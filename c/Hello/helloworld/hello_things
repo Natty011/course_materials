@@ -1,0 +1,176 @@
+"Hello World!"
+
+code:
+#include <stdio.h>
+
+int main()
+{
+   char Name[15]={0x00};
+    char *p=NULL;
+    printf("Enter an 8 letter name:\n\n");
+ 
+    fgets(Name, sizeof(Name),stdin);
+ 
+    printf("name entered: %s\n\n", Name);
+    printf("name entered in Hex:");
+    for(p=Name; *p ;p++)
+    {
+        printf("%02x",*p);
+    }
+    printf("\n");
+    return 0;
+}
+
+
+
+
+output:
+
+Enter an 8 letter name:
+
+"Hello World!"
+name entered: "Hello World!"
+
+name entered in Hex:2248656c6c6f20576f726c642122
+--------------------------------------------------------
+char* Name = "2248656c6c6f20576f726c642122";
+
+---------------------------------------------------------
+
+#include <stdio.h>
+
+int main()
+{
+   //char Name[15]={0x00};
+   char* Name = "2248656c6c6f20576f726c642122";
+    char *p=NULL;
+    char str[] = { 0x22, 0x48, 0x22, 0x48,0x22, 0x48,0x22, 0x48,0x22, 0x48,0x22, 0x48,0x22, 0x48,0x00};
+
+   // printf("Enter an 8 letter name:\n\n");
+ 
+    //fgets(Name, sizeof(Name),stdin);
+ 
+    printf("name entered: %s\n\n", Name);
+    printf("name entered in Hex:");
+    //printf("%s",(char*)Name);
+    printf("%c",str[15]);
+   /* for(p=Name; *p ;p++)
+    {
+        printf("%d",(char)*p);
+        //printf("%02x",*p);
+    }*/
+    printf("\n");
+    return 0;
+}
+
+---------------------------------------------------------------------------------------------
+the functionality works!
+code:
+
+#include <stdio.h>
+
+int main()
+{
+    int index = 0;
+   //char Name[15]={0x00};
+   char* Name = "22 48 65 6c 6c 6f 20 57 6f 72 6c 64 21 22";
+    char *p=NULL;
+    char str[] = { 0x22, 0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x20, 0x57, 0x6f, 0x72, 0x6c, 0x64, 0x21, 0x22};
+
+   // printf("Enter an 8 letter name:\n\n");
+ 
+    //fgets(Name, sizeof(Name),stdin);
+ 
+    printf("name entered: %s\n\n", Name);
+    printf("name entered in Hex:");
+    //printf("%s",(char*)Name);
+    //printf("%c",str[14]);
+    for( ; str[index] ; ++index)
+    {
+        printf("%c",str[index]);
+    }
+    printf("\n");
+    return 0;
+}
+
+
+output:
+name entered: 22 48 65 6c 6c 6f 20 57 6f 72 6c 64 21 22
+
+name entered in Hex:"Hello World!"
+
+----------------------------------------------------------------------------------------
+
+#include <stdio.h>
+
+int main()
+{
+    int index = 0;
+    char str[] = { 0x22, 0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x20, 0x57, 0x6f, 0x72, 0x6c, 0x64, 0x21, 0x22, 0x00};
+    //fgets(Name, sizeof(Name),stdin);
+ 
+    for( ; str[index] ; ++index)
+    {
+        printf("%c",str[index]);
+    }
+    printf("\n");
+    
+    return 0;
+}
+
+-------------------------------------------------------------------------------------------
+first demo:
+
+#include <stdio.h>
+
+int main()
+{
+    int index = 0;
+    char str[] = { 0x22, 0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x20, 0x57, 0x6f, 0x72, 0x6c, 0x64, 0x21, 0x22, 0x00};
+    
+ 
+    for( ; str[index] ; ++index)
+    {
+        printf("%c",str[index]);
+    }
+    printf("\n");
+    
+    return 0;
+  ----  ----------------------------------------------------------------------------------------------------------
+  #include <stdio.h>
+
+int main()
+{
+    int index = 0;
+    char str[] = { 0x22, 0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x20, 0x57, 0x6f, 0x72, 0x6c, 0x64, 0x21, 0x22};
+    
+ 
+    for( ; str[index] ; ++index)
+    {
+        printf("%c",str[index]);
+    }
+    printf("\n");
+    
+    return 0;
+}
+  
+    natty@natty:~/Desktop/git/c/Hello$ gd PrintHello.c
+natty@natty:~/Desktop/git/c/Hello$ gd PrintHello.c -o PrintHello
+natty@natty:~/Desktop/git/c/Hello$ gc PrintHello.c -o PrintHello
+natty@natty:~/Desktop/git/c/Hello$ gc PrintHello.c
+natty@natty:~/Desktop/git/c/Hello$ gc PrintHello.c -o PrintHello
+natty@natty:~/Desktop/git/c/Hello$ vlg ./PrintHello
+
+natty@natty:~/Desktop/git/c/Hello$ ./a.out
+"Hello World!"
+
+natty@natty:~/Desktop/git/c/Hello$ gc PrintHello.c -o PrintHello
+natty@natty:~/Desktop/git/c/Hello$ ./PrintHello
+"Hello World!"
+natty@natty:~/Desktop/git/c/Hello$ ./PrintHello
+"Hello World!"
+
+
+-------------------------------------------------------------------------------------------------------------------
+
+
