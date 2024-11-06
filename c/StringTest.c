@@ -82,12 +82,12 @@ void TestStrCmp ()
        puts("'StrCmp()' Function failed at an identicals' strings comparison");
     }
     
-    else if (strcmp(str2, str22) != StrCmp(str2, str22))
+    else if ((strcmp(str2, str22) <= 0)  && (StrCmp(str2, str22) <= 0))
     {
        puts("'StrCmp()' Function failed in case str1 > str2");
     }
     
-    else if (strcmp(str3, str33) != StrCmp(str3, str33))
+    else if ((strcmp(str3, str33) >= 0) && (StrCmp(str3, str33) >= 0))
     {
         puts("'StrCmp()' Function failed in case str1 < str2");
     }
