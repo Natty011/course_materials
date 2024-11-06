@@ -14,13 +14,14 @@ void CopyArr(int* src, int *dest, int len_src);
 int ComprInt(int* src, int *dest, int len_src);
 void CopyArr(int* src, int *dest, int len_src);
 void SwapSizeT(size_t* a, size_t* b);
-void swapSizeTPointer(size_t** a, size_t** b);
-
+void SwapSizeTPointer1(size_t** a, size_t** b);
+void SwapSizeTPointer2(size_t** a, size_t** b);
 
 void TestSwap();
 void TestCopyArr();
 void TestSwapSizeT();
-void TestswapSizeTPointer();
+void TestSwapSizeTPointer1();
+void TestSwapSizeTPointer2();
 
 /********************End of function declaration**************************/
 
@@ -37,8 +38,11 @@ int main()
     puts("'TestSwapSizeT()'");
     TestSwapSizeT();
     
-    puts("TestswapSizeTPointer()");
-    TestswapSizeTPointer();
+    puts("TestSwapSizeTPointer1()");
+    TestSwapSizeTPointer1();
+    
+    puts("TestSwapSizeTPointer2()");
+    TestSwapSizeTPointer2();
     
     return 0;
 }
@@ -202,7 +206,7 @@ void TestSwapSizeT()
 /* Arguments: 2 pointers to pointers of Size_t*'s data type */
 /* Return value: void  */
 
-void swapSizeTPointer(size_t** a, size_t** b)
+void SwapSizeTPointer1(size_t** a, size_t** b)
 {
 
     size_t* tmp = *a;
@@ -216,10 +220,10 @@ void swapSizeTPointer(size_t** a, size_t** b)
 }
 
 /********** Test Swap Size_t* function*********/
-/*- Test the swapSizeTPointer() function*/
+/*- Test the swapSizeTPointer1() function*/
 /* Arguments: none*/
 /*- Return: return a massage according to the correctness */
-void TestswapSizeTPointer()
+void TestSwapSizeTPointer1()
 {
  /*SIZE_MAX == 18446744073709551615 */
   size_t a = 0;
@@ -229,25 +233,80 @@ void TestswapSizeTPointer()
   size_t** app = &ap;
   size_t** bpp = &bp;
 
-   swapSizeTPointer(&ap, &bp);
+   SwapSizeTPointer1(&ap, &bp);
    if ((ap != &b) || (bp != &a))
     {
-       puts("'swapSizeTPointer()' Function failed");
+       puts("'SwapSizeTPointer1()' Function failed");
        puts("Pointers' swap failed");
     }
     else if( (a == SIZE_MAX) || (b == 0) )
     {
-     puts("'swapSizeTPointer()' Function failed");
+     puts("'SwapSizeTPointer1()' Function failed");
      puts("The values of the variables pointed by were changed");
     }
     else if( app != &ap || bpp != &bp)
     {
-       puts("'swapSizeTPointer()' Function failed");
+       puts("'SwapSizeTPointer1()' Function failed");
        puts("The adresses of the pointers were chacged");
     }
    else
     {
-       puts("'swapSizeTPointer()' Function works great");
+       puts("'SwapSizeTPointer1()' Function works great");
+    }
+    
+    return;
+}
+
+/**********Swap Size_t* function*********/
+/* Swaps 2 variables' adresses values of */
+/* type size_t* in the memory  based on the 'SwapSizeT' function*/
+/* Arguments: 2 pointers to pointers of Size_t*'s data type */
+/* Return value: void  */
+
+void SwapSizeTPointer2(size_t** a, size_t** b)
+{
+    assert(a);
+    assert(b);
+    
+    SwapSizeT((size_t*)a, (size_t*)b);
+    
+    return;
+}
+
+/********** Test Swap Size_t* function*********/
+/*- Test the SwapSizeTPointer2() function*/
+/* Arguments: none*/
+/*- Return: return a massage according to the correctness */
+void TestSwapSizeTPointer2()
+{
+
+/*SIZE_MAX == 18446744073709551615 */
+  size_t a = 0;
+  size_t b = SIZE_MAX; 
+  size_t* ap = &a;
+  size_t* bp = &b;
+  size_t** app = &ap;
+  size_t** bpp = &bp;
+
+   SwapSizeTPointer2(&ap, &bp);
+   if ((ap != &b) || (bp != &a))
+    {
+       puts("'SwapSizeTPointer2()' Function failed");
+       puts("Pointers' swap failed");
+    }
+    else if( (a == SIZE_MAX) || (b == 0) )
+    {
+     puts("'SwapSizeTPointer2()' Function failed");
+     puts("The values of the variables pointed by were changed");
+    }
+    else if( app != &ap || bpp != &bp)
+    {
+       puts("'SwapSizeTPointer2()' Function failed");
+       puts("The adresses of the pointers were chacged");
+    }
+   else
+    {
+       puts("'SwapSizeTPointer2()' Function works great");
     }
     
     return;
