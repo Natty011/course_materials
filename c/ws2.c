@@ -532,6 +532,7 @@ char* SpaceReview(char* str)
      *( str + j ) = '\0';
      
      free(p);
+     p = NULL;
     
     return str;
 }

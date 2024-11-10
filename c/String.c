@@ -129,7 +129,7 @@ char* StrChr(const char* str, int ch)
 {
    const char* result = str;	
    unsigned char target = (unsigned char)ch;
-   size_t len_str= strlen(result) + 1;
+   size_t len_str= strlen(result);
    size_t i = 0;
    
    assert(str);

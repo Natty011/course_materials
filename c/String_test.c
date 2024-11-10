@@ -242,12 +242,12 @@ static void TestStrnCmp(void)
        puts("'StrnCmp()' Function failed at an identicals' strings comparison");
     }
     
-    else if ((strncmp(str2, str22, 2) <= 0)  && (StrnCmp(str2, str22, 2) <= 0))
+    else if (StrnCmp(str2, str22, 2) <= 0)
     {
        puts("'StrnCmp()' Function failed in case str1 > str2");
     }
     
-    else if ((strncmp(str3, str33, 8) >= 0) && (StrnCmp(str3, str33, 8) >= 0))
+    else if (StrnCmp(str3, str33, 8) >= 0)
     {
         puts("'StrnCmp()' Function failed in case str1 < str2");
     }
@@ -281,12 +281,12 @@ static void TestStrCaseCmp(void)
        puts("'StrCaseCmp()' Function failed at an identicals' strings comparison");
     }
     
-    else if ((strcasecmp(str2, str22) <= 0)  && (StrCaseCmp(str2, str22) <= 0))
+    else if (StrCaseCmp(str2, str22) <= 0)
     {
        puts("'StrCaseCmp()' Function failed in case str1 > str2");
     }
     
-    else if ((strcasecmp(str3, str33) >= 0) && (StrCaseCmp(str3, str33) >= 0))
+    else if (StrCaseCmp(str3, str33) >= 0)
     {
         puts("'StrCaseCmp()' Function failed in case str1 < str2");   
     }
