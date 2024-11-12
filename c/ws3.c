@@ -11,6 +11,8 @@
 #include <stdbool.h> /* bool type */
 #include <string.h> /* strlen */
 #include <stdlib.h> /* malloc free, exit, EXIT_FAILURE */
+#include <ctype.h>  /* tolower */ 
+
 
 
 /***************************function declaration**************************/
@@ -21,10 +23,16 @@ static void TestSumEachRow(void);
 size_t JoseProb(size_t* arr, size_t n);
 static void TestJoseProb(void);
 
+void DataTypePrint(void);
+static void TestDataTypePrint(void);
+
+void EnvpPrint(char** Envp);
+static void TestEnvpPrint(char** Envp);
+
 /********************End of function declaration**************************/
 
 
-int main(void)
+int main(__attribute__((unused)) int argc, __attribute__((unused)) char* argv[], char **envp)
 {   
 
     puts("=====================================================");
@@ -34,6 +42,17 @@ int main(void)
     
     puts("'TestJoseProb()'");
     TestJoseProb();
+    puts("=====================================================");
+
+
+    puts("'TestDataTypePrint()'");
+    puts("=====================================================");   
+    TestDataTypePrint();
+    puts("=====================================================");
+    
+    puts("'Runinng the TestEnvpPrint(envp)'");
+    puts("=====================================================");
+    TestEnvpPrint(envp);
     puts("=====================================================");
     
     
@@ -194,5 +213,77 @@ static void TestJoseProb(void)
    return;
 }
 
+/********** DataTypePrint function*********/
+/* Prints the size of each data type it byte */
+/* Return  Value: prints to stdout .*/ 
+/* Note: */
+
+void DataTypePrint(void)
+{
+
+   printf("size of bool = %lu bytes\n", sizeof(bool));
+   printf("size of char = %lu bytes\n", sizeof(char));
+   printf("size of unsigned char = %lu bytes\n", sizeof(unsigned char));
+   printf("size of int = %lu bytes\n", sizeof(int));
+   printf("size of unsigned int = %lu bytes\n", sizeof(unsigned int));
+   printf("size of short int = %lu bytes\n", sizeof(short int));
+   printf("size of unsigned short int = %lu bytes\n", sizeof(unsigned short int));
+   printf("size of long int = %lu bytes\n", sizeof(long int));
+   printf("size of unsigned long int = %lu bytes\n", sizeof(unsigned long int));
+   printf("size of float = %lu bytes\n", sizeof(float));
+   printf("size of double = %lu bytes\n", sizeof(double));
+   printf("size of long double = %lu bytes\n", sizeof(long double));
+  
+  return;
+}
+
+/*********TestDataTypePrint function*********/
+/* Test the DataTypePrint() function by examination of prints result */
+/* Arguments: void */
+/* Return value: void */
+
+static void TestDataTypePrint(void)
+{
+   DataTypePrint();
+   
+   return;
+}
+
+/********** EnvpPrint function*********/
+/* Prints each environment strings in lowercase strings to stdout */
+/* Arguments: char** envp */
+/* Return  Value: prints to stdout .*/ 
+/* Note: */
+
+void EnvpPrint(char** Envp)
+{
+   char** env = NULL;
+   char *thisEnv = NULL;
+   size_t i = 0;
+   
+   for (env = Envp; *env != NULL; env++)
+   {   
+       thisEnv = *env;
+       
+       for( i = 0; thisEnv[i] ; i++)
+       {
+           thisEnv[i] = tolower(thisEnv[i]);
+       }
+           
+       printf("%s\n", thisEnv);    
+   }
+}
+
+/*********TestEnvpPrint function*********/
+/* Test the EnvpPrint() function by using the environment pointer 'envp' */
+/* Arguments: char** envp */
+/* Return value: void */
+
+static void TestEnvpPrint(char** Envp)
+{
+    EnvpPrint(Envp);
+    
+    return;
+}
 
 
