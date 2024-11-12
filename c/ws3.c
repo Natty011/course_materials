@@ -34,7 +34,7 @@ static void TestEnvpPrint(char** Envp);
 
 int main(__attribute__((unused)) int argc, __attribute__((unused)) char* argv[], char **envp)
 {   
-
+  
     puts("=====================================================");
     puts("'TestSumEachRow()'");
     TestSumEachRow();
@@ -54,7 +54,6 @@ int main(__attribute__((unused)) int argc, __attribute__((unused)) char* argv[],
     puts("=====================================================");
     TestEnvpPrint(envp);
     puts("=====================================================");
-    
     
     return 0;
 }
@@ -257,21 +256,74 @@ static void TestDataTypePrint(void)
 
 void EnvpPrint(char** Envp)
 {
-   char** env = NULL;
-   char *thisEnv = NULL;
-   size_t i = 0;
-   
-   for (env = Envp; *env != NULL; env++)
+  
+  size_t cnt = 0;
+  size_t i = 0;
+  size_t j = 0;  
+  char** Buffer = NULL;
+  char *thisEnv = NULL;
+  
+  assert(Envp);
+  
+  while (*(Envp + cnt ) != NULL)  
+  { 
+      ++cnt;
+  } 
+  
+  Buffer = (char**)malloc( (cnt +1) * (sizeof(char*)));
+  
+  if (Buffer == NULL)
+  {
+      puts("Failed in an allocation memory");
+      exit(EXIT_FAILURE);
+  }
+  
+  while( i <= cnt )
+  {
+      
+      if (*(Envp + i) == NULL)
+      {
+         *(Buffer+i) = *(Envp + i);
+         ++i;
+         continue;
+      }
+
+      *(Buffer+i) = (char*)malloc( (strlen(*(Envp + i)) +1) * (sizeof(char)));
+      
+      if (*(Buffer+i) == NULL)
+      {
+         puts("Failed in an allocation memory");
+         exit(EXIT_FAILURE);
+      }
+            
+      strcpy ( *(Buffer+i) , *(Envp + i ) );
+      
+      ++i;
+  }
+  
+  for (j = 0;  *(Buffer+j) != NULL ; ++j)
    {   
-       thisEnv = *env;
+       thisEnv = *(Buffer+j);
        
-       for( i = 0; thisEnv[i] ; i++)
+       for( i = 0; *(thisEnv +i) ; i++)
        {
-           thisEnv[i] = tolower(thisEnv[i]);
+           *(thisEnv +i) = tolower(*(thisEnv +i));
        }
            
-       printf("%s\n", thisEnv);    
+       printf("%s\n", thisEnv );    
    }
+   
+   printf("%s \n", *(Buffer+j) );  /* Print Null */  
+   
+   
+   for(i = 0; i <= cnt ; ++i )
+   {
+      free(*(Buffer+i));
+   }
+
+   free(Buffer);
+   
+   return;
 }
 
 /*********TestEnvpPrint function*********/
