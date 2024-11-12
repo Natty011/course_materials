@@ -90,11 +90,12 @@ static void TestSumEachRow(void)
             expect_res += mat[r][c];
        }
           
-   if (expect_res != res[r])
-   {
-       puts("'SumEachRow()' Function failed");
-   }    
-      expect_res = 0;
+       if (expect_res != res[r])
+       {
+           puts("'SumEachRow()' Function failed");
+       } 
+          
+       expect_res = 0;
    }
         
    puts("'SumEachRow()' Function works great");
@@ -125,8 +126,6 @@ size_t JoseProb(size_t* arr, size_t n)
         if( arr[ i % n] )
         {
 
-            if ( size > 1 )
-            {
                 if ( arr[ (i+1)%n] ) /* Kiss imidiatlly after i */
                 {
                     arr[ (i+1)%n] = 0; /* kiss the next one following */
@@ -150,7 +149,7 @@ size_t JoseProb(size_t* arr, size_t n)
                     arr[ (i+1)%n] = 0;
                     --size; /* resize after kissing */
                 }
-            }
+            
          }
                     
         else
