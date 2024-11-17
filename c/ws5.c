@@ -57,7 +57,7 @@ void PrintMe();
 void print(int x);
 
 /*************** 2nd qeustion *************************/
-
+void LoggerCall(int argc, char* argv[]);
 void Logger ( char* file_name );
 void InitArrays ( operator_t operators[] );
 int SimpleCompare ( char* input , char* command );
@@ -75,29 +75,40 @@ op_type AddFirst (char* filename, char* str );
 int main ( int argc , char* argv[] )
 {
 	
-   /*************** 2nd qeustion *************************/	
+
+  /*************** 1st qeustion *************************/
+  puts("");
+  puts("Test of the 1st qeustion:");
+  PrintMe();
+	
+  /*************** 2nd qeustion *************************/
+  puts("");
+  puts("Test of the 2nd qeustion:");	
+  LoggerCall(argc, argv);
+	
+  return 0;
+}
+
+  /*************** 2nd qeustion *************************/	
+  /* LoggerCall function */
+  /* Call to Logger in order to handle a file from the user */
+   
+void LoggerCall(int argc, char* argv[])
+{
    char* file_name = NULL;
 
    if (argc < 2)
    {
         printf("Missing File\n");
-        return 0;
+        return;
    }
    
 	file_name = argv[1];
 	
 	Logger ( file_name );
 	
-  /*************** 1st qeustion *************************/
-  puts("");
-  puts("Test of the first qeustion:");
-	PrintMe();
-	
-	
-	return 0;
-}
-
-   /*************** 2nd qeustion *************************/	
+	return;
+}   
    
 /* Logger function that handle entry file  from the user*/
 
@@ -291,5 +302,6 @@ void PrintMe()
      
     return;
 }
+
 
 
