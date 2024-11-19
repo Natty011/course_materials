@@ -144,10 +144,10 @@ void Logger (char* file_name )
 void InitArrays ( operator_t operators[] )
 {
 
-	char* special[] = { "-remove\n", "-exit\n" , "-count\n", "", "<"};
+	char* special[] = { "-remove\n", "-exit\n" , "-count\n", "<" , ""};
 	comper_t compare_functions[] = {SimpleCompare ,SimpleCompare,
-	                                 SimpleCompare, IsAddLast, IsAddFirst};
-	operation_t operte_function[] = {Remove , Exit , Count, AddLast, AddFirst};   
+	                                 SimpleCompare, IsAddFirst , IsAddLast};
+	operation_t operte_function[] = {Remove , Exit , Count, AddFirst , AddLast};   
 	size_t i = 0;
 	
 	for( i = 0 ; i < N ; ++i)
@@ -170,12 +170,7 @@ int SimpleCompare ( char* input , char* command )
 /* Chack for adding to the end of the file */
 int IsAddLast ( char* input , char* command )
 {
-	if ( (*input != '<') && ( *input != '-')  )
-	{
-		return 1;
-	}
-	
-	return 0;
+	return 1;
 }
 
 int IsAddFirst ( char* input , char* command )
