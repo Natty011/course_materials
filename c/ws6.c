@@ -9,10 +9,6 @@
 #include <stddef.h> /* size_t*/
 #include <assert.h> /* assert */
 
-/*************** typedef and structure declaration *************************/
-
-/***************End of typedef and structure declaration ******************/
-
 /***************************function declaration**************************/
 
 long Pow2(unsigned int x, unsigned int y);
