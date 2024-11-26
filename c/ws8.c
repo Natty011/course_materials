@@ -1,8 +1,8 @@
 /***************************************
 * Autor : Natty
-* Reviewr : Chen
+* Reviewer : Chen
 * Date : 23 / 11 / 2024
-* Last update: 25 / 11 / 2024
+* Last update: 26 / 11 / 2024
 *****************************************/
 #include <stdio.h> /* printf, putchar */
 #include <stdlib.h> /* malloc, realloc, free */
@@ -12,7 +12,7 @@
 
 /*************** MACROS *************************/
 #define MAX(a, b)  (((a) > (b)) ? (a) : (b)) 
-#define MAX3(a, b, c)  MAX(MAX(a, b), c)
+#define MAX3(a, b, c)  (MAX((MAX((a), (b))), (c)))
 #define SIZEOF_VAR(object) (char *)(&object+1) - (char *)(&object)
 #define SIZEOF_TYPE(type) (char *)(((type*)0) +1) - (char *)((type*)0)
 
@@ -20,17 +20,17 @@
 
 /*************** typedef and structure declaration *************************/
 
-typedef void (*Print_t) (void* data); 
-typedef void* (*Add_t) (void* ptr, int num); 
-typedef void (*Clean_t) (void* ptr); 
+typedef void (*print_t) (void* data); 
+typedef void* (*add_t) (void* ptr, int num); 
+typedef void (*clean_t) (void* ptr); 
 
 typedef struct 
 {
 
 	void* data;
-	Print_t print_element;
-	Add_t add_element;
-	Clean_t clean_element;
+	print_t print_element;
+	add_t add_element;
+	clean_t clean_element;
 	
 } element_t;
 /***************End of typedef and structure declaration ******************/
@@ -124,7 +124,7 @@ void PrintArr( element_t* arr ,  size_t n )
 	
 	for ( i = 0 ; i < n ; ++i)
 	{
-		arr[i].print_element ( arr[i].data );\
+		arr[i].print_element ( arr[i].data );
 		putchar(' ');
 	}
 	putchar('\n');	
