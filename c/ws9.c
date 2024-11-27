@@ -11,7 +11,7 @@
 #include <assert.h> /* assert */
 #define LEN_NAME 20
 #define LEN_SURNAME 20
-#define MAX_CHAR 25 /* For char array buffer */
+#define MAX_CHAR 30 /* For char array buffer */
 #define EPSILON 0.000001 /* to compare the float number after loading */
 #define ABS(a, b) (((a) > (b)) ? ((a)-(b)) : -((a)-(b)))
 
@@ -62,7 +62,7 @@ char* RemoveNewLineAddNull( char* str );
 char* StudentFullName( p_student_t p_std, char temp_str[MAX_CHAR] );
 
 FILE* FillDataBaseStudent(FILE* file, p_student_t p_std);
-FILE* FillOutDataBaseStudent(FILE* file, p_student_t p_std);
+FILE* ExtractDataBaseStudent(FILE* file, p_student_t p_std);
 
 p_student_t SaveStudentDataBase(p_student_t p_std);
 p_student_t LoadStudentDataBase(p_student_t p_std, char* fullname);
@@ -149,7 +149,7 @@ p_student_t LoadStudentDataBase(p_student_t p_std, char* fullname)
        exit(EXIT_FAILURE);
     }
     
-    file = FillOutDataBaseStudent(file, p_std);
+    file = ExtractDataBaseStudent(file, p_std);
     
     
     
@@ -163,8 +163,8 @@ p_student_t LoadStudentDataBase(p_student_t p_std, char* fullname)
 
 }
 
-/* Fill out the data base to the sturct's members*/
-FILE* FillOutDataBaseStudent(FILE* file, p_student_t p_std)
+/* Extract the data base to the sturct's members*/
+FILE* ExtractDataBaseStudent(FILE* file, p_student_t p_std)
 {
     char temp_str[MAX_CHAR] = { 0 };
     p_std = InitStdEmpty(p_std);
@@ -262,9 +262,9 @@ FILE* FillDataBaseStudent(FILE* file, p_student_t p_std)
     
 char* StudentFullName( p_student_t p_std, char temp_str[MAX_CHAR] )
 {
-   /* char temp_str[MAX_CHAR] = { 0 };*/
+
     strcpy(temp_str, p_std->name); 
-    strcat( temp_str , " "); /* Concatenating space for surname */
+    strcat( temp_str , "_"); /* Concatenating 'underscore' for surname */
     strcat( temp_str , p_std->surname); 
     
     return temp_str;
