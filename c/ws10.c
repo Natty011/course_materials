@@ -8,6 +8,7 @@
 #include <stdio.h> /* puts, __WORDSIZE */
 #include <stdlib.h> /* size_t, exit, EXIT_FAILURE */
 
+static const int bytes_per_word = __WORDSIZE / 8;
 
 /********************Memmove Function definition ****************************/
 
@@ -19,10 +20,8 @@ void *Memmove(void *dest, const void *src, size_t n)
 	size_t *ptr_dest_word = NULL;
     unsigned char *ptr_dest_byte = (unsigned char*)(dest) + n - 1 ;
     
-    int bytes_per_word = 0;
 	size_t remainder = 0;
-	int i = 0;
-	
+
 	if(NULL == src)
 	{
 		if( NULL == dest)
@@ -39,14 +38,7 @@ void *Memmove(void *dest, const void *src, size_t n)
 	{
 		return dest;
 	}
-	
-	for(i = 3; (1<<i) < __WORDSIZE; ++i)/* In order to find the word size*/
-	{
-		 /* i will be 5(32bits) or 6(64bits)*/
-	}
-	
-	bytes_per_word = 1<<(i-3);/* if i==6 then 1<<(i-3) == 8 bytes */ 
-	
+		
 	/*Copies byte by byte until the address is aligns to word boundery */
 	/*The 1st condition: Check if src is aligns <-> there is remainder? */
 	while(((((size_t)ptr_src_byte)&(bytes_per_word -1)) && n) ||
@@ -68,7 +60,7 @@ void *Memmove(void *dest, const void *src, size_t n)
 	remainder = n & (bytes_per_word - 1); 
 	
 	/*Get the number of the word-size chunks that enter in 'n' w/o renainder*/
-	n = n >> (i-3); 
+	n = n >> 3; 
 
 	/* Copies word-size chunks */ 
     /* Point to 1 word-size address backward before copying */
@@ -107,10 +99,7 @@ void *Memcpy(void *dest, const void *src, size_t n)
 	size_t *ptr_dest_word = NULL;
     unsigned char *ptr_dest_byte = (unsigned char*)dest;
     
-	
-	int bytes_per_word = 0;
 	size_t remainder = 0;
-	int i = 0;
 
 	if(NULL == src)
 	{
@@ -128,14 +117,7 @@ void *Memcpy(void *dest, const void *src, size_t n)
 	{
 		return dest;
 	}
-	
-	for(i = 3; (1<<i) < __WORDSIZE; ++i)/* In order to find the word size*/
-	{
-		 /* i will be 5(32bits) or 6(64bits)*/
-	}
-	
-    bytes_per_word = 1<<(i-3);/* if i==6 then 1<<(i-3) == 8 bytes */ 
-    
+
     /*Copies byte by byte until the address is aligns to word boundery */
 	/*The 1st condition: Check if src is aligns <-> there is remainder? */
 	while(((((size_t)ptr_src_byte)&(bytes_per_word -1)) && n) ||
@@ -155,7 +137,7 @@ void *Memcpy(void *dest, const void *src, size_t n)
 	remainder = n & (bytes_per_word - 1); 
 	
 	/*Get the number of the word-size chunks that enter in 'n' w/o renainder*/
-	n = n >> (i-3); 
+	n = n >> 3; 
 	
 	/* Copies word-size chunks */ 
 	while( n )
@@ -192,10 +174,8 @@ void *Memset(void *s, int c, size_t n)
 	size_t c_word = c & 0xff;
 	unsigned char c_byte = c & 0xff;
 	
-	int bytes_per_word = 0;
 	size_t remainder = 0;
-	int i = 0;
-	
+    int i = 3;
 	if(NULL == s)
 	{
 		puts("s is a null pointer");
@@ -211,13 +191,11 @@ void *Memset(void *s, int c, size_t n)
 	   in order to handle a copy of word-size chunks, when the address
 	   that s points to it divides by word size without remainder; 
 	   i.e: The address is aligns to a word boundary */
-	for(i = 3; (1<<i) < __WORDSIZE; ++i)
+	for(i = 3; i < 6 ; ++i)
 	{
-		c_word = c_word | (c_word<<(1<<i)); /* i will be 5(32bits) or 6(64bits)*/
+		c_word = c_word | (c_word<<(1<<i)); 
 	}   
 	 
-	bytes_per_word = 1<<(i-3);/* if i==6 then 1<<(i-3) == 8 bytes */ 
-	
 	/*Copies byte by byte until the address is aligns to word boundery */
 	/*The 1st condition: Check if ptr_byte is aligns <-> there is remainder? */
 	while((((size_t)ptr_byte)&(bytes_per_word -1)) && n)
@@ -233,7 +211,7 @@ void *Memset(void *s, int c, size_t n)
 	remainder = n & (bytes_per_word - 1); 
 	
 	/*Get the number of the word-size chunks that enter in n w/o renainder*/
-	n = n >> (i-3); 
+	n = n >> 3; 
 	
 	/* Copies word-size chunks */ 
 	while( n )
