@@ -13,6 +13,7 @@
 #include "ws10.h" /* Memset, Memcpy, Memmove */
 #define N 10
 
+
 /***************************function declaration**************************/
 
 static void TestMemset(void);
