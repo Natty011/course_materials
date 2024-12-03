@@ -7,7 +7,7 @@
 
 #include <stdio.h> /* puts */
 #include <stdlib.h> /* size_t, atoi */
-#include <string.h> 
+#include <string.h> /* strlen */
 #include <ctype.h> /* tolower, isalpha */
 #include <stdint.h> /*uint64_t, uint16_t */
 
@@ -16,18 +16,17 @@
 #define CHECKENDIAN ( (uint8_t)(0x1234) == 52 )
 
 
-
 /***************************function declaration**************************/
 
 
 
 char* ItoaUpTo36Base(int n, char* str, int base);
 char* Itoa10Base(int num, char* str);
-void ReverseStr(char* str);
+static void ReverseStr(char* str);
 static void TestItoaUpTo36Base(void);
 
 int Atoi10Base(const char *nptr);
-const char* WhiteSpacesSkip(const char *nptr);
+static const char* WhiteSpacesSkip(const char *nptr);
 static void TestAtoiUpTo36Base(void);
 int AtoiUpTo36Base(const char *str, int base);
 
@@ -66,23 +65,29 @@ int main ()
 return 0;
 }
 
+
 static void TestItoaUpTo36Base(void)
 {
 	char str[100] = { 0 };
+
     printf("Number: %d\nBase: %d\tConverted String: %s\n",
           -1750, 10, Itoa10Base(-1750, str));
-          
+     
+    puts("Expected result: 11011010110");      
     printf("Base: %d\t\tConverted String: %s\n", 2,
            ItoaUpTo36Base(-1750, str, 2));
            
+    puts("Expected result: 3326");          
     printf("Base: %d\t\tConverted String: %s\n", 8,
            ItoaUpTo36Base(-1750, str, 8));
            
+    puts("Expected result: 6d6");          
     printf("Base: %d\tConverted String: %s\n", 16,
            ItoaUpTo36Base(-1750, str, 16));
            
 
 }
+
 
 /****************** ItoaUpTo36Base function definition *******************/
 /* 
@@ -104,25 +109,28 @@ static void TestItoaUpTo36Base(void)
 */
 char* ItoaUpTo36Base(int n, char* str, int base)
 {
-	int i = 0;
+
 	int remainder = 0;
+	char* pstr = str;
 	
 	if(NULL == str )
 	{
 		puts("str is a null pointer");
 		exit(EXIT_FAILURE);
 	}
+	
 	if (  (base > 36) || (base < 2) )
 	{
 	   puts("Invalid base value");
 	   return str;
 	}
+	
 	if( n <= 0 )
 	{
 		if ( n == 0)
 		{
-			str[i++] = '0';
-			str[i] = '\0';
+			*str++ = '0';
+			*str = '\0';
 			return str; 
 		}
 		else if ((n < 0) && ( base == 10) )
@@ -135,17 +143,17 @@ char* ItoaUpTo36Base(int n, char* str, int base)
 			n = -n;
 		}
 	}
-	/* The base isn't 10 */
+	/* The base isn't negative decimal */
 	while( n )
 	{
 		remainder = n % base;
-		str[i++] = (remainder > 9) ? (remainder - 10) + 'a' : remainder + '0';
+		*str++ = (remainder > 9) ? (remainder - 10) + 'a' : remainder + '0';
 		n = n / base;
 	}
 	
-	str[i] = '\0'; 
-	ReverseStr(str);
-	return str;	
+	*str = '\0'; 
+	ReverseStr(pstr);
+	return pstr;	
 }
 /********************* Itoa10Base function definition *********************/
 /* 
@@ -159,19 +167,21 @@ char* ItoaUpTo36Base(int n, char* str, int base)
 */
 char* Itoa10Base(int n, char* str)
 {
-	int i = 0;
+
 	int sign = 1;
+	char* pstr = str;
 	if(NULL == str )
 	{
 		puts("str is a null pointer");
 		exit(EXIT_FAILURE);
 	}
+	
 	if( n <= 0 )
 	{
 		if ( n == 0)
 		{
-			str[i++] = '0';
-			str[i] = '\0';
+			*str++ = '0';
+			*str = '\0';
 			return str; 
 		}
 		else
@@ -183,23 +193,24 @@ char* Itoa10Base(int n, char* str)
 	
 	while( n )
 	{
-		str[i++] = n % 10 + '0';
+		*str++ = n % 10 + '0';
 		n = n / 10;
 	}
 	
 	if(sign == -1 )
 	{
-		str[i++] = '-';
+		*str++ = '-';
 	}
-	str[i] = '\0'; 
+	
+	*str = '\0'; 
 
-	ReverseStr(str);
+	ReverseStr(pstr);
 
-	return str;
+	return pstr;
 }
 
 /* An auxilary function to reverse a string*/
-void ReverseStr(char* str)
+static void ReverseStr(char* str)
 {
 
 	char temp = 0;
@@ -252,8 +263,9 @@ int Atoi10Base(const char *nptr)
 	return ( sign * num );
 
 }
-
-const char* WhiteSpacesSkip(const char *nptr)
+/*  An auxilary function that skipping intial portion 
+    of the white spaces */
+static const char* WhiteSpacesSkip(const char *nptr)
 {
 	while(( *nptr == 32) || ((*nptr >= 9) && (*nptr <=13 )))
 	{
@@ -270,9 +282,13 @@ static void TestAtoiUpTo36Base(void)
     char* str3 = " 10010110";
     printf(" str = -98105 , str1 =ff2, str2 = 12, str3 = 10010110 \n ");
 	printf(" Atoi10Base( str) = %d \n ", Atoi10Base(str));
+	
+	puts("Expected result: 4082");      
 	printf(" AtoiUpTo36Base( str1, 16)  = %d \n ",  AtoiUpTo36Base( str1, 16) );
 	printf(" AtoiUpTo36Base( str, 10)  = %d \n ",  AtoiUpTo36Base( str, 10) );
-	printf(" AtoiUpTo36Base( str2, 10)  = %d \n ",  AtoiUpTo36Base( str2, 8) );
+	puts("Expected result: 10");      
+	printf(" AtoiUpTo36Base( str2, 8)  = %d \n ",  AtoiUpTo36Base( str2, 8) );
+	puts("Expected result: 150");      
 	printf(" AtoiUpTo36Base( str3, 2)  = %d \n ",  AtoiUpTo36Base( str3, 2) );
 	return;
 }
@@ -301,16 +317,19 @@ int AtoiUpTo36Base(const char *str, int base)
 {
 	int dig = 0;
 	int num = 0;
+
 	if(NULL == str )
 	{
 		puts("str is a null pointer");
 		exit(EXIT_FAILURE);
 	}
+	
 	if (  (base > 36) || (base < 2) )
 	{
 	   puts("Invalid base value");
 	   return 0;
 	}
+	
 	str = WhiteSpacesSkip(str);
 	if ( ( base == 10) )
 		{
@@ -342,7 +361,7 @@ static void TestPrintOnly2ArrayChar(void)
 }
 /**************** PrintOnly2ArrayChar function *************/
 /* 
-   DESCRIPTION: The PrOccOf2ArrOnly() function prints the occurance of 
+   DESCRIPTION: The PrintOnly2ArrayChar() function prints the occurance of 
                 letters that apear only in array of s1 and s2 but not 
                 in s3.
 
@@ -353,33 +372,26 @@ void PrintOnly2ArrayChar(char* s1, char* s2, char* s3,\
 	int hist1[ASCI_NUM] = { 0 };
     int hist2[ASCI_NUM] = { 0 };
     int hist3[ASCI_NUM] = { 0 };
-    int hist_to_print[ASCI_NUM] = { 0 };
+
     int i = 0;
     
     FillLatterInHist( s1, hist1, len1);
     FillLatterInHist( s2, hist2, len2);
     FillLatterInHist( s3, hist3, len3);
-
+    
+    puts("\n-----------------------------------------------------------------");
+	puts("The latters that both appear only in the 1st and 2nd array:");
+	printf("{");
+	
 	for ( i = 65 ; i <= 122 ; ++i )
 	{
 		if( hist1[i] && hist2[i] && !hist3[i] )
 		{
-			hist_to_print[i] = (int)hist1[i];
+			printf("%c ", hist1[i]);
+
 		}
+	}
 	
-		
-	}
-	puts("\n-----------------------------------------------------------------");
-	puts("The latters that both appear only in the 1st and 2nd array:");
-
-	printf("{");
-	for ( i = 65 ; i <= 122 ; ++i )
-	{   if ( hist_to_print[i] )
-	    {
-			printf("%c ", hist_to_print[i]);
-
-		}
-	}
 	puts("}");
 	return;
 }
@@ -396,14 +408,11 @@ static void FillLatterInHist(char* s, int* hist, size_t len)
     	if( isalpha( s[i] ) )
     	{
     		hist[(int)s[i]] = s[i];
-    		++i;
     	}
-
-    	else
-    	{
-    		++i;
-    	}
-    }
+    	
+    	++i;
+   }
+   
     return;
 }
 
@@ -433,11 +442,12 @@ union
     {
         puts("It's a Big Endian");
     }
-     
+    /* Print the results for more information */
+    /* 
     printf("x.u64 = %#lx\n", x.u64);       
     printf("x.arr[0] = %#x\n", x.arr[0]);
     printf("(uint8_t)x.u64 = %#x\n", (uint8_t)x.u64); 
-    
+    */
     return;
 }
 /***** Test Macro CHECKENDIAN ****/
@@ -453,6 +463,7 @@ static void TestCheckEndian(void)
 	{
 	    puts("It's a Big Endian");
 	}
+	
 	return;
 }
 
