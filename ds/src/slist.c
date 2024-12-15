@@ -247,7 +247,7 @@ slist_iter_t SlistFind(slist_iter_t start, slist_iter_t end,
 	while(start != end)
 	{
 	
-		if(1 == !!match_function(SlistGetData(start), user_param))
+		if(1 == match_function(SlistGetData(start), user_param))
 		{
 			return start;
 		}
