@@ -279,6 +279,25 @@ int SlistForEach(slist_iter_t start, slist_iter_t end,
 	return SUCCESS;
 }                
 
+/********************  SlistAppend  **************************/   
+void SlistAppend(slist_t *dest, slist_t *src)
+{
+	
+	assert(dest);
+	assert(src);
+	
+	dest->dummy->data = src->head->next->data;
+	dest->dummy->next = src->head->next->next;
+
+	dest->dummy = src->dummy;
+	dest->dummy->data = dest;
+	
+	src->head->next->next = NULL;
+	src->head->next->data = src;
+	src->dummy = src->head->next;
+	
+}
+
 /*******************op_func to count *********************/
 static int CountNodes (__attribute__((unused)) void *data,
                        void *user_param)
@@ -287,8 +306,6 @@ static int CountNodes (__attribute__((unused)) void *data,
 	(*(size_t*)user_param)++;
 	return SUCCESS;
 }
-
-
 
 
 
