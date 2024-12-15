@@ -1,5 +1,5 @@
 /******************************************************************************
-*	Version 1.0
+*	Version 1.2
 ******************************************************************************/
 #ifndef __SLIST_H__             /* __SLIST_H__ */
 #define __SLIST_H__             /* __SLIST_H__ */
@@ -53,9 +53,8 @@ slist_t *SlistCreate(void);
 *       Description: frees all dynamically alloacated data from the list.
 *       Arguments: 	ptr to the list to be freed
 *       Complexity: Complexity of free
-*       Return: returnreturnreturn
-*       Notes:      * notenotenote
-*                   * notenotenote
+*       Return: N\A
+*       Notes: If 'slist' is NULL, no operations will be performed
 * 
 ******************************************************************************/
 void SlistDestroy(slist_t *slist);
@@ -70,10 +69,10 @@ void SlistDestroy(slist_t *slist);
 *       Arguments: 	the list to be insterted into, an iterator to the node 
 *       before which we wish to insert, and the data to be inserted into the new
 *       node.
-*       Complexity: O(n)
+*       Complexity: O(1)
 *       Return: Returns the iterator to the new node in case of success,
 *               else, returns SlistEnd() on failure
-*       Notes:      Undefined behaviour if where is not in the list.
+*       Notes:      Undefined behaviour if 'where' is not in the list.
 * 
 ******************************************************************************/
 slist_iter_t SlistInsertBefore(slist_t *slist, slist_iter_t where, const void *new_data);
@@ -84,11 +83,11 @@ slist_iter_t SlistInsertBefore(slist_t *slist, slist_iter_t where, const void *n
 *
 *       Name: SlistRemove
 *       Description: Removes a node from the list.
-*       Arguments: 	An iterator the the node to be removed.
+*       Arguments: 	An iterator to the node to be removed.
 *       Complexity: O(1)
 *       Return: Returns the iterator to the next element
 *       Notes:      * Undefined behaviour if "what" is iter to 
-*                     Dummy end ( SlistEnd() ). Undefined if what is not 
+*                     Dummy end ( SlistEnd() ). Undefined if "what" is not 
 *                     in the list.
 * 
 ******************************************************************************/
@@ -135,9 +134,8 @@ size_t SlistCount(const slist_t *slist);
 *       Complexity: O(n)
 *       Return: returns iter to found element on success, "end" iter on fail
 *       Notes:  undefined behaviour if "start" and "end" belongs to different lists 
-*              undefined behaviour if "end" is before "start"
-*           undefined behaviour is "op_func" is NULL, undefined if start and end
-*       are not parts of the same list.
+*               undefined behaviour if "end" is before "start"
+*               undefined behaviour if "op_func" is NULL
 * 
 ******************************************************************************/
 slist_iter_t SlistFind(slist_iter_t start, slist_iter_t end,
@@ -147,15 +145,16 @@ slist_iter_t SlistFind(slist_iter_t start, slist_iter_t end,
 
 /******************************************************************************
 *
-*       Name: SlistSearch
+*       Name: SlistForEach
 *       Description: performs a particular operation on each node in the list 
 *       within a range of nodes.
 *       Arguments: 	iterators to the start and end of the range. 
 *       Complexity: O(n)
-*       Return: returnreturnreturn
+*       Return: Success if an action was performed successfully for the entire range,
+*               else, fail.
 *       Notes: undefined behaviour if "start" and "end" belongs to different lists 
 *              undefined behaviour if "end" is before "start"
-*           undefined behaviour is "op_func" is NULL
+*              undefined behaviour is "op_func" is NULL
 * 
 ******************************************************************************/
 int SlistForEach(slist_iter_t start, slist_iter_t end,
@@ -170,22 +169,23 @@ int SlistForEach(slist_iter_t start, slist_iter_t end,
 *       Arguments: 	* 'const slist_t *slist' - The list user wishes to create
 *                   * iterator for
 *       Complexity: O(1)
-*       Return: returns iter to SlistEnd if list is empty
-*       Notes:      * undefined behaviour if "slist" is  NULL
+*       Return: returns iterator to the first valid element
+*       Notes: * returns iter to SlistEnd if list is empty      
+* 			   * undefined behaviour if "slist" is NULL
 * 
 ******************************************************************************/
-slist_iter_t SlistBegin(const slist_t* slist);
+slist_iter_t SlistBegin(const slist_t *slist);
+
+
 
 /******************************************************************************
 *
 *       Name: SlistEnd
-*       Description: return iter to unvalid dummy end .
-*       Arguments: 	* 'aa' - aa
-*					* 'aa' - aa
+*       Description: return iterator to the dummy node.
+*       Arguments: 	* slist - pointer to the slist
 *       Complexity: O(1)
-*       Return: returnreturnreturn
-*       Notes:      * notenotenote
-*                   * notenotenote
+*       Return: return iterator to the end of the list
+*       Notes:      * undefined behaviour if "slist" is NULL
 * 
 ******************************************************************************/
 slist_iter_t SlistEnd(const slist_t *slist);
@@ -195,11 +195,10 @@ slist_iter_t SlistEnd(const slist_t *slist);
 /******************************************************************************
 *
 *       Name: SlistNext
-*       Description: descriptiondescriptiondescription
-*       Arguments: 	* 'aa' - aa
-*					* 'aa' - aa
+*       Description: Gets the next node iterator of the current node
+*       Arguments: 	* iterator
 *       Complexity: O(1)
-*       Return: returnreturnreturn
+*       Return: Returns the next node
 *       Notes: Undefined behaviour if "what" is iter to Dummy end (SlistEnd())
 * 
 ******************************************************************************/
@@ -210,11 +209,10 @@ slist_iter_t SlistNext(slist_iter_t iter);
 /******************************************************************************
 *
 *       Name: SlistGetData
-*       Description: descriptiondescriptiondescription
-*       Arguments: 	* 'aa' - aa
-*					* 'aa' - aa
+*       Description: Gets the data of a node
+*       Arguments: 	* iterator 
 *       Complexity: O(1)
-*       Return: returnreturnreturn
+*       Return: Returns the node data
 *       Notes: Undefined behaviour if "what" is iter to Dummy end (SlistEnd())
 * 
 ******************************************************************************/
@@ -239,18 +237,30 @@ void SlistSetData(slist_iter_t iter, void *data);
 
 /******************************************************************************
 *
-*       Name: SlistIsEqual
-*       Description: descriptiondescriptiondescription
-*       Arguments: 	* 'aa' - aa
-*					* 'aa' - aa
-*       Complexity: O(1)
-*       Return: returnreturnreturn
-*       Notes:      * notenotenote
-*                   * notenotenote
+*       Name: IsItrEqual
+*       Description: Checks if two iterators are pointing to the same node
+*       Arguments:  * two iterators.
+*       Complexity:  O(1)
+*       Return: true if equal, else return false. 
+*       Notes:      
+*                   
 * 
 ******************************************************************************/
 int IsItrEqual(slist_iter_t iter1, slist_iter_t iter2);
 
+/******************************************************************************
+*
+*       Name: SlistAppend
+*       Description: Appends two slist together
+*       Arguments:  * 'dest' - The main slist object
+*                   * 'src' - The concatinated slist , 
+*       Complexity: O(1)
+*       Return: Returns the start of the slist ('dest')
+*       Notes: Undefined behaviour if 'slist' is a NULL object
+*              src remains a valid empty slist.
+******************************************************************************/
+
+void SlistAppend(slist_t *dest, slist_t *src);
 
 
 #endif                          /* __SLIST_H__ */
