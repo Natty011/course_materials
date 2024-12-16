@@ -123,7 +123,7 @@ slist_iter_t SlistEnd(const slist_t *slist)
 /********************  SlistGetData  ****************************/
 void *SlistGetData(slist_iter_t iter)
 {
-	assert(iter);
+	assert(IterToNode(iter));
 	return IterToNode(iter)->data;
 }
 
@@ -131,7 +131,7 @@ void *SlistGetData(slist_iter_t iter)
 void SlistSetData(slist_iter_t iter, void *data)
 {
 	assert(data);
-	assert(iter);
+	assert(IterToNode(iter));
 	
 	IterToNode(iter)->data = data; 
 }
@@ -139,7 +139,7 @@ void SlistSetData(slist_iter_t iter, void *data)
 /********************  SlistNext  ****************************/  
 slist_iter_t SlistNext(slist_iter_t iter)
 {
-	assert(iter);
+	assert(IterToNode(iter));
 	return NodeToIter(IterToNode(iter)->next);
 }
 
@@ -147,8 +147,8 @@ slist_iter_t SlistNext(slist_iter_t iter)
 int IsItrEqual(slist_iter_t iter1, slist_iter_t iter2)
 {
 	
-	assert(iter1);
-	assert(iter2);
+	assert(IterToNode(iter1));
+	assert(IterToNode(iter2));
 	
 	return iter1 == iter2;
 
@@ -198,8 +198,8 @@ slist_iter_t SlistInsertBefore(slist_t *slist, slist_iter_t where,
 		return SlistEnd(slist);
 	}
 	
-	assert(slist && where && new_data);
-
+	assert(slist); /*	assert(slist && where && new_data); */
+	assert(IterToNode(where)); 
 	new_node->data = SlistGetData(where);
 	new_node->next = IterToNode(where)->next;
 	
@@ -218,7 +218,7 @@ slist_iter_t SlistInsertBefore(slist_t *slist, slist_iter_t where,
 slist_iter_t SlistRemove(slist_iter_t what)
 {
 	slist_node_t* temp = NULL;
-	assert(what);
+	assert(IterToNode(what));
 	
 	temp = IterToNode(SlistNext(what));
 	IterToNode(what)->data = temp->data;
@@ -242,9 +242,9 @@ slist_iter_t SlistFind(slist_iter_t start, slist_iter_t end,
                        void *user_param)
 
 {
-	assert(start && end && user_param);
-	
-	while(start != end)
+	assert(IterToNode(start) && IterToNode(end) );
+	assert(match_function); /* Add*/
+	while(!IsItrEqual(start, end)) /* change while(start != end)  */
 	{
 	
 		if(1 == match_function(SlistGetData(start), user_param))
@@ -263,9 +263,9 @@ int SlistForEach(slist_iter_t start, slist_iter_t end,
                  operation_func_t op_func, void *user_param)
 
 {
-	assert(start && end && user_param);
+	assert(IterToNode(start) && IterToNode(end) && user_param);
 	
-	while(start != end)
+	while(!IsItrEqual(start, end))   /* change while(start != end)  */
 	{
 	
 		if(op_func(SlistGetData(start), user_param))
@@ -286,6 +286,7 @@ void SlistAppend(slist_t *dest, slist_t *src)
 	assert(dest);
 	assert(src);
 	
+
 	dest->dummy->data = src->head->next->data;
 	dest->dummy->next = src->head->next->next;
 
