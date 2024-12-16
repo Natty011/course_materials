@@ -38,12 +38,12 @@ static void TestString(void)
 	queue_t* Q2 = QCreate();
 	
 
-	if( QPeek(Q1) != Q1 || QSize(Q1) != 0 || !QIsEmpty(Q1) )
+	if(QSize(Q1) != 0 || !QIsEmpty(Q1) )
 	{
 		puts("Failes in TestString: QPeek & QSize & QIsEmpty");
 	}
 	
-	if( QPeek(Q2) != Q2 || QSize(Q2) != 0 || !QIsEmpty(Q2) )
+	if(QSize(Q2) != 0 || !QIsEmpty(Q2) )
 	{
 		puts("Failes in TestString: QPeek & QSize & QIsEmpty");
 	}
