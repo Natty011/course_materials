@@ -10,11 +10,15 @@
 #include "slist.h" 
 #include "queue.h" 
 
+#define QueueToSlist(queue) (queue->que)
+
 /****************struct and enum declaration*********************/
 
 struct queue
 {
+
 	slist_t* que; 
+	
 };
 
 
@@ -31,32 +35,34 @@ typedef enum
 
 /***********Functions declaration and definition*******/
 
-	
-queue_t* SlistToQueue(slist_t* slist)
-{
-	return (queue_t*)slist;
-}
-
-slist_t* QueueToSlist(queue_t* queue) 
-{
-	return(slist_t*)queue;
-
-}
-
 /**********End of functions declaration and definition *******/
 
 /********************  QCreate  ****************************/
 queue_t *QCreate(void)
 {
 
-	queue_t* que = SlistToQueue(SlistCreate());
-	return que;
+	queue_t* queue = (queue_t*)malloc(sizeof(queue_t));
+	if(NULL == queue)
+	{
+		return NULL;
+	}
+	queue->que =  SlistCreate();
+	
+	if(NULL == queue->que)
+	{
+		free(queue);
+		queue = NULL;
+		return NULL;
+	}
+	
+	return queue;
 	
 }
 /********************  QDestroy  ****************************/
 void QDestroy(queue_t *queue)
 {
-	 SlistDestroy(QueueToSlist(queue));
+	 SlistDestroy(queue->que);
+	 free(queue);
 }
 /********************  QEnqueue  ****************************/
 int QEnqueue(queue_t *queue, const void *data)
@@ -75,17 +81,17 @@ void QDequeue(queue_t *queue)
 /********************  QPeek  ****************************/
 void *QPeek(const queue_t *queue)
 {
-	return SlistGetData(SlistBegin(QueueToSlist((queue_t*)queue)));
+	return SlistGetData(SlistBegin(QueueToSlist(queue)));
 }
 /********************  QIsEmpty  ****************************/
 int QIsEmpty(const queue_t *queue)
 {
-	return SlistIsEmpty(QueueToSlist((queue_t*)queue));
+	return SlistIsEmpty(QueueToSlist(queue));
 }
 /********************  QSize  ****************************/
 size_t QSize(const queue_t *queue)
 {
-	return SlistCount(QueueToSlist((queue_t*)queue));
+	return SlistCount(QueueToSlist(queue));
 }
 
 /********************  QAppend  ****************************/
