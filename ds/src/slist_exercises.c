@@ -71,8 +71,8 @@ node_t *FindIntersection(node_t *head_1, node_t *head_2)
 	size_t move1 = 0;
 	size_t move2 = 0;
 	
-	assert(head_1->next);
-	assert(head_2->next);
+	assert(head_1);
+	assert(head_2);
 	
 	while(NULL != head1->next)
 	{
