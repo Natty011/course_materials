@@ -62,7 +62,11 @@ queue_t *QCreate(void)
 void QDestroy(queue_t *queue)
 {
 	 SlistDestroy(queue->que);
+	 queue->que = NULL;
+	 
 	 free(queue);
+	 queue = NULL;	
+	  
 }
 /********************  QEnqueue  ****************************/
 int QEnqueue(queue_t *queue, const void *data)
@@ -76,27 +80,38 @@ int QEnqueue(queue_t *queue, const void *data)
 /********************  QDequeue  ****************************/
 void QDequeue(queue_t *queue)
 {
+	
+	assert(queue);
+	assert(!QIsEmpty(queue));
 	SlistRemove(SlistBegin(QueueToSlist(queue)));
+	
 }
 /********************  QPeek  ****************************/
 void *QPeek(const queue_t *queue)
 {
+	assert(queue);
+	assert(!QIsEmpty(queue));
 	return SlistGetData(SlistBegin(QueueToSlist(queue)));
 }
 /********************  QIsEmpty  ****************************/
 int QIsEmpty(const queue_t *queue)
 {
+	assert(queue);	
 	return SlistIsEmpty(QueueToSlist(queue));
 }
 /********************  QSize  ****************************/
 size_t QSize(const queue_t *queue)
 {
+	assert(queue);	
 	return SlistCount(QueueToSlist(queue));
 }
 
 /********************  QAppend  ****************************/
 queue_t *QAppend(queue_t *dest, queue_t *src)
 {
+	
+	assert(dest);
+	assert(src);		
 	SlistAppend(QueueToSlist(dest), QueueToSlist(src));
 	return dest;	
 }
