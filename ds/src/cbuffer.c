@@ -6,7 +6,7 @@
 *****************************************/
 
 #include <assert.h> 	/* assert 		*/
-#include <stdlib.h> 	/* malloc, free */
+#include <stdlib.h> 	/* malloc, free, size_t */
 #include <string.h> 	/* memcpy 		*/
 #include "cbuffer.h" 
 
@@ -75,7 +75,7 @@ int CBufferIsEmpty(const cbuffer_t *cbuffer)
 }
 
 /********************  CBufferBuffSiz  ****************************/
-size_t CBufferBuffSiz(const cbuffer_t *cbuffer)
+size_t CBufferBufSiz(const cbuffer_t *cbuffer)
 {
 	assert(cbuffer);
 	return 	cbuffer->capacity;
@@ -94,13 +94,13 @@ Note: The first memcpy handles data copy till buffer end, and
 	   second one handles data copy from buffer beginning.
 
 ***********************************************************/ 
-size_t CBufferRead(cbuffer_t *src, char *dest, size_t n)
+size_t CBufferRead(cbuffer_t *src, void *dest, size_t n)
 {
 
 	size_t remainder = 0;
 	size_t bytes_to_read = 0;
 	
-	if ( CBufferBuffSiz(src) == CBufferFreeSpace(src) ||  0 == n )
+	if ( CBufferBufSiz(src) == CBufferFreeSpace(src) ||  0 == n )
 	{
 		return 0;	
 	}
@@ -109,18 +109,15 @@ size_t CBufferRead(cbuffer_t *src, char *dest, size_t n)
 	assert(dest);	
 		
 	n = MIN(n, src->current_size);
-	bytes_to_read = MIN(n, CBufferBuffSiz(src) - src->front);
+	bytes_to_read = MIN(n, CBufferBufSiz(src) - src->front);
 	remainder = n - bytes_to_read;
 	
 	memcpy(dest, src->arr + src->front, bytes_to_read);	
-	
-	UpdateCurrSize(src, -bytes_to_read);	
-	src->front = (src->front + bytes_to_read) % CBufferBuffSiz(src);
 
-	memcpy(dest+ bytes_to_read, src->arr + src->front, remainder);	
+	memcpy((char*)dest+ bytes_to_read, src->arr, remainder);	
 
-	UpdateCurrSize(src, -remainder);	
-	src->front = (src->front + remainder) % CBufferBuffSiz(src);
+	UpdateCurrSize(src, -n);	
+	src->front = (src->front + n) % CBufferBufSiz(src);
 
 	return n;
 	
@@ -134,7 +131,7 @@ Note: The first memcpy handles data copy till buffer end, and
 
 ***********************************************************/ 
 
-size_t CBufferWrite(cbuffer_t *dest, const char *src, size_t n)
+size_t CBufferWrite(cbuffer_t *dest, const void *src, size_t n)
 {
 	size_t remainder = 0;
 	size_t bytes_to_write = 0;
@@ -148,19 +145,16 @@ size_t CBufferWrite(cbuffer_t *dest, const char *src, size_t n)
 	assert(src);
 	assert(dest);
 	
-	rear = ( dest->front + dest->current_size )%CBufferBuffSiz(dest);
+	rear = ( dest->front + dest->current_size )%CBufferBufSiz(dest);
 	n = MIN(n, CBufferFreeSpace(dest));
-	bytes_to_write = MIN(n, CBufferBuffSiz(dest) - rear);
+	bytes_to_write = MIN(n, CBufferBufSiz(dest) - rear);
 	remainder = n - bytes_to_write;
 
 	memcpy(dest->arr + rear, src, bytes_to_write);
-	
-	UpdateCurrSize(dest, bytes_to_write);	
-	rear = ( dest->front + dest->current_size )%CBufferBuffSiz(dest);
 
-	memcpy(dest->arr + rear, src + bytes_to_write, remainder);	
-	
-	UpdateCurrSize(dest, remainder);
+	memcpy(dest->arr, (char*)src + bytes_to_write, remainder);	
+		
+	UpdateCurrSize(dest, n);
 				
 	return n;
 }
