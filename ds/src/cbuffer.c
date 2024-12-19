@@ -96,14 +96,15 @@ size_t CBufferRead(cbuffer_t *src, void *dest, size_t n)
 
 	size_t remainder = 0;
 	size_t bytes_to_read = 0;
-	
+
+	assert(src);
+	assert(dest);
+		
 	if (  CBufferIsEmpty(src) == 1 ||  0 == n )
 	{
 		return 0;	
 	}
 
-	assert(src);
-	assert(dest);	
 		
 	n = MIN(n, src->current_size);
 	bytes_to_read = MIN(n, CBufferBufSiz(src) - src->front);
@@ -133,14 +134,14 @@ size_t CBufferWrite(cbuffer_t *dest, const void *src, size_t n)
 	size_t remainder = 0;
 	size_t bytes_to_write = 0;
 	size_t rear = 0;
-	
+
+	assert(src);
+	assert(dest);
+		
 	if ( 0 == CBufferFreeSpace(dest) ||  0 == n )
 	{
 		return 0;	
 	}
-
-	assert(src);
-	assert(dest);
 	
 	rear = ( dest->front + dest->current_size )%CBufferBufSiz(dest);
 	n = MIN(n, CBufferFreeSpace(dest));
