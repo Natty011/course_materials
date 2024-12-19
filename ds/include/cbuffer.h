@@ -4,7 +4,7 @@
 #ifndef __CBUFFER_H__   /* __CBUFFER_H__  */
 #define __CBUFFER_H__   /* __CBUFFER_H__  */
 
-#include <stddef.h>     /* size_t       */
+#include <stddef.h>     /* size_t         */
 
 typedef struct cbuffer cbuffer_t;
 
@@ -41,58 +41,61 @@ void CBufferDestroy(cbuffer_t *cbuffer);
 *       the number of bytes to read.
 *       Complexity: O(n)
 *       Return: Number of bytes read
-*       Notes: N\A
+*       Notes: undefined behaviour if src is empty
 * 
 ******************************************************************************/
-size_t CBufferRead(cbuffer_t *src, char *dest, size_t n);
+size_t CBufferRead(cbuffer_t *src, void *dest, size_t n);
 
 
 /******************************************************************************
 *
 *       Name: CBufferWrite
-*       Description: BBBBBB
+*       Description: the function writes to the following free spot in the 
+*                    buffer, if there are no n bytes to write to we will
+*                    write what we can.
 *       Arguments: dest - the buffer that is written to.
 *                  src - the memory we want to write from.
 *                  n - the amount of bytes we want to write.
 *       Complexity: O(n)
 *       Return: Number of bytes written
-*       Notes: how do we return that something went wrong?
+*       Notes: undefined behaviour if dest is full
 * 
 ******************************************************************************/
-size_t CBufferWrite(cbuffer_t *dest, const char *src, size_t n);
+size_t CBufferWrite(cbuffer_t *dest, const void *src, size_t n);
 
 /******************************************************************************
 *
 *       Name: CBufferIsEmpty
-*       Description: BBBBBB
-*       Arguments: CCCCC
+*       Description: checks if the circular buffer is empty.
+*       Arguments: 'cbuffer' - The buffer struct.
 *       Complexity: O(1)
-*       Return: EEEEEE
-*       Notes: FFFFFF
+*       Return: Returns 'TRUE' (1) if empty, 'FALSE' (0) if not
+*       Notes: Undefined behaviour if "cbuffer" is NULL
 * 
 ******************************************************************************/
 int CBufferIsEmpty(const cbuffer_t *cbuffer);
 
 /******************************************************************************
 *
-*       Name: CBufferCapacity
-*       Description: BBBBBB
-*       Arguments: CCCCC
-*       Complexity: DDDDDDD
-*       Return: EEEEEE
-*       Notes: FFFFFF
+*       Name: CBufferBufSiz
+*       Description: Returns the byte capacity of the buffer
+*       Arguments: * 'cbuffer' - The buffer struct
+*       Complexity: O(1)
+*       Return: Buffer capacity in bytes
+*       Notes: Undefined behaviour if 'cbuffer' is NULL
 * 
 ******************************************************************************/
-size_t CBufferBuffSiz(const cbuffer_t *cbuffer);
+size_t CBufferBufSiz(const cbuffer_t *cbuffer);
 
 /******************************************************************************
 *
 *       Name: CBufferFreeSpace
-*       Description: the function return how much empty space is left in the buffer.
+*       Description: the function return how much free space is left in the
+*                                                          buffer in bytes.
 *       Arguments:  cbuffer - The circular buffer object.
-*       Complexity: O(1)
-*       Return: EEEEEE
-*       Notes: FFFFFF
+*       Complexity: O(1) 
+*       Return: return how much free space is left in the buffer in bytes.
+*       Notes: 
 * 
 ******************************************************************************/
 size_t CBufferFreeSpace(const cbuffer_t *cbuffer);
