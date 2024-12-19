@@ -36,7 +36,7 @@ static void TestString(void)
 	
 	cbuffer_t* cbuff1 = CBufferCreate(cap1);
 	
-	if( CBufferBuffSiz(cbuff1) != cap1 || CBufferIsEmpty(cbuff1) != 1  || 
+	if( CBufferBufSiz(cbuff1) != cap1 || CBufferIsEmpty(cbuff1) != 1  || 
 	    CBufferFreeSpace(cbuff1) != cap1 )
 	{
 		puts("Failes in TestString: BuffSiz & IsEmpty & FreeSpace");
