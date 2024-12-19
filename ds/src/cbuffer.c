@@ -35,11 +35,8 @@ static void UpdateCurrSize(cbuffer_t *cbuffer, size_t bytes);
 
 cbuffer_t *CBufferCreate(size_t capacity)
 {
-
-	size_t padding = sizeof(cbuffer_t) - OFFSETOF(cbuffer_t, arr);
-	size_t cap_to_alloc = capacity - padding;
 	
-	cbuffer_t* cbuffer = (cbuffer_t*)malloc(sizeof(cbuffer_t) + cap_to_alloc);
+	cbuffer_t* cbuffer =(cbuffer_t*)malloc(OFFSETOF(cbuffer_t, arr) + capacity);
 	
 	if(NULL == cbuffer)
 	{
@@ -100,7 +97,7 @@ size_t CBufferRead(cbuffer_t *src, void *dest, size_t n)
 	size_t remainder = 0;
 	size_t bytes_to_read = 0;
 	
-	if ( CBufferBufSiz(src) == CBufferFreeSpace(src) ||  0 == n )
+	if (  CBufferIsEmpty(src) == 1 ||  0 == n )
 	{
 		return 0;	
 	}
