@@ -2,7 +2,7 @@
 * Author : Natty
 * Reviewer : Eric
 * Date : 21 / 12 / 2024
-* Last update: 21 / 12 / 2024
+* Last update: 22 / 12 / 2024
 *****************************************/
 
 #include <stdio.h> 		/* printf, puts,  */
@@ -94,7 +94,7 @@ static void TestString(void)
 	
 	
 	itr5 = DListInsertBefore(d2, DListBegin(d2), arr[3]);
-	/*printf(" DListBegin1(d2) = %p \n", (void*)DListBegin(d2));*/
+
 	DListSetData(itr5, DListGetData(itr3));
 
 	if( strcmp( (char*)DListGetData(itr3), (char*)DListGetData(itr5) ) )
