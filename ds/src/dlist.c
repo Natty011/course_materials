@@ -2,12 +2,15 @@
 * Author : Natty
 * Reviewer : Eric
 * Date : 19 / 12 / 2024
-* Last update: 21 / 12 / 2024
+* Last update: 22 / 12 / 2024
 *****************************************/
 
 #include <assert.h> 	/* assert */
 #include <stdlib.h> 	/* malloc, free */
 #include "dlist.h" 
+
+#define 	NodeToIter(x)		((dlist_iter_t)x)
+#define		IterToNode(x)		((dlist_node_t*)x)	
 
 /****************struct and enum declaration*********************/
 
@@ -35,27 +38,15 @@ struct dlist_node
 typedef enum
 {
 	
-	OPERATION_FAIL,
-	SUCCESS
+	OPERATION_FAIL = 0,
+	SUCCESS = 1
 	
 }dlistresult;
 
 /***************End of struct and enum declaration *******/
 
 /***********Functions declaration and definition*******/
-
 static int CountNodes (void *data, void *user_param);
-	
-dlist_node_t* IterToNode(dlist_iter_t iter)
-{
-	return (dlist_node_t*)iter;
-}
-
-dlist_iter_t NodeToIter(dlist_node_t* node) 
-{
-	return (dlist_iter_t)node;
-}
-
 /**********End of functions declaration and definition *******/
 
 /********************  DListCreate  ****************************/
@@ -91,7 +82,7 @@ dlist_t* DListCreate( void )
 		return NULL;
 	}
 	
-	p_dlist->head->data = NULL;
+	p_dlist->head->data = p_dlist;
 	p_dlist->head->next = p_dlist->dummy;
 	p_dlist->head->prev = NULL;
 		
@@ -166,12 +157,11 @@ int DListIterIsEqual(dlist_iter_t iter1, dlist_iter_t iter2)
 
 }
 
-
 /********************  DListCount  ****************************/
 size_t DListCount(const dlist_t *dlist)
 {
 	size_t size = 0;
-
+	assert(dlist);
 	DListForEach(DListBegin(dlist), DListEnd(dlist), CountNodes, &size);
 	
 	return size; 
@@ -191,7 +181,7 @@ void DListDestroy(dlist_t *dlist)
 {
 
 	dlist_node_t* node = dlist->head->next;
-	dlist_node_t* p_element;
+	dlist_node_t* p_element = NULL;
 	
 	assert(dlist);
 	
@@ -227,7 +217,7 @@ dlist_iter_t DListInsertBefore(dlist_t *dlist, dlist_iter_t where,
 		return DListEnd(dlist);
 	}
 		
-	new_node->prev = DListPrev(IterToNode(where));
+	new_node->prev = IterToNode(DListPrev(where));
 	new_node->data = (void*)new_data;
 	new_node->next = IterToNode(where);
 	
@@ -342,7 +332,10 @@ dlist_iter_t DListFind(dlist_iter_t start, dlist_iter_t end,
 }
 
 /********************  DListMultiFind  ****************************/   
-
+/*
+ Applies match_func that the user inserta on every element
+ in range [start:end) and inserts them to new_dlist
+*/
 int DListMultiFind(dlist_iter_t start, dlist_iter_t end,
                    match_func_t match_func, void* user_param,
                    dlist_t* match_dlist)
@@ -376,6 +369,10 @@ int DListMultiFind(dlist_iter_t start, dlist_iter_t end,
 } 
 	
 /********************  DListSplice  ****************************/ 
+/*
+Updates the addresses of source and targets lists acording to 
+the operation of the function. 
+*/
   
 dlist_iter_t DListSplice(dlist_iter_t where, dlist_iter_t from,
                           dlist_iter_t to)
@@ -391,7 +388,7 @@ dlist_iter_t DListSplice(dlist_iter_t where, dlist_iter_t from,
 	IterToNode(DListPrev(where))->next = IterToNode(from);
 	IterToNode(where)->prev = DListPrev(to);
 
-	DListPrev(to)->next = IterToNode(where);
+	IterToNode(DListPrev(to))->next = IterToNode(where);
 
 	IterToNode(DListPrev(from))->next = IterToNode(to);
 	IterToNode(to)->prev = IterToNode(DListPrev(from));	
@@ -403,7 +400,11 @@ dlist_iter_t DListSplice(dlist_iter_t where, dlist_iter_t from,
 }	
 
 
-/********************  DListForEach  **************************/   
+/********************  DListForEach  **************************/ 
+/* 
+ Applies a user specific operation function on all of
+ the linked list's element's data
+*/ 
 int DListForEach(dlist_iter_t start, dlist_iter_t end,
                  operation_func_t op_func, void *user_param)
 
