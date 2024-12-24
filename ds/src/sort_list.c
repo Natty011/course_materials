@@ -1,8 +1,8 @@
 /***************************************
 * Author : Natty
-* Reviewer : Eric
+* Reviewer : Matan
 * Date : 22 / 12 / 2024
-* Last update: 22 / 12 / 2024
+* Last update: 24 / 12 / 2024
 *****************************************/
 
 #include <assert.h> 	/* assert */
@@ -13,8 +13,6 @@
 #define SRListToDList(sort_list) (sort_list->dlist)
 
 /****************struct and enum declaration*********************/
-
-
 
 struct sort_list
 {
@@ -44,9 +42,7 @@ typedef enum
 /***************End of struct and enum declaration *******/
 
 /***********Functions declaration and definition*******/
-/*
-static int CountNodes (void *data, void *user_param);
-*/
+
 /**********End of functions declaration and definition *******/
 
 /********************  SortlistCreate  ****************************/
@@ -70,9 +66,7 @@ sort_list_t* SortlistCreate(cmp_func_t sort_func)
 	}
 
 	list->cmp_func = sort_func;
-	/*list->dlist->dummy = dlist;*/	
 	return list;
-
 
 }
 
@@ -127,7 +121,7 @@ sort_list_iter_t SortlistNext(sort_list_iter_t iter)
 	
 	# ifndef NDEBUG
 		itr.list = iter.list;
-		 /*sort_list;*/
+		
 	#endif
 	
 	return itr;
@@ -141,7 +135,7 @@ sort_list_iter_t SortlistPrev(sort_list_iter_t iter)
 	
 	# ifndef NDEBUG
 		itr.list = iter.list;
-		/*(sort_list_t*)sort_list;*/
+
 	#endif
 	
 	return itr;
@@ -150,9 +144,14 @@ sort_list_iter_t SortlistPrev(sort_list_iter_t iter)
 /********************  SortlistIterIsEqual  ****************************/   
 int SortlistIterIsEqual( sort_list_iter_t iter1 , sort_list_iter_t iter2 )
 {
-	assert(iter1.list == iter2.list);
-
-	return DListIterIsEqual(iter1.iter, iter2.iter);
+	
+	int res = TRUE;
+	
+	# ifndef NDEBUG
+		res = (iter1.list == iter2.list);
+	#endif
+	
+	return res * DListIterIsEqual(iter1.iter, iter2.iter);
 }
 
 /********************  SortlistGetData  ****************************/
@@ -183,12 +182,18 @@ void SortlistDestroy( sort_list_t* sort_list )
 
 
 /********************  SortlistRemove  ****************************/ 
-  
 sort_list_iter_t SortlistRemove(sort_list_iter_t what )
 {	
 	sort_list_iter_t itr;
-	itr.iter = DListRemove(what.iter); 	
 	
+	# ifndef NDEBUG
+		itr.list = what.list;
+	#endif
+	 
+	itr.iter = DListRemove(what.iter); 	
+
+
+		
 	return itr; 	
 }
 
@@ -198,20 +203,22 @@ sort_list_iter_t SortlistInsert(sort_list_t* sort_list ,const void *data)
 	
 	sort_list_iter_t next_iter;
 	void* temp_data = NULL;
-	int res_cmp = 0;
+	int res_cmp = FALSE;
 	
 	assert(sort_list);
 				
 	next_iter = SortlistBegin(sort_list); 
-	
+
 	temp_data = SortlistGetData(next_iter);
 	
-	res_cmp = sort_list->cmp_func(temp_data, (void*)data);
-	
-
-	while( res_cmp <= 0 &&  NULL != next_iter.iter)
+	if( !SortlistIsEmpty(sort_list) )
 	{
-	
+		res_cmp = sort_list->cmp_func(temp_data, (void*)data);
+	}
+
+	while( res_cmp <= FALSE &&  NULL != SortlistNext(next_iter).iter)
+	{
+
 		next_iter = SortlistNext(next_iter);
 		temp_data = SortlistGetData(next_iter);
 		res_cmp = sort_list->cmp_func(temp_data, (void*)data);	
@@ -247,7 +254,7 @@ void* SortlistPopBack( sort_list_t* sort_list )
  
 }
 
-/********************  DListForEach  **************************/ 
+/********************  SortlistForEach  **************************/ 
 int SortlistForEach(sort_list_iter_t start, sort_list_iter_t end,
                      operation_func_t op_func ,void* user_param)
 {
@@ -255,8 +262,7 @@ int SortlistForEach(sort_list_iter_t start, sort_list_iter_t end,
 	assert(start.list == end.list);
 	assert(op_func);
 	
-	return DListForEach(start.iter, end.iter, op_func, user_param);
-	
+	return DListForEach(start.iter, end.iter, op_func, user_param);	
 }                     
 
 /********************  SortlistFindIf  **************************/ 
@@ -264,10 +270,10 @@ int SortlistForEach(sort_list_iter_t start, sort_list_iter_t end,
 sort_list_iter_t SortlistFindIf( sort_list_iter_t start, sort_list_iter_t end,
                                 match_func_t match_func , void* user_param )
 {
-
 	sort_list_iter_t itr;
 		
 	assert(start.list == end.list);
+	
 	assert(match_func);
 			
 	itr.iter = DListFind(start.iter, end.iter, match_func, user_param);
@@ -307,82 +313,75 @@ void SortlistMerge(sort_list_t *dest, sort_list_t *src)
 {
 		
 	sort_list_iter_t src_itr_from = SortlistBegin(src);
-	sort_list_iter_t src_itr_to = SortlistBegin(src);
-	
+	sort_list_iter_t src_itr_from2 = SortlistBegin(src);
+
 	sort_list_iter_t dest_itr_where = SortlistBegin(dest);
 		
 	void* src_temp_data = NULL;
 	void* dest_temp_data = NULL;
-	int res_cmp = 0;
+	int res_cmp = FALSE;
 
 	assert(dest);
 	assert(src);
 	assert(dest != src);
-	
-	/*src_temp_data = SortlistGetData(src_itr_from);*/
-	
-	src_temp_data = SortlistGetData(src_itr_to);
+
+	src_temp_data = SortlistGetData(src_itr_from);
 	dest_temp_data = SortlistGetData(dest_itr_where);
 			
 	res_cmp = dest->cmp_func(src_temp_data, dest_temp_data);
-			
-	while( NULL != SortlistNext(src_itr_to).iter &&
-	      !SortlistIterIsEqual(src_itr_from, src_itr_to ) )
-	{		
-		if( res_cmp >= 0 )
-		{
-			src_itr_to = SortlistNext(src_itr_to);
+	/* src in not an Empty*/
+	while( !SortlistIterIsEqual(src_itr_from, SortlistEnd(src) ) ) 
+	{
+		/* src_data(from) >= dest_data(where) */		
+		if( res_cmp >= FALSE && 
+			!SortlistIterIsEqual(SortlistEnd(dest), dest_itr_where ) )
+		  
+		{		
 			dest_itr_where = SortlistNext(dest_itr_where);
 			
-			src_temp_data = SortlistGetData(src_itr_to);
 			dest_temp_data = SortlistGetData(dest_itr_where);		
 
-			res_cmp = dest->cmp_func(src_temp_data, dest_temp_data);		
+			res_cmp = dest->cmp_func(src_temp_data, dest_temp_data);
 		}
-	
+		
+		/* src_data(from) < dest_data(where) */		
 		else
-		{	
-			DListSplice(dest_itr_where.iter, src_itr_from.iter, 
-						 src_itr_to.iter);
+		{		
+			src_itr_from2 = src_itr_from;
+			src_itr_from = SortlistNext(src_itr_from);
+				
+			DListSplice(dest_itr_where.iter,
+				src_itr_from2.iter, src_itr_from.iter);
 			
-			src_itr_from = src_itr_to;
-						 	
-		}
+			 
+			if ( SortlistIterIsEqual((src_itr_from), SortlistEnd(src) ) ||
+			     SortlistIterIsEqual(SortlistEnd(dest), dest_itr_where )	)		     
+			 	
+			{
+				break;
+			}
+
+			dest_itr_where = SortlistNext(dest_itr_where);
+				
+		  	src_temp_data = SortlistGetData(src_itr_from);
+		  	
+		  	dest_temp_data = SortlistGetData(dest_itr_where);
 	
+		  	res_cmp = dest->cmp_func(src_temp_data, dest_temp_data);		  					 	
+		}
+	}
+	
+	/* If dest is empty and src is not */
+	while( !SortlistIsEmpty(src) )
+	{
+			src_itr_from2 = src_itr_from;
+			src_itr_from = SortlistNext(src_itr_from);
+				
+			DListSplice(dest_itr_where.iter,
+				src_itr_from2.iter, src_itr_from.iter);
 	}
 	
 }
 
-	
-/********************  DListSplice  ****************************/ 
-/*
-Updates the addresses of source and targets lists acording to 
-the operation of the function. 
-*/
-/*  
-dlist_iter_t DListSplice(dlist_iter_t where, dlist_iter_t from,
-                          dlist_iter_t to)
 
-{
-	
-	dlist_iter_t prev_where = DListPrev(where);
-
-	assert(IterToNode(from));
-	assert(IterToNode(to));
-	assert(IterToNode(where));
-	
-	IterToNode(DListPrev(where))->next = IterToNode(from);
-	IterToNode(where)->prev = DListPrev(to);
-
-	IterToNode(DListPrev(to))->next = IterToNode(where);
-
-	IterToNode(DListPrev(from))->next = IterToNode(to);
-	IterToNode(to)->prev = IterToNode(DListPrev(from));	
-
-	IterToNode(from)->prev = prev_where;		
-							
-	return DListPrev(where);
-	
-}	
-*/
 
