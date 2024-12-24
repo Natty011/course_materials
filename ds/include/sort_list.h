@@ -19,6 +19,7 @@ typedef struct sort_list_iter
     #endif
 } sort_list_iter_t;
 
+
 /******************************************************************************
 * 
 *   Description: Function to determine sorting method of sorted list
