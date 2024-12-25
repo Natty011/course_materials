@@ -236,7 +236,7 @@ static void TestString(void)
 	}
 	
 	SortlistMerge(srl1, srl2);
-		
+	
 	if( SortlistSize(srl2) != 0	|| SortlistSize(srl1) != 9 ||
 		strcmp(SortlistGetData(SortlistNext(itr2)), "dortlistMerge") ||
 		strcmp(SortlistGetData(SortlistPrev(itr33)), "dortlistMerge") ||
@@ -257,7 +257,8 @@ static void TestString(void)
 	}
 	
 	SortlistMerge(srl1, srl2);
-		
+	
+			
 	if( SortlistSize(srl2) != 0	|| SortlistSize(srl1) != 11 ||
 		strcmp(SortlistGetData(SortlistNext(itr2)), "cBanai") ||
 		strcmp(SortlistGetData(SortlistPrev(SortlistEnd(srl1))), "sot")
@@ -275,15 +276,16 @@ static void TestString(void)
 
 	if(	SortlistSize(srl4) != 4	)
 	{
-		puts(ANSI_COLOR_RED"Failes in TestString_4: SortlistInsert"ANSI_RESET_ALL);		
+		puts(ANSI_COLOR_RED"Failes in TestString_4_1: SortlistInsert"ANSI_RESET_ALL);		
 	}	
 	
 	itr5 = itr1;
+		
 	SortlistMerge(srl3, srl4);
-	
+		
 	if( SortlistSize(srl4) != 0	|| SortlistSize(srl3) != 4 )
 	{
-		puts(ANSI_COLOR_RED"Failes in TestString_4: SortlistInsert"ANSI_RESET_ALL);		
+		puts(ANSI_COLOR_RED"Failes in TestString_4_2:SortlistMerge_1 "ANSI_RESET_ALL);		
 	}
 
 	itr5 = SortlistFind(srl3, SortlistBegin(srl3),
@@ -297,7 +299,7 @@ static void TestString(void)
 	  )
 			
 	  {
-		  puts(ANSI_COLOR_RED"Failes in TestString_2: SortlistMerge"ANSI_RESET_ALL );	
+		  puts(ANSI_COLOR_RED"Failes in TestString_2: SortlistMerge_2"ANSI_RESET_ALL );	
 	  }
 		
 				
@@ -323,8 +325,14 @@ static int op_func (void *data, void *user_param)
 {
 	return !strcmp(data, user_param);
 }
-
+/*
+static int SortingFunc(void* check_data , void* new_data)
+{
+	return (*(int*)check_data - *(int*)new_data);
+}
+*/
 /*******************match_function*********************/
+
 static int sort_func(void *check_data, void *user_param )
 {
 	int res = strcmp(check_data, user_param);
