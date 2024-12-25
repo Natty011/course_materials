@@ -2,7 +2,7 @@
 * Author : Natty
 * Reviewer : Matan
 * Date : 22 / 12 / 2024
-* Last update: 24 / 12 / 2024
+* Last update: 25 / 12 / 2024
 *****************************************/
 
 #include <assert.h> 	/* assert */
@@ -10,7 +10,7 @@
 #include "dlist.h" 
 #include "sort_list.h" 
 
-#define SRListToDList(sort_list) (sort_list->dlist)
+#define SRLISTTODLIST(sort_list) (sort_list->dlist)
 
 /****************struct and enum declaration*********************/
 
@@ -29,7 +29,7 @@ typedef enum
 	SUCCESS = 0,
 	OPERATION_FAIL = 1
 	
-}dlistresult;
+}dlist_result_t;
 
 typedef enum
 {
@@ -37,13 +37,9 @@ typedef enum
 	FALSE = 0,
 	TRUE = 1
 	
-}funcresult;
+}func_result_t;
 
 /***************End of struct and enum declaration *******/
-
-/***********Functions declaration and definition*******/
-
-/**********End of functions declaration and definition *******/
 
 /********************  SortlistCreate  ****************************/
 sort_list_t* SortlistCreate(cmp_func_t sort_func)
@@ -74,7 +70,7 @@ sort_list_t* SortlistCreate(cmp_func_t sort_func)
 int SortlistIsEmpty(const sort_list_t* sort_list)
 {
 	 assert(sort_list);	
-	 return DListIsEmpty(SRListToDList(sort_list));
+	 return DListIsEmpty(SRLISTTODLIST(sort_list));
 }
 
 /********************  SortlistBegin  ****************************/
@@ -85,7 +81,7 @@ sort_list_iter_t SortlistBegin(const sort_list_t* sort_list)
 		
 	assert(sort_list);
 	
-	itr.iter = DListBegin(SRListToDList(sort_list));
+	itr.iter = DListBegin(SRLISTTODLIST(sort_list));
 	
 	# ifndef NDEBUG
 		itr.list = (sort_list_t*)sort_list;
@@ -102,7 +98,7 @@ sort_list_iter_t SortlistEnd(const sort_list_t* sort_list)
 		
 	assert(sort_list);
 	
-	itr.iter = DListEnd(SRListToDList(sort_list));
+	itr.iter = DListEnd(SRLISTTODLIST(sort_list));
 	
 	# ifndef NDEBUG
 		itr.list = (sort_list_t*)sort_list;
@@ -116,29 +112,17 @@ sort_list_iter_t SortlistEnd(const sort_list_t* sort_list)
 sort_list_iter_t SortlistNext(sort_list_iter_t iter)
 {
 
-	sort_list_iter_t itr; 
-	itr.iter = DListNext(iter.iter); 
+	iter.iter = DListNext(iter.iter); 
 	
-	# ifndef NDEBUG
-		itr.list = iter.list;
-		
-	#endif
-	
-	return itr;
+	return iter;
 }
 
 /********************  SortlistPrev  ****************************/  
 sort_list_iter_t SortlistPrev(sort_list_iter_t iter)
 {
-	sort_list_iter_t itr; 
-	itr.iter = DListPrev(iter.iter); 
+	iter.iter = DListPrev(iter.iter); 
 	
-	# ifndef NDEBUG
-		itr.list = iter.list;
-
-	#endif
-	
-	return itr;
+	return iter;
 }
 
 /********************  SortlistIterIsEqual  ****************************/   
@@ -166,7 +150,7 @@ size_t SortlistSize(const sort_list_t* sort_list)
 {	
 	assert(sort_list);	
 		
-	return DListCount(SRListToDList(sort_list));
+	return DListCount(SRLISTTODLIST(sort_list));
 }
 
 /********************  SortlistDestroy  ****************************/
@@ -175,7 +159,11 @@ void SortlistDestroy( sort_list_t* sort_list )
 
 	assert(sort_list);
 	
-	DListDestroy(SRListToDList(sort_list));
+	if(	 NULL == sort_list )
+	{
+		return;
+	}
+	DListDestroy(SRLISTTODLIST(sort_list));
 	free(sort_list);
 	sort_list = NULL;
 }
@@ -184,17 +172,10 @@ void SortlistDestroy( sort_list_t* sort_list )
 /********************  SortlistRemove  ****************************/ 
 sort_list_iter_t SortlistRemove(sort_list_iter_t what )
 {	
-	sort_list_iter_t itr;
-	
-	# ifndef NDEBUG
-		itr.list = what.list;
-	#endif
 	 
-	itr.iter = DListRemove(what.iter); 	
-
-
-		
-	return itr; 	
+	what.iter = DListRemove(what.iter); 	
+			
+	return what; 	
 }
 
 /******************  SortlistInsert  ***********************/
@@ -225,7 +206,7 @@ sort_list_iter_t SortlistInsert(sort_list_t* sort_list ,const void *data)
 		
 	}
 		
-	next_iter.iter = DListInsertBefore(SRListToDList(sort_list),
+	next_iter.iter = DListInsertBefore(SRLISTTODLIST(sort_list),
 							 next_iter.iter , data);
  								
 	# ifndef NDEBUG
@@ -241,7 +222,7 @@ void* SortlistPopFront( sort_list_t* sort_list )
 {	
 	assert(sort_list);
 	
-	return DListPopFront(SRListToDList(sort_list));	
+	return DListPopFront(SRLISTTODLIST(sort_list));	
 }
 
 /********************  SortlistPopBack  ****************************/ 
@@ -250,7 +231,7 @@ void* SortlistPopBack( sort_list_t* sort_list )
 {
 	assert(sort_list);
 	
-	return DListPopBack(SRListToDList(sort_list));	
+	return DListPopBack(SRLISTTODLIST(sort_list));	
  
 }
 
@@ -270,19 +251,14 @@ int SortlistForEach(sort_list_iter_t start, sort_list_iter_t end,
 sort_list_iter_t SortlistFindIf( sort_list_iter_t start, sort_list_iter_t end,
                                 match_func_t match_func , void* user_param )
 {
-	sort_list_iter_t itr;
 		
 	assert(start.list == end.list);
 	
 	assert(match_func);
 			
-	itr.iter = DListFind(start.iter, end.iter, match_func, user_param);
-
-	# ifndef NDEBUG
-		itr.list = start.list;
-	#endif 
+	start.iter = DListFind(start.iter, end.iter, match_func, user_param);
 		
-	return itr;
+	return start;
 	
 }
 
@@ -307,81 +283,62 @@ sort_list_iter_t SortlistFind(sort_list_t* sort_list , sort_list_iter_t start ,
 	return end;
 	
 } 
+/********************  WhereToInsert  ****************************/ 
+  
+static sort_list_iter_t WhereToInsert( sort_list_t* list ,
+						sort_list_iter_t dest_itr_where, void* new_data )
+{
+	sort_list_iter_t itr = dest_itr_where;
+	sort_list_iter_t end = SortlistEnd( list );
+	
+	while ( ! SortlistIterIsEqual( itr , end ) )
+	{
+		if ( list->cmp_func( SortlistGetData( itr ) , new_data ) > 0 )
+		{
+			return itr;
+		}
+		
+		itr = SortlistNext( itr );	
+	}
+	return itr;
+}
 
 /********************  SortlistMerge  ****************************/   
+
 void SortlistMerge(sort_list_t *dest, sort_list_t *src)
 {
-		
-	sort_list_iter_t src_itr_from = SortlistBegin(src);
-	sort_list_iter_t src_itr_from2 = SortlistBegin(src);
 
-	sort_list_iter_t dest_itr_where = SortlistBegin(dest);
-		
-	void* src_temp_data = NULL;
-	void* dest_temp_data = NULL;
-	int res_cmp = FALSE;
+
+	sort_list_iter_t dest_itr_where = SortlistBegin( dest );
+	sort_list_iter_t src_itr ={0};
+	sort_list_iter_t src_end = SortlistEnd(src);
+	sort_list_iter_t tmp = {0};
 
 	assert(dest);
 	assert(src);
 	assert(dest != src);
-
-	src_temp_data = SortlistGetData(src_itr_from);
-	dest_temp_data = SortlistGetData(dest_itr_where);
 			
-	res_cmp = dest->cmp_func(src_temp_data, dest_temp_data);
-	/* src in not an Empty*/
-	while( !SortlistIterIsEqual(src_itr_from, SortlistEnd(src) ) ) 
+	while ( ! SortlistIsEmpty(src) )
 	{
-		/* src_data(from) >= dest_data(where) */		
-		if( res_cmp >= FALSE && 
-			!SortlistIterIsEqual(SortlistEnd(dest), dest_itr_where ) )
-		  
+	
+		src_itr = SortlistBegin(src);
+		dest_itr_where = WhereToInsert( dest ,dest_itr_where , 
+										SortlistGetData(src_itr) );
+		do
 		{		
-			dest_itr_where = SortlistNext(dest_itr_where);
+			src_itr = SortlistNext( src_itr );
+			if ( SortlistIterIsEqual( src_itr , src_end ) ) break;
 			
-			dest_temp_data = SortlistGetData(dest_itr_where);		
-
-			res_cmp = dest->cmp_func(src_temp_data, dest_temp_data);
-		}
+		} while ( SortlistIterIsEqual( dest_itr_where ,
+					WhereToInsert( dest ,dest_itr_where, 
+									SortlistGetData(src_itr) ) ) );
+		tmp = SortlistBegin(src);
 		
-		/* src_data(from) < dest_data(where) */		
-		else
-		{		
-			src_itr_from2 = src_itr_from;
-			src_itr_from = SortlistNext(src_itr_from);
-				
-			DListSplice(dest_itr_where.iter,
-				src_itr_from2.iter, src_itr_from.iter);
-			
-			 
-			if ( SortlistIterIsEqual((src_itr_from), SortlistEnd(src) ) ||
-			     SortlistIterIsEqual(SortlistEnd(dest), dest_itr_where )	)		     
-			 	
-			{
-				break;
-			}
+		DListSplice(dest_itr_where.iter, tmp.iter, src_itr.iter);
 
-			dest_itr_where = SortlistNext(dest_itr_where);
-				
-		  	src_temp_data = SortlistGetData(src_itr_from);
-		  	
-		  	dest_temp_data = SortlistGetData(dest_itr_where);
-	
-		  	res_cmp = dest->cmp_func(src_temp_data, dest_temp_data);		  					 	
-		}
 	}
-	
-	/* If dest is empty and src is not */
-	while( !SortlistIsEmpty(src) )
-	{
-			src_itr_from2 = src_itr_from;
-			src_itr_from = SortlistNext(src_itr_from);
-				
-			DListSplice(dest_itr_where.iter,
-				src_itr_from2.iter, src_itr_from.iter);
-	}
-	
 }
+
 
 
 
