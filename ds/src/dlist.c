@@ -123,12 +123,12 @@ void *DListGetData(dlist_iter_t iter)
 
 /********************  DListSetData  ****************************/ 
 
-void DListSetData(dlist_iter_t iter, void *data)
+void DListSetData(dlist_iter_t iter, const void *data)
 {
 	assert(data);
 	assert(IterToNode(iter));
 	
-	IterToNode(iter)->data = data; 
+	IterToNode(iter)->data = (void*)data; 
 }
 
 
