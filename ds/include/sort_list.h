@@ -1,11 +1,12 @@
 /******************************************************************************
-*	Version 3.6
+*	Version 2.1
 ******************************************************************************/
 #ifndef __SORT_LIST_H__    
 #define __SORT_LIST_H__    
 
 #include <stddef.h>     /* size_t */
 #include "dlist.h"
+#include "aux_func.h"
 
 typedef struct sort_list sort_list_t;
 
@@ -19,7 +20,6 @@ typedef struct sort_list_iter
     #endif
 } sort_list_iter_t;
 
-
 /******************************************************************************
 * 
 *   Description: Function to determine sorting method of sorted list
@@ -27,45 +27,9 @@ typedef struct sort_list_iter
 *				* 'new_data' - data to be inserted to the list
 *   Return: >0 , <0 , =0 if check_data is bigger(after), smaller(before) or equal than new data
 * 
-*/
-#ifndef __CMP_FUNC_T__   
-#define __CMP_FUNC_T__
-    typedef int( *cmp_func_t )(void* check_data , void* new_data );
-#endif /* __CMP_FUNC_T__ */
+*/  typedef int( *cmp_func_t )(void* check_data, void* new_data );
 /* 
 ******************************************************************************/
-
-/******************************************************************************
-* 
-*   Description: Function callback for finding elements in a linked list
-*   Arguments: 	* 'check_data' - Node element data to check
-*				* 'user_param' - Optional user parameter
-*   Return: Boolean value ( true = 1 or false = 0 )
-* 
-*/  
-#ifndef __MATCH_FUNC_T__   
-#define __MATCH_FUNC_T__
-	typedef int( *match_func_t )(void* check_data , void* user_param );
-#endif /* __MATCH_FUNC_T__ */
-/* 
-******************************************************************************/
-
-/******************************************************************************
-* 
-*   Description: Function callback to modify all elements of the linked list
-*   Arguments: 	* 'data' - Node element data
-*				* 'user_param' - Optional user parameter 
-*   Complexity: O(n)
-*   Return: Boolean value ( success = 0 or fail = 1 )
-* 
-*/  
-#ifndef __OPERATION_FUNC_T__   
-#define __OPERATION_FUNC_T__
-	typedef int( *operation_func_t )(void* data , void* user_param );
-#endif /* __OPERATION_FUNC_T__ */
-/*
-******************************************************************************/
-
 
 /******************************************************************************
 *
@@ -100,7 +64,7 @@ typedef struct sort_list_iter
 *       Return: size_t - amount of valid elements in list. 0 when empty.
 *       Notes: Undefined behaviour if sort_list is NULL.
 * 
-*/    size_t SortlistSize(const sort_list_t* sort_list);
+*/      size_t SortlistSize(const sort_list_t* sort_list);
 /* 
 ******************************************************************************/
 
@@ -118,7 +82,7 @@ typedef struct sort_list_iter
 
 /******************************************************************************
 *
-*       Description: Makes iterator pointing to next of head
+*       Description: Makes iterator pointing to first valid node
 *       Arguments: sort_list - pointer to sorted list
 *       Complexity: O(1)
 *       Return: Undefined behaviour If 'sort_list' is NULL
@@ -172,7 +136,7 @@ typedef struct sort_list_iter
 *       Complexity: O(1)
 *       Return: return true = 1 if the iterators are equal, and false = 0 otherwise
 * 
-*/      int SortlistIterIsEqual( sort_list_iter_t iter1 , sort_list_iter_t iter2 );
+*/      int SortlistIterIsEqual( sort_list_iter_t iter1, sort_list_iter_t iter2 );
 /* 
 ******************************************************************************/
 
@@ -195,7 +159,7 @@ typedef struct sort_list_iter
 *       Return: iter to new element added to the list, or 
 *       sort_list end if insertion failed* 
 * 
-*/      sort_list_iter_t SortlistInsert( sort_list_t* sort_list ,const void *data );
+*/      sort_list_iter_t SortlistInsert( sort_list_t* sort_list, const void *data );
 /*
 ******************************************************************************/
 
@@ -251,7 +215,7 @@ typedef struct sort_list_iter
 *               undefined behaviour if "op_func" is NULL
 * 
 */      int SortlistForEach( sort_list_iter_t start, sort_list_iter_t end,
-                          operation_func_t op_func , void* user_param );
+                          operation_func_t op_func, void* user_param );
 /* 
 ******************************************************************************/
                     
@@ -271,7 +235,7 @@ typedef struct sort_list_iter
 * 
 * 
 */      sort_list_iter_t SortlistFindIf( sort_list_iter_t start, sort_list_iter_t end,
-                                match_func_t match_func , void* user_param );
+                                match_func_t match_func, void* user_param );
 /* 
 ******************************************************************************/
 
@@ -288,8 +252,8 @@ typedef struct sort_list_iter
 *               undefined behaviour if "end" is before "start"
 * 
 * 
-*/      sort_list_iter_t SortlistFind( sort_list_t* sort_list , sort_list_iter_t start ,
-                                        sort_list_iter_t end , void* user_param );
+*/      sort_list_iter_t SortlistFind( sort_list_t* sort_list, sort_list_iter_t start,
+                                        sort_list_iter_t end, void* user_param );
 /* 
 ******************************************************************************/
 
@@ -301,8 +265,8 @@ typedef struct sort_list_iter
 *       Complexity: O(n)
 *       Return: N\A
 *       Note: Undefined behaviour if dest & src are same list.
-*/      void SortlistMerge( sort_list_t *dest , sort_list_t *src );
+*/      void SortlistMerge( sort_list_t *dest, sort_list_t *src );
 /* 
 ******************************************************************************/
 
-#endif /* __DLIST_H__      */
+#endif /* __SORTLIST_H__      */
