@@ -4,7 +4,7 @@
 * Date : 26 / 12 / 2024
 * Last update: 26 / 12 / 2024
 *****************************************/
-#include <stdio.h>
+
 #include <assert.h> 	/* assert */
 #include <stdlib.h> 	/* malloc, free */
 #include "pqueue.h" 
@@ -16,15 +16,6 @@ struct pqueue
 	sort_list_t* pq_list; 	
 };
 
-/** possible return values **/
-typedef enum
-{
-	
-	SUCCESS = 0,
-	OPERATION_FAIL = 1
-	
-}pqueue_result_t;
-
 typedef enum
 {
 	
@@ -34,18 +25,6 @@ typedef enum
 }func_result_t;
 
 /***************End of struct and enum declaration *******/
-
-int main ()
-{
-
-	puts("=====================================================");
-
-    puts("=====================================================");
-     
-	return 0;
-}
-
-
 
 /********************  PQueueCreate  ****************************/
 pqueue_t *PQueueCreate(priority_func_t priority)
@@ -70,7 +49,6 @@ pqueue_t *PQueueCreate(priority_func_t priority)
 	}
 
 	return ptr_pqueue;
-
 }
 
 /********************  PQueueDestroy  ****************************/
@@ -96,7 +74,6 @@ int PQueueIsEmpty(const pqueue_t *pqueue)
 	 return SortlistIsEmpty(pqueue->pq_list);
 
 }
-
 
 /********************  PQueueSize  ****************************/
 size_t PQueueSize(const pqueue_t *pqueue)
@@ -125,10 +102,7 @@ int PQueueEnqueue(pqueue_t *pqueue, const void *data)
 							 
 	return SortlistIterIsEqual(sort_itr, SortlistEnd(pqueue->pq_list));	
 
-
 }
-
-
 
 /********************  PQueueEnqueue  ****************************/
 void *PQueueDequeue(pqueue_t *pqueue)
