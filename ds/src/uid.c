@@ -1,20 +1,19 @@
 /***************************************
 * Author : Natty
-* Reviewer : 
+* Reviewer : Matan
 * Date : 29 / 12 / 2024
 * Last update: 29 / 12 / 2024
 *****************************************/
-#include <stdio.h>
-#include <sys/types.h>  /* pid_t, time_t, size_t	*/
-#include <assert.h> 	/* assert */
-#include <stdlib.h> 	/* malloc, free */
-#include <ifaddrs.h> 	/* getifaddrs */
-#include <time.h>       /* time_t*/
-#include <unistd.h>  /* getpid */
-#include <sys/socket.h> /* socket */
-#include <string.h> /* memcpy */
-#include <arpa/inet.h> /* sockaddr_in */
+
+#include <sys/types.h>  	/* pid_t, time_t, size_t */
+#include <ifaddrs.h> 		/* getifaddrs */
+#include <time.h>       	/* time_t */
+#include <unistd.h>  	/* getpid */
+#include <string.h> 	/* memcpy */
+
 #include "uid.h" 
+
+#define IP_ADDR_LEN 14
 
 /****************struct and enum declaration*********************/
 
@@ -29,42 +28,23 @@ typedef enum
 }func_result_t;
 
 /***************End of struct and enum declaration *******/
-int main()
-{
 
-	int i = 0;
-	ilrd_uid_t uid = {0};
-	uid = UIDCreate();
+/***************************function declaration**************************/
 
-	printf("uid.ip_addr: \n", uid.ip_addr);	
-	for( i = 0; i<14; ++i)
-	{
-		printf("%d", uid.ip_addr[i]);
-	}
-	puts("");	
-	puts(uid.ip_addr);
-	/*printf("uid.ip_addr = %p \n", uid.ip_addr);*/
-	/*printf("uid.ip_addr_string = %s \n", uid.ip_addr);*/
-	printf("counter = %lu \n", uid.counter);
-	printf("time = %lu \n", uid.time);
-	printf("pid = %u \n", uid.pid);
-			
-	return 0;
-}
+static int CmpIpAddr(ilrd_uid_t uid_1, ilrd_uid_t uid_2 );
+
+/***************************End of function declaration******************/
+
 /********************  UIDCreate  ****************************/
 ilrd_uid_t UIDCreate(void)
 {
 	ilrd_uid_t uid;
 	struct ifaddrs *ifaddr, *ifa;
-	
-	/*
-	struct sockaddr_in *sa;
-    char *addr;
-	*/
+		
 	static size_t count = 0;
-	static size_t flag = 0;
+	static size_t flag = FALSE;
 	
-	if(1 == flag)
+	if(TRUE == flag)
 	{	
 		++count;
 		uid.counter = count;
@@ -73,7 +53,7 @@ ilrd_uid_t UIDCreate(void)
 	else
 	{
 		uid.counter = count;
-		flag = 1;
+		flag = TRUE;
 	}
 	
 	if (-1 == getifaddrs(&ifaddr)) 
@@ -86,6 +66,7 @@ ilrd_uid_t UIDCreate(void)
        
     for(ifa = ifaddr; ifa != NULL; ifa = ifa->ifa_next)
     {
+    	
     	if( NULL == ifa->ifa_addr )
     	{
         	continue;   	
@@ -96,27 +77,15 @@ ilrd_uid_t UIDCreate(void)
     		break;
     	}
 	}
-
-	/*puts(ifa->ifa_addr->sa_data);*/
-
-	/*
-	sa = (struct sockaddr_in *) ifa->ifa_addr;
-	addr = inet_ntoa(sa->sin_addr);
-	*/
-	/*memcpy(uid.ip_addr, addr, 14);*/
 	
-	memcpy(uid.ip_addr, ifa->ifa_addr->sa_data, 14);
-/*
-	puts(ifaddr->ifa_name);
+	memcpy(uid.ip_addr, ifa->ifa_addr->sa_data, IP_ADDR_LEN);
 
-	puts(uid.ip_addr);
-*/
 	uid.pid = getpid();
 	
-	/*uid.time = time(NULL);	*/
 	time(&(uid.time));
 	
     freeifaddrs(ifaddr);
+    
 	ifaddr = NULL;	
 	
 	return uid;
@@ -126,10 +95,32 @@ ilrd_uid_t UIDCreate(void)
 
 int UIDIsSame(ilrd_uid_t uid_1, ilrd_uid_t uid_2)
 {
-
+	return (uid_1.pid == uid_2.pid &&
+	
+			uid_1.time == uid_2.time &&
+			
+			uid_1.counter == uid_2.counter &&
+			
+			CmpIpAddr(uid_1, uid_2));
 }
-
-
+/********************  CmpIpAddr  ****************************/
+static int CmpIpAddr(ilrd_uid_t uid_1, ilrd_uid_t uid_2 )
+{
+	
+	int i = 0;
+		
+	for( i = 0; i < IP_ADDR_LEN; ++i)
+	{
+	
+		if(uid_1.ip_addr[i] != uid_2.ip_addr[i])
+		{
+			return FALSE;
+		}
+		
+	}
+	
+	return TRUE;
+}
 
 
 
