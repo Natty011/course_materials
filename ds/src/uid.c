@@ -8,8 +8,8 @@
 #include <sys/types.h>  	/* pid_t, time_t, size_t */
 #include <ifaddrs.h> 		/* getifaddrs */
 #include <time.h>       	/* time_t */
-#include <unistd.h>  	/* getpid */
-#include <string.h> 	/* memcpy */
+#include <unistd.h>  		/* getpid */
+#include <string.h> 		/* memcpy */
 
 #include "uid.h" 
 
@@ -42,19 +42,9 @@ ilrd_uid_t UIDCreate(void)
 	struct ifaddrs *ifaddr, *ifa;
 		
 	static size_t count = 0;
-	static size_t flag = FALSE;
 	
-	if(TRUE == flag)
-	{	
-		++count;
-		uid.counter = count;
-	}
-	
-	else
-	{
-		uid.counter = count;
-		flag = TRUE;
-	}
+	uid.counter = count;
+	++count;
 	
 	if (-1 == getifaddrs(&ifaddr)) 
 	{
