@@ -116,7 +116,7 @@ typedef struct pqueue pqueue_t;
 *       Notes: Undefined behaviour If 'pqueue' is NULL
 *              Undefined behaviour If 'match_func' is NULL
 * 
-*/      void PQueueErase(pqueue_t* pqueue, 
+*/      void* PQueueErase(pqueue_t* pqueue, 
                          match_func_t match_func, const void* user_param);
 /*
 ******************************************************************************/
