@@ -24,7 +24,6 @@ typedef enum
 	
 }func_result_t;
 
-
 /***************End of struct and enum declaration *******/
 
 /********************  PQueueCreate  ****************************/
@@ -129,10 +128,12 @@ void PQueueClear(pqueue_t* pqueue)
 }
 
 /********************  PQueueErase  ****************************/
-void PQueueErase(pqueue_t* pqueue, match_func_t match_func,
+void* PQueueErase(pqueue_t* pqueue, match_func_t match_func,
 				 const void* user_param)
 {
-	sort_list_iter_t sort_itr = {0};	
+	sort_list_iter_t sort_itr = {0};
+		
+	void* data = NULL;
 		
 	assert(pqueue);	
 	assert(match_func);
@@ -141,13 +142,16 @@ void PQueueErase(pqueue_t* pqueue, match_func_t match_func,
 		
 	if( PQueueIsEmpty(pqueue) )
 	{
-		return;
+		return NULL;
 	}
 	
 	sort_itr = SortlistFindIf(sort_itr, SortlistEnd(pqueue->pq_list),
 								match_func, (void*)user_param);
-		
+	
+	data = SortlistGetData(sort_itr);	
 	SortlistRemove(sort_itr);
+	
+	return data;
 		
 }				 
 
