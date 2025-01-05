@@ -12,6 +12,9 @@
 
 #define SRLISTTODLIST(sort_list) (sort_list->dlist)
 
+#define NULL_ITER                     {0}
+
+#define DLIST_ITR(itr)		          (itr.iter)
 /****************struct and enum declaration*********************/
 
 struct sort_list
@@ -77,7 +80,7 @@ int SortlistIsEmpty(const sort_list_t* sort_list)
 sort_list_iter_t SortlistBegin(const sort_list_t* sort_list)
 {
 
-	sort_list_iter_t itr;
+	sort_list_iter_t itr = {0};
 		
 	assert(sort_list);
 	
@@ -94,7 +97,7 @@ sort_list_iter_t SortlistBegin(const sort_list_t* sort_list)
 sort_list_iter_t SortlistEnd(const sort_list_t* sort_list)
 {
 	
-	sort_list_iter_t itr;
+	sort_list_iter_t itr = {0};
 		
 	assert(sort_list);
 	
@@ -164,6 +167,8 @@ void SortlistDestroy( sort_list_t* sort_list )
 		return;
 	}
 	DListDestroy(SRLISTTODLIST(sort_list));
+	
+	SRLISTTODLIST(sort_list) = NULL;
 	free(sort_list);
 	sort_list = NULL;
 }
@@ -179,10 +184,11 @@ sort_list_iter_t SortlistRemove(sort_list_iter_t what )
 }
 
 /******************  SortlistInsert  ***********************/
+
 sort_list_iter_t SortlistInsert(sort_list_t* sort_list ,const void *data)
 {
 	
-	sort_list_iter_t next_iter;
+	sort_list_iter_t next_iter = {0};
 	void* temp_data = NULL;
 	int res_cmp = FALSE;
 	
@@ -191,16 +197,24 @@ sort_list_iter_t SortlistInsert(sort_list_t* sort_list ,const void *data)
 	next_iter = SortlistBegin(sort_list); 
 
 	temp_data = SortlistGetData(next_iter);
+
 	
 	if( !SortlistIsEmpty(sort_list) )
 	{
 		res_cmp = sort_list->cmp_func(temp_data, (void*)data);
 	}
+	
 
-	while( res_cmp <= FALSE &&  NULL != SortlistNext(next_iter).iter)
+	while( !SortlistIterIsEqual(next_iter,SortlistEnd(sort_list)) && 
+			res_cmp <= FALSE )
+	  
 	{
 
 		next_iter = SortlistNext(next_iter);
+		if( NULL == SortlistNext(next_iter).iter)
+		{
+			break;
+		}
 		temp_data = SortlistGetData(next_iter);
 		res_cmp = sort_list->cmp_func(temp_data, (void*)data);	
 		
@@ -208,11 +222,7 @@ sort_list_iter_t SortlistInsert(sort_list_t* sort_list ,const void *data)
 		
 	next_iter.iter = DListInsertBefore(SRLISTTODLIST(sort_list),
 							 next_iter.iter , data);
- 								
-	# ifndef NDEBUG
-		next_iter.list = sort_list;
-	#endif 	
-  	
+							 
  	return next_iter;
  			
 }
