@@ -1,26 +1,19 @@
 /***************************************
 * Author : Natty
-* Reviewer : 
+* Reviewer : Chen
 * Date : 01 / 01 / 2025
 * Last update: 01 / 01 / 2025
 *****************************************/
 #include <stdio.h> 	
 #include <assert.h> 	/* assert */
 #include <stdlib.h> 	/* malloc, free */
+#include <unistd.h>
+/*#include "typedefs.h" *//* sleep */
 #include "scheduler.h"
 #include "pqueue.h"
 #include "task.h"
+#include "uid.h"
 
-/*const ilrd_uid_t BADUID = {0, 0, 0, {0} };*/
-/****************struct and enum declaration*********************/
-
-/* -3 operation_fail
-  -2 system_fail
-  0  succuss
-  -1 stopped 
-*/
-
-/** possible return values **/
 typedef enum
 {
 
@@ -34,33 +27,38 @@ typedef enum
 
 typedef enum
 {
+	FAIL_FROM_RUN = -1,	
+	FINISHED = 0,
+	SHOULD_REPEAT = 1 /* not finished */
+	
+}task_result_t;
+
+typedef enum 
+{
 	
 	FALSE = 0,
 	TRUE = 1
 	
-}func_result_t;
+}bool;
 
 struct scheduler
 {
 	pqueue_t* pq;
 	task_t* current_task;
-	status_t status;
+	bool to_stop;
 	int to_remove_current;
 	 	
 };
 
-static int match_func(void *check_data, void *user_param );
 /***************End of struct and enum declaration *******/
 
-int main()
-{
-	puts("=================================================");
-	return 0;
+/***************************function declaration**************************/
+static int match_func(void *check_data, void *user_param );
+static int priority_func(void *check_data, void *user_param );
+/***************************End of function declaration******************/
 
-}
 
 /********************  SchedulerCreate  ****************************/
-
 scheduler_t *SchedulerCreate(void)
 {
 
@@ -79,9 +77,9 @@ scheduler_t *SchedulerCreate(void)
 		return NULL;
 	}
 	
-	ptr_sch->current_task = { 0 }; /* BADUID */
-	ptr_sch->status = SUCCESS;
-	ptr_sch->to_remove_current = 0;
+	ptr_sch->current_task = NULL; 
+	ptr_sch->to_stop = FALSE;
+	ptr_sch->to_remove_current = FALSE;
 	
 	return ptr_sch;
 	
@@ -90,61 +88,51 @@ scheduler_t *SchedulerCreate(void)
 
 static int priority_func(void *check_data, void *user_param )
 {
-	time_t check_data_priority = *(time_t*)check_data;
-	time_t user_param_priority = *(time_t*)user_param;
+	time_t check_data_priority = TaskGetTimeToRun((task_t*)check_data);
+	time_t user_param_priority = TaskGetTimeToRun((task_t*)user_param);
 	
-	if(check_data_priority > user_param_priority)
-	{
-		return -1; 
-	}
+	return check_data_priority > user_param_priority;
 	
-	else if(check_data_priority == user_param_priority)
-	{
-		return 0;
-	}
-	
-	else
-	{
-		return 1;
-	}
-		
 }
 
 /********************  SchedulerIsEmpty  ****************************/
 int SchedulerIsEmpty(const scheduler_t *scheduler)
 {
 	 assert(scheduler);
-	 
-	 return PQueueIsEmpty(scheduler->pq) && (NULL == scheduler->current_task);
+
+	 return PQueueIsEmpty(scheduler->pq) && (NULL == scheduler->current_task) ;
 
 }
 
 /********************  SchedulerDestroy  ****************************/
 void SchedulerDestroy(scheduler_t *scheduler)
 {
-	 assert(scheduler);
-
-	 if(!SchedulerIsEmpty(scheduler))
-	 {
-	 	SchedulerClear(scheduler);
-	 }
-	 
-	 free(scheduler->pq);
-	 scheduler->pq = NULL;
-	
-	 free(scheduler);
-	 scheduler = NULL;
-	  
+	if ( scheduler )
+	{
+		SchedulerClear(scheduler);
+		TaskDestroy(scheduler->current_task);
+		PQueueDestroy(scheduler->pq);
+		scheduler->pq = NULL;
+		free(scheduler);
+		scheduler = NULL;		
+	}
 }
 /********************  SchedulerClear  ****************************/
 void SchedulerClear(scheduler_t *scheduler)
 {
+	
+	task_t* data = NULL;
+	
 	assert(scheduler);
 	
-	PQueueClear(scheduler->pq);	
-
-	scheduler->to_remove_current =	( NULL != scheduler->current_task );
-
+	while( ! PQueueIsEmpty(scheduler->pq) )
+	{	
+		data = (task_t*)PQueueDequeue(scheduler->pq);
+		TaskDestroy(data);	
+	}
+	
+	scheduler->to_remove_current = TRUE;
+	
 }
 /********************  SchedulerSize  ****************************/
 
@@ -160,48 +148,139 @@ size_t SchedulerSize(const scheduler_t *scheduler)
 int SchedulerRemove(scheduler_t *scheduler, ilrd_uid_t task_to_remove)
 {
 	
-	task_t* to_remove = {0};
+	task_t* to_remove = NULL;
 	
 	assert(scheduler);
 	
-	
-	to_remove = scheduler->current_task;
-	
-	if( UIDIsSame(task_to_remove, to_remove->UID ) )
+	if( scheduler->current_task && UIDIsSame(task_to_remove, TaskGetUID(scheduler->current_task) ) )
 	{
 		scheduler->to_remove_current = TRUE;
 		return SUCCESS;
 		
 	}
+	to_remove = (task_t*)PQueueErase( scheduler->pq, match_func , &task_to_remove);
 	
-	else if(PQueueIsEmpty(scheduler->pq))
+	if ( NULL != to_remove )
 	{
-		return FAIL;	
+		TaskDestroy( to_remove );	
+		to_remove = NULL;
+		return SUCCESS;
 	}
-	
 	else
 	{
-
-		{
-		
-			PQueueErase(scheduler->pq, match_func , &task_to_remove);
-			return SUCCESS;
-			
-		}
-	
+		return FAIL;
 	}
-	
 }
 
 /*******************match_function*********************/
 
 static int match_func(void *check_data, void *user_param )
 {
-
-	return UIDIsSame(TaskGetUID((task_t*)check_data), *user_param );
-
+	return UIDIsSame(TaskGetUID((task_t*)check_data),
+					 *(ilrd_uid_t*)user_param );
 }
 
+/*******************SchedulerStop*********************/
+void SchedulerStop(scheduler_t *scheduler)
+{
 
-				 
+	assert(scheduler);
+	scheduler->to_stop = TRUE; 
+} 
+ 
+/*******************SchedulerAdd*********************/				 
+ilrd_uid_t SchedulerAdd(scheduler_t *scheduler,
+                        int (*op_func)(void *user_param),
+                        void *user_param, size_t interval_in_sec)
+{
 
+	
+	task_t* task =  NULL;
+	int status = SUCCESS;
+
+	assert(scheduler);
+
+	task =  TaskCreate(op_func, user_param, interval_in_sec);
+	
+	if(  NULL == task )
+	{
+		return BADUID;
+	}
+		
+	status = PQueueEnqueue(scheduler->pq, task);
+		
+	if( FAIL == status )
+	{
+		TaskDestroy(task);
+		task = NULL;
+		
+		return BADUID;
+	}
+	
+	return TaskGetUID(task);
+	
+}  
+
+/*******************SchedulerRun*********************/				 
+
+int SchedulerRun(scheduler_t *scheduler)
+{
+	int status = SUCCESS;
+	/*task_t* task =  NULL;*/
+	time_t time_to_run = 0;
+	time_t curr_time = 0;
+	time_t time_wait = 0;			
+	assert(scheduler);
+	
+
+	while( (FALSE == scheduler->to_stop) && (! SchedulerIsEmpty(scheduler)) ) 
+	{
+		scheduler->current_task = PQueueDequeue(scheduler->pq);
+	
+
+		time_to_run = TaskGetTimeToRun(scheduler->current_task );
+		
+		time_wait = time_to_run - time(NULL);	
+		time_wait = time_wait <= 0 ? 0 : time_wait;
+				
+		while ( sleep(time_wait) );
+		
+		status = TaskRun(scheduler->current_task );
+	
+		if ( TRUE == scheduler->to_remove_current ) status = FINISHED;
+			
+		if(FINISHED == status)
+		{
+			TaskDestroy(scheduler->current_task );
+			scheduler->to_remove_current = FALSE;
+		}		
+		else if ( SHOULD_REPEAT == status )
+		{
+			TaskSetTimeToRun(scheduler->current_task );	
+			
+			if( PQueueEnqueue(scheduler->pq, scheduler->current_task ) )/* if failed*/
+			{
+				TaskDestroy(scheduler->current_task );
+				scheduler->current_task = NULL;
+				return SYSTEM_FAIL;
+			}
+		}
+		else
+		{
+			TaskDestroy(scheduler->current_task );
+			scheduler->current_task = NULL;
+			return OPERATION_FAIL;	
+		}	
+		
+		scheduler->current_task = NULL;	
+		scheduler->to_remove_current = FALSE;	
+	}
+	
+	if ( scheduler->to_stop == TRUE )
+	{	
+		return STOPPED;
+	}	
+	return SUCCESS;
+				
+}
+          
