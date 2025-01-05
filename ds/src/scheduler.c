@@ -8,7 +8,7 @@
 #include <assert.h> 	/* assert */
 #include <stdlib.h> 	/* malloc, free */
 #include <unistd.h>
-/*#include "typedefs.h" *//* sleep */
+
 #include "scheduler.h"
 #include "pqueue.h"
 #include "task.h"
@@ -77,7 +77,7 @@ scheduler_t *SchedulerCreate(void)
 		return NULL;
 	}
 	
-	ptr_sch->current_task = NULL; 
+	ptr_sch->current_task = NULL; /* NULL if scheduler is not running */
 	ptr_sch->to_stop = FALSE;
 	ptr_sch->to_remove_current = FALSE;
 	
@@ -152,13 +152,16 @@ int SchedulerRemove(scheduler_t *scheduler, ilrd_uid_t task_to_remove)
 	
 	assert(scheduler);
 	
-	if( scheduler->current_task && UIDIsSame(task_to_remove, TaskGetUID(scheduler->current_task) ) )
+	if( scheduler->current_task && UIDIsSame(task_to_remove,
+		 TaskGetUID(scheduler->current_task) ) )
 	{
 		scheduler->to_remove_current = TRUE;
 		return SUCCESS;
 		
 	}
-	to_remove = (task_t*)PQueueErase( scheduler->pq, match_func , &task_to_remove);
+	
+	to_remove = (task_t*)PQueueErase( scheduler->pq, match_func ,
+									 &task_to_remove);
 	
 	if ( NULL != to_remove )
 	{
@@ -226,13 +229,15 @@ ilrd_uid_t SchedulerAdd(scheduler_t *scheduler,
 int SchedulerRun(scheduler_t *scheduler)
 {
 	int status = SUCCESS;
-	/*task_t* task =  NULL;*/
+
 	time_t time_to_run = 0;
-	time_t curr_time = 0;
+
 	time_t time_wait = 0;			
 	assert(scheduler);
 	
 
+	scheduler->to_stop = FALSE;
+		
 	while( (FALSE == scheduler->to_stop) && (! SchedulerIsEmpty(scheduler)) ) 
 	{
 		scheduler->current_task = PQueueDequeue(scheduler->pq);
@@ -240,9 +245,10 @@ int SchedulerRun(scheduler_t *scheduler)
 
 		time_to_run = TaskGetTimeToRun(scheduler->current_task );
 		
-		time_wait = time_to_run - time(NULL);	
-		time_wait = time_wait <= 0 ? 0 : time_wait;
-				
+		time_wait = time_to_run - time(NULL);
+
+		time_wait = (time_to_run > time(NULL)) ? time_wait : 0;
+
 		while ( sleep(time_wait) );
 		
 		status = TaskRun(scheduler->current_task );
@@ -258,14 +264,15 @@ int SchedulerRun(scheduler_t *scheduler)
 		{
 			TaskSetTimeToRun(scheduler->current_task );	
 			
-			if( PQueueEnqueue(scheduler->pq, scheduler->current_task ) )/* if failed*/
+			/* if failed*/
+			if( PQueueEnqueue(scheduler->pq, scheduler->current_task ) )
 			{
 				TaskDestroy(scheduler->current_task );
 				scheduler->current_task = NULL;
 				return SYSTEM_FAIL;
 			}
 		}
-		else
+		else /* OPERATION_FAIL case */
 		{
 			TaskDestroy(scheduler->current_task );
 			scheduler->current_task = NULL;
@@ -276,8 +283,9 @@ int SchedulerRun(scheduler_t *scheduler)
 		scheduler->to_remove_current = FALSE;	
 	}
 	
-	if ( scheduler->to_stop == TRUE )
+	if ( TRUE == scheduler->to_stop )
 	{	
+		scheduler->to_stop = FALSE;
 		return STOPPED;
 	}	
 	return SUCCESS;
