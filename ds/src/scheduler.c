@@ -63,6 +63,7 @@ scheduler_t *SchedulerCreate(void)
 {
 
 	scheduler_t* ptr_sch = (scheduler_t*)malloc(sizeof(scheduler_t));
+	
 	if(NULL == ptr_sch)
 	{
 		return NULL;
@@ -244,11 +245,12 @@ int SchedulerRun(scheduler_t *scheduler)
 	
 
 		time_to_run = TaskGetTimeToRun(scheduler->current_task );
-		
-		time_wait = time_to_run - time(NULL);
+	
+		do
+		{
+			time_wait = time_to_run > time(NULL) ? time_to_run - time(NULL) : 0;
 
-		time_wait = (time_to_run > time(NULL)) ? time_wait : 0;
-
+		}
 		while ( sleep(time_wait) );
 		
 		status = TaskRun(scheduler->current_task );
