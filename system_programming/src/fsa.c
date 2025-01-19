@@ -10,8 +10,8 @@
 
 #include "fsa.h"
 
-#define 	HEADER_SIZE 		sizeof(block_header_t)
-#define 	FSA_SIZE 			sizeof(fsa_t)
+#define 	HEADER_SIZE 		AlignSizeBlock(sizeof(block_header_t))
+#define 	FSA_SIZE 			AlignSizeBlock(sizeof(fsa_t))
 #define 	WORD_SIZE 			sizeof(size_t)
 
 struct fsa
