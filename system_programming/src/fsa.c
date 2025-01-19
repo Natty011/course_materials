@@ -1,48 +1,28 @@
 /***************************************
 * Author : Natty
-* Reviewer : 
+* Reviewer : Chen 
 * Date : 13 / 01 / 2025
-* Last update: 13 / 01 / 2025
+* Last update: 15 / 01 / 2025
 *****************************************/
-#include <stdio.h> 	
+ 	
 #include <assert.h> 	/* assert */
 #include <stdlib.h> 	/* malloc, free */
-#include <unistd.h>
 
 #include "fsa.h"
 
 #define 	HEADER_SIZE 		sizeof(block_header_t)
 #define 	FSA_SIZE 			sizeof(fsa_t)
-
-/*typedef enum 
-{
-	
-	FALSE = 0,
-	TRUE = 1
-	
-}bool;
-*/
-typedef enum 
-{	
-	ZERO = 0
-	
-}digits;
-
-
+#define 	WORD_SIZE 			sizeof(size_t)
 
 struct fsa
 {
-
 	char* mem_pool_first;
-
-	
 };
 
 typedef struct block_header
 {
-
 	char* next_free;
-
+	
 }block_header_t;
 
 
@@ -57,9 +37,9 @@ static size_t AlignSizeBlock(size_t size_of_block );
 static size_t AlignSizeBlock(size_t size_of_block )
 {
 	
-	if(size_of_block % HEADER_SIZE)
+	if(size_of_block % WORD_SIZE)
 	{
-		size_of_block += (HEADER_SIZE - size_of_block % HEADER_SIZE);
+		size_of_block += (WORD_SIZE - size_of_block % WORD_SIZE);
 	}
 	
 	return size_of_block;
