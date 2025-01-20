@@ -11,7 +11,6 @@
 #include "vsa.h"
 
 #define 	VSA_SIZE 			AlignSizeBlock(sizeof(vsa_t))
-#define 	VSA_DSIZE 			(2 * VSA_SIZE)
 #define		WORD_SIZE 			sizeof(size_t)
 struct vsa
 {
@@ -37,9 +36,9 @@ static long GetAbsValue(char*  header_entry);
 static int CheckHeaderState(char*  header_entry);
 static char* NextEntryHeaderAddr(char*  header_entry,long value);
 static char* NextFirstFreeEntryHeaderAddr(char*  header_entry);
-static int CanAllocCurrBlock(size_t  block_size, size_t mem_size );
-static size_t GetDiffAllocCurrBlock(size_t  block_size, size_t mem_size );
-static size_t GetNextBlockSizeToAlloc(size_t  block_size, size_t mem_size );
+static int CanAllocCurrBlock(size_t  block_size, size_t mem_size_request );
+static size_t GetDiffAllocCurrBlock(size_t  block_size, size_t mem_size_request);
+static size_t GetNextBlockSizeToAlloc(size_t  block_size, size_t size_request );
 static size_t TotalFreeSpaceWithHeaders(size_t curr_size, size_t num_of_blocks);
 static void* StartOfBlockAddr(char*  header_entry);
 static void* StartOfHeaderBlockAddr(char*  header_entry);
@@ -77,18 +76,23 @@ static void SetOffsetValue(char*  header_entry,long value )
 /***************************GetAbsValue************************/
 static long GetAbsValue(char*  header_entry)
 {
+	long offset_value = 0;
 	assert(header_entry);
-	return GetOffsetValue(header_entry) > 0 ? GetOffsetValue(header_entry) :
-											-GetOffsetValue(header_entry);
+	
+	offset_value =  GetOffsetValue(header_entry);
+	
+	return offset_value > 0 ? offset_value : -offset_value;
 }
 
 /***************************CheckHeaderState************************/
 static int CheckHeaderState(char*  header_entry)
 {
+	long offset_value = 0;	
 	assert(header_entry);
-	return  END_MEMORY == GetOffsetValue(header_entry) ? END_MEMORY :
-							2 * (GetOffsetValue(header_entry) > 0) - 1 ;		
-
+		
+	offset_value =  GetOffsetValue(header_entry);	
+	return  offset_value ?  2 * (offset_value > 0) - 1 :  END_MEMORY ;		
+ 
 }
 
 /***************************NextEntryHeaderAddr************************/
@@ -148,16 +152,16 @@ static void* StartOfHeaderBlockAddr(char*  header_entry)
 }
 
 /********************CanAllocCurrBlock**********************/
-static int CanAllocCurrBlock(size_t  block_size, size_t mem_size )
+static int CanAllocCurrBlock(size_t  block_size, size_t mem_size_request )
 {	
-	return 	block_size >= mem_size ;	
+	return 	block_size >= mem_size_request ;	
 }
 
 /********************GetDiffAllocCurrBlock**********************/
-static size_t GetDiffAllocCurrBlock(size_t  block_size, size_t mem_size )
+static size_t GetDiffAllocCurrBlock(size_t  block_size, size_t mem_size_request)
 {
 	/* 0 is the minimal aligns block of the difference */
-	return 	block_size - mem_size ;
+	return 	block_size - mem_size_request ;
 }
 
 /********************TotalFreeSpaceWithHeaders**********************/
@@ -165,14 +169,14 @@ static size_t TotalFreeSpaceWithHeaders(size_t curr_size, size_t num_of_blocks)
 {
 	return curr_size + (VSA_SIZE * (num_of_blocks - 1) );
 }
-
-static size_t GetNextBlockSizeToAlloc(size_t  block_size, size_t mem_size )
+/********************GetNextBlockSizeToAlloc**********************/
+static size_t GetNextBlockSizeToAlloc(size_t  block_size, size_t size_request )
 {
 	size_t get_diff = 0;
 	
-	get_diff = (GetDiffAllocCurrBlock(block_size, mem_size) > VSA_SIZE );
+	get_diff = (GetDiffAllocCurrBlock(block_size, size_request) > VSA_SIZE );
 	
-	return get_diff * (GetDiffAllocCurrBlock(block_size, mem_size) - VSA_SIZE);
+	return get_diff * (GetDiffAllocCurrBlock(block_size, size_request) - VSA_SIZE);
 }
 
 
@@ -251,9 +255,9 @@ void *VSAAlloc(vsa_t *vsa, size_t chunk_size_in_bytes)
 	
 	size_t align_chuck_size = 0;
 	
-	size_t local_max_size = 0, local_max_free_block = 0;
+	size_t local_max_size = 0, local_max_free_blocks = 0;
 	size_t curr_block_size = 0;
-	size_t next_block_size_to_alloc = 0;
+	size_t next_block_size_to_create = 0;
 	size_t local_total_free_space = 0;
 	
 	char* local_max_first_free_entry = NULL;
@@ -282,14 +286,14 @@ void *VSAAlloc(vsa_t *vsa, size_t chunk_size_in_bytes)
 				
 			if( CanAllocCurrBlock( curr_block_size, align_chuck_size ))
 			{
-				next_block_size_to_alloc = 
+				next_block_size_to_create = 
 					GetNextBlockSizeToAlloc(curr_block_size, align_chuck_size);
 				
-				if( next_block_size_to_alloc > 0 )
+				if( next_block_size_to_create > 0 )
 				{
 					/* cteate new header */
 					SetOffsetValue(NextEntryHeaderAddr(curr_entry_header,
-							align_chuck_size) ,(long)next_block_size_to_alloc);	
+							align_chuck_size) ,(long)next_block_size_to_create);	
 					
 					/* now the block is occupied */
 					SetOffsetValue(curr_entry_header,
@@ -315,23 +319,23 @@ void *VSAAlloc(vsa_t *vsa, size_t chunk_size_in_bytes)
 			{
 				
 				local_max_size += curr_block_size;
-				local_max_free_block += 1;
+				local_max_free_blocks += 1;
 			
 				local_total_free_space = TotalFreeSpaceWithHeaders(local_max_size,
-														 local_max_free_block);
+														 local_max_free_blocks);
 				 /* First Fit -> unified on demend*/											 
 				if(CanAllocCurrBlock(local_total_free_space, align_chuck_size ))
 				{
 				
-					next_block_size_to_alloc = 
+					next_block_size_to_create = 
 						GetNextBlockSizeToAlloc(local_total_free_space,
 										 align_chuck_size);
 										 
-					if( next_block_size_to_alloc > 0 )
+					if( next_block_size_to_create > 0 )
 					{
 						/* cteate new header */
 						SetOffsetValue(NextEntryHeaderAddr(local_max_first_free_entry,
-								align_chuck_size) ,(long)next_block_size_to_alloc);	
+								align_chuck_size) ,(long)next_block_size_to_create);	
 					
 						/* now the block is occupied */
 						SetOffsetValue(local_max_first_free_entry,
@@ -366,10 +370,10 @@ void *VSAAlloc(vsa_t *vsa, size_t chunk_size_in_bytes)
 			
 				/* resets for the next chunck checking */
 				curr_block_size = 0;
-				local_max_free_block = 0;	
+				local_max_free_blocks = 0;	
 				local_max_size = 0;
 				local_total_free_space = 0;
-				next_block_size_to_alloc = 0;
+				next_block_size_to_create = 0;
 
 			}
 			
@@ -390,7 +394,7 @@ void *VSAAlloc(vsa_t *vsa, size_t chunk_size_in_bytes)
 size_t VSALargestChunkAvailable(vsa_t *vsa)
 {
 	size_t global_max_size = 0;
-	size_t local_max_size = 0 , local_max_free_block = 0;
+	size_t local_max_size = 0 , local_max_free_blocks = 0;
 	size_t local_total_free_space = 0;
 	
 	char* curr_entry_header = NULL;
@@ -409,10 +413,10 @@ size_t VSALargestChunkAvailable(vsa_t *vsa)
 		if ( FREE_BLOCK == CheckHeaderState(curr_entry_header) )
 		{
 	
-		local_max_size += GetOffsetValue(curr_entry_header);
-		local_max_free_block += 1;
+			local_max_size += GetOffsetValue(curr_entry_header);
+			local_max_free_blocks += 1;
 			
-		curr_entry_header = NextEntryHeaderAddr(curr_entry_header,
+			curr_entry_header = NextEntryHeaderAddr(curr_entry_header,
 							GetOffsetValue(curr_entry_header));																
 		}
 							
@@ -421,14 +425,14 @@ size_t VSALargestChunkAvailable(vsa_t *vsa)
 		{	
 			
 			local_total_free_space = TotalFreeSpaceWithHeaders(local_max_size,
-														 local_max_free_block);
+														 local_max_free_blocks);
 														 
 		/* unified the largests consecutive free blocks */			
 			SetOffsetValue(local_max_first_free_entry,
 								 (long)local_total_free_space);			
 					
-			/* local_max_free_block >0 if there is at list 1 block free */
-			if( local_max_free_block &&
+			/* local_max_free_blocks >0 if there is at list 1 block free */
+			if( local_max_free_blocks &&
 					 (local_total_free_space >= global_max_size) )
 			{				
 				global_max_size = local_total_free_space;
@@ -438,16 +442,13 @@ size_t VSALargestChunkAvailable(vsa_t *vsa)
 			{
 				break;
 			}
-
-			SetOffsetValue(local_max_first_free_entry,
-								 (long)local_total_free_space);
-						
+					
 			local_max_first_free_entry =
 							 NextFirstFreeEntryHeaderAddr(curr_entry_header);
 							 
 			curr_entry_header = local_max_first_free_entry;
 			
-			local_max_free_block = 0;	
+			local_max_free_blocks = 0;	
 			local_max_size = 0;
 		}
 		
