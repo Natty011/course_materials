@@ -10,23 +10,22 @@
 
 #include "sort.h"
 
-
 /***************struct and enum declaration *******/
 
-typedef enum
+typedef enum state
 {
 	FALSE = 0,
 	TRUE = 1
-}bool;
+}state_t;
 
 /***************End of struct and enum declaration *******/
 
 /***************************function declaration***************************/
-void swap(int* ptr1, int* ptr2);
+static void swap(int* ptr1, int* ptr2);
 /***************************End of function declaration******************/
 
 /******************static functions definition**********************/
-void swap(int* ptr1, int* ptr2)
+static void swap(int* ptr1, int* ptr2)
 {
 	int temp = 0;
 	
@@ -43,8 +42,7 @@ void swap(int* ptr1, int* ptr2)
 /***************************BubbleSort***************************/
 void BubbleSort(int* arr, size_t size)
 {
-
-	bool swapped_occured = FALSE;
+	int swapped_occured = FALSE;
 	size_t i = 0, j = 0;
 
 	assert(arr);
@@ -99,7 +97,6 @@ void InsertionSort(int *arr, size_t size)
 void SelectionSort(int *arr, size_t size)
 {
 	int i = 0, j = 0, min_index = 0;
-	/*int temp = 0;*/
 	
 	assert(arr);
 	
