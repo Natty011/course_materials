@@ -42,11 +42,11 @@
 
 /***************struct and enum declaration *******/
 
-typedef enum
+typedef enum state
 {
 	FALSE = 0,
 	TRUE = 1
-}bool;
+}state_t;
 /*
 typedef struct sort_time_req
 {
