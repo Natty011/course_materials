@@ -1,15 +1,16 @@
 /***************************************
 * Author : Natty
-* Reviewer : Matan  
+* Reviewer : David  
 * Date : 22 / 01 / 2025
-* Last update: 22 / 01 / 2025
+* Last update: 23 / 01 / 2025
 *****************************************/
-
 #include <assert.h> 	/* assert */
-#include <stdlib.h> 	/* malloc, free */
+#include <stdlib.h> 	/* malloc, calloc, free */
 
 #include "sort.h"
 
+#define MIN(a, b)		((a > b ) ? b : a )
+#define MAX(a, b)		((a > b ) ? a : b )
 /***************struct and enum declaration *******/
 
 typedef enum state
@@ -18,13 +19,29 @@ typedef enum state
 	TRUE = 1
 }state_t;
 
+typedef enum status
+{
+	SUCCESS = 0,
+	FAIL = 1
+}status_t;
+
+/*
+typedef struct min_max
+{
+	int min;
+	int max;
+}min_max_t;
+*/
 /***************End of struct and enum declaration *******/
 
 /***************************function declaration***************************/
 static void swap(int* ptr1, int* ptr2);
+static void FindMinMax(	int* arr, size_t size, int* min, int* max);
 /***************************End of function declaration******************/
 
 /******************static functions definition**********************/
+
+/***************************swap***************************/
 static void swap(int* ptr1, int* ptr2)
 {
 	int temp = 0;
@@ -36,7 +53,19 @@ static void swap(int* ptr1, int* ptr2)
 	*ptr1 = *ptr2;
 	*ptr2 = temp;
 }
-
+/*************************FindMinMax***************************/
+static void FindMinMax(	int* arr, size_t size, int* min, int* max)
+{
+	size_t i = 0;
+	
+	assert(arr);
+	
+	for( i = 0; i < size ; ++i)
+	{
+		*min = MIN(arr[i], *min);
+		*max = MAX(arr[i], *max);	
+	}
+}
 /******************End of static functions definition**********************/
 
 /***************************BubbleSort***************************/
@@ -117,4 +146,71 @@ void SelectionSort(int *arr, size_t size)
 	}
 
 }
+/***************************CountingSort***************************/
+
+int CountingSort(int *arr, size_t size)
+{
+	int i = 0, hist_size = 0, min = arr[0], max = arr[0],
+				 *hist = NULL, *arr_sorted = NULL;
+	int len  = (int)size ;
+	assert(arr);
+
+	FindMinMax(arr, size, &min, &max);
+	
+	hist_size = max - min + 1;
+	hist = (int*)calloc( hist_size, sizeof(int) );
+	
+	if( !hist )
+	{
+		return FAIL; /* 1 */		
+	}
+	
+	/* fill the hist*/
+	for(i = 0; i < len; ++i)
+	{
+		hist[arr[i] - min]++; 
+	}
+	
+	/* acumulatiom of each data cell with the previouses data
+	include the current cell */	
+	for(i = 1; i < hist_size; ++i)
+	{
+		hist[i] += hist[i-1]; 
+	}
+	
+	/* check if the acumulations correct*/
+	assert( size == (size_t)hist[hist_size - 1]);
+	
+	arr_sorted = (int*)malloc( size * sizeof(int) );
+	
+	if( !arr_sorted )
+	{
+		
+		free(hist);
+		hist = NULL;
+				
+		return FAIL;
+	}
+	/* do the sorting */	
+	for(i = len - 1 ; i >= 0; --i)
+	{
+		--hist[ arr[i] - min ];
+		arr_sorted[ hist[ arr[i] - min ] ] = arr[i];
+	}
+	/* copy to original array after the sorting */		
+	for(i = 0; i < len ; ++i)
+	{
+		arr[i] = arr_sorted[i];
+	}
+	
+	free(hist);
+	free(arr_sorted);
+	hist = NULL;
+	arr_sorted = NULL; 
+	
+	return SUCCESS; /* 0 */
+}
+
+
+
 
