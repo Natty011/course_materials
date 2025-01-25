@@ -58,7 +58,11 @@ typedef struct sort_time_req
 }sort_time_req_t;
 */
 
-/*	
+/*
+	#ifdef PRINTS
+	PrintArr(arr, 10);
+	#endif
+	
 	# ifndef NDEBUG
 	PrintArr(arr, 10);
 	#endif
@@ -113,8 +117,9 @@ int ArrIsSorted(int* arr, size_t len)
 }
 
 /********************  PrintArr  ****************************/
-# ifndef NDEBUG
+/* # ifndef NDEBUG */
 /*
+	#ifdef PRINTS
 static void PrintArr(int* arr, size_t len)
 {	
 	size_t i = 0;
@@ -126,8 +131,9 @@ static void PrintArr(int* arr, size_t len)
 	}
 	
 }
-*/	
+	
 #endif
+*/
 /********************  Compare  ****************************/
 /* For qsort*/
 int Compare(const void* a, const void* b)
@@ -165,7 +171,7 @@ int main ()
 static void TestSort(void)
 {	
 	int flag = FALSE, flag_bubble = FALSE, flag_insertion = FALSE,
-		flag_selection = FALSE, flag_counting = FALSE;
+		flag_selection = FALSE, flag_counting = FALSE, flag_radix = FALSE;
 	int arr[MAX] = { 0 };
 	size_t len = MAX;
 	
@@ -174,9 +180,10 @@ static void TestSort(void)
     clock_t time_req_selection = clock();
     clock_t time_req_qsort = clock();
 	clock_t time_req_counting = clock();
-	
+	clock_t time_req_radix = clock();
+		
 	float t_bubble = 0.0, t_insert = 0.0, t_select = 0.0, 
-		t_count, t_qsort = 0.0;
+		  t_count = 0.0, t_radix = 0.0, t_qsort = 0.0;
 
 	/* BubbleSort test	*/    
 	GenRandArr(arr, len, MIN, MAX);	
@@ -206,10 +213,15 @@ static void TestSort(void)
 	CountingSort(arr, MAX);
 	time_req_counting = clock() - time_req_counting;
 	flag_counting  = ArrIsSorted(arr, MAX);
-	
-					
+
+	/* RedixSort test	*/    
+	GenRandArr(arr, MAX, 1000000, 2000000);
+	time_req_radix = clock();
+	RadixSort(arr, MAX);
+	time_req_radix = clock() - time_req_radix;
+	flag_radix  = ArrIsSorted(arr, MAX);	
 	if(flag_bubble || flag_insertion || flag_selection
-		|| flag_counting )
+		|| flag_counting || flag_radix)
 	{
 		puts(RED);
 		
@@ -232,6 +244,11 @@ static void TestSort(void)
 		{
 			puts("Failes in CountingSort: Unsorted array of numbers");
 		}
+		
+		if(flag_radix)
+		{
+			puts("Failes in RedixSort: Unsorted array of numbers");
+		}
 					
 		flag = TRUE;
 	}
@@ -246,7 +263,8 @@ static void TestSort(void)
 	t_qsort = (float)time_req_qsort / CLOCKS_PER_SEC;
 	t_select = (float)time_req_selection / CLOCKS_PER_SEC;	
 	t_count = (float)time_req_counting / CLOCKS_PER_SEC;	
-	
+	t_radix = (float)time_req_radix / CLOCKS_PER_SEC;
+		
 	puts("\n" BACK_CYAN"Processor time taken for:"RESET"\n");
 		
 	printf("BubbleSort   : "BACK_GREEN" %f "RESET" seconds  \n", t_bubble);
@@ -255,8 +273,10 @@ static void TestSort(void)
            
 	printf("InsertionSort: "BACK_GREEN" %f "RESET" seconds  \n", t_insert);
 	
- 	printf("CountingSort : "BACK_GREEN" %f "RESET" seconds  \n", t_count); 	
- 	                     
+ 	printf("CountingSort : "BACK_GREEN" %f "RESET" seconds  \n", t_count); 
+ 		
+ 	printf("RadixSort    : "BACK_GREEN" %f "RESET" seconds  \n", t_radix);
+ 	 	 	                     
 	printf("QuickSort    : "BACK_GREEN" %f "RESET" seconds  \n", t_qsort);
 
 	puts("\n" BACK_CYAN"Ratio time:"RESET"\n");
@@ -268,11 +288,6 @@ static void TestSort(void)
                       
 	printf("InsertionSort/QuickSort: "BACK_GREEN" %f "RESET" \n", \
            t_insert/t_qsort);           
-	
-
-
-
-	
 	  	                  
 	if( !flag )
 	{		

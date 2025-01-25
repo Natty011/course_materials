@@ -37,6 +37,7 @@ typedef struct min_max
 /***************************function declaration***************************/
 static void swap(int* ptr1, int* ptr2);
 static void FindMinMax(	int* arr, size_t size, int* min, int* max);
+static int CountingSortAux(int *arr, size_t size, int exp_digit);
 /***************************End of function declaration******************/
 
 /******************static functions definition**********************/
@@ -66,6 +67,56 @@ static void FindMinMax(	int* arr, size_t size, int* min, int* max)
 		*max = MAX(arr[i], *max);	
 	}
 }
+
+/*************************CountingSortAux***************************/
+static int CountingSortAux(int *arr, size_t size, int exp_digit)
+{
+	int i = 0, hist_size = 10, *arr_sorted = NULL, len  = (int)size ;
+	int hist[10] = { 0 };
+		
+	assert(arr);
+
+	/* fill the hist*/
+	for(i = 0; i < len; ++i)
+	{
+		hist[( arr[i] / exp_digit) % 10 ]++; 
+	}
+	
+	/* acumulatiom of each data cell with the previouses data
+	include the current cell */	
+	for(i = 1; i < hist_size; ++i)
+	{
+		hist[i] += hist[i-1]; 
+	}
+	
+	/* check if the acumulations correct*/
+	assert( size == (size_t)hist[hist_size - 1]);
+	
+	arr_sorted = (int*)malloc( size * sizeof(int) );
+	
+	if( !arr_sorted )
+	{		
+		return FAIL;
+	}
+	/* do the sorting */	
+	for(i = len - 1 ; i >= 0; --i)
+	{
+		--hist[ (arr[i] / exp_digit) % 10 ];
+		arr_sorted[ hist[ (arr[i] / exp_digit) % 10 ] ] = arr[i];
+	}
+	/* copy to original array after the sorting */		
+	for(i = 0; i < len ; ++i)
+	{
+		arr[i] = arr_sorted[i];
+	}
+	
+	free(arr_sorted);
+	arr_sorted = NULL; 
+	
+	return SUCCESS; /* 0 */
+
+}
+
 /******************End of static functions definition**********************/
 
 /***************************BubbleSort***************************/
@@ -211,6 +262,25 @@ int CountingSort(int *arr, size_t size)
 	return SUCCESS; /* 0 */
 }
 
+/***************************RadixSort***************************/
+int RadixSort(int *arr, size_t size)
+{
+	int max = arr[0], exp_digit = 1; /* exp_digit == 10^digit_to_sort*/
+    int min __attribute__((unused))= arr[0];
 
+	assert(arr);
+	FindMinMax(arr, size, &min, &max);
+	
+	for(exp_digit = 1; max/exp_digit > 0; exp_digit *= 10)
+	{
 
+		if (CountingSortAux(arr, size, exp_digit) )
+		{
+			return FAIL;
+		}
+		
+	}
+	
+	return SUCCESS;
+}
 
