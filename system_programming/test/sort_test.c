@@ -33,7 +33,6 @@
 #define BACK_CYAN 	 "\x1b[46m"
 #define BACK_WHITE   "\x1b[47m"
 
-
 #define DEBUG		"DEBUG MODE"
 #define RELEASE		"RELEASE MODE"
 
