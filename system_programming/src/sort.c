@@ -13,6 +13,7 @@
 #define MAX(a, b)		((a > b ) ? a : b )
 /***************struct and enum declaration *******/
 
+
 typedef enum state
 {
 	FALSE = 0,
