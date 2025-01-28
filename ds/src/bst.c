@@ -54,6 +54,15 @@ typedef enum
 	
 }child_pose_t;
 
+typedef enum
+{
+	
+	NO_CHILDS = 0,
+	ONE_CHILD = 1,
+	TWO_CHILDS = 2
+	
+}nume_of_childs_t;
+
 /***************End of struct and enum declaration *******/
 
 /***********Functions declaration and definition*******/
@@ -61,6 +70,10 @@ typedef enum
 
 static bst_iter_t BstNodeMax(bst_node_t* node);
 static bst_iter_t BstNodeBegin(bst_node_t* node);
+static int FindNumChilds(bst_node_t* node);
+static int IsChildExist(bst_node_t* node, int child_pos);
+static IsLeftChild(bst_node_t* parnt, bst_node_t* child);
+static IsRightChild(bst_node_t* parnt, bst_node_t* child);
 /**********End of functions declaration and definition *******/
 
 /********************  BstCreate  ****************************/
@@ -323,7 +336,7 @@ static bst_iter_t BstNodeMax(bst_node_t* node)
 	return NodeToIter(node);		
 }
 /********************  BstRemove  ****************************/
-/* Phases: bst_iter_t BstRemove(bst_iter_t what)
+Phases: bst_iter_t BstRemove(bst_iter_t what)
 
 bst_node_t* curr_node = IterToNode(what);
 bst_node_t* curr_node_next = BstNext(what);
@@ -412,9 +425,94 @@ case 2: the node has one child: replace the node with the child
 	
 	 
 */
+
+NO_CHILDS = 0,
+	ONE_CHILD = 1,
+	TWO_CHILDS = 2
+	
+	
 bst_iter_t BstRemove(bst_iter_t what)
 {
+	bst_node_t *curr_node = NULL, *parnt = NULL, 
+			 *curr_node_next = NULL, *l_child = NULL, *r_child = NULL;
+	
+	assert(IterToNode(what));
+	
+	parnt = curr_node->parent;
+	assert( parnt ); /* check if curr_node is a dummy end */
+	curr_node_next = BstNext(what);
+	
+	/* case 1: The node has no childs */
+	
+	if( NO_CHILDS == FindNumChilds(curr_node) )
+	{
+		IsLeftChild(parnt, curr_node) ? parnt->child[LEFT] = NULL:
+										parnt->child[RIGHT] = NULL;
+										
+		free(curr_node);
+		curr_node = NULL;
+		
+		return NodeToIter(curr_node_next);
+	
+	}
+	
+	/* case 2: the node has one child:
+				 replace the node with the child */
+	if( ONE_CHILD == FindNumChilds(curr_node )
+	{
+	
+		if( IsChildExist(curr_node, LEFT) )
+		{
+			IsLeftChild(parnt, curr_node) ?
+							 parnt->child[LEFT] = curr_node->child[LEFT]:
+							 parnt->child[RIGHT] = curr_node->child[LEFT];
+		}
+		else
+		{
+			IsLeftChild(parnt, curr_node) ?
+							 parnt->child[LEFT] = curr_node->child[RIGHT]:
+							 parnt->child[RIGHT] = curr_node->child[RIGHT];	
+		}
+		
+		 
+		free(curr_node);
+		curr_node = NULL;
+		
+		return NodeToIter(curr_node_next);
+	}
+	
+	/* case 3: The node has two children:  */
+	
+}		
 
+static IsLeftChild(bst_node_t* parnt, bst_node_t* child)
+{
+	assert(parnt);
+	assert(child);
+	return Child == parnt->child[LEFT];
+	
+}
+
+static IsRihtChild(bst_node_t* parnt, bst_node_t* child)
+{
+	assert(parnt);
+	assert(child);
+	return Child == parnt->child[RIGHT];
+}
+
+
+static int FindNumChilds(bst_node_t* node)
+{
+	assert(node);
+	return IsChildExist(node, LEFT) + IsChildExist(node, RIGHT);
+
+}
+
+static int IsChildExist(bst_node_t* node, int child_pos)
+{
+	assert(node);
+	return  LEFT == child_pos ? NULL != node->child[LEFT] :
+								NULL != node->child[RIGHT]; 
 }
 
 
