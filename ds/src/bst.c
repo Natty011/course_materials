@@ -46,6 +46,14 @@ typedef enum
 	
 }func_result_t;
 
+typedef enum
+{
+	
+	LEFT = 0,
+	RIGHT = 1
+	
+}child_pose_t;
+
 /***************End of struct and enum declaration *******/
 
 /***********Functions declaration and definition*******/
@@ -77,8 +85,8 @@ bst_t *BstCreate(cmp_func_t sort_func)
 	bst_p->cmp_func = sort_func;
 	bst_p->end->data = bst_p;
 	bst_p->end->parent = NULL;
-	bst_p->end->child[0] = NULL; /* left child */
-	bst_p->end->child[1] = NULL; /* right child */
+	bst_p->end->child[LEFT] = NULL; /* left child */
+	bst_p->end->child[RIGHT] = NULL; /* right child */
 	
 	return bst_p;
 }
@@ -145,55 +153,7 @@ if check_data > new_data go to left child
 if check_data < new_data go to right child
 */
 /********************  BstInsert  ****************************/
-/*Phases: bst_iter_t BstInsert(bst_t *bst, const void *new_data)
-1.
-  bst_node_t new_node = NULL, parant = NULL;
-  int res = 0;
 
-2.  allocate new_node and check if succeeded, initialize his members:	
-	new_node =  (bst_node_t*)malloc(sizeof(bst_node_t));
-	
-*) if  (TRUE == IsEmpty(bst)) end->left_child = new_node;
-{
-	new_node->parent = end;
-	new_node->data = new_data;
-	return new_node;
-}
-
-*) get the root node:  curr_node = BstPrev( end );
-
-while(NULL != curr_node)
-{
-	res = cmp_func( curr_node->data, new_data);
-	
-	if
-  		res > 0 then
-
-  			parant = curr_node ;
-  			curr_node = curr_node->left_child;
-  			 
-  	else
-  		   	parant = curr_node ;
-  			curr_node = curr_node->right_child;
-	
-} 
-
-3. 
-	
-	if(res > 0)     
-		parent->left_child = new_node;
-		new_node->data = new_data;
-
-		
-	else 			
-		parent->right_child = new_node;
-		new_node->data = new_data;
-
-
-4. new_node->child = {NULL, NULL}
-5. return new_node;
-		
-*/
 
 bst_iter_t BstInsert(bst_t *bst, const void *new_data)
 {
@@ -215,9 +175,9 @@ bst_iter_t BstInsert(bst_t *bst, const void *new_data)
 	{
 		new_node->parent = bst->end;
 
-		new_node->child[0] = NULL;
-		new_node->child[1] = NULL;
-		bst->end->child[0] = new_node;
+		new_node->child[LEFT] = NULL;
+		new_node->child[RIGHT] = NULL;
+		bst->end->child[LEFT] = new_node;
 		 
 		return NodeToIter(new_node);
 	}
@@ -231,28 +191,27 @@ bst_iter_t BstInsert(bst_t *bst, const void *new_data)
 		
 		if( res > 0 )
 		{
-			curr_node  = curr_node->child[0]; /* left */
+			curr_node  = curr_node->child[LEFT]; /* left */
 		}
 		
 		else 
 		{
-			curr_node = curr_node->child[1]; /* right */
+			curr_node = curr_node->child[RIGHT]; /* right */
 		}
 	}
 	
 	if( res > 0 )
 	{
-		parnt->child[0] = new_node;
-		
+		parnt->child[LEFT] = new_node;	
 	}
 	
 	else
 	{
-		parnt->child[1] = new_node;
+		parnt->child[RIGHT] = new_node;
 	}
 	
-	new_node->child[0] = NULL;
-	new_node->child[1] = NULL;	
+	new_node->child[LEFT] = NULL;
+	new_node->child[RIGHT] = NULL;	
 	new_node->data = new_data;
 	
 	return NodeToIter(new_node);	
@@ -260,109 +219,68 @@ bst_iter_t BstInsert(bst_t *bst, const void *new_data)
 
 
 /********************  BstBegin  ****************************/
-/* Phases:bst_iter_t BstBegin(const bst_t *bst)
+bst_iter_t BstBegin(const bst_t *bst)
 {
-1. 
-	bst_node_t* curr_node = NULL;
-		
-*) assert(node); assert(bst);		
-*) curr_node = bst->end;
-*) assert(curr_node);
-
-if(TRUE == IsEmpty(bst) )
+	bst_node_t* curr_node = NULL;	
+	
+	assert(bst);
+	assert(bst->end);
+	
+	curr_node = bst->end;
+	
+	if(TRUE == IsEmpty(bst) )
 	{
 		return NodeToIter(curr_node);
 	}
 	
-2. return BstNodeBegin(curr_node);
-	
+	return BstNodeBegin(curr_node);		
 }
-*/
-
-bst_iter_t BstBegin(const bst_t *bst)
-{
-	
-		
-}
-
-
 
 /********************  BstIsEmpty  ****************************/
-/* Phases: int BstIsEmpty(const bst_t *bst)
-1. 
-	bst_node_t* curr_node = NULL;
-		
-*)  assert(bst);		
-*) curr_node = bst->end;
-*) assert(curr_node);
-
-if(NULL == curr_node->left_child )
-	{
-		return FALSE;
-	}
-	
-2. return TRUE;
-	
-*/
 BstIsEmpty(const bst_t *bst)
 {
-
-
+	assert(bst);	
+	assert(bst->end);
+	
+	return bst->end ? FALSE : TRUE;	
 }
 /********************  BstNodeBegin  ****************************/
-/* Phases:bst_iter_t BstNodeBegin(bst_node_t* node)
-1. 
-	
-*)start from the root
-*)get left_child until arrive to null, return that child(minimum).
-assert(node);
-bst_node_t* curr_node = node;
-
-while( NULL != curr_node->left_child)
-{
-	curr_node = curr_node->left_child;
-}
-
-	return NodeToIter(curr_node);
-*/
 static bst_iter_t BstNodeBegin(bst_node_t* node)
 {
+	bst_node_t* curr_node = NULL;
+	assert(node);
 	
+	curr_node = node;
 	
-
+	while( NULL != curr_node->child[LEFT] )
+	{
+		curr_node = curr_node->child[LEFT];
+	}
+	
+	return NodeToIter(curr_node);
 }
 
 /********************  BstNext  ****************************/
-/* Phases:bst_iter_t BstNext(bst_iter_t iter)
-case 1: there is a right child to the iter->
-	 return the  BstNodeBegin(right_child):
-	 
-*)	bst_node_t* curr_node = NULL, mother = NULL;
-*)  assert(iter);
-*) mother  = curr_node-> parent;
-
-*)    curr_node = NodeToIter(iter);
-
-    if(  NULL != curr_node->right_child ) 
+bst_iter_t BstNext(bst_iter_t iter)
+{
+	bst_node_t* curr_node = NULL, parnt = NULL;
+	assert( IterToNode(iter) );
+	curr_node = IterToNode(iter);
+	
+	if(  NULL != curr_node->child[RIGHT] ) 
     {
  		return BstNodeBegin(curr_node);
 	}
 	
-case 2: there is a no right child to the iter:	
+	parnt  = curr_node->parent;
 	
-		while(curr_node  != mother->left_child)
-		{
-			curr_node = mother ; 
-			mother = curr_node->parent;	
-		}
-
-		return mother; /*if curr_node is max than return dummy end*/
-
-*/
-
-bst_iter_t BstNext(bst_iter_t iter)
-{
-
+	while(curr_node != parnt->child[LEFT] )
+	{
+		curr_node = parnt;
+		parnt = curr_node->parent;
+	}
+	
+	return parnt; /*if curr_node is max than return dummy end*/	
 }
 
 /********************  BstPrev  ****************************/
