@@ -59,6 +59,8 @@ typedef enum
 /***********Functions declaration and definition*******/
 /*static int CountNodes (void *data, void *user_param);*/
 
+static bst_iter_t BstNodeMax(bst_node_t* node);
+static bst_iter_t BstNodeBegin(bst_node_t* node);
 /**********End of functions declaration and definition *******/
 
 /********************  BstCreate  ****************************/
@@ -157,7 +159,7 @@ if check_data < new_data go to right child
 
 bst_iter_t BstInsert(bst_t *bst, const void *new_data)
 {
-	bst_node_t* new_node = NULL, parnt = NULL, curr_node = NULL;
+	bst_node_t *new_node = NULL, *parnt = NULL, *curr_node = NULL;
 	int res = 0;
 	
 	assert(bst);
@@ -259,11 +261,10 @@ static bst_iter_t BstNodeBegin(bst_node_t* node)
 	
 	return NodeToIter(curr_node);
 }
-
 /********************  BstNext  ****************************/
 bst_iter_t BstNext(bst_iter_t iter)
 {
-	bst_node_t* curr_node = NULL, parnt = NULL;
+	bst_node_t *curr_node = NULL, *parnt = NULL;
 	assert( IterToNode(iter) );
 	curr_node = IterToNode(iter);
 	
@@ -284,60 +285,42 @@ bst_iter_t BstNext(bst_iter_t iter)
 }
 
 /********************  BstPrev  ****************************/
-/* Phases:bst_iter_t BstPrev(bst_iter_t iter)
-case 1: there is a left child to the iter->
-
-	  return the  BstNodeMax(left_child):
-	 
-*)	bst_node_t* curr_node = NULL, mother = NULL;
-*)  assert(iter);
- 
-  *) curr_node = NodeToIter(iter);
-
-    if(  NULL != curr_node->left_child )
-    {
- 		return BstNodeMax(curr_node);
-	}
-	
-case 2: there is a no left child to the iter:	
-	
-
-		while( ( NULL != mother->parent) curr_node  != mother->right_child)
-		{
-			curr_node = mother ; 
-			mother = curr_node->parent;	
-		}
-		
-	 	/*if curr_node is min than undefine, return dummy end*/
-		return mother; 
-
-*/
-
 bst_iter_t BstPrev(bst_iter_t iter)
 {
-
+	bst_node_t *curr_node = NULL, *parnt = NULL;
+	
+	assert(IterToNode(iter));
+	
+	curr_node = NodeToIter(iter);
+	
+	if(NULL != curr_node->child[LEFT] )
+	{
+		return BstNodeMax( curr_node->child[LEFT] );
+	}
+	
+	parnt = curr_node->parnt;
+	/* if the parent is dummy end don't compare to its right child(NULL) */
+	while( (NULL != parnt->parent) && (curr_node != parnt->child[RIGHT] ))
+	{
+		curr_node = parnt;
+		parnt = curr_node->parent;
+	}
+	
+	/*if curr_node is min than undefine, return dummy end*/
+	return NodeToIter(parnt);
 }
 
 /********************  BstNodeMax  ****************************/
-/*Find the max value of a specific subtree brunch*/
-/* Phases:bst_iter_t BstNodeMax(bst_node_t* node)
-1. 
-	
-*)start from the node
-*)get right_child until arrive to null, return that child(maximum).
-assert(node);
-bst_node_t* curr_node = node;
-
-while( NULL != curr_node->right_child)
-{
-	curr_node = curr_node->right_child;
-}
-
-	return NodeToIter(curr_node);
-*/
 static bst_iter_t BstNodeMax(bst_node_t* node)
 {
+	assert(node);
 	
+	while(NULL != node->child[RIGHT])
+	{
+		node = node->child[RIGHT];
+	}
+	
+	return NodeToIter(node);		
 }
 /********************  BstRemove  ****************************/
 /* Phases: bst_iter_t BstRemove(bst_iter_t what)
