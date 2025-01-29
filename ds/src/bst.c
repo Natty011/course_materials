@@ -4,7 +4,6 @@
 * Date : 27 / 01 / 2025
 * Last update: 29 / 01 / 2025
 *****************************************/
-#include <stdio.h> 	/* assert */
 #include <assert.h> 	/* assert */
 #include <stdlib.h> 	/* malloc, free */
 #include "bst.h" 
@@ -137,11 +136,13 @@ static bst_iter_t BstNodeBegin(bst_node_t* node)
 	return NodeToIter(curr_node);
 }
 /***********End Of Static Functions definition*******/
+/*
 int main()
 {
 	puts("$$");
 	return 0;
 }
+*/
 /********************  BstCreate  ****************************/
 
 bst_t *BstCreate(cmp_func_t sort_func)
@@ -295,14 +296,21 @@ bst_iter_t BstNext(bst_iter_t iter)
 {
 	bst_node_t *curr_node = NULL, *parnt = NULL;
 	assert( IterToNode(iter) );
+	assert(  NULL == IterToNode(iter)->parent ); /* iter is dummy */
+	
 	curr_node = IterToNode(iter);
+	
+	parnt  = curr_node->parent;
+	
+	if( NULL == parnt ) /* parnt */
+	{
+		return iter;
+	}
 	
 	if(  NULL != curr_node->child[RIGHT] ) 
     {
  		return BstNodeBegin(curr_node);
 	}
-	
-	parnt  = curr_node->parent;
 	
 	while(curr_node != parnt->child[LEFT] )
 	{
@@ -319,9 +327,9 @@ bst_iter_t BstPrev(bst_iter_t iter)
 	bst_node_t *curr_node = NULL, *parnt = NULL;
 	
 	assert(IterToNode(iter));
-	
 	curr_node = NodeToIter(iter);
-	
+	assert(  NULL == curr_node->parent ); /* iter is dummy */
+		
 	if(NULL != curr_node->child[LEFT] )
 	{
 		return BstNodeMax( curr_node->child[LEFT] );
@@ -428,8 +436,6 @@ bst_iter_t BstRemove(bst_iter_t what)
 		
 		free( l_child );
 		l_child = NULL;
-		
-
 	}
 	
 	return NodeToIter(curr_node); /* case 3 */
@@ -505,13 +511,16 @@ size_t BstSize(const bst_t *bst)
 	assert(bst);
 	assert(bst->end);
 	
+	if( NULL == bst->end->child[LEFT])
+	{
+		return size;
+	}
 	curr_iter = BstNext( NodeToIter( bst->end ) );
 	
 	while( bst->end != IterToNode( curr_iter  ) ) 
 	{
 		++size;
 		curr_iter = BstNext( curr_iter );
-	
 	}
 	
 	return size;
