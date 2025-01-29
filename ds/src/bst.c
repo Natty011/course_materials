@@ -66,8 +66,6 @@ typedef enum
 /***************End of struct and enum declaration *******/
 
 /***********Functions declaration*******/
-/*static int CountNodes (void *data, void *user_param);*/
-
 static bst_iter_t BstNodeMax(bst_node_t* node);
 static bst_iter_t BstNodeBegin(bst_node_t* node);
 static int FindNumChilds(bst_node_t* node);
@@ -168,67 +166,32 @@ bst_t *BstCreate(cmp_func_t sort_func)
 	return bst_p;
 }
 /********************  BstDestroy  ****************************/
-/* Phases: void BstDestroy(bst_t *bst)
-1. Operate BstRemove on each node post -order tree-traversal(walk).
-*)	curr_node = bst->end;
-*) curr_node = BstBegin ( bst )
-*) curr_node_next = NULL;
-*) parnt =curr_node->parent;
--- post-order tree traversal --
-
-*)need to find the max of each subtree 
-in order not to break the arriving to the root ??
-
-first of all: curr_node is the root or dummy end
-if we enter to while the first curr_node is the root
- 
-while (FALSE == BstIsEmpty(bst) && curr_node != end) 
- { 
- 
-  curr_node_next = IterToNode(BstNodeBegin(curr_node));
-  parnt = curr_node_next->parent;
-  child2 = curr_node_next->right_child;
-  
-    
-  if( end == parnt )
-  {
-  	curr_node = (parnt->left_child)->right_child;
-  	continoue;
-  }	NEED TO CONTINOUE!! NOT COMPLETED!!
-  free(curr_node);
-  (parnt->left_child)-> NULL;
-  if(NULL != child2) )
-  {
-  	curr_node = child2;
-  }
-
-  
-  
-  
-  
- }
- 
- free(curr_node) 
- free(bst)
-
-{ A, B  C, D, E, F, G, H, I, end}
-{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
-*/
-
 void BstDestroy(bst_t *bst)
 {
+	bst_node_t *curr_node = NULL, *curr_node_next = NULL;
+
+	if(NULL == bst)
+	{
+		return;
+	}
 	
+	assert(bst->end);
+	curr_node = IterToNode(BstBegin(bst));
+	
+	while( curr_node != bst->end) /* FALSE == BstIsEmpty(bst) &&  */
+	{
+		curr_node = BstNodeBegin(curr_node);
+		curr_node_next = IterToNode(BstRemove(NodeToIter(curr_node) ));
+		curr_node = curr_node_next;
+	}
+	
+	free(bst->end);
+	bst->end = NULL;
+	
+	free(bst);
+	bst = NULL;
 }
 
-/*
-static int SortingFunc(void* check_data , void* new_data)
-{
-	return (*(int*)check_data - *(int*)new_data);
-}
-
-if check_data > new_data go to left child
-if check_data < new_data go to right child
-*/
 /********************  BstInsert  ****************************/
 
 bst_iter_t BstInsert(bst_t *bst, const void *new_data)
@@ -258,7 +221,7 @@ bst_iter_t BstInsert(bst_t *bst, const void *new_data)
 		return NodeToIter(new_node);
 	}
 	
-	curr_node = BstPrev(bst->end); /* get the root */
+	curr_node = (bst->end)->child[LEFT]; /* get the root */
 	
 	while(NULL != curr_node)
 	{
