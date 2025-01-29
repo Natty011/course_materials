@@ -160,7 +160,7 @@ bst_t *BstCreate(cmp_func_t sort_func)
 	}
 	
 	bst_p->cmp_func = sort_func;
-	bst_p->end->data = bst_p;
+	bst_p->end->data = NULL;
 	bst_p->end->parent = NULL;
 	bst_p->end->child[LEFT] = NULL; /* left child */
 	bst_p->end->child[RIGHT] = NULL; /* right child */
@@ -262,7 +262,7 @@ bst_iter_t BstInsert(bst_t *bst, const void *new_data)
 	
 	while(NULL != curr_node)
 	{
-		res = cmp_func(curr_node->data, new_data);
+		res = bst->cmp_func(curr_node->data, new_data);
 		parnt  = curr_node;
 		
 		if( res > 0 )
@@ -459,7 +459,7 @@ void *BstGetData(bst_iter_t iter)
 	return IterToNode(iter)->data;
 }
 /********************  is_same_iter  ****************************/
-int is_same_iter(bst_iter_t iter1, bst_iter_t iter2)
+int IsIterSame(bst_iter_t iter1, bst_iter_t iter2)
 {
 	assert( IterToNode(iter1) );
 	assert( IterToNode(iter2) );
@@ -491,7 +491,7 @@ bst_iter_t BstFind(const bst_t *bst, void *data_to_find)
 	
 	while( NULL != curr_node)
 	{
-		res = cmp_func(curr_node->data, data_to_find);
+		res = bst->cmp_func(curr_node->data, data_to_find);
 		
 		if( res > 0 )
 		{
@@ -532,9 +532,26 @@ size_t BstSize(const bst_t *bst)
 	
 	return size;
 }
+/********************  BstForEach  ****************************/
+int BstForEach(bst_iter_t start, bst_iter_t end,
+                 operation_func_t op_func, void *user_param)
+{
+	int op_state = SUCCESS;
 
-
-
+	assert( op_func);
+	assert(IsIterSame(start, end));
+	
+	while( !IsIterSame(start, end))
+	{
+		if ( op_func( BstGetData(start), user_param ) )
+		{
+			op_state = OPERATION_FAIL;
+			break;
+		}
+	}
+	
+	return op_state;
+}                 
 
 
 
