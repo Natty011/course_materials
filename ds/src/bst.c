@@ -336,105 +336,11 @@ static bst_iter_t BstNodeMax(bst_node_t* node)
 	return NodeToIter(node);		
 }
 /********************  BstRemove  ****************************/
-Phases: bst_iter_t BstRemove(bst_iter_t what)
-
-bst_node_t* curr_node = IterToNode(what);
-bst_node_t* curr_node_next = BstNext(what);
-bst_node_t* parnt =  curr_node->parent; 
-bst_node_t* child1 =  NULL;
-bst_node_t* child2 =  NULL;
-prepere data: using static functions that gets:
-			a) find the noumber of children of a node
-			b) find if the the children is left or right child
-			
-case 1: there are not childes to curr_node( the node is leaf):
-									(The node has no children)
-	
-	
-	if(curr_node == parnt->right_child)
-	{
-		parnt->right_child = NULL;
-	}
-	
-	else
-	{
-		parnt->left_child = NULL;
-	}
-	
-	free(curr_node);
-	curr_node = NULL;
-	
-	return NodeToIter(curr_node_next);
-	
-	/* check if there are less then 2 childs-> handle with parant of what
-			else = handle the case of 2 children */	
-/*			
-case 2: the node has one child: replace the node with the child
-
-	(find(left/right) and save(addr) the child of the curr_node)
-	child1 = curr_node->left/right child; 
-	
-	(save what child curr_node is(left/right)) using static function
-	(replace the node with the child) 
-	parnt-> left/right child = child;
-
-	if(curr_node_next == parnt->right_child)
-	{
-		parnt->right_child = NULL;
-	}
-	
-	else
-	{
-		parnt->left_child = NULL;
-	}
-	
-	free(curr_node);
-	curr_node= NULL;
-	
-	case 3: a) The node has two children :
-				 the removal should be as below:
-			  b)  We go the right child of the node,
-	              and then extreme left of that child.
-	              i.e: find the begin of the right subtree.
-	              
-	              if the node that we find has a right child
-	              then:
-	              b.1) put the parent of the node to point on
-	              the right child of the subtree begin
-	              b.2) swap the data of the node with the contender
-	              		to be remove.
-	              b.3) free the subtree begin node.
-		
-	child1 =  IterToNode(BstNodeBegin(curr_node->right_child));
-	(child1 nust be left_child that has only rights childs !!)
-	parnt = child1->parent;
-	
-	curr_node->data = child1->data; ( copy the data)
-				
-	if( NULL != child1->right_child )
-	{
-		parnt->left_child = child1->right_child;
-	}
-	else
-	{
-		parnt->left_child = NULL;
-	}
-	
-	free(child1);
-	child1 = NULL;
-	
-	 
-*/
-
-NO_CHILDS = 0,
-	ONE_CHILD = 1,
-	TWO_CHILDS = 2
-	
 	
 bst_iter_t BstRemove(bst_iter_t what)
 {
 	bst_node_t *curr_node = NULL, *parnt = NULL, 
-			 *curr_node_next = NULL, *l_child = NULL, *r_child = NULL;
+			 *curr_node_next = NULL, *l_child = NULL;
 	
 	assert(IterToNode(what));
 	
@@ -458,7 +364,7 @@ bst_iter_t BstRemove(bst_iter_t what)
 	
 	/* case 2: the node has one child:
 				 replace the node with the child */
-	if( ONE_CHILD == FindNumChilds(curr_node )
+	if( ONE_CHILD == FindNumChilds(curr_node ) )
 	{
 	
 		if( IsChildExist(curr_node, LEFT) )
@@ -482,6 +388,30 @@ bst_iter_t BstRemove(bst_iter_t what)
 	}
 	
 	/* case 3: The node has two children:  */
+	
+	if(  TWO_CHILDS == FindNumChilds(curr_node ) )
+	{
+		l_child =  IterToNode(BstNodeBegin(curr_node->child[RIGHT]));
+		parnt = l_child->parent;
+		curr_node->data = l_child->data;
+		
+		/* l_child must be left_child that has only rights childs */
+		if(	IsChildExist(l_child, RIGHT) )
+		{
+			parnt->child[LEFT] = l_child->child[RIGHT];
+			
+		}
+		
+		else
+		{
+			parnt->child[LEFT] = NULL;
+		}
+		
+		free( l_child );
+		l_child = NULL;
+		
+		return NodeToIter(curr_node);
+	}
 	
 }		
 
