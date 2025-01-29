@@ -65,7 +65,7 @@ typedef enum
 
 /***************End of struct and enum declaration *******/
 
-/***********Functions declaration and definition*******/
+/***********Functions declaration*******/
 /*static int CountNodes (void *data, void *user_param);*/
 
 static bst_iter_t BstNodeMax(bst_node_t* node);
@@ -74,7 +74,41 @@ static int FindNumChilds(bst_node_t* node);
 static int IsChildExist(bst_node_t* node, int child_pos);
 static IsLeftChild(bst_node_t* parnt, bst_node_t* child);
 static IsRightChild(bst_node_t* parnt, bst_node_t* child);
-/**********End of functions declaration and definition *******/
+/**********End of functions declaration *******/
+
+/***********Static Functions definition*******/
+
+/********************  IsLeftChild  ****************************/
+static IsLeftChild(bst_node_t* parnt, bst_node_t* child)
+{
+	assert(parnt);
+	assert(child);
+	return Child == parnt->child[LEFT];
+	
+}
+/********************  IsRihtChild  ****************************/
+static IsRihtChild(bst_node_t* parnt, bst_node_t* child)
+{
+	assert(parnt);
+	assert(child);
+	return Child == parnt->child[RIGHT];
+}
+/********************  FindNumChilds  ****************************/
+static int FindNumChilds(bst_node_t* node)
+{
+	assert(node);
+	return IsChildExist(node, LEFT) + IsChildExist(node, RIGHT);
+
+}
+/********************  IsChildExist  ****************************/
+static int IsChildExist(bst_node_t* node, int child_pos)
+{
+	assert(node);
+	return  LEFT == child_pos ? NULL != node->child[LEFT] :
+								NULL != node->child[RIGHT]; 
+}
+
+/***********End Of Static Functions definition*******/
 
 /********************  BstCreate  ****************************/
 
@@ -169,7 +203,6 @@ if check_data < new_data go to right child
 */
 /********************  BstInsert  ****************************/
 
-
 bst_iter_t BstInsert(bst_t *bst, const void *new_data)
 {
 	bst_node_t *new_node = NULL, *parnt = NULL, *curr_node = NULL;
@@ -226,12 +259,12 @@ bst_iter_t BstInsert(bst_t *bst, const void *new_data)
 	}
 	
 	new_node->child[LEFT] = NULL;
-	new_node->child[RIGHT] = NULL;	
+	new_node->child[RIGHT] = NULL;
+	new_node->parent = parnt;	
 	new_node->data = new_data;
 	
 	return NodeToIter(new_node);	
 }
-
 
 /********************  BstBegin  ****************************/
 bst_iter_t BstBegin(const bst_t *bst)
@@ -414,39 +447,22 @@ bst_iter_t BstRemove(bst_iter_t what)
 	}
 	
 }		
-
-static IsLeftChild(bst_node_t* parnt, bst_node_t* child)
+/********************  BstGetData  ****************************/
+void *BstGetData(bst_iter_t iter)
 {
-	assert(parnt);
-	assert(child);
-	return Child == parnt->child[LEFT];
+	assert( IterToNode(iter) );
+	assert( NULL == IterToNode(iter)->parent ); /* check if dummy*/
 	
+	return IterToNode(iter)->data;
 }
 
-static IsRihtChild(bst_node_t* parnt, bst_node_t* child)
+int is_same_iter(bst_iter_t iter1, bst_iter_t iter2)
 {
-	assert(parnt);
-	assert(child);
-	return Child == parnt->child[RIGHT];
+	assert( IterToNode(iter1) );
+	assert( IterToNode(iter2) );
+	
+	return IterToNode(iter1) == IterToNode(iter2) ;
 }
-
-
-static int FindNumChilds(bst_node_t* node)
-{
-	assert(node);
-	return IsChildExist(node, LEFT) + IsChildExist(node, RIGHT);
-
-}
-
-static int IsChildExist(bst_node_t* node, int child_pos)
-{
-	assert(node);
-	return  LEFT == child_pos ? NULL != node->child[LEFT] :
-								NULL != node->child[RIGHT]; 
-}
-
-
-void *BstGetData(bst_iter_t iter);
 
 
 
