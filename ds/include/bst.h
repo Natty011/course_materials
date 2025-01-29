@@ -1,5 +1,6 @@
 /******************************************************************************
-*	Version 1.2
+*	Version 1.3 
+*   date 27.1 20:00
 ******************************************************************************/
 #ifndef __BST_H__             /* __BST_H__ */
 #define __BST_H__             /* __BST_H__ */
@@ -18,8 +19,8 @@ typedef struct bst_node *bst_iter_t;
 *   Arguments: 	* 'check_data' - current iterator data
 *				* 'new_data' - data to be inserted to the list
 *   Return: >0   if check_data is bigger than new data
-*           <0 smaller  than new data
-*           =0  or equal than new data
+*           <0 if check_data smaller than new data
+*          
 * 
 */
     typedef int( *cmp_func_t )(void* check_data , void* new_data );
@@ -116,7 +117,7 @@ int BstIsEmpty(const bst_t *bst);
 *       Name: BstSize
 *       Description: counts the number of nodes in the tree
 *       Arguments: The tree to be examined
-*       Complexity: O(n)
+*       Complexity: O(nlog(n))
 *       Return: the size of the tree.
 *       Notes:  undefined behaviour if tree is null.
 * 
@@ -144,7 +145,7 @@ bst_iter_t BstFind(const bst_t *bst, void *data_to_find);
 *       Description: performs a particular operation on each node in the list 
 *       within a range of nodes [start, end)
 *       Arguments: 	iterators to the start and end of the range. 
-*       Complexity: O(n)
+*       Complexity: O(nlog(n))
 *       Return: Success if an action was performed successfully for the entire range,
 *               else, fail (TODO stop on first failure)
 *       Notes: undefined behaviour if "start" and "end" belongs to different trees 
@@ -206,7 +207,7 @@ bst_iter_t BstNext(bst_iter_t iter);
 *       Arguments: 	* iterator
 *       Complexity: O(log(n))
 *       Return: Returns the previous node
-*       Notes: 
+*       Notes: Undefined if prev to min val.
 * 
 ******************************************************************************/
 bst_iter_t BstPrev(bst_iter_t iter);
@@ -236,8 +237,9 @@ void *BstGetData(bst_iter_t iter);
 *                   
 * 
 ******************************************************************************/
-int is_same_iter(bst_iter_t iter1, bst_iter_t iter2);
+int IsIterSame(bst_iter_t iter1, bst_iter_t iter2);
 
 
 
-#endif                          /* __BST_H__ 
+#endif                          /* __BST_H__ */
+
