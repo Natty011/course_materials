@@ -108,6 +108,34 @@ static int IsChildExist(bst_node_t* node, int child_pos)
 								NULL != node->child[RIGHT]; 
 }
 
+/********************  BstNodeMax  ****************************/
+static bst_iter_t BstNodeMax(bst_node_t* node)
+{
+	assert(node);
+	
+	while(NULL != node->child[RIGHT])
+	{
+		node = node->child[RIGHT];
+	}
+	
+	return NodeToIter(node);		
+}
+
+/********************  BstNodeBegin  ****************************/
+static bst_iter_t BstNodeBegin(bst_node_t* node)
+{
+	bst_node_t* curr_node = NULL;
+	assert(node);
+	
+	curr_node = node;
+	
+	while( NULL != curr_node->child[LEFT] )
+	{
+		curr_node = curr_node->child[LEFT];
+	}
+	
+	return NodeToIter(curr_node);
+}
 /***********End Of Static Functions definition*******/
 
 /********************  BstCreate  ****************************/
@@ -292,21 +320,7 @@ BstIsEmpty(const bst_t *bst)
 	
 	return bst->end ? FALSE : TRUE;	
 }
-/********************  BstNodeBegin  ****************************/
-static bst_iter_t BstNodeBegin(bst_node_t* node)
-{
-	bst_node_t* curr_node = NULL;
-	assert(node);
-	
-	curr_node = node;
-	
-	while( NULL != curr_node->child[LEFT] )
-	{
-		curr_node = curr_node->child[LEFT];
-	}
-	
-	return NodeToIter(curr_node);
-}
+
 /********************  BstNext  ****************************/
 bst_iter_t BstNext(bst_iter_t iter)
 {
@@ -356,18 +370,7 @@ bst_iter_t BstPrev(bst_iter_t iter)
 	return NodeToIter(parnt);
 }
 
-/********************  BstNodeMax  ****************************/
-static bst_iter_t BstNodeMax(bst_node_t* node)
-{
-	assert(node);
-	
-	while(NULL != node->child[RIGHT])
-	{
-		node = node->child[RIGHT];
-	}
-	
-	return NodeToIter(node);		
-}
+
 /********************  BstRemove  ****************************/
 	
 bst_iter_t BstRemove(bst_iter_t what)
@@ -455,7 +458,7 @@ void *BstGetData(bst_iter_t iter)
 	
 	return IterToNode(iter)->data;
 }
-
+/********************  is_same_iter  ****************************/
 int is_same_iter(bst_iter_t iter1, bst_iter_t iter2)
 {
 	assert( IterToNode(iter1) );
@@ -464,7 +467,50 @@ int is_same_iter(bst_iter_t iter1, bst_iter_t iter2)
 	return IterToNode(iter1) == IterToNode(iter2) ;
 }
 
+/********************  BstEnd  ****************************/
+bst_iter_t BstEnd(const bst_t *bst)
+{
+	assert(bst);
+	return bst->end;
+}
 
+/********************  BstFind  ****************************/
+bst_iter_t BstFind(const bst_t *bst, void *data_to_find)
+{
+	bst_node_t *curr_node = NULL;
+	int res = 0;
+	
+	assert(bst);
+	
+	if(TRUE == BstIsEmpty(bst))
+	{
+		return IterToNode(bst->end);
+	}
+	
+	curr_node = BstPrev(bst->end); /* get the root */
+	
+	while( NULL != curr_node)
+	{
+		res = cmp_func(curr_node->data, data_to_find);
+		
+		if( res > 0 )
+		{
+			curr_node  = curr_node->child[LEFT]; /* left */
+		}
+		
+		else if( res < 0 )
+		{
+			curr_node = curr_node->child[RIGHT]; /* right */
+		}
+		
+		else
+		{
+			return NodeToIter(curr_node); 
+		}
+	}
+		
+	return IterToNode(bst->end);
+}
 
 
 
