@@ -537,17 +537,21 @@ int BstForEach(bst_iter_t start, bst_iter_t end,
                  operation_func_t op_func, void *user_param)
 {
 	int op_state = SUCCESS;
-
+	 
+	assert(IterToNode(start));
+	assert(IterToNode(end));
 	assert( op_func);
 	assert(IsIterSame(start, end));
 	
-	while( !IsIterSame(start, end))
+	while( !IsIterSame(start, end) )
 	{
 		if ( op_func( BstGetData(start), user_param ) )
 		{
 			op_state = OPERATION_FAIL;
 			break;
 		}
+		
+		start = BstNext(start);
 	}
 	
 	return op_state;
