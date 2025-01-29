@@ -512,8 +512,26 @@ bst_iter_t BstFind(const bst_t *bst, void *data_to_find)
 	return IterToNode(bst->end);
 }
 
-
-
+/********************  BstSize  ****************************/
+size_t BstSize(const bst_t *bst)
+{
+	bst_iter_t *curr_iter = NULL;	
+	size_t size = 0;
+	
+	assert(bst);
+	assert(bst->end);
+	
+	curr_iter = BstNext( NodeToIter( bst->end ) );
+	
+	while( bst->end != IterToNode( curr_iter  ) ) 
+	{
+		++size;
+		curr_iter = BstNext( curr_iter );
+	
+	}
+	
+	return size;
+}
 
 
 
