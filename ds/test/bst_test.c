@@ -151,18 +151,40 @@ static void TestBst(void)
 	size_t i = 0;
 	char* arr[5] = {"a", "b", "e", "i", "c" };
 	
-	bst_t *bst1 = BstCreate(SortingFunc);	
-
+	bst_iter_t dummy_itr1;
+	bst_iter_t itr1;
+	bst_iter_t itr2;
+	bst_iter_t itr3;
 	
-	if(BstSize(bst1) != 0 || !BstIsEmpty(bst1))
+	bst_t *bst1 = BstCreate(SortingFunc);	
+	/*puts(RED);*/
+	/* || !BstIsEmpty(bst1) */
+	if( !BstIsEmpty(bst1) )  /* (BstSize(bst1) != 0 )*/
 	{
-		puts(RED);
-		puts("Failes in_1: Size & IsEmpty");
+
+		puts("Failes in_1: IsEmpty");
 		flag =  TRUE;
 	}
-		          
+	
+	if( BstSize(bst1) != 0 )  
+	{
+		puts("Failes in_1: Size");
+		flag =  TRUE;
+	}
+	
+	dummy_itr1 = BstBegin(bst1);
+	
+	if( BstEnd(bst1) != dummy_itr1 )
+	{
+		puts("Failes in_1: Begin || End ");
+		flag =  TRUE;
+	}
+	/*
+	res = BstInsert(pqueue1, arr[0]);
+	*/	          
 	if( !flag )
-	{		
+	{
+		puts(RESET);		
 		puts(BACK_BLUE"Test: Success"RESET);
 
 	}
