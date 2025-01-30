@@ -4,7 +4,10 @@
 * Date : 27 / 01 / 2025
 * Last update: 29 / 01 / 2025
 *****************************************/
-#include <stdio.h> 	/* assert */
+#ifdef PRINTS
+#include <stdio.h> 	
+#endif
+
 #include <assert.h> 	/* assert */
 #include <stdlib.h> 	/* malloc, free */
 #include "bst.h" 
@@ -73,6 +76,10 @@ static bst_iter_t BstNodeBegin(bst_node_t* node);
 static int FindNumChilds(bst_node_t* node);
 static int IsChildExist(bst_node_t* node, int child_pos);
 static int IsLeftChild(bst_node_t* parnt, bst_node_t* child);
+#ifdef PRINTS
+void Pre_Print_Tree(bst_node_t* root, bst_t *bst);
+void Aux_Pre_Print_Tree(bst_t *bst);
+#endif
 /*static int IsRightChild(bst_node_t* parnt, bst_node_t* child);*/
 /**********End of functions declaration *******/
 
@@ -532,7 +539,7 @@ size_t BstSize(const bst_t *bst)
 	
 	return size;
 }
-/********************  BstForEach  ****************************/
+
 int BstForEach(bst_iter_t start, bst_iter_t end,
                  operation_func_t op_func, void *user_param)
 {
@@ -557,5 +564,32 @@ int BstForEach(bst_iter_t start, bst_iter_t end,
 	return op_state;
 }                 
 
+/********************  Pre_Print_Tree  ****************************/
+#ifdef PRINTS
+void Pre_Print_Tree(bst_node_t* root, bst_t *bst)
+{
+	/*bst_iter_t curr_iter = root;*/
+	if(NULL != root ) /* && root != bst->end  */
+	{
+		printf("%d  ",  *(int*)BstGetData(NodeToIter(root) ) );
+		
+		puts("\n/");
+		Pre_Print_Tree(root->child[LEFT], bst);
+		puts("\\");
+		Pre_Print_Tree(root->child[RIGHT], bst);
+		/*puts("\\");*/
+		/*puts("\t");*/
+	}
+
+}
+
+
+/********************  Aux_Pre_Print_Tree  ****************************/
+void Aux_Pre_Print_Tree(bst_t *bst)
+{
+	Pre_Print_Tree(bst->end->child[LEFT] , bst);
+
+}
+#endif
 
 
