@@ -101,6 +101,8 @@ static int SortingFunc(void* check_data , void* new_data);
 
 /******************static functions definition**********************/
 
+
+
 /********************  PrintArr  ****************************/
 /* # ifndef NDEBUG */
 /*
@@ -310,7 +312,7 @@ static void TestBstTwoeNode(void)
 	for(i = 0; i <= 8; ++i)
 	{
 		itr1 = BstInsert(bst1, arr + i);
-		
+		/*Aux_Pre_Print_Tree(bst1);*/
 		min = MIN(arr[i], min);
 		max = MAX(arr[i], max);
 		/*printf("min = %d, max = %d \n", min, max);*/
@@ -333,7 +335,9 @@ static void TestBstTwoeNode(void)
 			printf("Failes in_2: Insert || Prev Iteration: %lu \n", i);
 			flag =  TRUE;
 		}
-	}	
+	}
+	
+	Aux_Pre_Print_Tree(bst1);	
 
 	BstDestroy(bst1);
 	bst1 = NULL;
@@ -351,7 +355,6 @@ static void TestBstTwoeNode(void)
 	{
 		puts(RESET);		
 		puts(BACK_BLUE"Test: Success"RESET);
-
 	}
 	
 	else
