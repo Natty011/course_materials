@@ -62,6 +62,8 @@ typedef enum
 	
 }nume_of_childs_t;
 
+int destroy_check = SUCCESS; /* extern*/
+
 /***************End of struct and enum declaration *******/
 
 /***********Functions declaration*******/
@@ -176,7 +178,7 @@ bst_t *BstCreate(cmp_func_t sort_func)
 void BstDestroy(bst_t *bst)
 {
 	bst_node_t *curr_node = NULL, *curr_node_next = NULL;
-
+	/*int destroy_check = 1 ;*/
 	if(NULL == bst)
 	{
 		return;
@@ -192,6 +194,11 @@ void BstDestroy(bst_t *bst)
 		curr_node = curr_node_next;
 	}
 	
+	if( TRUE == BstIsEmpty(bst) )
+	{
+	   destroy_check = OPERATION_FAIL;
+		/*printf("destroy_check = %d\n", destroy_check);*/
+	}
 	free(bst->end);
 	bst->end = NULL;
 	
@@ -327,8 +334,7 @@ bst_iter_t BstPrev(bst_iter_t iter)
 	
 	assert(IterToNode(iter));
 	curr_node = NodeToIter(iter);
-	assert(  NULL == curr_node->parent ); /* iter is dummy */
-		
+	
 	if(NULL != curr_node->child[LEFT] )
 	{
 		return BstNodeMax( curr_node->child[LEFT] );
