@@ -194,10 +194,9 @@ void BstDestroy(bst_t *bst)
 		curr_node = curr_node_next;
 	}
 	
-	if( TRUE == BstIsEmpty(bst) )
+	if( TRUE != BstIsEmpty(bst) )
 	{
 	   destroy_check = OPERATION_FAIL;
-		/*printf("destroy_check = %d\n", destroy_check);*/
 	}
 	free(bst->end);
 	bst->end = NULL;
@@ -400,6 +399,9 @@ bst_iter_t BstRemove(bst_iter_t what)
 			{
 				parnt->child[RIGHT] = curr_node->child[LEFT];	
 			}
+			
+			curr_node->child[LEFT]->parent = parnt;
+				
 		}
 		else
 		{
@@ -412,7 +414,10 @@ bst_iter_t BstRemove(bst_iter_t what)
 			{
 				parnt->child[RIGHT] = curr_node->child[RIGHT];	
 			}
+			
+			curr_node->child[RIGHT]->parent = parnt;
 		}
+		
 		
 		free(curr_node);
 		curr_node = NULL;
@@ -431,7 +436,7 @@ bst_iter_t BstRemove(bst_iter_t what)
 		if(	IsChildExist(l_child, RIGHT) )
 		{
 			parnt->child[LEFT] = l_child->child[RIGHT];
-			
+			l_child->child[RIGHT]->parent = parnt;
 		}
 		
 		else
@@ -539,7 +544,7 @@ int BstForEach(bst_iter_t start, bst_iter_t end,
 	assert(IterToNode(start));
 	assert(IterToNode(end));
 	assert( op_func);
-	assert(IsIterSame(start, end));
+	/*assert(IsIterSame(start, end));*/
 	
 	while( !IsIterSame(start, end) )
 	{
