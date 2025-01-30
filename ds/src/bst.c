@@ -4,6 +4,7 @@
 * Date : 27 / 01 / 2025
 * Last update: 29 / 01 / 2025
 *****************************************/
+#include <stdio.h> 	/* assert */
 #include <assert.h> 	/* assert */
 #include <stdlib.h> 	/* malloc, free */
 #include "bst.h" 
@@ -210,7 +211,7 @@ void BstDestroy(bst_t *bst)
 bst_iter_t BstInsert(bst_t *bst, const void *new_data)
 {
 	bst_node_t *new_node = NULL, *parnt = NULL, *curr_node = NULL;
-	int res = 0;
+	int res = 0, what_child = LEFT;
 	
 	assert(bst);
 	
@@ -244,24 +245,17 @@ bst_iter_t BstInsert(bst_t *bst, const void *new_data)
 		if( res > 0 )
 		{
 			curr_node  = curr_node->child[LEFT]; /* left */
+			what_child = LEFT;
 		}
 		
 		else 
 		{
 			curr_node = curr_node->child[RIGHT]; /* right */
+			what_child = RIGHT;
 		}
 	}
 	
-	if( res > 0 )
-	{
-		parnt->child[LEFT] = new_node;	
-	}
-	
-	else
-	{
-		parnt->child[RIGHT] = new_node;
-	}
-	
+	parnt->child[what_child] = new_node;
 	new_node->child[LEFT] = NULL;
 	new_node->child[RIGHT] = NULL;
 	new_node->parent = parnt;	
@@ -312,12 +306,13 @@ bst_iter_t BstNext(bst_iter_t iter)
 		return iter;
 	}
 	
-	if(  NULL != curr_node->child[RIGHT] ) 
+	if( NULL != curr_node->child[RIGHT] ) 
     {
- 		return BstNodeBegin(curr_node);
+		/*printf(" GetData = %d, \n",  *(int*)BstGetData(curr_node) );*/
+ 		return BstNodeBegin(curr_node->child[RIGHT]);
 	}
 	
-	while(curr_node != parnt->child[LEFT] )
+	while( curr_node != parnt->child[LEFT] )
 	{
 		curr_node = parnt;
 		parnt = curr_node->parent;
@@ -521,16 +516,18 @@ size_t BstSize(const bst_t *bst)
 	assert(bst);
 	assert(bst->end);
 	
-	if( NULL == bst->end->child[LEFT])
+	if( TRUE == BstIsEmpty(bst) ) /* NULL == bst->end->child[LEFT] */
 	{
 		return size;
 	}
-	curr_iter = BstPrev( NodeToIter( bst->end ) );
-	
-	while( bst->end != IterToNode( curr_iter  ) ) 
+	curr_iter = BstBegin( bst ); /* BstPrev( NodeToIter( bst->end ) ); */
+	/*printf(" GetData = %d, \n",  *(int*)BstGetData(curr_iter) );*/
+	while(( NULL != IterToNode(curr_iter)->parent) &&  bst->end != IterToNode( curr_iter  ) ) 
 	{
 		++size;
+		/*printf(" GetData = %d, \n",  *(int*)BstGetData(curr_iter) );*/
 		curr_iter = BstNext( curr_iter );
+
 	}
 	
 	return size;
