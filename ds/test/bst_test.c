@@ -159,7 +159,7 @@ static void TestBstOneNode(void)
 {	
 	int flag = FALSE;
 
-	int arr[10] = {100, 70, 110, 85, 80, 75 ,65 , 85 };
+	int arr[8] = {100, 70, 110, 85, 80, 75 ,65 , 85 };
 	
 	bst_iter_t dummy_itr1;
 	bst_iter_t itr1;
@@ -274,15 +274,17 @@ static void TestBstOneNode(void)
 /********************  TestBstOneNode  ****************************/
 static void TestBstTwoeNode(void)
 {	
-	int arr[9] = {100, 70, 110, 85, 80, 75 ,65 , 67, 130 };
-	
+	int arr[11] = {100, 70, 110, 85, 80, 75 ,65 , 67, 130, 30, 150};
+	int arr_sort[11] = {30, 65, 72, 70, 75, 80, 85 ,100 , 110, 130, 150};
 	int flag = FALSE, max = arr[0], min = arr[0];
 	size_t i = 0;
 
 	bst_iter_t dummy_itr1;
 	bst_iter_t itr1;
-	/*bst_iter_t itr2;*/
-	/*bst_iter_t itr3;*/
+	bst_iter_t itr2;
+	bst_iter_t itr3;
+	bst_iter_t itr4;
+	bst_iter_t itr5;
 	
 	bst_t *bst1 = BstCreate(SortingFunc);	
 	/*puts(RED);*/
@@ -309,7 +311,7 @@ static void TestBstTwoeNode(void)
 	}
 	/*printf("size = %lu\n", BstSize(bst1) );*/
 
-	for(i = 0; i <= 8; ++i)
+	for(i = 0; i <= 10; ++i)
 	{
 		itr1 = BstInsert(bst1, arr + i);
 		/*Aux_Pre_Print_Tree(bst1);*/
@@ -335,16 +337,59 @@ static void TestBstTwoeNode(void)
 			printf("Failes in_2: Insert || Prev Iteration: %lu \n", i);
 			flag =  TRUE;
 		}
+	
 	}
 	
-	Aux_Pre_Print_Tree(bst1);	
-
+	/*Aux_Pre_Print_Tree(bst1, 0);*/
+	
+	itr3 = BstFind(bst1, arr + 3); /* 85 */
+	itr2 = BstFind(bst1, arr); /* 100 (root) */
+	/*printf(" GetData_itr3 = %d, \n",  *(int*)BstGetData(itr3) );*/
+	
+	if(SortingFunc(BstGetData(itr3)  ,arr + 3 )) 
+	{
+		puts("Failes in_2: Find");
+		flag =  TRUE;	
+	}
+	
+	if( TRUE != IsIterSame(itr2 , BstNext(itr3)) )  /* itr3->data == 85 */
+	{
+		puts("Failes in_2: Next");
+		flag =  TRUE;	
+	}
+	
+	if( TRUE != IsIterSame(dummy_itr1 , BstNext(itr1)) ) /* itr1->data == 150 */
+	{
+		puts("Failes in_3: Next");
+		flag =  TRUE;	
+	}
+	itr4 = BstNext(itr1);
+	itr5 = BstBegin(bst1);
+	/* || SUCCESS != BstForEach(BstPrev(itr4), itr4, SortingFunc, arr_sort + 10 - i) */
+	for( i = 0; i <= 10; ++i)
+	{
+		if( SUCCESS != BstForEach(itr5, BstNext(itr5), SortingFunc, arr_sort + i) )  
+			 
+		{
+			printf("Iteration = %lu \n",  i);
+			puts("Failes in_3: ForEach");
+			flag =  TRUE;
+	
+		}
+		
+		itr2 = BstNext(itr2);
+		itr4 = BstPrev(itr4);
+	
+	} 
+	
+	/*Aux_Pre_Print_Tree(bst1, 0);*/	
+	
 	BstDestroy(bst1);
 	bst1 = NULL;
 	
 	if( OPERATION_FAIL == destroy_check )
 	{
-		puts("Failes in_1: Destroy");
+		puts("Failes in_1: Destroy || Remove ");
 		flag =  TRUE;
 	}
 	/*printf("destroy_check = %d\n", destroy_check);*/
