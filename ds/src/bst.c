@@ -296,13 +296,12 @@ bst_iter_t BstNext(bst_iter_t iter)
 {
 	bst_node_t *curr_node = NULL, *parnt = NULL;
 	assert( IterToNode(iter) );
-	assert(  NULL == IterToNode(iter)->parent ); /* iter is dummy */
-	
+
 	curr_node = IterToNode(iter);
 	
 	parnt  = curr_node->parent;
 	
-	if( NULL == parnt ) /* parnt */
+	if( NULL == parnt ) /* iter is dummy end */
 	{
 		return iter;
 	}
@@ -356,7 +355,7 @@ bst_iter_t BstRemove(bst_iter_t what)
 			 *curr_node_next = NULL, *l_child = NULL;
 	
 	assert(IterToNode(what));
-	
+	curr_node = IterToNode(what);
 	parnt = curr_node->parent;
 	assert( parnt ); /* check if curr_node is a dummy end */
 	curr_node_next = BstNext(what);
@@ -444,7 +443,7 @@ bst_iter_t BstRemove(bst_iter_t what)
 void *BstGetData(bst_iter_t iter)
 {
 	assert( IterToNode(iter) );
-	assert( NULL == IterToNode(iter)->parent ); /* check if dummy*/
+	/*assert( NULL == IterToNode(iter)->parent ); *//* check if dummy*/
 	
 	return IterToNode(iter)->data;
 }
@@ -515,7 +514,7 @@ size_t BstSize(const bst_t *bst)
 	{
 		return size;
 	}
-	curr_iter = BstNext( NodeToIter( bst->end ) );
+	curr_iter = BstPrev( NodeToIter( bst->end ) );
 	
 	while( bst->end != IterToNode( curr_iter  ) ) 
 	{
