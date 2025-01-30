@@ -36,6 +36,7 @@
 #define DEBUG		"DEBUG MODE"
 #define RELEASE		"RELEASE MODE"
 
+extern int destroy_check;
 /***************struct and enum declaration *******/
 
 /** possible return values **/
@@ -194,14 +195,13 @@ static void TestBst(void)
 		flag =  TRUE;
 	}
 	
-	if( itr1 != BstPrev(dummy_itr1) )
+	if( itr1 != BstPrev(dummy_itr1) || dummy_itr1 != BstPrev(itr1) )
 	{
 		puts("Failes in_1: Prev");
 		flag =  TRUE;	
 	}
 	
-	if( dummy_itr1 != BstNext(dummy_itr1) ||
-	     dummy_itr1 != BstNext(itr1) )
+	if( dummy_itr1 != BstNext(dummy_itr1) || dummy_itr1 != BstNext(itr1) )
 	{
 		puts("Failes in_1: Next");
 		flag =  TRUE;	
@@ -214,9 +214,27 @@ static void TestBst(void)
 		flag =  TRUE;	
 	}
 	
+	/*if (BstForEach(*/
+	
+	if( dummy_itr1 != BstRemove(itr1) || BstSize(bst1) != 0 )
+	{
+		puts("Failes in_1: Remove || Size");
+		flag =  TRUE;	
+	}
+	
+	itr1 = BstInsert(bst1, arr);  
+	BstDestroy(bst1);
+	bst1 = NULL;
+	
+	if( OPERATION_FAIL == destroy_check )
+	{
+		puts("Failes in_1: Destroy");
+		flag =  TRUE;
+	}
+	/*printf("destroy_check = %d\n", destroy_check);*/
 	/*BstFind*/
 	/*itr1 = BstInsert(bst1, arr);*/
-		   
+
 	if( !flag )
 	{
 		puts(RESET);		
@@ -229,8 +247,8 @@ static void TestBst(void)
 		puts(BACK_YELLOW"Test: Failure"RESET);	
 	}
 	
-	BstDestroy(bst1);
-	bst1 = NULL;
+
+
 
 }
 
