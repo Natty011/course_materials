@@ -85,7 +85,8 @@ typedef enum
 /***************End of struct and enum declaration *******/
 
 /***************************function declaration**************************/
-static void TestBst(void);
+static void TestBstOneNode(void);
+static void TestBstTwoeNode(void);
 /*
 static int match_func (void *check_data, void *user_param);
 static int priority_func(void *check_data, void *user_param );
@@ -135,8 +136,12 @@ int main ()
 
 	puts(BLUE"====================================================="RESET);
 	printf("%sTEST: %s "RESET" \n", background,  mode);
-   	puts(BACK_BLUE"'TestBst()'"RESET);
-    TestBst();
+   	puts(BACK_BLUE"'TestBstOneNode()'"RESET);
+    TestBstOneNode();
+       
+ 	puts(BLUE"====================================================="RESET);  	
+   	puts(BACK_BLUE"'TestBstTwoeNode()'"RESET);
+    TestBstTwoeNode();
     
 	puts(BLUE"====================================================="RESET);
 
@@ -144,9 +149,125 @@ int main ()
 }
 
 
+/********************  TestBstOneNode  ****************************/
+static void TestBstOneNode(void)
+{	
+	int flag = FALSE;
 
-/********************  Test2Block  ****************************/
-static void TestBst(void)
+	int arr[10] = {100, 70, 110, 85, 80, 75 ,65 , 85 };
+	
+	bst_iter_t dummy_itr1;
+	bst_iter_t itr1;
+
+	bst_t *bst1 = BstCreate(SortingFunc);	
+	puts(RED);
+
+	if( !BstIsEmpty(bst1) ) 
+	{
+
+		puts("Failes in_1: IsEmpty");
+		flag =  TRUE;
+	}
+	
+	if( BstSize(bst1) != 0 )  
+	{
+		puts("Failes in_1: Size");
+		flag =  TRUE;
+	}
+	
+	dummy_itr1 = BstBegin(bst1);
+	
+	if( BstEnd(bst1) != dummy_itr1 )
+	{
+		puts("Failes in_1: Begin || End ");
+		flag =  TRUE;
+	}
+	
+	itr1 = BstInsert(bst1, arr);
+	/* SortingFunc(BstGetData(itr1) ,BstGetData(BstBegin(bst1))) */
+	/* BstSize(bst1) != 1 || */
+	/* BstIsEmpty(bst1)  */
+	/* *arr != *(int*)BstGetData(BstBegin(bst1)) */
+	/*printf("size = %lu\n", BstSize(bst1) );*/
+	if( SortingFunc(BstGetData(itr1) ,BstGetData(BstBegin(bst1)))  
+	     || BstSize(bst1) != 1 || BstIsEmpty(bst1) )
+		 
+	{
+		puts("Failes in_1: Insert || Begin || GetData || Size || IsEmpty");
+		flag =  TRUE;
+	}
+	
+	if( itr1 != BstPrev(dummy_itr1) || dummy_itr1 != BstPrev(itr1) )
+	{
+		puts("Failes in_1: Prev");
+		flag =  TRUE;	
+	}
+	
+	if( dummy_itr1 != BstNext(dummy_itr1) || dummy_itr1 != BstNext(itr1) )
+	{
+		puts("Failes in_1: Next");
+		flag =  TRUE;	
+	}
+	
+	if( itr1 != BstFind(bst1, arr) || dummy_itr1 != BstFind(bst1, arr + 1) 
+		|| dummy_itr1 != BstFind(bst1, arr + 2) )
+	{
+		puts("Failes in_1: Find");
+		flag =  TRUE;	
+	}
+	
+	if( TRUE != IsIterSame(itr1, itr1) || 
+		FALSE != IsIterSame(itr1, dummy_itr1) )
+	{
+		puts("Failes in_1: IsIterSame");
+		flag =  TRUE;
+	} 
+	
+	if( SUCCESS != BstForEach(itr1, dummy_itr1, SortingFunc, arr) || 
+		OPERATION_FAIL != BstForEach(itr1, dummy_itr1, SortingFunc, arr + 1) )
+	{
+		puts("Failes in_1: ForEach");
+		flag =  TRUE;
+	
+	} 
+	
+	if( dummy_itr1 != BstRemove(itr1) || BstSize(bst1) != 0 )
+	{
+		puts("Failes in_1: Remove || Size");
+		flag =  TRUE;	
+	}
+	
+	itr1 = BstInsert(bst1, arr);  
+	BstDestroy(bst1);
+	bst1 = NULL;
+	
+	if( OPERATION_FAIL == destroy_check )
+	{
+		puts("Failes in_1: Destroy");
+		flag =  TRUE;
+	}
+	/*printf("destroy_check = %d\n", destroy_check);*/
+	/*BstFind*/
+	/*itr1 = BstInsert(bst1, arr);*/
+
+	if( !flag )
+	{
+		puts(RESET);		
+		puts(BACK_BLUE"Test: Success"RESET);
+
+	}
+	
+	else
+	{
+		puts(BACK_YELLOW"Test: Failure"RESET);	
+	}
+	
+}
+
+
+
+/********************  TestBstOneNode  ****************************/
+static void TestBstTwoeNode(void)
 {	
 	int flag = FALSE, res = 0;
 	size_t i = 0;
@@ -214,7 +335,20 @@ static void TestBst(void)
 		flag =  TRUE;	
 	}
 	
-	/*if (BstForEach(*/
+	if( TRUE != IsIterSame(itr1, itr1) || 
+		FALSE != IsIterSame(itr1, dummy_itr1) )
+	{
+		puts("Failes in_1: IsIterSame");
+		flag =  TRUE;
+	} 
+	
+	if( SUCCESS != BstForEach(itr1, dummy_itr1, SortingFunc, arr) || 
+		OPERATION_FAIL != BstForEach(itr1, dummy_itr1, SortingFunc, arr + 1) )
+	{
+		puts("Failes in_1: ForEach");
+		flag =  TRUE;
+	
+	} 
 	
 	if( dummy_itr1 != BstRemove(itr1) || BstSize(bst1) != 0 )
 	{
@@ -247,11 +381,7 @@ static void TestBst(void)
 		puts(BACK_YELLOW"Test: Failure"RESET);	
 	}
 	
-
-
-
 }
-
 /*******************match_function*********************/
 /*
 static int match_func(void *check_data, void *user_param )
