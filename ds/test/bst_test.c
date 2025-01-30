@@ -149,7 +149,7 @@ static void TestBst(void)
 {	
 	int flag = FALSE, res = 0;
 	size_t i = 0;
-	char* arr[5] = {"a", "b", "e", "i", "c" };
+	int arr[10] = {100, 70, 110, 85, 80, 75 ,65 , 85 };
 	
 	bst_iter_t dummy_itr1;
 	bst_iter_t itr1;
@@ -179,9 +179,44 @@ static void TestBst(void)
 		puts("Failes in_1: Begin || End ");
 		flag =  TRUE;
 	}
-	/*
-	res = BstInsert(pqueue1, arr[0]);
-	*/	          
+	
+	itr1 = BstInsert(bst1, arr);
+	/* SortingFunc(BstGetData(itr1) ,BstGetData(BstBegin(bst1))) */
+	/* BstSize(bst1) != 1 || */
+	/* BstIsEmpty(bst1)  */
+	/* *arr != *(int*)BstGetData(BstBegin(bst1)) */
+	/*printf("size = %lu\n", BstSize(bst1) );*/
+	if( SortingFunc(BstGetData(itr1) ,BstGetData(BstBegin(bst1)))  
+	     || BstSize(bst1) != 1 || BstIsEmpty(bst1) )
+		 
+	{
+		puts("Failes in_1: Insert || Begin || GetData || Size || IsEmpty");
+		flag =  TRUE;
+	}
+	
+	if( itr1 != BstPrev(dummy_itr1) )
+	{
+		puts("Failes in_1: Prev");
+		flag =  TRUE;	
+	}
+	
+	if( dummy_itr1 != BstNext(dummy_itr1) ||
+	     dummy_itr1 != BstNext(itr1) )
+	{
+		puts("Failes in_1: Next");
+		flag =  TRUE;	
+	}
+	
+	if( itr1 != BstFind(bst1, arr) || dummy_itr1 != BstFind(bst1, arr + 1) 
+		|| dummy_itr1 != BstFind(bst1, arr + 2) )
+	{
+		puts("Failes in_1: Find");
+		flag =  TRUE;	
+	}
+	
+	/*BstFind*/
+	/*itr1 = BstInsert(bst1, arr);*/
+		   
 	if( !flag )
 	{
 		puts(RESET);		
