@@ -36,6 +36,9 @@
 #define DEBUG		"DEBUG MODE"
 #define RELEASE		"RELEASE MODE"
 
+#define MIN(a, b)		((a > b ) ? b : a )
+#define MAX(a, b)		((a > b ) ? a : b )
+
 extern int destroy_check;
 /***************struct and enum declaration *******/
 
@@ -160,7 +163,7 @@ static void TestBstOneNode(void)
 	bst_iter_t itr1;
 
 	bst_t *bst1 = BstCreate(SortingFunc);	
-	puts(RED);
+	/*puts(RED);*/
 
 	if( !BstIsEmpty(bst1) ) 
 	{
@@ -269,28 +272,29 @@ static void TestBstOneNode(void)
 /********************  TestBstOneNode  ****************************/
 static void TestBstTwoeNode(void)
 {	
-	int flag = FALSE, res = 0;
-	size_t i = 0;
-	int arr[10] = {100, 70, 110, 85, 80, 75 ,65 , 85 };
+	int arr[9] = {100, 70, 110, 85, 80, 75 ,65 , 67, 130 };
 	
+	int flag = FALSE, max = arr[0], min = arr[0];
+	size_t i = 0;
+
 	bst_iter_t dummy_itr1;
 	bst_iter_t itr1;
-	bst_iter_t itr2;
-	bst_iter_t itr3;
+	/*bst_iter_t itr2;*/
+	/*bst_iter_t itr3;*/
 	
 	bst_t *bst1 = BstCreate(SortingFunc);	
 	/*puts(RED);*/
-	/* || !BstIsEmpty(bst1) */
-	if( !BstIsEmpty(bst1) )  /* (BstSize(bst1) != 0 )*/
+
+	if( !BstIsEmpty(bst1) )  
 	{
 
-		puts("Failes in_1: IsEmpty");
+		puts("Failes in_2: IsEmpty");
 		flag =  TRUE;
 	}
 	
 	if( BstSize(bst1) != 0 )  
 	{
-		puts("Failes in_1: Size");
+		puts("Failes in_2: Size");
 		flag =  TRUE;
 	}
 	
@@ -298,16 +302,78 @@ static void TestBstTwoeNode(void)
 	
 	if( BstEnd(bst1) != dummy_itr1 )
 	{
-		puts("Failes in_1: Begin || End ");
+		puts("Failes in_2: Begin || End ");
 		flag =  TRUE;
 	}
+	/*printf("size = %lu\n", BstSize(bst1) );*/
+
+	for(i = 0; i <= 8; ++i)
+	{
+		itr1 = BstInsert(bst1, arr + i);
+		
+		min = MIN(arr[i], min);
+		max = MAX(arr[i], max);
+		/*printf("min = %d, max = %d \n", min, max);*/
+		/*printf(" GetData = %d, \n",  *(int*)BstGetData(itr1) );*/
+		/*printf("size = %lu, Iteration = %lu \n", BstSize(bst1) , i);*/
+		if(	BstSize(bst1) != (i + 1) )
+		{
+			printf("Failes in_2: Size || Next || Insert, Iteration = %lu \n", i);
+			flag =  TRUE;
+		}
+		
+		if( SortingFunc(BstGetData(BstBegin(bst1) ) , &min ) ) 
+		{
+			printf("Failes in_2: Insert || Begin Iteration: %lu \n", i);
+			flag =  TRUE;
+		}
+		
+		if( SortingFunc(BstGetData(BstPrev(dummy_itr1) ) , &max ) )
+		{
+			printf("Failes in_2: Insert || Prev Iteration: %lu \n", i);
+			flag =  TRUE;
+		}
+	}	
+
+	BstDestroy(bst1);
+	bst1 = NULL;
 	
-	itr1 = BstInsert(bst1, arr);
+	if( OPERATION_FAIL == destroy_check )
+	{
+		puts("Failes in_1: Destroy");
+		flag =  TRUE;
+	}
+	/*printf("destroy_check = %d\n", destroy_check);*/
+	/*BstFind*/
+	/*itr1 = BstInsert(bst1, arr);*/
+
+	if( !flag )
+	{
+		puts(RESET);		
+		puts(BACK_BLUE"Test: Success"RESET);
+
+	}
+	
+	else
+	{
+		puts(BACK_YELLOW"Test: Failure"RESET);	
+	}
+	
+}    
+		
+/*******************SortingFunc*********************/
+static int SortingFunc(void* check_data , void* new_data)
+{
+	return (*(int*)check_data - *(int*)new_data);
+}
+
+	/*itr1 = BstInsert(bst1, arr);*/
 	/* SortingFunc(BstGetData(itr1) ,BstGetData(BstBegin(bst1))) */
 	/* BstSize(bst1) != 1 || */
 	/* BstIsEmpty(bst1)  */
 	/* *arr != *(int*)BstGetData(BstBegin(bst1)) */
 	/*printf("size = %lu\n", BstSize(bst1) );*/
+	/*
 	if( SortingFunc(BstGetData(itr1) ,BstGetData(BstBegin(bst1)))  
 	     || BstSize(bst1) != 1 || BstIsEmpty(bst1) )
 		 
@@ -355,33 +421,9 @@ static void TestBstTwoeNode(void)
 		puts("Failes in_1: Remove || Size");
 		flag =  TRUE;	
 	}
+	*/
 	
-	itr1 = BstInsert(bst1, arr);  
-	BstDestroy(bst1);
-	bst1 = NULL;
 	
-	if( OPERATION_FAIL == destroy_check )
-	{
-		puts("Failes in_1: Destroy");
-		flag =  TRUE;
-	}
-	/*printf("destroy_check = %d\n", destroy_check);*/
-	/*BstFind*/
-	/*itr1 = BstInsert(bst1, arr);*/
-
-	if( !flag )
-	{
-		puts(RESET);		
-		puts(BACK_BLUE"Test: Success"RESET);
-
-	}
-	
-	else
-	{
-		puts(BACK_YELLOW"Test: Failure"RESET);	
-	}
-	
-}
 /*******************match_function*********************/
 /*
 static int match_func(void *check_data, void *user_param )
@@ -405,11 +447,6 @@ static int Compare(const void* a, const void* b)
     return (*(int*)a - *(int*)b);
 }
 */
-/*******************SortingFunc*********************/
-static int SortingFunc(void* check_data , void* new_data)
-{
-	return (*(int*)check_data - *(int*)new_data);
-}
 
 
 /*
