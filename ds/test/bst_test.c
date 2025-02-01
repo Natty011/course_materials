@@ -78,11 +78,7 @@ typedef enum
 
 /*
 	#ifdef PRINTS
-	PrintArr(arr, 10);
-	#endif
-	
-	# ifndef NDEBUG
-	PrintArr(arr, 10);
+		Aux_Pre_Print_Tree(bst1, 0);
 	#endif
 */
 /***************End of struct and enum declaration *******/
@@ -276,6 +272,10 @@ static void TestBstTwoeNode(void)
 {	
 	int arr[11] = {100, 70, 110, 85, 80, 75 ,65 , 67, 130, 30, 150};
 	int arr_sort[11] = {30, 65, 67, 70, 75, 80, 85 ,100 , 110, 130, 150};
+	int to_insert[10] = { 76 }; 
+	
+	int* data = NULL;
+	
 	int flag = FALSE, max = arr[0], min = arr[0];
 	size_t i = 0;
 
@@ -285,6 +285,8 @@ static void TestBstTwoeNode(void)
 	bst_iter_t itr3;
 	bst_iter_t itr4;
 	bst_iter_t itr5;
+	bst_iter_t itr6;
+	bst_iter_t itr7;
 	
 	bst_t *bst1 = BstCreate(SortingFunc);	
 	/*puts(RED);*/
@@ -363,14 +365,15 @@ static void TestBstTwoeNode(void)
 		puts("Failes in_3: Next");
 		flag =  TRUE;	
 	}
-	itr4 = BstNext(itr1);
-	itr5 = BstBegin(bst1);
-	/* || SUCCESS != BstForEach(BstPrev(itr4), itr4, SortingFunc, arr_sort + 10 - i) */
+	
+	/*printf(" GetData_itr4 = %d, \n",  *(int*)BstGetData(itr4) );*/
+	/*printf(" GetData_BstNext(itr5) = %d, \n",  *(int*)BstGetData(BstNext(itr5)) );*/
+	
+	itr4 = BstNext(itr1); /* itr4->data == end->data*/
+	itr5 = BstBegin(bst1); /* itr5->data == 30*/
 	for( i = 0; i <= 10; ++i)
 	{
 		
-		/*printf(" GetData_itr4 = %d, \n",  *(int*)BstGetData(itr4) );*/
-			/*printf(" GetData_BstNext(itr5) = %d, \n",  *(int*)BstGetData(BstNext(itr5)) );*/
 		if( SUCCESS != BstForEach(itr5, BstNext(itr5), SortingFunc, arr_sort + i)
 			|| SUCCESS != BstForEach(BstPrev(itr4), itr4, SortingFunc, arr_sort + 10 - i) )  
 		{
@@ -381,19 +384,85 @@ static void TestBstTwoeNode(void)
 	
 		}
 		itr5 = BstNext(itr5);
-		/*itr2 = BstNext(itr2);*/
 		itr4 = BstPrev(itr4);
 	
 	} 
 	
-	/*Aux_Pre_Print_Tree(bst1, 0);*/	
+	/*Aux_Pre_Print_Tree(bst1, 0);*/
 	
+	/*printf(" GetData_BstPrev(itr5) = %d, \n",  *(int*)BstGetData(BstPrev(itr5)) );*/
+	itr5 = BstPrev(itr5); /* the Prev result: itr5->data == 150 */
+	itr6 = BstFind(bst1, arr_sort + 9); /*itr6->data == 130  */
+	itr6 = BstRemove(itr6); /* the node (itr6) has one child */
+	itr7 = BstFind(bst1, arr_sort + 8); /*itr7->data == 110  */
+	
+	if( !IsIterSame(itr6, itr5) || BstSize(bst1) != 10 || 
+		!IsIterSame(itr6, BstNext(itr7)) || !IsIterSame(BstPrev(itr6), itr7) )
+	{
+		puts("Failes in_3 - One child case: Remove ");
+		flag =  TRUE;
+	}
+		
+	/*Aux_Pre_Print_Tree(bst1, 0);*/
+	itr1 = BstInsert(bst1, to_insert); /* itr1->data == 76*/
+	if ( BstSize(bst1) != 11)
+	{
+		puts("Failes in_3: Insert");
+		flag =  TRUE;
+	}
+	
+	itr3 = BstFind(bst1, arr_sort + 3); /*itr3->data == 70 */
+	itr4 = BstNext(itr3); /*itr4->data == 75 */
+	
+	data = BstGetData(itr4); /* 75 */
+	
+	itr5 = BstNext(itr4); /*itr5->data == 76 */
+	itr6 = BstNext(itr5); /*itr6->data == 80 */
+	
+	/*Aux_Pre_Print_Tree(bst1, 0);*/
+		
+	itr3 = BstRemove(itr3); /* the node (itr3) has two childs */
+	/*After remove: itr3->data == 75 */
+
+	if( SortingFunc(BstGetData(itr3), data) ||
+		!IsIterSame(BstNext(itr3), itr5) || BstSize(bst1) != 10 )
+	{
+		puts("Failes in_4 - Two childs case: Remove ");
+		flag =  TRUE;
+	}
+	
+	data = BstGetData(BstNext(itr3)); /* 76 */
+	itr3 = BstRemove(itr3); /* itr3->data == 75, the node has two childs */
+
+	if( SortingFunc(BstGetData(itr3), data) ||
+		!IsIterSame(BstNext(itr3), itr6) || BstSize(bst1) != 9 )
+	{
+		puts("Failes in_5 - Two childs case: Remove ");
+		flag =  TRUE;
+	}
+	
+	itr2 = BstFind(bst1, arr); /* itr2->data == 100 ,  (root) */
+	printf(" GetData_(itr2) = %d, \n",  *(int*)BstGetData(itr2) );
+	data = BstGetData(BstNext(itr2)); /* 110 */
+	printf(" GetData_BstNext(itr2) = %d, \n",  *(int*)BstGetData(BstNext(itr2)) );
+	itr3 = BstNext(BstNext(itr2)); /* itr2->data == 150 */
+	printf(" GetData_(itr3) = %d, \n",  *(int*)BstGetData(itr3) );
+	/*itr2 = BstRemove(itr2); *//* the node has two childs */
+	/*After remove: itr2->data == 110 */
+	/*
+	if( SortingFunc(BstGetData(itr2), data) ||
+		!IsIterSame(BstNext(itr2), itr3) || BstSize(bst1) != 8 )
+	{
+		puts("Failes in_5 - Two childs case: Remove ");
+		flag =  TRUE;
+	}
+	*/
 	BstDestroy(bst1);
 	bst1 = NULL;
 	
 	if( OPERATION_FAIL == destroy_check )
 	{
-		puts("Failes in_1: Destroy || Remove ");
+		puts("Failes in_2: Destroy || Remove ");
 		flag =  TRUE;
 	}
 	/*printf("destroy_check = %d\n", destroy_check);*/
