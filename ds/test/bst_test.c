@@ -1,8 +1,8 @@
 /***************************************
 * Author : Natty
-* Reviewer : David
+* Reviewer : Matan
 * Date : 22 / 01 / 2025
-* Last update: 23 / 01 / 2025
+* Last update: 01 / 02 / 2025
 *****************************************/
 
 #include <stdio.h> 		/* printf, puts, qsort  */
@@ -86,40 +86,17 @@ typedef enum
 /***************************function declaration**************************/
 static void TestBstOneNode(void);
 static void TestBstTwoeNode(void);
-/*
-static int match_func (void *check_data, void *user_param);
-static int priority_func(void *check_data, void *user_param );
-static int Compare(const void* a, const void* b);
-*/
 static int SortingFunc(void* check_data , void* new_data);
-/*static void PrintArr(int* arr, size_t len);*/
+
 /***************************End of function declaration******************/
 
 /******************static functions definition**********************/
-
-
-
-/********************  PrintArr  ****************************/
-/* # ifndef NDEBUG */
-/*
-	#ifdef PRINTS
-static void PrintArr(int* arr, size_t len)
-{	
-	size_t i = 0;
 		
-	for(i = 0; i < len; ++i)
-	{
-		printf("arr[%lu] = %d ", i, arr[i]);
-		puts("");
-	}
-	
+/*******************SortingFunc*********************/
+static int SortingFunc(void* check_data , void* new_data)
+{
+	return (*(int*)check_data - *(int*)new_data);
 }
-	
-#endif
-*/
-/********************  Compare  ****************************/
-
-
 
 /******************End of static functions definition**********************/
 
@@ -161,7 +138,7 @@ static void TestBstOneNode(void)
 	bst_iter_t itr1;
 
 	bst_t *bst1 = BstCreate(SortingFunc);	
-	/*puts(RED);*/
+	puts(RED);
 
 	if( !BstIsEmpty(bst1) ) 
 	{
@@ -185,11 +162,6 @@ static void TestBstOneNode(void)
 	}
 	
 	itr1 = BstInsert(bst1, arr);
-	/* SortingFunc(BstGetData(itr1) ,BstGetData(BstBegin(bst1))) */
-	/* BstSize(bst1) != 1 || */
-	/* BstIsEmpty(bst1)  */
-	/* *arr != *(int*)BstGetData(BstBegin(bst1)) */
-	/*printf("size = %lu\n", BstSize(bst1) );*/
 	if( SortingFunc(BstGetData(itr1) ,BstGetData(BstBegin(bst1)))  
 	     || BstSize(bst1) != 1 || BstIsEmpty(bst1) )
 		 
@@ -247,10 +219,7 @@ static void TestBstOneNode(void)
 		puts("Failes in_1: Destroy");
 		flag =  TRUE;
 	}
-	/*printf("destroy_check = %d\n", destroy_check);*/
-	/*BstFind*/
-	/*itr1 = BstInsert(bst1, arr);*/
-
+	
 	if( !flag )
 	{
 		puts(RESET);		
@@ -264,8 +233,6 @@ static void TestBstOneNode(void)
 	}
 	
 }
-
-
 
 /********************  TestBstOneNode  ****************************/
 static void TestBstTwoeNode(void)
@@ -289,7 +256,7 @@ static void TestBstTwoeNode(void)
 	bst_iter_t itr7;
 	
 	bst_t *bst1 = BstCreate(SortingFunc);	
-	/*puts(RED);*/
+	puts(RED);
 
 	if( !BstIsEmpty(bst1) )  
 	{
@@ -311,17 +278,13 @@ static void TestBstTwoeNode(void)
 		puts("Failes in_2: Begin || End ");
 		flag =  TRUE;
 	}
-	/*printf("size = %lu\n", BstSize(bst1) );*/
 
 	for(i = 0; i <= 10; ++i)
 	{
 		itr1 = BstInsert(bst1, arr + i);
-		/*Aux_Pre_Print_Tree(bst1);*/
 		min = MIN(arr[i], min);
 		max = MAX(arr[i], max);
-		/*printf("min = %d, max = %d \n", min, max);*/
-		/*printf(" GetData = %d, \n",  *(int*)BstGetData(itr1) );*/
-		/*printf("size = %lu, Iteration = %lu \n", BstSize(bst1) , i);*/
+		
 		if(	BstSize(bst1) != (i + 1) )
 		{
 			printf("Failes in_2: Size || Next || Insert, Iteration = %lu \n", i);
@@ -339,15 +302,11 @@ static void TestBstTwoeNode(void)
 			printf("Failes in_2: Insert || Prev Iteration: %lu \n", i);
 			flag =  TRUE;
 		}
-	
 	}
-	
 	/*Aux_Pre_Print_Tree(bst1, 0);*/
-	
 	itr3 = BstFind(bst1, arr + 3); /* 85 */
 	itr2 = BstFind(bst1, arr); /* 100 (root) */
-	/*printf(" GetData_itr3 = %d, \n",  *(int*)BstGetData(itr3) );*/
-	
+
 	if(SortingFunc(BstGetData(itr3)  ,arr + 3 )) 
 	{
 		puts("Failes in_2: Find");
@@ -366,14 +325,10 @@ static void TestBstTwoeNode(void)
 		flag =  TRUE;	
 	}
 	
-	/*printf(" GetData_itr4 = %d, \n",  *(int*)BstGetData(itr4) );*/
-	/*printf(" GetData_BstNext(itr5) = %d, \n",  *(int*)BstGetData(BstNext(itr5)) );*/
-	
 	itr4 = BstNext(itr1); /* itr4->data == end->data*/
 	itr5 = BstBegin(bst1); /* itr5->data == 30*/
 	for( i = 0; i <= 10; ++i)
-	{
-		
+	{	
 		if( SUCCESS != BstForEach(itr5, BstNext(itr5), SortingFunc, arr_sort + i)
 			|| SUCCESS != BstForEach(BstPrev(itr4), itr4, SortingFunc, arr_sort + 10 - i) )  
 		{
@@ -387,10 +342,7 @@ static void TestBstTwoeNode(void)
 		itr4 = BstPrev(itr4);
 	
 	} 
-	
 	/*Aux_Pre_Print_Tree(bst1, 0);*/
-	
-	/*printf(" GetData_BstPrev(itr5) = %d, \n",  *(int*)BstGetData(BstPrev(itr5)) );*/
 	itr5 = BstPrev(itr5); /* the Prev result: itr5->data == 150 */
 	itr6 = BstFind(bst1, arr_sort + 9); /*itr6->data == 130  */
 	itr6 = BstRemove(itr6); /* the node (itr6) has one child */
@@ -442,21 +394,34 @@ static void TestBstTwoeNode(void)
 	}
 	
 	itr2 = BstFind(bst1, arr); /* itr2->data == 100 ,  (root) */
-	printf(" GetData_(itr2) = %d, \n",  *(int*)BstGetData(itr2) );
 	data = BstGetData(BstNext(itr2)); /* 110 */
-	printf(" GetData_BstNext(itr2) = %d, \n",  *(int*)BstGetData(BstNext(itr2)) );
 	itr3 = BstNext(BstNext(itr2)); /* itr2->data == 150 */
-	printf(" GetData_(itr3) = %d, \n",  *(int*)BstGetData(itr3) );
-	/*itr2 = BstRemove(itr2); *//* the node has two childs */
-	/*After remove: itr2->data == 110 */
-	/*
+	itr2 = BstRemove(itr2); /* the node has two childs */
+	
 	if( SortingFunc(BstGetData(itr2), data) ||
 		!IsIterSame(BstNext(itr2), itr3) || BstSize(bst1) != 8 )
 	{
 		puts("Failes in_5 - Two childs case: Remove ");
 		flag =  TRUE;
 	}
-	*/
+	
+	itr2 = BstFind(bst1, arr_sort + 2); /* itr2->data == 67 ,   */
+	itr2 = BstRemove(itr2); /* the node has two childs */
+	if( SortingFunc(BstGetData(itr2), to_insert) || BstSize(bst1) != 7 )
+	{
+		puts("Failes in_6 - Two childs case: Remove ");
+		flag =  TRUE;
+	}
+	
+	itr2 = BstFind(bst1, to_insert); /* itr2->data == 76 ,   */
+	itr2 = BstRemove(itr2); /* the node has two childs */
+	if( SortingFunc(BstGetData(itr2), arr_sort + 5) || BstSize(bst1) != 6 )
+	{
+		puts("Failes in_7 - Two childs case: Remove ");
+		flag =  TRUE;
+	}
+
+	itr1 = BstInsert(bst1, to_insert);
 	BstDestroy(bst1);
 	bst1 = NULL;
 	
@@ -465,9 +430,6 @@ static void TestBstTwoeNode(void)
 		puts("Failes in_2: Destroy || Remove ");
 		flag =  TRUE;
 	}
-	/*printf("destroy_check = %d\n", destroy_check);*/
-	/*BstFind*/
-	/*itr1 = BstInsert(bst1, arr);*/
 
 	if( !flag )
 	{
@@ -481,98 +443,5 @@ static void TestBstTwoeNode(void)
 	}
 	
 }    
-		
-/*******************SortingFunc*********************/
-static int SortingFunc(void* check_data , void* new_data)
-{
-	return (*(int*)check_data - *(int*)new_data);
-}
-
-	/*itr1 = BstInsert(bst1, arr);*/
-	/* SortingFunc(BstGetData(itr1) ,BstGetData(BstBegin(bst1))) */
-	/* BstSize(bst1) != 1 || */
-	/* BstIsEmpty(bst1)  */
-	/* *arr != *(int*)BstGetData(BstBegin(bst1)) */
-	/*printf("size = %lu\n", BstSize(bst1) );*/
-	/*
-	if( SortingFunc(BstGetData(itr1) ,BstGetData(BstBegin(bst1)))  
-	     || BstSize(bst1) != 1 || BstIsEmpty(bst1) )
-		 
-	{
-		puts("Failes in_1: Insert || Begin || GetData || Size || IsEmpty");
-		flag =  TRUE;
-	}
-	
-	if( itr1 != BstPrev(dummy_itr1) || dummy_itr1 != BstPrev(itr1) )
-	{
-		puts("Failes in_1: Prev");
-		flag =  TRUE;	
-	}
-	
-	if( dummy_itr1 != BstNext(dummy_itr1) || dummy_itr1 != BstNext(itr1) )
-	{
-		puts("Failes in_1: Next");
-		flag =  TRUE;	
-	}
-	
-	if( itr1 != BstFind(bst1, arr) || dummy_itr1 != BstFind(bst1, arr + 1) 
-		|| dummy_itr1 != BstFind(bst1, arr + 2) )
-	{
-		puts("Failes in_1: Find");
-		flag =  TRUE;	
-	}
-	
-	if( TRUE != IsIterSame(itr1, itr1) || 
-		FALSE != IsIterSame(itr1, dummy_itr1) )
-	{
-		puts("Failes in_1: IsIterSame");
-		flag =  TRUE;
-	} 
-	
-	if( SUCCESS != BstForEach(itr1, dummy_itr1, SortingFunc, arr) || 
-		OPERATION_FAIL != BstForEach(itr1, dummy_itr1, SortingFunc, arr + 1) )
-	{
-		puts("Failes in_1: ForEach");
-		flag =  TRUE;
-	
-	} 
-	
-	if( dummy_itr1 != BstRemove(itr1) || BstSize(bst1) != 0 )
-	{
-		puts("Failes in_1: Remove || Size");
-		flag =  TRUE;	
-	}
-	*/
-	
-	
-/*******************match_function*********************/
-/*
-static int match_func(void *check_data, void *user_param )
-{
-	return !strcmp(check_data, user_param);
-}
-*/
-/*******************priority_func*********************/
-/*
-static int priority_func(void *check_data, void *user_param )
-{
-	int res = strcmp(check_data, user_param);
-		
-	return (-1) * res;
-}
-*/
-/*******************Compare*********************/
-/*
-static int Compare(const void* a, const void* b)
-{
-    return (*(int*)a - *(int*)b);
-}
-*/
 
 
-/*
-puts("\n" BACK_CYAN"Ratio time:"RESET"\n");
-	printf("BubbleSort/QuickSort   : "BACK_GREEN" %f "RESET" \n", \
-           t_bubble/t_qsort);
-           
-*/           
