@@ -1,8 +1,8 @@
 /***************************************
 * Author : Natty
-* Reviewer : 
+* Reviewer : Matan
 * Date : 27 / 01 / 2025
-* Last update: 29 / 01 / 2025
+* Last update: 01 / 02 / 2025
 *****************************************/
 #ifdef PRINTS
 #include <stdio.h> 	
@@ -30,7 +30,6 @@ struct bst_node
 	struct bst_node *parent;
 	struct bst_node* child[2]; /* child[0] = left, child[1] = right*/
 };
-
 
 /** possible return values **/
 typedef enum
@@ -66,7 +65,7 @@ typedef enum
 	
 }nume_of_childs_t;
 
-int destroy_check = SUCCESS; /* extern*/
+int destroy_check = SUCCESS; /* extern */
 
 /***************End of struct and enum declaration *******/
 
@@ -80,7 +79,6 @@ static int IsLeftChild(bst_node_t* parnt, bst_node_t* child);
 void Pre_Print_Tree(bst_node_t* root, bst_t *bst, int level);
 void Aux_Pre_Print_Tree(bst_t *bst, int level);
 #endif
-/*static int IsRightChild(bst_node_t* parnt, bst_node_t* child);*/
 /**********End of functions declaration *******/
 
 /***********Static Functions definition*******/
@@ -93,15 +91,7 @@ static int IsLeftChild(bst_node_t* parnt, bst_node_t* child)
 	return child == parnt->child[LEFT];
 	
 }
-/********************  IsRihtChild  ****************************/
-/*
-static int IsRightChild(bst_node_t* parnt, bst_node_t* child)
-{
-	assert(parnt);
-	assert(child);
-	return child == parnt->child[RIGHT];
-}
-*/
+
 /********************  FindNumChilds  ****************************/
 static int FindNumChilds(bst_node_t* node)
 {
@@ -146,18 +136,10 @@ static bst_iter_t BstNodeBegin(bst_node_t* node)
 	return NodeToIter(curr_node);
 }
 /***********End Of Static Functions definition*******/
-/*
-int main()
-{
-	puts("$$");
-	return 0;
-}
-*/
-/********************  BstCreate  ****************************/
 
+/********************  BstCreate  ****************************/
 bst_t *BstCreate(cmp_func_t sort_func)
 {
-	
 	bst_t *bst_p = (bst_t*)malloc(sizeof(bst_t));
 
 	if(NULL == bst_p)
@@ -186,7 +168,7 @@ bst_t *BstCreate(cmp_func_t sort_func)
 void BstDestroy(bst_t *bst)
 {
 	bst_node_t *curr_node = NULL, *curr_node_next = NULL;
-	/*int destroy_check = 1 ;*/
+	
 	if(NULL == bst)
 	{
 		return;
@@ -195,7 +177,7 @@ void BstDestroy(bst_t *bst)
 	assert(bst->end);
 	curr_node = IterToNode(BstBegin(bst));
 	
-	while( curr_node != bst->end) /* FALSE == BstIsEmpty(bst) &&  */
+	while( curr_node != bst->end)
 	{
 		curr_node = BstNodeBegin(curr_node);
 		curr_node_next = IterToNode(BstRemove(NodeToIter(curr_node) ));
@@ -214,7 +196,6 @@ void BstDestroy(bst_t *bst)
 }
 
 /********************  BstInsert  ****************************/
-
 bst_iter_t BstInsert(bst_t *bst, const void *new_data)
 {
 	bst_node_t *new_node = NULL, *parnt = NULL, *curr_node = NULL;
@@ -288,7 +269,6 @@ bst_iter_t BstBegin(const bst_t *bst)
 	
 	return BstNodeBegin(curr_node);		
 }
-
 /********************  BstIsEmpty  ****************************/
 int BstIsEmpty(const bst_t *bst)
 {
@@ -315,7 +295,6 @@ bst_iter_t BstNext(bst_iter_t iter)
 	
 	if( NULL != curr_node->child[RIGHT] ) 
     {
-		/*printf(" GetData = %d, \n",  *(int*)BstGetData(curr_node) );*/
  		return BstNodeBegin(curr_node->child[RIGHT]);
 	}
 	
@@ -348,20 +327,19 @@ bst_iter_t BstPrev(bst_iter_t iter)
 		curr_node = parnt;
 		parnt = curr_node->parent;
 	}
-	
 	/*if curr_node is min than undefine, return dummy end*/
 	return NodeToIter(parnt);
 }
 
-
 /********************  BstRemove  ****************************/
-	
+
 bst_iter_t BstRemove(bst_iter_t what)
 {
 	bst_node_t *curr_node = NULL, *parnt = NULL, 
 			 *curr_node_next = NULL, *l_child = NULL;
 	
-	int what_child = LEFT; 
+	int what_child = LEFT, what_son = LEFT;
+	 
 	assert(IterToNode(what));
 	curr_node = IterToNode(what);
 	parnt = curr_node->parent;
@@ -372,6 +350,7 @@ bst_iter_t BstRemove(bst_iter_t what)
 	
 	if( NO_CHILDS == FindNumChilds(curr_node) )
 	{
+		
 		if(IsLeftChild(parnt, curr_node) )
 		{
 			parnt->child[LEFT] = NULL; 
@@ -391,37 +370,11 @@ bst_iter_t BstRemove(bst_iter_t what)
 				 replace the node with the child */
 	if( ONE_CHILD == FindNumChilds(curr_node ) )
 	{
+		what_child = IsLeftChild(parnt, curr_node) ? LEFT: RIGHT;
+		what_son = IsChildExist(curr_node, LEFT) ? LEFT : RIGHT;
 		
-		if( IsChildExist(curr_node, LEFT) )
-		{
-			if(IsLeftChild(parnt, curr_node) )
-			{
-				parnt->child[LEFT] = curr_node->child[LEFT];	
-			}
-			
-			else
-			{
-				parnt->child[RIGHT] = curr_node->child[LEFT];	
-			}
-			
-			curr_node->child[LEFT]->parent = parnt;
-				
-		}
-		else if ( IsChildExist(curr_node, RIGHT) ) 
-		{
-			if (IsLeftChild(parnt, curr_node) )
-			{
-				parnt->child[LEFT] = curr_node->child[RIGHT];
-			}
-			
-			else
-			{
-				parnt->child[RIGHT] = curr_node->child[RIGHT];	
-			}
-			
-			curr_node->child[RIGHT]->parent = parnt;
-		}
-		
+		parnt->child[what_child] = curr_node->child[what_son];	
+		curr_node->child[what_son]->parent = parnt;	
 		
 		free(curr_node);
 		curr_node = NULL;
@@ -461,8 +414,6 @@ bst_iter_t BstRemove(bst_iter_t what)
 void *BstGetData(bst_iter_t iter)
 {
 	assert( IterToNode(iter) );
-	/*assert( NULL == IterToNode(iter)->parent ); *//* check if dummy*/
-	
 	return IterToNode(iter)->data;
 }
 /********************  is_same_iter  ****************************/
@@ -532,14 +483,11 @@ size_t BstSize(const bst_t *bst)
 	{
 		return size;
 	}
-	curr_iter = BstBegin( bst ); /* BstPrev( NodeToIter( bst->end ) ); */
-	/*printf(" GetData = %d, \n",  *(int*)BstGetData(curr_iter) );*/
+	curr_iter = BstBegin( bst ); 
 	while(( NULL != IterToNode(curr_iter)->parent) &&  bst->end != IterToNode( curr_iter  ) ) 
 	{
 		++size;
-		/*printf(" GetData = %d, \n",  *(int*)BstGetData(curr_iter) );*/
 		curr_iter = BstNext( curr_iter );
-
 	}
 	
 	return size;
@@ -553,8 +501,7 @@ int BstForEach(bst_iter_t start, bst_iter_t end,
 	assert(IterToNode(start));
 	assert(IterToNode(end));
 	assert( op_func);
-	/*assert(IsIterSame(start, end));*/
-	
+
 	while( !IsIterSame(start, end) )
 	{
 		if ( op_func( BstGetData(start), user_param ) )
