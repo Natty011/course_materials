@@ -275,7 +275,7 @@ static void TestBstOneNode(void)
 static void TestBstTwoeNode(void)
 {	
 	int arr[11] = {100, 70, 110, 85, 80, 75 ,65 , 67, 130, 30, 150};
-	int arr_sort[11] = {30, 65, 72, 70, 75, 80, 85 ,100 , 110, 130, 150};
+	int arr_sort[11] = {30, 65, 67, 70, 75, 80, 85 ,100 , 110, 130, 150};
 	int flag = FALSE, max = arr[0], min = arr[0];
 	size_t i = 0;
 
@@ -368,16 +368,20 @@ static void TestBstTwoeNode(void)
 	/* || SUCCESS != BstForEach(BstPrev(itr4), itr4, SortingFunc, arr_sort + 10 - i) */
 	for( i = 0; i <= 10; ++i)
 	{
-		if( SUCCESS != BstForEach(itr5, BstNext(itr5), SortingFunc, arr_sort + i) )  
-			 
+		
+		/*printf(" GetData_itr4 = %d, \n",  *(int*)BstGetData(itr4) );*/
+			/*printf(" GetData_BstNext(itr5) = %d, \n",  *(int*)BstGetData(BstNext(itr5)) );*/
+		if( SUCCESS != BstForEach(itr5, BstNext(itr5), SortingFunc, arr_sort + i)
+			|| SUCCESS != BstForEach(BstPrev(itr4), itr4, SortingFunc, arr_sort + 10 - i) )  
 		{
+
 			printf("Iteration = %lu \n",  i);
-			puts("Failes in_3: ForEach");
+			puts("Failes in_3: ForEach || Next || Prev");
 			flag =  TRUE;
 	
 		}
-		
-		itr2 = BstNext(itr2);
+		itr5 = BstNext(itr5);
+		/*itr2 = BstNext(itr2);*/
 		itr4 = BstPrev(itr4);
 	
 	} 
