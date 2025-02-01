@@ -361,6 +361,7 @@ bst_iter_t BstRemove(bst_iter_t what)
 	bst_node_t *curr_node = NULL, *parnt = NULL, 
 			 *curr_node_next = NULL, *l_child = NULL;
 	
+	int what_child = LEFT; 
 	assert(IterToNode(what));
 	curr_node = IterToNode(what);
 	parnt = curr_node->parent;
@@ -390,6 +391,7 @@ bst_iter_t BstRemove(bst_iter_t what)
 				 replace the node with the child */
 	if( ONE_CHILD == FindNumChilds(curr_node ) )
 	{
+		
 		if( IsChildExist(curr_node, LEFT) )
 		{
 			if(IsLeftChild(parnt, curr_node) )
@@ -405,7 +407,7 @@ bst_iter_t BstRemove(bst_iter_t what)
 			curr_node->child[LEFT]->parent = parnt;
 				
 		}
-		else
+		else if ( IsChildExist(curr_node, RIGHT) ) 
 		{
 			if (IsLeftChild(parnt, curr_node) )
 			{
@@ -432,18 +434,21 @@ bst_iter_t BstRemove(bst_iter_t what)
 	{
 		l_child =  IterToNode(BstNodeBegin(curr_node->child[RIGHT]));
 		parnt = l_child->parent;
+		
+		what_child = IsLeftChild(parnt, l_child) ? LEFT: RIGHT;
+		
 		curr_node->data = l_child->data;
 		
 		/* l_child must be left_child that has only rights childs */
 		if(	IsChildExist(l_child, RIGHT) )
 		{
-			parnt->child[LEFT] = l_child->child[RIGHT];
+			parnt->child[what_child] = l_child->child[RIGHT];
 			l_child->child[RIGHT]->parent = parnt;
 		}
 		
 		else
 		{
-			parnt->child[LEFT] = NULL;
+			parnt->child[what_child] = NULL;
 		}
 		
 		free( l_child );
