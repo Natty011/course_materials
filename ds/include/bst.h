@@ -12,6 +12,10 @@ typedef struct bst_node bst_node_t;
 /* May change - do not use it */
 typedef struct bst_node *bst_iter_t; 
 
+#ifdef PRINTS
+void Pre_Print_Tree(bst_node_t* root, bst_t *bst, int level);
+void Aux_Pre_Print_Tree(bst_t *bst, int level);
+#endif
 
 /******************************************************************************
 * 
@@ -223,7 +227,6 @@ bst_iter_t BstPrev(bst_iter_t iter);
 * 
 ******************************************************************************/
 void *BstGetData(bst_iter_t iter);
-
 
 
 /******************************************************************************
