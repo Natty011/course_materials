@@ -2,7 +2,7 @@
 * Author : Natty
 * Reviewer : Matan
 * Date : 27 / 01 / 2025
-* Last update: 01 / 02 / 2025
+* Last update: 02 / 02 / 2025
 *****************************************/
 #ifdef PRINTS
 #include <stdio.h> 	
@@ -16,7 +16,6 @@
 #define		IterToNode(x)		((bst_node_t*)x)	
 
 /****************struct and enum declaration*********************/
-
 struct bst
 {
 	bst_node_t *end;
@@ -91,7 +90,6 @@ static int IsLeftChild(bst_node_t* parnt, bst_node_t* child)
 	return child == parnt->child[LEFT];
 	
 }
-
 /********************  FindNumChilds  ****************************/
 static int FindNumChilds(bst_node_t* node)
 {
@@ -108,6 +106,9 @@ static int IsChildExist(bst_node_t* node, int child_pos)
 }
 
 /********************  BstNodeMax  ****************************/
+/*	
+	Find the end of node's sub tree 
+*/
 static bst_iter_t BstNodeMax(bst_node_t* node)
 {
 	assert(node);
@@ -121,6 +122,9 @@ static bst_iter_t BstNodeMax(bst_node_t* node)
 }
 
 /********************  BstNodeBegin  ****************************/
+/*	
+	Find the begin of node's sub tree 
+*/
 static bst_iter_t BstNodeBegin(bst_node_t* node)
 {
 	bst_node_t* curr_node = NULL;
@@ -211,21 +215,11 @@ bst_iter_t BstInsert(bst_t *bst, const void *new_data)
 	}
 	
 	new_node->data = (void*)new_data;
-	
-	if( TRUE == BstIsEmpty(bst) )
-	{
-		new_node->parent = bst->end;
+	parnt = bst->end;
 
-		new_node->child[LEFT] = NULL;
-		new_node->child[RIGHT] = NULL;
-		bst->end->child[LEFT] = new_node;
-		 
-		return NodeToIter(new_node);
-	}
-	
 	curr_node = (bst->end)->child[LEFT]; /* get the root */
 	
-	while(NULL != curr_node)
+	while( !BstIsEmpty(bst) && NULL != curr_node)
 	{
 		res = bst->cmp_func(curr_node->data, (void*)new_data);
 		parnt  = curr_node;
@@ -236,7 +230,7 @@ bst_iter_t BstInsert(bst_t *bst, const void *new_data)
 			what_child = LEFT;
 		}
 		
-		else 
+		else if ( res < 0 )
 		{
 			curr_node = curr_node->child[RIGHT]; /* right */
 			what_child = RIGHT;
@@ -247,7 +241,6 @@ bst_iter_t BstInsert(bst_t *bst, const void *new_data)
 	new_node->child[LEFT] = NULL;
 	new_node->child[RIGHT] = NULL;
 	new_node->parent = parnt;	
-	new_node->data = (void*)new_data;
 	
 	return NodeToIter(new_node);	
 }
@@ -417,7 +410,7 @@ void *BstGetData(bst_iter_t iter)
 	return IterToNode(iter)->data;
 }
 /********************  is_same_iter  ****************************/
-int IsIterSame(bst_iter_t iter1, bst_iter_t iter2)
+int BstIsIterSame(bst_iter_t iter1, bst_iter_t iter2)
 {
 	assert( IterToNode(iter1) );
 	assert( IterToNode(iter2) );
@@ -479,12 +472,13 @@ size_t BstSize(const bst_t *bst)
 	assert(bst);
 	assert(bst->end);
 	
-	if( TRUE == BstIsEmpty(bst) ) /* NULL == bst->end->child[LEFT] */
+	if( TRUE == BstIsEmpty(bst) ) 
 	{
 		return size;
 	}
 	curr_iter = BstBegin( bst ); 
-	while(( NULL != IterToNode(curr_iter)->parent) &&  bst->end != IterToNode( curr_iter  ) ) 
+	while(( NULL != IterToNode(curr_iter)->parent) && 
+			 bst->end != IterToNode( curr_iter  ) ) 
 	{
 		++size;
 		curr_iter = BstNext( curr_iter );
@@ -502,9 +496,9 @@ int BstForEach(bst_iter_t start, bst_iter_t end,
 	assert(IterToNode(end));
 	assert( op_func);
 
-	while( !IsIterSame(start, end) )
+	while( !BstIsIterSame(start, end) )
 	{
-		if ( op_func( BstGetData(start), user_param ) )
+		if ( OPERATION_FAIL == op_func( BstGetData(start), user_param ) )
 		{
 			op_state = OPERATION_FAIL;
 			break;
