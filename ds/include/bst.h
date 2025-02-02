@@ -240,7 +240,7 @@ void *BstGetData(bst_iter_t iter);
 *                   
 * 
 ******************************************************************************/
-int IsIterSame(bst_iter_t iter1, bst_iter_t iter2);
+int BstIsIterSame(bst_iter_t iter1, bst_iter_t iter2);
 
 
 
