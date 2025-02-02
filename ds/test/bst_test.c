@@ -2,7 +2,7 @@
 * Author : Natty
 * Reviewer : Matan
 * Date : 22 / 01 / 2025
-* Last update: 01 / 02 / 2025
+* Last update: 02 / 02 / 2025
 *****************************************/
 
 #include <stdio.h> 		/* printf, puts, qsort  */
@@ -97,6 +97,11 @@ static int SortingFunc(void* check_data , void* new_data)
 {
 	return (*(int*)check_data - *(int*)new_data);
 }
+/*******************Compare*********************/
+static int Compare(void* check_data , void* new_data)
+{
+	return !(SUCCESS == (*(int*)check_data - *(int*)new_data));
+}
 
 /******************End of static functions definition**********************/
 
@@ -189,15 +194,15 @@ static void TestBstOneNode(void)
 		flag =  TRUE;	
 	}
 	
-	if( TRUE != IsIterSame(itr1, itr1) || 
-		FALSE != IsIterSame(itr1, dummy_itr1) )
+	if( TRUE != BstIsIterSame(itr1, itr1) || 
+		FALSE != BstIsIterSame(itr1, dummy_itr1) )
 	{
-		puts("Failes in_1: IsIterSame");
+		puts("Failes in_1: BstIsIterSame");
 		flag =  TRUE;
 	} 
 	
-	if( SUCCESS != BstForEach(itr1, dummy_itr1, SortingFunc, arr) || 
-		OPERATION_FAIL != BstForEach(itr1, dummy_itr1, SortingFunc, arr + 1) )
+	if( SUCCESS != BstForEach(itr1, dummy_itr1, Compare, arr) || 
+		OPERATION_FAIL != BstForEach(itr1, dummy_itr1, Compare, arr + 1) )
 	{
 		puts("Failes in_1: ForEach");
 		flag =  TRUE;
@@ -313,13 +318,13 @@ static void TestBstTwoeNode(void)
 		flag =  TRUE;	
 	}
 	
-	if( TRUE != IsIterSame(itr2 , BstNext(itr3)) )  /* itr3->data == 85 */
+	if( TRUE != BstIsIterSame(itr2 , BstNext(itr3)) )  /* itr3->data == 85 */
 	{
 		puts("Failes in_2: Next");
 		flag =  TRUE;	
 	}
 	
-	if( TRUE != IsIterSame(dummy_itr1 , BstNext(itr1)) ) /* itr1->data == 150 */
+	if( TRUE != BstIsIterSame(dummy_itr1 , BstNext(itr1)) ) /* itr1->data == 150 */
 	{
 		puts("Failes in_3: Next");
 		flag =  TRUE;	
@@ -329,8 +334,8 @@ static void TestBstTwoeNode(void)
 	itr5 = BstBegin(bst1); /* itr5->data == 30*/
 	for( i = 0; i <= 10; ++i)
 	{	
-		if( SUCCESS != BstForEach(itr5, BstNext(itr5), SortingFunc, arr_sort + i)
-			|| SUCCESS != BstForEach(BstPrev(itr4), itr4, SortingFunc, arr_sort + 10 - i) )  
+		if( SUCCESS != BstForEach(itr5, BstNext(itr5), Compare, arr_sort + i)
+			|| SUCCESS != BstForEach(BstPrev(itr4), itr4, Compare, arr_sort + 10 - i) )  
 		{
 
 			printf("Iteration = %lu \n",  i);
@@ -348,8 +353,8 @@ static void TestBstTwoeNode(void)
 	itr6 = BstRemove(itr6); /* the node (itr6) has one child */
 	itr7 = BstFind(bst1, arr_sort + 8); /*itr7->data == 110  */
 	
-	if( !IsIterSame(itr6, itr5) || BstSize(bst1) != 10 || 
-		!IsIterSame(itr6, BstNext(itr7)) || !IsIterSame(BstPrev(itr6), itr7) )
+	if( !BstIsIterSame(itr6, itr5) || BstSize(bst1) != 10 || 
+		!BstIsIterSame(itr6, BstNext(itr7)) || !BstIsIterSame(BstPrev(itr6), itr7) )
 	{
 		puts("Failes in_3 - One child case: Remove ");
 		flag =  TRUE;
@@ -377,7 +382,7 @@ static void TestBstTwoeNode(void)
 	/*After remove: itr3->data == 75 */
 
 	if( SortingFunc(BstGetData(itr3), data) ||
-		!IsIterSame(BstNext(itr3), itr5) || BstSize(bst1) != 10 )
+		!BstIsIterSame(BstNext(itr3), itr5) || BstSize(bst1) != 10 )
 	{
 		puts("Failes in_4 - Two childs case: Remove ");
 		flag =  TRUE;
@@ -387,7 +392,7 @@ static void TestBstTwoeNode(void)
 	itr3 = BstRemove(itr3); /* itr3->data == 75, the node has two childs */
 
 	if( SortingFunc(BstGetData(itr3), data) ||
-		!IsIterSame(BstNext(itr3), itr6) || BstSize(bst1) != 9 )
+		!BstIsIterSame(BstNext(itr3), itr6) || BstSize(bst1) != 9 )
 	{
 		puts("Failes in_5 - Two childs case: Remove ");
 		flag =  TRUE;
@@ -399,7 +404,7 @@ static void TestBstTwoeNode(void)
 	itr2 = BstRemove(itr2); /* the node has two childs */
 	
 	if( SortingFunc(BstGetData(itr2), data) ||
-		!IsIterSame(BstNext(itr2), itr3) || BstSize(bst1) != 8 )
+		!BstIsIterSame(BstNext(itr2), itr3) || BstSize(bst1) != 8 )
 	{
 		puts("Failes in_5 - Two childs case: Remove ");
 		flag =  TRUE;
