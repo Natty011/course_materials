@@ -211,7 +211,7 @@ bst_iter_t BstInsert(bst_t *bst, const void *new_data)
 	
 	if(NULL == new_node)
 	{
-		return NULL;
+		return BstEnd(bst);
 	}
 	
 	new_node->data = (void*)new_data;
