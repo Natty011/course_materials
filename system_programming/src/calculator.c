@@ -15,11 +15,6 @@
 #define UNUSED( var )       ( (void)var )
 #define UNUSED_1( var )			( __attribute__((unused))var )
 
-
-
-
-
-
 /****************struct and enum declaration*********************/
 
 
@@ -47,15 +42,23 @@ typedef enum
 	NUM_OF_EVENTS
 	
 }event_t;
-/*
-typedef struct 
-{
-	space_t space;
-	
-	state_t NEXT_STATE;
 
-}handlers_array_t;
-*/
+typedef enum 
+{
+
+	ZERO_CHAR = '0', /* 48*/
+	DIV_CHAR = '/', /* 47 */
+	MULT_CHAR = '*', /* 42 */
+	MINUS_CHAR = '-', /* 45 */
+	PLUS_CHAR = '+',  /* 43 */
+	OPEN_BRACKET_CHAR = '(', /* 40 */
+	CLOSE_BRACKET_CHAR = ')', /* 41 */
+	SPACE_CHAR = ' ', /* 32 */
+	BACK_SLASH_CHAR = '\0' /* '0/' */
+
+}characther_t;
+
+
 typedef enum 
 {
 	WAIT_FOR_NUM = 0,
@@ -68,6 +71,7 @@ typedef enum
 typedef struct calc
 {
 	char *str;
+	state_t curr_state;
 	status_t curr_status;
 	stack_t *num_stack;
 	stack_t *op_stack;
@@ -82,6 +86,7 @@ state_t Space(calc_t* calc_state, double* result);
 status_t Calc_Rest(calc_t *calc_state, double* result);
 status_t InitArrEvent(int *arr_event);
 status_t InitStacks(const char* expression, calc_t *p_calc_state);
+static void InitNumHandlers(handler_t* num_arr_handlers  );
 state_t PushNum(calc_t *calc_state, double* result);
 state_t PushPlus(calc_t *calc_state, double* result);
 
@@ -92,7 +97,7 @@ state_t PushPlus(calc_t *calc_state, double* result);
 /* global current and next state */
 
 state_t current_state = WAIT_FOR_NUM;
-state_t next_state = WAIT_FOR_OP;
+/*state_t next_state = WAIT_FOR_OP;*/
 
 int arr_events[128] = { 0 };
 /*
@@ -103,22 +108,22 @@ op_arr_handlers[ PLUS ] = PushPlus;
 */
 /**************End Of Globals****************************/
 
+/**************PushNum****************************/
 state_t PushNum(calc_t *calc_state, double* result)
 {
-	
-	/*char* pEnd = NULL;*/
+
 	double num1 = 1.0;
 	assert(calc_state);
 	assert(result);
 
 	num1 = strtod( calc_state->str, &calc_state->str );
 	StackPush( calc_state->num_stack, &num1 );
-
-	/*calc_state->str = pEnd;*/
 	
 	return WAIT_FOR_OP;
 }
 
+
+/**************PushPlus****************************/
 state_t PushPlus(calc_t *calc_state, double* result)
 {
 	
@@ -158,7 +163,7 @@ status_t Calc_Rest(calc_t *calc_state, double* result)
 	
 	/* !StackIsEmpty(calc_state->num_stack) &&*/
 	while(  !StackIsEmpty(calc_state->op_stack) 
-	        &&   '(' != *(char*)StackPeek(calc_state->op_stack) ) 
+	        && OPEN_BRACKET_CHAR != *(char*)StackPeek(calc_state->op_stack) ) 
 	{
 		
 		num1  *= *(double*)StackPeek(calc_state->num_stack);
@@ -228,24 +233,22 @@ state_t Space(calc_t *calc_state, double* result)
 {
 	char* str1 = NULL;
 	
-
-
 	UNUSED(result);
 	
 	assert(calc_state);
 	assert( calc_state->str ); 
 	/*assert(result);*/
-	str1 = calc_state->str;
+	/*str1 = calc_state->str;*/
 	
 	(void)result; /* maybe not neccessery */
 	
 	while( isspace( str1 ) )
 	{
-		++str1;
+		++(calc_state->str);
 	}
 	calc_state->curr_status = SUCCESS;
-	calc_state->str = str1;
-	return current_state;
+	/*calc_state->current_state = WAIT_FOR_NUM;*/
+	return calc_state->curr_state; 
 	
 }
 
@@ -255,57 +258,21 @@ status_t InitArrEvent(int *arr_event )
 	size_t i = 0;
 	assert(arr_event);
 	
-	for(i = 0; i <= 127; ++i)
+	arr_event[BACK_SLASH_CHAR] = BACK_SLASH; 
+	arr_event[SPACE_CHAR] = SPACE;	
+	arr_event[OPEN_BRACKET_CHAR] = OPEN_BRACKET;	
+	arr_event[CLOSE_BRACKET_CHAR] = CLOSE_BRACKET;
+	arr_event[MULT_CHAR] = MULT;
+	arr_event[PLUS_CHAR] = PLUS;
+	arr_event[MINUS_CHAR] = MINUS;
+	arr_event[DIV_CHAR] = DIV;
+		
+	for( i = 48; i <=57; ++i )
 	{
-
-		if ( 0 == i )
-		{
-			arr_event[i] = BACK_SLASH; 
-		}
-
-		if ( 32 == i  )
-		{
-			arr_event[i] = SPACE;
-		}
-		
-		if ( 40 == i  )
-		{
-			arr_event[i] = OPEN_BRACKET;
-		}
-		
-		if ( 41 == i  )
-		{
-			arr_event[i] = CLOSE_BRACKET;
-		}
-		if ( 42 == i  )
-		{
-			arr_event[i] = MULT;
-		}
-		
-		if ( 43 == i  )
-		{
-			arr_event[i] = PLUS;
-		}
-		
-		if ( 45 == i  )
-		{
-			arr_event[i] = MINUS;
-		}
-		
-		if ( 47 == i )
-		{
-			arr_event[i] = DIV;
-		}
-		
-		if ( 48 <= i  && i <=57 )
-		{
-			arr_event[i] = NUMBER_EVENT;
-		}
-		/*arr_event[47] = DIV;*/
+		arr_event[i] = NUMBER_EVENT;
 	}
-	
+
 	return SUCCESS;
-	
 }
 /**********************InitStacks *******************************/
 status_t InitStacks(const char* expression, calc_t *p_calc_state)
@@ -339,12 +306,52 @@ status_t InitStacks(const char* expression, calc_t *p_calc_state)
 	}
 	
 	p_calc_state->curr_status = SUCCESS;
+	p_calc_state->curr_state = WAIT_FOR_NUM;
 	return SUCCESS;
 	
-
+}
+/**********************InitNumHandlers *******************************/
+static void InitNumHandlers(handler_t* num_arr_handlers  )
+{
+	assert(num_arr_handlers);
+	
+	/*num_arr_handlers[ INVALID_INPUT ] = Error;*/
+	/* need to handle if zero arive and in the stack there is DIV*/
+	num_arr_handlers[ NUMBER_EVENT ] = PushNum; 
+	/*
+	num_arr_handlers[ PLUS ] = Error;
+	num_arr_handlers[ DIV ] = Error;
+	num_arr_handlers[ MULT ] = Error;
+	num_arr_handlers[ OPEN_BRACKET ] = PushBracket;
+	num_arr_handlers[ CLOSE_BRACKET ] = Error;
+	*/
+	num_arr_handlers[ SPACE ] = Space;
+	/*
+	num_arr_handlers[ BACK_SLASH ] = BackSlash;	
+	*/
+}
+/**********************InitNumHandlers *******************************/
+static void InitOpHandlers(handler_t* op_arr_handlers  )
+{
+	assert(op_arr_handlers);
+	/*
+	op_arr_handlers[ INVALID_INPUT ] = Error;
+	op_arr_handlers[ NUMBER_EVENT ] = Error;
+	*/	
+	op_arr_handlers[ PLUS ] = PushPlus;
+	/*
+	op_arr_handlers[ DIV ] = PushDiv;
+	op_arr_handlers[ MULT ] = PushMult;
+	op_arr_handlers[ OPEN_BRACKET ] = PushPlus;
+	op_arr_handlers[ CLOSE_BRACKET ] = PushPlus;
+	*/
+	op_arr_handlers[ SPACE ] = Space;
+	/*
+	op_arr_handlers[ BACK_SLASH ] = BackSlash;
+	*/	
 	
 }
-
+	
 /*int destroy_check = SUCCESS; *//* extern */
 
 /***************End of struct and enum declaration *******/
@@ -368,17 +375,14 @@ status_t Calculate(const char* expression, double* result)
 	
 	handler_t num_arr_handlers[ 10 ] = { NULL };
 	handler_t op_arr_handlers[ 10 ] = { NULL };
-	num_arr_handlers[ NUMBER_EVENT ] = PushNum;
-	op_arr_handlers[ PLUS ] = PushPlus;
-
+	
+	InitNumHandlers ( num_arr_handlers );
+	InitOpHandlers ( op_arr_handlers );
 	
 	current_state = WAIT_FOR_NUM;
-	/*next_state = WAIT_FOR_OP;*/
 
 	InitArrEvent(arr_events);
-	/*
-	InitArrEvent((char*)expression);
-	*/
+
 	current_status = InitStacks((char*)expression, p_calc_state  );
 	
 	if( SYSTEM_ERROR == current_status )
@@ -394,36 +398,37 @@ status_t Calculate(const char* expression, double* result)
 			case WAIT_FOR_NUM:
 				num_event = arr_events[ *(p_calc_state->str) ];
 				
-				if(num_arr_handlers[ num_event ] != NULL) /*Not to get segmentation dump */ 
+				if(num_arr_handlers[ num_event ] != NULL) /*Not to get segmentation fault */ 
         		{
             		current_state = 
             		num_arr_handlers[ num_event ](p_calc_state, result);
+            		p_calc_state->curr_state = current_state;
        			}
        			break;
        			
 			case WAIT_FOR_OP:
 				 op_event = arr_events[ *(char*)(p_calc_state->str) ];
 				
-				/* (p_calc_state, result, num1, num2)*/ 
 				if(op_arr_handlers[ op_event ] != NULL)  /*Not to get segmentation fault*/
 				{
             		current_state = 
             		(op_arr_handlers[ op_event ])(p_calc_state, result);
-            		
+            		 
+            		p_calc_state->curr_state = current_state;
             		current_status = p_calc_state->curr_status;
        			} 
-       			 break;
+       			break;
        			 
        		case ERROR: 
+       			
        			printf(" need to handle error, current_status = %d\n", current_status);
        			/*current_status = MATH_ERROR;*/
-       			break;	
-					
+       			break;			
 		}
 		
 	}
 	
-	Calc_Rest( p_calc_state, result);
+	current_status = Calc_Rest( p_calc_state, result);
 	
 	StackDestroy(p_calc_state->num_stack );
 	StackDestroy(p_calc_state->op_stack );
