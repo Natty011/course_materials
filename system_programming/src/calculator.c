@@ -11,8 +11,38 @@
 #include "stack.h" 
 #include "calculator.h" 
 
+#define UNUSED( var )       ( (void)var )
+#define UNUSED_1( var )			( __attribute__((unused))var )
+
+
+
+/***********Functions declaration*******/
+
+state_t Space(calc_t* calc_state, double* result, double num1, double num2);
+state_t Calc_Rest(calc_t *calc_state, double* result, double num1, double num2);
+status_t InitArrEvent(int *arr_event);
+status_t InitStacks(const char* expression, calc_t *p_calc_state);
+state_t PushNum(calc_t *calc_state, double* result, double num1, double num2);
+state_t PushPluse(calc_t *calc_state, double* result, double num1, double num2);
+
+
+/**********End of functions declaration *******/
+
 
 /****************struct and enum declaration*********************/
+
+/*********************Globals****************************/
+/* global current and next state */
+typedef state_t (*handler_t) (calc_t* calc_state, double* result, double num1, double num2);
+state_t current_state = WAIT_FOR_NUMBER;
+state_t next_state = WAIT_FOR_OP;
+
+int arr_events[128] = { 0 };
+handler_t num_arr_handlers[ 10 ] = { NULL };
+handler_t op_arr_handlers[ 10 ] = { NULL };
+num_arr_handlers[ NUMBER_EVENT ] = PushNum;
+op_arr_handlers[ PLUSE ] = PushPluse;
+/**************End Of Globals****************************/
 
 typedef enum
 {
@@ -37,15 +67,15 @@ typedef enum
 	NUM_OF_EVENTS
 	
 }event_t;
-
+/*
 typedef struct 
 {
-	space_t handle_space;
-
+	space_t space;
+	
 	state_t NEXT_STATE;
 
 }handlers_array_t;
-
+*/
 typedef enum 
 {
 	WAIT_FOR_NUMBER = 0,
@@ -64,22 +94,33 @@ typedef struct
 
 }calc_t;
 
+
+state_t PushNum(calc_t *calc_state, double* result, double num1, double num2)
+{
+	
+}
+
+
+
+
+
+
 /* typedef void* (*handler_t) (calc_t* calc_state, void* result); */
 /*
-typedef status_t (*handler_num_t) (char* ptr, calc_t calc_state,  double* result);
-typedef status_t (*space_t) (calc_t* calc_state,  double* result);
-typedef status_t (*calc_rest_t) (calc_t* calc_state,  double* result);
-typedef status_t (*minus_t) (calc_t calc_state,  double* result);    
-typedef status_t (*pluse_t) (double num1, double num2, calc_t calc_state,  double result);
-typedef status_t (*pluseMinuse_t) (char* ptr, calc_t calc_state, double* result);
-typedef status_t (*operation_t) (char* ptr, calc_t calc_state, double* result);
-typedef status_t (*bracket_t) (char* ptr, calc_t calc_state, double* result);    
-typedef status_t (*error_t) (char* ptr, calc_t calc_state, double* result);
+typedef state_t (*handler_num_t) (char* ptr, calc_t calc_state,  double* result);
+typedef state_t (*space_t) (calc_t* calc_state, double* result, double num1, double num2);
+typedef state_t (*calc_rest_t) (calc_t* calc_state,  double* result);
+typedef state_t (*minus_t) (calc_t calc_state,  double* result);    
+typedef state_t (*pluse_t) (double num1, double num2, calc_t calc_state,  double result);
+typedef state_t (*pluseMinuse_t) (char* ptr, calc_t calc_state, double* result);
+typedef state_t (*operation_t) (char* ptr, calc_t calc_state, double* result);
+typedef state_t (*bracket_t) (char* ptr, calc_t calc_state, double* result);    
+typedef state_t (*error_t) (char* ptr, calc_t calc_state, double* result);
 
 */
 
 /*****************************Calc_Rest*************************/
-status_t Calc_Rest(calc_t *calc_state, double* result)
+state_t Calc_Rest(calc_t *calc_state, double* result, double num1, double num2)
 {
  /* need to complete if arrive to back_slash while the 
  	current state is WAIT_FOR_OP, if the current state is WAIT_FOR_NUM
@@ -98,20 +139,18 @@ status_t Calc_Rest(calc_t *calc_state, double* result)
 
 
 }
-/*********************Globals****************************/
-/* global current and next state */
-state_t current_state = WAIT_FOR_NUMBER;
-state_t next_state = WAIT_FOR_OP;
 
-int arr_events[128] = { 0 };
-/**************End Of Globals****************************/
 
 /*****************************Space*************************/
-status_t Space(calc_t *calc_state, double* result)
+state_t Space(calc_t *calc_state, double* result, double num1, double num2)
 {
 	char* str1 = NULL;
 	calc_state->str;
-
+	
+	UNUSED(num1);
+	UNUSED_1(num2);
+	UNUSED_1(result);
+	
 	assert(calc_state);
 	assert( calc_state->str ); 
 	/*assert(result);*/
@@ -125,7 +164,7 @@ status_t Space(calc_t *calc_state, double* result)
 	}
 	
 	calc_state->str = str1;
-	return SUCCESS;
+	return current_state;
 	
 }
 
@@ -183,6 +222,8 @@ status_t InitArrEvent(int *arr_event )
 		}
 	}
 	
+	return SUCCESS;
+	
 }
 /**********************InitStacks *******************************/
 status_t InitStacks(const char* expression, calc_t *p_calc_state)
@@ -220,13 +261,7 @@ status_t InitStacks(const char* expression, calc_t *p_calc_state)
 
 /***************End of struct and enum declaration *******/
 
-/***********Functions declaration*******/
 
-status_t Space(calc_t* calc_state, double* result);
-status_t Calc_Rest(calc_t *calc_state, double* result);
-status_t InitArrEvent(int *arr_event);
-status_t InitStacks(const char* expression, calc_t *p_calc_state);
-/**********End of functions declaration *******/
 
 /***********Static Functions definition*******/
 
@@ -238,12 +273,15 @@ status_t Calculate(const char* expression, double* result)
 	
 	current_state = WAIT_FOR_NUM;
 	/*next_state = WAIT_FOR_OP;*/
+	/*
 	handlers_array_t num_array = { 0 };
 	handlers_array_t op_array = { 0 };
-	
+	*/
 	status_t init_res = SUCCESS;
+	
 	event_t num_event = INVALID_INPUT;
 	event_t op_event = INVALID_INPUT;
+	
 	calc_t calc_state = { 0 };
 	
 	calc_t *p_calc_state = &calc_state;
