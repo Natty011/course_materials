@@ -5,7 +5,7 @@
 * Last update: 03 / 02 / 2025
 *****************************************/
 #include <stdio.h>
-#include <string.h> 	/* isspace */
+#include <string.h> 	/* isspace, strlen */
 #include <assert.h> 	/* assert */
 #include <stdlib.h> 	/* malloc, free */
 #include "stack.h" 
@@ -20,7 +20,7 @@ typedef enum
     MATH_ERROR = 1,
     SYNTAX_ERROR = 2,
     SYSTEM_ERROR = 3
-}status_result_t;
+}status_t;
 
 typedef enum 
 {
@@ -41,8 +41,7 @@ typedef enum
 typedef struct 
 {
 	space_t handle_space;
-	
-	state_t CURR_STATE;
+
 	state_t NEXT_STATE;
 
 }handlers_array_t;
@@ -50,19 +49,18 @@ typedef struct
 typedef enum 
 {
 	WAIT_FOR_NUMBER = 0,
-	WAIT_FOR_NON_ZERO = 1,
-	WAIT_FOR_OPERATOR = 2,
-	ERROR = 3,
+	WAIT_FOR_OPERATOR = 1,
+	ERROR = 2,
 	NUM_OF_STATES
 
 }state_t;
 
 typedef struct 
 {
-	const char *str;
+	char *str;
 	double* result;
-	const stack_t *num_stack;
-	const stack_t *op_stack;
+	stack_t *num_stack;
+	stack_t *op_stack;
 
 }calc_t;
 
@@ -79,6 +77,8 @@ typedef status_t (*bracket_t) (char* ptr, calc_t calc_state, double* result);
 typedef status_t (*error_t) (char* ptr, calc_t calc_state, double* result);
 
 */
+
+/*****************************Calc_Rest*************************/
 status_t Calc_Rest(calc_t *calc_state, double* result)
 {
  /* need to complete if arrive to back_slash while the 
@@ -98,8 +98,15 @@ status_t Calc_Rest(calc_t *calc_state, double* result)
 
 
 }
+/*********************Globals****************************/
+/* global current and next state */
+state_t current_state = WAIT_FOR_NUMBER;
+state_t next_state = WAIT_FOR_OP;
 
+int arr_events[128] = { 0 };
+/**************End Of Globals****************************/
 
+/*****************************Space*************************/
 status_t Space(calc_t *calc_state, double* result)
 {
 	char* str1 = NULL;
@@ -121,15 +128,11 @@ status_t Space(calc_t *calc_state, double* result)
 	return SUCCESS;
 	
 }
-/* global current and next state */
-state_t current_state = WAIT_FOR_NUMBER;
-state_t next_state = WAIT_FOR_OP;
 
-int arr_events[128] = { 0 };
-
-status_t InitArrEvent(int *arr_event, calc_t calc_state )
+/*****************************InitArrEvent*************************/
+status_t InitArrEvent(int *arr_event )
 {
-	int i = 0;
+	size_t i = 0;
 	assert(arr_event);
 	
 	for(i = 0; i < 127; ++i)
@@ -180,12 +183,38 @@ status_t InitArrEvent(int *arr_event, calc_t calc_state )
 		}
 	}
 	
+}
+/**********************InitStacks *******************************/
+status_t InitStacks(const char* expression, calc_t *p_calc_state)
+{
+	size_t len = 0;
+
+	assert(p_calc_state);
+	assert(expression);
 	
+	len = strlen(expression);
+	p_calc_state->str = (char*)expression;
+	*(p_calc_state->result) = 0.0;
+	p_calc_state->num_stack = StackCreate( len, sizeof(*expression) );
+	
+	if( NULL == p_calc_state->num_stack );
+	{
+		return SYSTEM_ERROR;
+	}
+	
+	p_calc_state->op_stack = StackCreate( len, sizeof(*expression) );	
+	
+	if( NULL == p_calc_state->op_stack );
+	{
+		free( p_calc_state->num_stack);
+		p_calc_state->num_stack = NULL;
+		
+		return SYSTEM_ERROR;
+	}
+	
+	return SUCCESS;
 	
 }
-
-/** possible return values **/
-
 
 /*int destroy_check = SUCCESS; *//* extern */
 
@@ -195,6 +224,8 @@ status_t InitArrEvent(int *arr_event, calc_t calc_state )
 
 status_t Space(calc_t* calc_state, double* result);
 status_t Calc_Rest(calc_t *calc_state, double* result);
+status_t InitArrEvent(int *arr_event);
+status_t InitStacks(const char* expression, calc_t *p_calc_state);
 /**********End of functions declaration *******/
 
 /***********Static Functions definition*******/
@@ -206,18 +237,37 @@ status_t Calculate(const char* expression, double* result)
 {
 	
 	current_state = WAIT_FOR_NUM;
-	next_state = WAIT_FOR_OP;
-	stack_t* num_stack = NULL;
-	stack_t* op_stack = NULL;
-	InitArrEvent(expression, 
+	/*next_state = WAIT_FOR_OP;*/
+	handlers_array_t num_array = { 0 };
+	handlers_array_t op_array = { 0 };
+	
+	status_t init_res = SUCCESS;
+	event_t num_event = INVALID_INPUT;
+	event_t op_event = INVALID_INPUT;
+	calc_t calc_state = { 0 };
+	
+	calc_t *p_calc_state = &calc_state;
+	
+	InitArrEvent(expression);
+	init_res = InitStacks( p_calc_state );
+	
+	if( SYSTEM_ERROR == init_res )
+	{
+		return SYSTEM_ERROR;
+	}
+	
 	while( (ERROR != current_state) && (*expression) )
 	{
 		
-		switch (current_state)
+		switch ( current_state )
 		{
-			case 
-		
-		
+			case WAIT_FOR_NUM:
+				num_event = arr_events[ *expression ];
+				 
+			
+				
+				
+				
 		}
 	
 	}
