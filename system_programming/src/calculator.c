@@ -60,8 +60,8 @@ typedef enum
 {
 	WAIT_FOR_NUM = 0,
 	WAIT_FOR_OP = 1,
-	ERROR = 2,
-	NUM_OF_STATES
+	ERROR = 2
+	/*NUM_OF_STATES*/
 
 }state_t;
 
@@ -391,25 +391,24 @@ status_t Calculate(const char* expression, double* result)
 			case WAIT_FOR_NUM:
 				num_event = arr_events[ *(int*)(p_calc_state->str) ];
 				
-				/*if(num_arr_handlers[ num_event ] != NULL)*/ /*Not to get segmentation dump */ 
-        		
+				if(num_arr_handlers[ num_event ] != NULL) /*Not to get segmentation dump */ 
+        		{
 
             		current_state = 
             		(num_arr_handlers[ num_event ])(p_calc_state, result, num1, num2);
-       			
+       			}
        			break;
        			
 			case WAIT_FOR_OP:
 				 op_event = arr_events[ *(int*)(p_calc_state->str) ];
-				
-				/* if(num_arr_handlers[ op_event ]() != NULL) *//*Not to get segmentation dump */ 
-        		 
-
+				/* (p_calc_state, result, num1, num2)*/ 
+				if(num_arr_handlers[ op_event ] != NULL)  /*Not to get segmentation fault*/
+				{
             		current_state = 
             		(op_arr_handlers[ op_event ])(p_calc_state, result, num1, num2);
             		
             		current_status = p_calc_state->curr_status;
-       			 
+       			} 
        			 break;
        			 
        		case ERROR: 
