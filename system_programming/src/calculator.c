@@ -88,7 +88,7 @@ typedef enum
 typedef struct 
 {
 	char *str;
-	double* result;
+	status_t curr_status;
 	stack_t *num_stack;
 	stack_t *op_stack;
 
@@ -125,8 +125,10 @@ state_t PushPlus(calc_t *calc_state, double* result, double num1, double num2)
 		 2. if precedence of the opertaor is lower or call to Calc_Rest 
 			to do the job, and return from the the update result */
 	
-	Calc_Rest(calc_state, result, num1, num2);
+	calc_state->curr_status = Calc_Rest(calc_state, result, num1, num2);
 	StackPush(calc_state->op_stack, calc_state->str );
+	
+	calc_state->str = ++str;
 	
 	return WAIT_FOR_OP;
 }
@@ -236,7 +238,7 @@ state_t Space(calc_t *calc_state, double* result, double num1, double num2)
 	{
 		++str1;
 	}
-	
+	calc_state->curr_status = SUCCESS;
 	calc_state->str = str1;
 	return current_state;
 	
@@ -309,11 +311,12 @@ status_t InitStacks(const char* expression, calc_t *p_calc_state)
 	
 	len = strlen(expression);
 	p_calc_state->str = (char*)expression;
-	*(p_calc_state->result) = 0.0;
+	/* *(p_calc_state->result) = 0.0; */ 
 	p_calc_state->num_stack = StackCreate( len, sizeof(*expression) );
 	
 	if( NULL == p_calc_state->num_stack );
 	{
+		calc_state->curr_status = SYSTEM_ERROR;
 		return SYSTEM_ERROR;
 	}
 	
@@ -324,9 +327,12 @@ status_t InitStacks(const char* expression, calc_t *p_calc_state)
 		free( p_calc_state->num_stack);
 		p_calc_state->num_stack = NULL;
 		
+		calc_state->curr_status = SYSTEM_ERROR;
 		return SYSTEM_ERROR;
+		
 	}
 	
+	calc_state->curr_status = SUCCESS;
 	return SUCCESS;
 	
 }
@@ -347,11 +353,8 @@ status_t Calculate(const char* expression, double* result)
 	
 	current_state = WAIT_FOR_NUM;
 	/*next_state = WAIT_FOR_OP;*/
-	/*
-	handlers_array_t num_array = { 0 };
-	handlers_array_t op_array = { 0 };
-	*/
-	status_t init_res = SUCCESS;
+	double num1 = 0.0, num2 = 0.0; 
+	status_t current_status = SUCCESS;
 	
 	event_t num_event = INVALID_INPUT;
 	event_t op_event = INVALID_INPUT;
@@ -361,25 +364,47 @@ status_t Calculate(const char* expression, double* result)
 	calc_t *p_calc_state = &calc_state;
 	
 	InitArrEvent(expression);
-	init_res = InitStacks( p_calc_state );
+	current_status = InitStacks( p_calc_state );
 	
-	if( SYSTEM_ERROR == init_res )
+	if( SYSTEM_ERROR == current_status )
 	{
 		return SYSTEM_ERROR;
 	}
 	
-	while( (ERROR != current_state) && (*expression) )
+	while( (ERROR != current_state) && *(p_calc_state->str) )
 	{
 		
 		switch ( current_state )
 		{
 			case WAIT_FOR_NUM:
-				num_event = arr_events[ *expression ];
-				 
-			
+				num_event = arr_events[ *(p_calc_state->str) ];
 				
+				if(num_arr_handlers[ num_event ] != NULL) /*Not to get segmentation dump */ 
+        		{   
+
+            		current_state = 
+            		(*num_arr_handlers[ num_event ])(p_calc_state, result, num1, num2);
+       			}
+       			break;
+       			
+			case WAIT_FOR_OP:
+				 op_event = arr_events[ *(p_calc_state->str) ];
 				
-				
+				 if(num_arr_handlers[ op_event ] != NULL) /*Not to get segmentation dump */ 
+        		 {   
+
+            		current_state = 
+            		(*op_arr_handlers[ op_event ])(p_calc_state, result, num1, num2);
+            		
+            		current_status = p_calc_state->curr_status;
+       			 }
+       			 break;
+       			 
+       		case ERROR: 
+       			printf(" need to handle error, current_status = %d\n", current_status);
+       			/*current_status = MATH_ERROR;*/
+       			break;	
+					
 		}
 	
 	}
