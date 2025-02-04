@@ -132,7 +132,7 @@ static void TestBstOneNode(void)
 	
 	int flag = FALSE;
 	status_t result_status = -1;
-	char* exp1 = "1+1";
+	char* exp1 = "3+2";
 	double res = 0.0;
 	double* result = NULL;
 	
