@@ -5,24 +5,23 @@
 * Last update: 03 / 02 / 2025
 *****************************************/
 #include <stdio.h>
+#include <string.h> 	/* isspace */
 #include <assert.h> 	/* assert */
 #include <stdlib.h> 	/* malloc, free */
 #include "stack.h" 
 #include "calculator.h" 
-/*
-#define 	NodeToIter(x)		((bst_iter_t)x)
-#define		IterToNode(x)		((bst_node_t*)x)	
-*/
+
+
 /****************struct and enum declaration*********************/
-/*
+
 typedef enum
 {
     SUCCESS = 0,
     MATH_ERROR = 1,
     SYNTAX_ERROR = 2,
     SYSTEM_ERROR = 3
-}status_t;
-*/
+}status_result_t;
+
 typedef enum 
 {
 	INVALID_INPUT = 0, /* the rest */
@@ -34,6 +33,7 @@ typedef enum
 	OPEN_BRACKET = 6, /* 40 */
 	CLOSE_BRACKET = 7, /* 41 */
 	SPACE = 8, /* 32 */
+	BACK_SLASH = 9, /* '0/' */
 	NUM_OF_EVENTS
 	
 }event_t;
@@ -59,34 +59,71 @@ typedef enum
 
 typedef struct 
 {
-	const char* str;
+	const char *str;
 	double* result;
 	const stack_t *num_stack;
 	const stack_t *op_stack;
 
 }calc_t;
 
-/* typedef void* (*handler_t) (void* ptr, calc_t calc_state, void* result); */
+/* typedef void* (*handler_t) (calc_t* calc_state, void* result); */
 /*
 typedef status_t (*handler_num_t) (char* ptr, calc_t calc_state,  double* result);
-typedef status_t (*space_t) (calc_t calc_state,  double* result);
+typedef status_t (*space_t) (calc_t* calc_state,  double* result);
+typedef status_t (*calc_rest_t) (calc_t* calc_state,  double* result);
 typedef status_t (*minus_t) (calc_t calc_state,  double* result);    
 typedef status_t (*pluse_t) (double num1, double num2, calc_t calc_state,  double result);
 typedef status_t (*pluseMinuse_t) (char* ptr, calc_t calc_state, double* result);
 typedef status_t (*operation_t) (char* ptr, calc_t calc_state, double* result);
 typedef status_t (*bracket_t) (char* ptr, calc_t calc_state, double* result);    
 typedef status_t (*error_t) (char* ptr, calc_t calc_state, double* result);
- 
+
 */
-
-
-status_t Space(calc_t calc_state, double* result)
+status_t Calc_Rest(calc_t *calc_state, double* result)
 {
+ /* need to complete if arrive to back_slash while the 
+ 	current state is WAIT_FOR_OP, if the current state is WAIT_FOR_NUM
+ 	then jump to next_state  = ERROR */
+ 	
+ 	/* 
+ 		if the cuurent state is WAIT_FOR_OP and the characther is
+ 		 minus, then you need to AddPluse to oprtator stack( with handler function)
+ 		 then ( in the same handler function ) need to Add -1 to number stack
+ 		 and then to Add multiple operator ( * ) to operator stack and now
+ 		 to send the stack to func Calc_Rest because the precedance is violats
+ 		 because i enter * after + and + is lower precedance then * .
+ 		 After returning from calc_rest you need to pass ( the current state)
+ 		 to WAIT_FOR_NUM. 
+ 	*/
 
+
+}
+
+
+status_t Space(calc_t *calc_state, double* result)
+{
+	char* str1 = NULL;
+	calc_state->str;
+
+	assert(calc_state);
+	assert( calc_state->str ); 
+	/*assert(result);*/
+	str1 = calc_state->str;
+	
+	(void)result; /* maybe not neccessery */
+	
+	while( isspace( str1 ) );
+	{
+		++str1;
+	}
+	
+	calc_state->str = str1;
+	return SUCCESS;
+	
 }
 /* global current and next state */
 state_t current_state = WAIT_FOR_NUMBER;
-state_t next_state = WAIT_FOR_NUMBER;
+state_t next_state = WAIT_FOR_OP;
 
 int arr_events[128] = { 0 };
 
@@ -98,6 +135,11 @@ status_t InitArrEvent(int *arr_event, calc_t calc_state )
 	for(i = 0; i < 127; ++i)
 	{
 
+		if ( 0 == i )
+		{
+			arr_event[i] = BACK_SLASH;
+		}
+		
 		if ( 32 == i  )
 		{
 			arr_event[i] = SPACE;
@@ -138,10 +180,9 @@ status_t InitArrEvent(int *arr_event, calc_t calc_state )
 		}
 	}
 	
+	
+	
 }
-
-
-
 
 /** possible return values **/
 
@@ -152,13 +193,35 @@ status_t InitArrEvent(int *arr_event, calc_t calc_state )
 
 /***********Functions declaration*******/
 
-status_t Space(calc_t calc_state, double* result);
-
+status_t Space(calc_t* calc_state, double* result);
+status_t Calc_Rest(calc_t *calc_state, double* result);
 /**********End of functions declaration *******/
 
 /***********Static Functions definition*******/
 
 
 /***********End Of Static Functions definition*******/
+
+status_t Calculate(const char* expression, double* result)
+{
+	
+	current_state = WAIT_FOR_NUM;
+	next_state = WAIT_FOR_OP;
+	stack_t* num_stack = NULL;
+	stack_t* op_stack = NULL;
+	InitArrEvent(expression, 
+	while( (ERROR != current_state) && (*expression) )
+	{
+		
+		switch (current_state)
+		{
+			case 
+		
+		
+		}
+	
+	}
+
+}
 
 
