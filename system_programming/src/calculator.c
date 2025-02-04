@@ -19,11 +19,11 @@
 /***********Functions declaration*******/
 
 state_t Space(calc_t* calc_state, double* result, double num1, double num2);
-state_t Calc_Rest(calc_t *calc_state, double* result, double num1, double num2);
+status_t Calc_Rest(calc_t *calc_state, double* result, double num1, double num2);
 status_t InitArrEvent(int *arr_event);
 status_t InitStacks(const char* expression, calc_t *p_calc_state);
 state_t PushNum(calc_t *calc_state, double* result, double num1, double num2);
-state_t PushPluse(calc_t *calc_state, double* result, double num1, double num2);
+state_t PushPlus(calc_t *calc_state, double* result, double num1, double num2);
 
 
 /**********End of functions declaration *******/
@@ -41,7 +41,7 @@ int arr_events[128] = { 0 };
 handler_t num_arr_handlers[ 10 ] = { NULL };
 handler_t op_arr_handlers[ 10 ] = { NULL };
 num_arr_handlers[ NUMBER_EVENT ] = PushNum;
-op_arr_handlers[ PLUSE ] = PushPluse;
+op_arr_handlers[ PLUSE ] = PushPlus;
 /**************End Of Globals****************************/
 
 typedef enum
@@ -59,7 +59,7 @@ typedef enum
 	DIV = 2, /* 47 */
 	MULT = 3, /* 42 */
 	MINUS = 4, /* 45 */
-	PLUSE = 5,  /* 43 */
+	PLUS = 5,  /* 43 */
 	OPEN_BRACKET = 6, /* 40 */
 	CLOSE_BRACKET = 7, /* 41 */
 	SPACE = 8, /* 32 */
@@ -98,7 +98,100 @@ typedef struct
 state_t PushNum(calc_t *calc_state, double* result, double num1, double num2)
 {
 	
+	char* pEnd = NULL;
+	
+	assert(calc_state);
+	assert(result);
+	UNUSED(num2);
+	num1 = strtod( calc_state->str, &pEnd );
+	StackPush( calc_state->num_stack, &num1 );
+
+	calc_state->str = pEnd;
+	
+	return WAIT_FOR_OP;
 }
+
+state_t PushPlus(calc_t *calc_state, double* result, double num1, double num2)
+{
+	assert(calc_state);
+	assert(result);
+	UNUSED(num1);
+	UNUSED(num2);
+	
+	/*
+		1.  Use StackPeek to see the current operator in the op_stack
+			before pushing thr current operator.
+			
+		 2. if precedence of the opertaor is lower or call to Calc_Rest 
+			to do the job, and return from the the update result */
+	
+	Calc_Rest(calc_state, result, num1, num2);
+	StackPush(calc_state->op_stack, calc_state->str );
+	
+	return WAIT_FOR_OP;
+}
+
+status_t Calc_Rest(calc_t *calc_state, double* result, double num1, double num2)
+{
+	
+	double res = 0.0;
+	double sign = +1.0;
+	
+	assert(calc_state);
+	assert(result);
+	
+	num1 = 0.0;
+	num2 = 0.0;
+	
+	while( !StackIsEmpty(calc_state->num_stack) && !StackIsEmpty(calc_state->op_stack) && 
+	        &&    '(' != StackPeek(calc_state->op_stack) ) 
+	{
+		/*
+		num1 = StackPeek(calc_state->num_stack);
+		StackPop(calc_state->num_stack);
+		*/
+		while( '-' == *(char*)StackPeek(calc_state->op_stack) )
+		{
+			sign = -1.0;
+			num1 += *(double*)StackPeek(calc_state->num_stack);
+			
+			StackPop(calc_state->num_stack);
+			StackPop(calc_state->op_stack); 
+		}
+
+		num1 *= sign;
+		res += num1;
+		
+		if( !StackIsEmpty(calc_state->num_stack) )
+		{
+			num2 = *(double*)StackPeek(calc_state->num_stack);
+			StackPop(calc_state->num_stack);
+			
+			res += num2;
+			
+		}
+	}
+	
+	*result = res;
+	
+	return SUCCESS;
+	
+}	
+	
+ /* need to complete if arrive to back_slash while the 
+ 	current state is WAIT_FOR_OP, if the current state is WAIT_FOR_NUM
+ 	then jump to next_state  = ERROR */
+ 	
+ 	/* 
+ 		if the cuurent state is WAIT_FOR_OP and the characther is
+ 		 minus, then you need to AddPluse to oprtator stack( with handler function)
+ 		 then ( in the same handler function ) need to Add -1 to number stack
+ 		 and then to Add multiple operator ( * ) to operator stack and now
+ 		 to send the stack to func Calc_Rest because the precedance is violats
+ 		 because i enter * after + and + is lower precedance then * .
+ 		 After returning from calc_rest you need to pass ( the current state)
+ 		 to WAIT_FOR_NUM. 
+ 	*/
 
 
 
@@ -120,25 +213,6 @@ typedef state_t (*error_t) (char* ptr, calc_t calc_state, double* result);
 */
 
 /*****************************Calc_Rest*************************/
-state_t Calc_Rest(calc_t *calc_state, double* result, double num1, double num2)
-{
- /* need to complete if arrive to back_slash while the 
- 	current state is WAIT_FOR_OP, if the current state is WAIT_FOR_NUM
- 	then jump to next_state  = ERROR */
- 	
- 	/* 
- 		if the cuurent state is WAIT_FOR_OP and the characther is
- 		 minus, then you need to AddPluse to oprtator stack( with handler function)
- 		 then ( in the same handler function ) need to Add -1 to number stack
- 		 and then to Add multiple operator ( * ) to operator stack and now
- 		 to send the stack to func Calc_Rest because the precedance is violats
- 		 because i enter * after + and + is lower precedance then * .
- 		 After returning from calc_rest you need to pass ( the current state)
- 		 to WAIT_FOR_NUM. 
- 	*/
-
-
-}
 
 
 /*****************************Space*************************/
