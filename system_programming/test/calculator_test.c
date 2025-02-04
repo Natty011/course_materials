@@ -129,18 +129,20 @@ int main ()
 /********************  TestBstOneNode  ****************************/
 static void TestBstOneNode(void)
 {	
+	
 	int flag = FALSE;
-
-	puts(RED);
-	/*
-	if( OPERATION_FAIL == destroy_check )
-	{
-		puts("Failes in_1: Destroy");
-		flag =  TRUE;
-	}
-	*/
+	status_t result_status = -1;
+	char* exp1 = "1+1";
+	double res = 0.0;
+	double* result = NULL;
 	
+	result = &res;
 	
+	/*puts(RED);*/
+	
+	result_status = Calculate(exp1, result);
+	printf(" result_status_exp1 = %d \n", result_status);
+	printf(" result_exp1 = %f \n", *result);
 	if( !flag ) /*!flag*/
 	{
 		puts(RESET);		
@@ -154,5 +156,13 @@ static void TestBstOneNode(void)
 	}
 	
 }
+
+/*
+	if( OPERATION_FAIL == destroy_check )
+	{
+		puts("Failes in_1: Destroy");
+		flag =  TRUE;
+	}
+*/
 
 
