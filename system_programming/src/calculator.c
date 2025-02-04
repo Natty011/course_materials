@@ -74,17 +74,16 @@ typedef struct calc
 
 }calc_t;
 
-typedef state_t (*handler_t)(calc_t* calc_state,
-				 double* result, double num1, double num2);
+typedef state_t (*handler_t)(calc_t* calc_state, double* result);
 
 /***********Functions declaration*******/
 
-state_t Space(calc_t* calc_state, double* result, double num1, double num2);
-status_t Calc_Rest(calc_t *calc_state, double* result, double num1, double num2);
-status_t InitArrEvent(char *arr_event);
+state_t Space(calc_t* calc_state, double* result);
+status_t Calc_Rest(calc_t *calc_state, double* result);
+status_t InitArrEvent(int *arr_event);
 status_t InitStacks(const char* expression, calc_t *p_calc_state);
-state_t PushNum(calc_t *calc_state, double* result, double num1, double num2);
-state_t PushPlus(calc_t *calc_state, double* result, double num1, double num2);
+state_t PushNum(calc_t *calc_state, double* result);
+state_t PushPlus(calc_t *calc_state, double* result);
 
 
 /**********End of functions declaration *******/
@@ -104,88 +103,79 @@ op_arr_handlers[ PLUS ] = PushPlus;
 */
 /**************End Of Globals****************************/
 
-state_t PushNum(calc_t *calc_state, double* result, double num1, double num2)
+state_t PushNum(calc_t *calc_state, double* result)
 {
 	
-	char* pEnd = NULL;
-	
+	/*char* pEnd = NULL;*/
+	double num1 = 1.0;
 	assert(calc_state);
 	assert(result);
-	UNUSED(num2);
-	num1 = strtod( calc_state->str, &pEnd );
+
+	num1 = strtod( calc_state->str, &calc_state->str );
 	StackPush( calc_state->num_stack, &num1 );
 
-	calc_state->str = pEnd;
+	/*calc_state->str = pEnd;*/
 	
 	return WAIT_FOR_OP;
 }
 
-state_t PushPlus(calc_t *calc_state, double* result, double num1, double num2)
+state_t PushPlus(calc_t *calc_state, double* result)
 {
-	char* str1 = NULL;
 	
 	assert(calc_state);
 	assert(result);
-	UNUSED(num1);
-	UNUSED(num2);
-	str1 = calc_state->str;
+
 	/*
 		1.  Use StackPeek to see the current operator in the op_stack
 			before pushing thr current operator.
 			
 		 2. if precedence of the opertaor is lower or call to Calc_Rest 
 			to do the job, and return from the the update result */
+	/*if( '+' != *(calc_state->str ) )*/
+	if( '\0' == *(calc_state->str ) )
+	{
+		return ERROR;
+	}
+	calc_state->curr_status = Calc_Rest(calc_state, result);
 	
-	calc_state->curr_status = Calc_Rest(calc_state, result, num1, num2);
 	StackPush(calc_state->op_stack, calc_state->str );
-	str1 = calc_state->str;
-	calc_state->str = ++str1;
+
+	++(calc_state->str);
 	
-	return WAIT_FOR_OP;
+	return WAIT_FOR_NUM;
 }
 
-status_t Calc_Rest(calc_t *calc_state, double* result, double num1, double num2)
+status_t Calc_Rest(calc_t *calc_state, double* result)
 {
 	
-	double res = 0.0;
+	double res = 0.0, num1 = 1.0, num2 = 1.0;
 	double sign = +1.0;
 	
 	assert(calc_state);
 	assert(result);
 	
-	num1 = 0.0;
-	num2 = 0.0;
 	
 	while( !StackIsEmpty(calc_state->num_stack) && !StackIsEmpty(calc_state->op_stack) 
 	        &&   '(' != *(char*)StackPeek(calc_state->op_stack) ) 
 	{
-		/*
-		num1 = StackPeek(calc_state->num_stack);
-		StackPop(calc_state->num_stack);
-		*/
-		while( '-' == *(char*)StackPeek(calc_state->op_stack) )
-		{
-			sign = -1.0;
-			num1 += *(double*)StackPeek(calc_state->num_stack);
-			
-			StackPop(calc_state->num_stack);
-			StackPop(calc_state->op_stack); 
-		}
-
-		num1 *= sign;
-		res += num1;
 		
+		
+		
+		num1  *= *(double*)StackPeek(calc_state->num_stack);
+		res += num1;
+		StackPop(calc_state->num_stack);
+
 		if( !StackIsEmpty(calc_state->num_stack) )
 		{
-			num2 = *(double*)StackPeek(calc_state->num_stack);
+			num2 *= *(double*)StackPeek(calc_state->num_stack);
 			StackPop(calc_state->num_stack);
 			
-			res += num2;
-			
-		}
+			StackPop( calc_state->op_stack );
+
+		}	
+		res += num2;
+		StackPush( calc_state->num_stack , &res );
 	}
-	
-	*result = res;
 	
 	return SUCCESS;
 	
@@ -225,12 +215,12 @@ typedef state_t (*error_t) (char* ptr, calc_t calc_state, double* result);
 
 
 /*****************************Space*************************/
-state_t Space(calc_t *calc_state, double* result, double num1, double num2)
+state_t Space(calc_t *calc_state, double* result)
 {
 	char* str1 = NULL;
 	
-	UNUSED(num1);
-	UNUSED(num2);
+
+
 	UNUSED(result);
 	
 	assert(calc_state);
@@ -251,19 +241,19 @@ state_t Space(calc_t *calc_state, double* result, double num1, double num2)
 }
 
 /*****************************InitArrEvent*************************/
-status_t InitArrEvent(char *arr_event )
+status_t InitArrEvent(int *arr_event )
 {
 	size_t i = 0;
 	assert(arr_event);
 	
-	for(i = 0; i < 127; ++i)
+	for(i = 0; i <= 127; ++i)
 	{
 
 		if ( 0 == i )
 		{
-			arr_event[i] = BACK_SLASH;
+			arr_event[i] = BACK_SLASH; 
 		}
-		
+
 		if ( 32 == i  )
 		{
 			arr_event[i] = SPACE;
@@ -302,6 +292,7 @@ status_t InitArrEvent(char *arr_event )
 		{
 			arr_event[i] = NUMBER_EVENT;
 		}
+		/*arr_event[47] = DIV;*/
 	}
 	
 	return SUCCESS;
@@ -318,7 +309,7 @@ status_t InitStacks(const char* expression, calc_t *p_calc_state)
 	len = strlen(expression);
 	p_calc_state->str = (char*)expression;
 	/* *(p_calc_state->result) = 0.0; */ 
-	p_calc_state->num_stack = StackCreate( len, sizeof(*expression) );
+	p_calc_state->num_stack = StackCreate( len, sizeof(double) );
 	
 	if( NULL == p_calc_state->num_stack )
 	{
@@ -326,7 +317,7 @@ status_t InitStacks(const char* expression, calc_t *p_calc_state)
 		return SYSTEM_ERROR;
 	}
 	
-	p_calc_state->op_stack = StackCreate( len, sizeof(*expression) );	
+	p_calc_state->op_stack = StackCreate( len, sizeof(char) );	
 	
 	if( NULL == p_calc_state->op_stack )
 	{
@@ -375,7 +366,10 @@ status_t Calculate(const char* expression, double* result)
 	current_state = WAIT_FOR_NUM;
 	/*next_state = WAIT_FOR_OP;*/
 
+	InitArrEvent(arr_events);
+	/*
 	InitArrEvent((char*)expression);
+	*/
 	current_status = InitStacks((char*)expression, p_calc_state  );
 	
 	if( SYSTEM_ERROR == current_status )
@@ -383,29 +377,42 @@ status_t Calculate(const char* expression, double* result)
 		return SYSTEM_ERROR;
 	}
 	
-	while( (ERROR != current_state) && *(p_calc_state->str) )
+	while( (ERROR != current_state) && *(p_calc_state->str) != '\0' )
 	{
-		
+		printf("before switch = %c\n" , *p_calc_state->str );
 		switch ( current_state )
 		{
 			case WAIT_FOR_NUM:
-				num_event = arr_events[ *(int*)(p_calc_state->str) ];
+				num_event = arr_events[ *(p_calc_state->str) ];
 				
+				if ( BACK_SLASH == num_event)
+				 {
+				 	current_state = ERROR;
+				 	break;
+				 }
+				 
 				if(num_arr_handlers[ num_event ] != NULL) /*Not to get segmentation dump */ 
         		{
-
             		current_state = 
-            		(num_arr_handlers[ num_event ])(p_calc_state, result, num1, num2);
+            		num_arr_handlers[ num_event ](p_calc_state, result);
        			}
        			break;
        			
 			case WAIT_FOR_OP:
-				 op_event = arr_events[ *(int*)(p_calc_state->str) ];
+				 op_event = arr_events[ *(char*)(p_calc_state->str) ];
+				/*
+				 if ( BACK_SLASH == op_event)
+				 {
+				 	current_state = ERROR;
+				 	break;
+				 }
+				 
+				 */
 				/* (p_calc_state, result, num1, num2)*/ 
-				if(num_arr_handlers[ op_event ] != NULL)  /*Not to get segmentation fault*/
+				if(op_arr_handlers[ op_event ] != NULL)  /*Not to get segmentation fault*/
 				{
             		current_state = 
-            		(op_arr_handlers[ op_event ])(p_calc_state, result, num1, num2);
+            		(op_arr_handlers[ op_event ])(p_calc_state, result);
             		
             		current_status = p_calc_state->curr_status;
        			} 
@@ -417,8 +424,10 @@ status_t Calculate(const char* expression, double* result)
        			break;	
 					
 		}
-	
+		
 	}
+	
+	Calc_Rest( p_calc_state, result);
 	
 	StackDestroy(p_calc_state->num_stack );
 	StackDestroy(p_calc_state->op_stack );
