@@ -132,12 +132,14 @@ state_t PushPlus(calc_t *calc_state, double* result)
 		 2. if precedence of the opertaor is lower or call to Calc_Rest 
 			to do the job, and return from the the update result */
 	/*if( '+' != *(calc_state->str ) )*/
+	
+	calc_state->curr_status = Calc_Rest(calc_state, result);
+	/*
 	if( '\0' == *(calc_state->str ) )
 	{
-		return ERROR;
+		return WAIT_FOR_NUM;
 	}
-	calc_state->curr_status = Calc_Rest(calc_state, result);
-	
+	*/
 	StackPush(calc_state->op_stack, calc_state->str );
 
 	++(calc_state->str);
@@ -154,12 +156,10 @@ status_t Calc_Rest(calc_t *calc_state, double* result)
 	assert(calc_state);
 	assert(result);
 	
-	
-	while( !StackIsEmpty(calc_state->num_stack) && !StackIsEmpty(calc_state->op_stack) 
+	/* !StackIsEmpty(calc_state->num_stack) &&*/
+	while(  !StackIsEmpty(calc_state->op_stack) 
 	        &&   '(' != *(char*)StackPeek(calc_state->op_stack) ) 
 	{
-		
-		
 		
 		num1  *= *(double*)StackPeek(calc_state->num_stack);
 		res += num1;
@@ -170,11 +170,20 @@ status_t Calc_Rest(calc_t *calc_state, double* result)
 			num2 *= *(double*)StackPeek(calc_state->num_stack);
 			StackPop(calc_state->num_stack);
 			
-			StackPop( calc_state->op_stack );
-
-		}	
+		}
+		
+		StackPop( calc_state->op_stack );	
 		res += num2;
-		StackPush( calc_state->num_stack , &res );
+		
+		if( StackIsEmpty(calc_state->op_stack) )
+		{
+			*result += res; 
+		}
+		
+		else
+		{
+			StackPush( calc_state->num_stack , &res );
+		}	
 	}
 	
 	return SUCCESS;
@@ -385,12 +394,6 @@ status_t Calculate(const char* expression, double* result)
 			case WAIT_FOR_NUM:
 				num_event = arr_events[ *(p_calc_state->str) ];
 				
-				if ( BACK_SLASH == num_event)
-				 {
-				 	current_state = ERROR;
-				 	break;
-				 }
-				 
 				if(num_arr_handlers[ num_event ] != NULL) /*Not to get segmentation dump */ 
         		{
             		current_state = 
@@ -400,14 +403,7 @@ status_t Calculate(const char* expression, double* result)
        			
 			case WAIT_FOR_OP:
 				 op_event = arr_events[ *(char*)(p_calc_state->str) ];
-				/*
-				 if ( BACK_SLASH == op_event)
-				 {
-				 	current_state = ERROR;
-				 	break;
-				 }
-				 
-				 */
+				
 				/* (p_calc_state, result, num1, num2)*/ 
 				if(op_arr_handlers[ op_event ] != NULL)  /*Not to get segmentation fault*/
 				{
