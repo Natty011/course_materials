@@ -118,6 +118,7 @@ state_t PushNum(calc_t *calc_state, double* result)
 
 	/* ENTER HANDLER_ERROR_FUNC OF ZERO ?? */
 	num1 = strtod( calc_state->str, &calc_state->str );
+	/*printf("PushNum_num1 = %f\n", num1);*/
 	StackPush( calc_state->num_stack, &num1 );
 
 	return WAIT_FOR_OP;
@@ -177,7 +178,7 @@ state_t PushMinus(calc_t *calc_state, double* result)
 			to do the job, and return from the the update result */
 	/*if( '+' != *(calc_state->str ) )*/
 	
-	/*calc_state->curr_status = Calc_Rest(calc_state, result);*/
+	calc_state->curr_status = Calc_Rest(calc_state, result);
 	/*
 	if( '\0' == *(calc_state->str ) )
 	{
@@ -587,14 +588,24 @@ status_t Calculate(const char* expression, double* result)
        		case ERROR: 
        			printf(" need to handle error, current_status = %d\n", current_status);
        			
-       			current_status = MATH_ERROR;
+       			current_status = SYNTAX_ERROR;
+       			
        			break;			
 		}
 		
 	}
+	/* Not possible to finish with that state */
+	if ( WAIT_FOR_NUM == current_state && *(p_calc_state->str) == '\0' ) 
+	{
+		current_status = MATH_ERROR;
+		current_state = ERROR;
+		p_calc_state->curr_state = current_state;
+		*result = 0.0;
+	}
 	/*if ( ERROR != current_state )*/
 	printf("curr_state_after_while = %d\n" , current_state );
-	if( !StackIsEmpty(p_calc_state->op_stack) && (ERROR != current_state) ) 
+	/* !StackIsEmpty(p_calc_state->op_stack) && */
+	if(  (ERROR != current_state) ) 
 	{
 		current_status = Calc_Rest( p_calc_state, result);
 	}
