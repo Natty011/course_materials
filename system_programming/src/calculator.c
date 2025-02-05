@@ -167,9 +167,10 @@ state_t PushPlus(calc_t *calc_state, double* result)
 state_t PushMinus(calc_t *calc_state, double* result)
 {
 	
+	char pluse = PLUS_CHAR;
 	assert(calc_state);
 	assert(result);
-
+	/**pluse = PLUS_CHAR;*/
 	/*
 		1.  Use StackPeek to see the current operator in the op_stack
 			before pushing thr current operator.
@@ -185,9 +186,17 @@ state_t PushMinus(calc_t *calc_state, double* result)
 		return WAIT_FOR_NUM;
 	}
 	*/
+
+	printf("before_*calc_state->str _PushMinus = %c\n" , *calc_state->str );
 	StackPush(calc_state->op_stack, calc_state->str );
-	/*printf("before_*calc_state->str _PushMinus = %c\n" , *calc_state->str );*/
 	++(calc_state->str);
+	if( MINUS_CHAR == *(calc_state->str) )
+	{
+		StackPop( calc_state->op_stack );
+		StackPush(calc_state->op_stack, &pluse );
+		++(calc_state->str);
+		
+	}
 	/*printf("after_*calc_state->str _PushMinus = %c\n" , *calc_state->str );*/
 
 	/*printf("BACK_SLASH_CHAR = %d \n", BACK_SLASH_CHAR);*/
@@ -544,7 +553,7 @@ status_t Calculate(const char* expression, double* result)
 	while( (ERROR != current_state) && *(p_calc_state->str) != '\0' )
 	{
 		printf("before switch = %c\n" , *p_calc_state->str );
-		/*printf("curr_state_before switch = %d\n" , current_state );*/
+		printf("curr_state_before switch = %d\n" , current_state );
 		switch ( current_state )
 		{
 			case WAIT_FOR_NUM:
