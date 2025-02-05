@@ -152,11 +152,41 @@ state_t PushPlus(calc_t *calc_state, double* result)
 	return WAIT_FOR_NUM;
 }
 
+/**************PushMinus****************************/
+state_t PushMinus(calc_t *calc_state, double* result)
+{
+	
+	assert(calc_state);
+	assert(result);
+
+	/*
+		1.  Use StackPeek to see the current operator in the op_stack
+			before pushing thr current operator.
+			
+		 2. if precedence of the opertaor is lower or call to Calc_Rest 
+			to do the job, and return from the the update result */
+	/*if( '+' != *(calc_state->str ) )*/
+	
+	/*calc_state->curr_status = Calc_Rest(calc_state, result);*/
+	/*
+	if( '\0' == *(calc_state->str ) )
+	{
+		return WAIT_FOR_NUM;
+	}
+	*/
+	StackPush(calc_state->op_stack, calc_state->str );
+
+	++(calc_state->str);
+	
+	return WAIT_FOR_NUM;
+}
+
+/**************Calc_Rest****************************/
 status_t Calc_Rest(calc_t *calc_state, double* result)
 {
 	
-	double res = 0.0, num1 = 1.0, num2 = 1.0;
-	double sign = +1.0;
+	double res = 0.0, num1 = 0.0, num2 = 0.0;
+	/*double sign = +1.0;*/
 	
 	assert(calc_state);
 	assert(result);
@@ -166,23 +196,33 @@ status_t Calc_Rest(calc_t *calc_state, double* result)
 	        && OPEN_BRACKET_CHAR != *(char*)StackPeek(calc_state->op_stack) ) 
 	{
 		
-		num1  *= *(double*)StackPeek(calc_state->num_stack);
-		res += num1;
+		num1  = *(double*)StackPeek(calc_state->num_stack);
 		StackPop(calc_state->num_stack);
+		
+		if( MINUS_CHAR == *(char*)StackPeek(calc_state->op_stack) )
+		{
 
+			num1 *= -1.0;
+		}
+			
+		/*printf("res_num1 = %f \n", res);*/
+		
 		if( !StackIsEmpty(calc_state->num_stack) )
 		{
-			num2 *= *(double*)StackPeek(calc_state->num_stack);
+			num2 = *(double*)StackPeek(calc_state->num_stack);
 			StackPop(calc_state->num_stack);
 			
 		}
-		
+	
 		StackPop( calc_state->op_stack );	
-		res += num2;
+		res += (num2 + num1) ;
+		
+		/*printf("res_num2 = %f \n", res);*/
 		
 		if( StackIsEmpty(calc_state->op_stack) )
 		{
 			*result += res; 
+			/*printf(" *result_is empty_op_stack = %f \n", *result);*/
 		}
 		
 		else
@@ -211,19 +251,7 @@ status_t Calc_Rest(calc_t *calc_state, double* result)
  	*/
 
 
-/* typedef void* (*handler_t) (calc_t* calc_state, void* result); */
-/*
-typedef state_t (*handler_num_t) (char* ptr, calc_t calc_state,  double* result);
-typedef state_t (*space_t) (calc_t* calc_state, double* result, double num1, double num2);
-typedef state_t (*calc_rest_t) (calc_t* calc_state,  double* result);
-typedef state_t (*minus_t) (calc_t calc_state,  double* result);    
-typedef state_t (*pluse_t) (double num1, double num2, calc_t calc_state,  double result);
-typedef state_t (*pluseMinuse_t) (char* ptr, calc_t calc_state, double* result);
-typedef state_t (*operation_t) (char* ptr, calc_t calc_state, double* result);
-typedef state_t (*bracket_t) (char* ptr, calc_t calc_state, double* result);    
-typedef state_t (*error_t) (char* ptr, calc_t calc_state, double* result);
 
-*/
 
 /*****************************Calc_Rest*************************/
 
@@ -318,6 +346,9 @@ static void InitNumHandlers(handler_t* num_arr_handlers  )
 	num_arr_handlers[ NUMBER_EVENT ] = PushNum; 
 	/*
 	num_arr_handlers[ PLUS ] = Error;
+	*/
+	num_arr_handlers[ MINUS ] = PushMinus;
+	/*
 	num_arr_handlers[ DIV ] = Error;
 	num_arr_handlers[ MULT ] = Error;
 	num_arr_handlers[ OPEN_BRACKET ] = PushBracket;
@@ -337,6 +368,7 @@ static void InitOpHandlers(handler_t* op_arr_handlers  )
 	op_arr_handlers[ NUMBER_EVENT ] = Error;
 	*/	
 	op_arr_handlers[ PLUS ] = PushPlus;
+	op_arr_handlers[ MINUS ] = PushMinus;
 	/*
 	op_arr_handlers[ DIV ] = PushDiv;
 	op_arr_handlers[ MULT ] = PushMult;
@@ -415,19 +447,32 @@ status_t Calculate(const char* expression, double* result)
             		 
             		p_calc_state->curr_state = current_state;
             		current_status = p_calc_state->curr_status;
+            		
+       			}
+       			break;			
+       			/*
+       			else
+       			{
+       				current_state = ERROR;
+       				p_calc_state->curr_state = current_state;
+       				p_calc_state->curr_status = SYNTAX_ERROR;
+       				current_status = p_calc_state->curr_status;
+       				break;
        			} 
-       			break;
-       			 
-       		case ERROR: 
+				*/
        			
+       		case ERROR: 
        			printf(" need to handle error, current_status = %d\n", current_status);
-       			/*current_status = MATH_ERROR;*/
+       			current_status = MATH_ERROR;
        			break;			
 		}
 		
 	}
-	
-	current_status = Calc_Rest( p_calc_state, result);
+	/*if ( ERROR != current_state )*/
+	if( !StackIsEmpty(p_calc_state->op_stack) && (ERROR != current_state) ) 
+	{
+		current_status = Calc_Rest( p_calc_state, result);
+	}
 	
 	StackDestroy(p_calc_state->num_stack );
 	StackDestroy(p_calc_state->op_stack );
