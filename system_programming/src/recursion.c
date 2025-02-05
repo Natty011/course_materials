@@ -40,7 +40,7 @@ int StrCmp(const char *s1, const char *s2)
  	assert(s1);
  	assert(s2);
  	
- 	if( !(*s1) || !(*s2) )
+ 	if( !(*s1)  || (*s1 - *s2) ) /* !(*s1) */
  	{
  		return *s1 - *s2;
  	}
