@@ -231,23 +231,21 @@ typedef state_t (*error_t) (char* ptr, calc_t calc_state, double* result);
 /*****************************Space*************************/
 state_t Space(calc_t *calc_state, double* result)
 {
-	char* str1 = NULL;
-	
+
 	UNUSED(result);
 	
 	assert(calc_state);
 	assert( calc_state->str ); 
 	/*assert(result);*/
-	/*str1 = calc_state->str;*/
-	
+
 	(void)result; /* maybe not neccessery */
 	
-	while( isspace( str1 ) )
+	while( isspace( *calc_state->str ) )
 	{
 		++(calc_state->str);
 	}
 	calc_state->curr_status = SUCCESS;
-	/*calc_state->current_state = WAIT_FOR_NUM;*/
+	calc_state->curr_state = WAIT_FOR_NUM;
 	return calc_state->curr_state; 
 	
 }
@@ -366,7 +364,7 @@ static void InitOpHandlers(handler_t* op_arr_handlers  )
 status_t Calculate(const char* expression, double* result)
 {
 	
-	double num1 = 0.0, num2 = 0.0;
+	/*double num1 = 0.0, num2 = 0.0;*/
 	status_t current_status = SUCCESS; 
 	event_t num_event = INVALID_INPUT;
 	event_t op_event = INVALID_INPUT;
@@ -396,7 +394,7 @@ status_t Calculate(const char* expression, double* result)
 		switch ( current_state )
 		{
 			case WAIT_FOR_NUM:
-				num_event = arr_events[ *(p_calc_state->str) ];
+				num_event = arr_events[ *(char*)(p_calc_state->str) ];
 				
 				if(num_arr_handlers[ num_event ] != NULL) /*Not to get segmentation fault */ 
         		{
