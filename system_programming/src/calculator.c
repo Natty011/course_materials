@@ -149,6 +149,13 @@ state_t PushPlus(calc_t *calc_state, double* result)
 
 	++(calc_state->str);
 	
+	if(BACK_SLASH_CHAR == *(calc_state->str) )
+	{
+		
+		calc_state->curr_status = SYNTAX_ERROR;
+		return ERROR;
+	}
+	
 	return WAIT_FOR_NUM;
 }
 
@@ -175,8 +182,17 @@ state_t PushMinus(calc_t *calc_state, double* result)
 	}
 	*/
 	StackPush(calc_state->op_stack, calc_state->str );
-
+	printf("before_*calc_state->str _PushMinus = %c\n" , *calc_state->str );
 	++(calc_state->str);
+	printf("after_*calc_state->str _PushMinus = %c\n" , *calc_state->str );
+
+	printf("BACK_SLASH_CHAR = %d \n", BACK_SLASH_CHAR);
+	if(BACK_SLASH_CHAR == (char)(*(calc_state->str)) )
+	{
+		
+		calc_state->curr_status = SYNTAX_ERROR;
+		return ERROR;
+	}
 	
 	return WAIT_FOR_NUM;
 }
@@ -204,8 +220,10 @@ status_t Calc_Rest(calc_t *calc_state, double* result)
 
 			num1 *= -1.0;
 		}
-			
-		/*printf("res_num1 = %f \n", res);*/
+		
+		StackPop( calc_state->op_stack );
+				
+		printf("num1 = %f \n", num1);
 		
 		if( !StackIsEmpty(calc_state->num_stack) )
 		{
@@ -213,22 +231,33 @@ status_t Calc_Rest(calc_t *calc_state, double* result)
 			StackPop(calc_state->num_stack);
 			
 		}
+		
+		if( !StackIsEmpty(calc_state->op_stack) &&
+			 MINUS_CHAR == *(char*)StackPeek(calc_state->op_stack) )
+		{
+
+			StackPop( calc_state->op_stack );
+			num2 *= -1.0;
+		}
 	
-		StackPop( calc_state->op_stack );	
+		printf("num2 = %f \n", num2);	
+		
 		res += (num2 + num1) ;
 		
-		/*printf("res_num2 = %f \n", res);*/
+		printf("res += (num2 + num1) = %f \n", res);
 		
 		if( StackIsEmpty(calc_state->op_stack) )
 		{
 			*result += res; 
-			/*printf(" *result_is empty_op_stack = %f \n", *result);*/
+			printf(" *result_is empty_op_stack = %f \n", *result);
 		}
 		
 		else
 		{
 			StackPush( calc_state->num_stack , &res );
-		}	
+		}
+		
+		res = 0.0, num1 = 0.0, num2 = 0.0;	
 	}
 	
 	return SUCCESS;
@@ -423,6 +452,7 @@ status_t Calculate(const char* expression, double* result)
 	while( (ERROR != current_state) && *(p_calc_state->str) != '\0' )
 	{
 		printf("before switch = %c\n" , *p_calc_state->str );
+		printf("curr_state_before switch = %d\n" , current_state );
 		switch ( current_state )
 		{
 			case WAIT_FOR_NUM:
@@ -434,6 +464,7 @@ status_t Calculate(const char* expression, double* result)
             		num_arr_handlers[ num_event ](p_calc_state, result);
             		/*current_state = p_calc_state->curr_state;*/
             		p_calc_state->curr_state = current_state;
+            		current_status = p_calc_state->curr_status;
        			}
        			break;
        			
@@ -449,8 +480,8 @@ status_t Calculate(const char* expression, double* result)
             		current_status = p_calc_state->curr_status;
             		
        			}
-       			break;			
-       			/*
+       			break;
+       			/*			
        			else
        			{
        				current_state = ERROR;
@@ -458,7 +489,8 @@ status_t Calculate(const char* expression, double* result)
        				p_calc_state->curr_status = SYNTAX_ERROR;
        				current_status = p_calc_state->curr_status;
        				break;
-       			} 
+       			}
+       			 
 				*/
        			
        		case ERROR: 
@@ -469,6 +501,7 @@ status_t Calculate(const char* expression, double* result)
 		
 	}
 	/*if ( ERROR != current_state )*/
+	printf("curr_state_after_while = %d\n" , current_state );
 	if( !StackIsEmpty(p_calc_state->op_stack) && (ERROR != current_state) ) 
 	{
 		current_status = Calc_Rest( p_calc_state, result);
