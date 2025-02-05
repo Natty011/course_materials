@@ -126,10 +126,15 @@ int main ()
 }
 
 /* 
-TESTS TYPES:
-Add ints: " 3.5+2.3";
-Add doubles: " 3.5+2.3";
-space first: " 3.5+2.3";
+TESTS TYPES:                  				Pass/Fail     curr_state
+Add ints: " 3.5+2.3";							P			NUM+OP
+Add doubles: " 3.5+2.3"; 						P			NUM+OP
+space first(num): " 3.5+2.3";					P			NUM
+space end (num): 	"3.5+2.3 ";		    		P		    NUM
+space first & end (num): "       3.5+2.3    ";	P		    NUM
+space first (op): " 3.5 +2.3";					P			OP
+space end (num): " 3.5+ 2.3";					P			NUM
+space first & end (num): "  3.5  + 2.3  "	    P		    NUM+OP
 */
 /********************  TestBstOneNode  ****************************/
 static void TestBstOneNode(void)
@@ -137,7 +142,7 @@ static void TestBstOneNode(void)
 	
 	int flag = FALSE;
 	status_t result_status = -1;
-	char* exp1 = " 3.5 +2.3";
+	char* exp1 = "  3.5  + 2.3  ";
 	double res = 0.0;
 	double* result = NULL;
 	
