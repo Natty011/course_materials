@@ -68,7 +68,7 @@ typedef enum
 static void TestRecursion(void);
 static int TestStrLen(void);
 static int TestStrCmp(void);
-
+static int TestStrCpy(void);
 /***************************End of function declaration******************/
 
 /******************static functions definition**********************/
@@ -112,6 +112,10 @@ static void TestRecursion(void)
 	
 	puts("'TestStrCmp()'");
     flag = TestStrCmp();
+    puts("=====================================================");
+    
+    puts("'TestStrCpy()'");
+    flag = TestStrCpy();
     puts("=====================================================");
     
     
@@ -204,5 +208,37 @@ static int TestStrCmp (void)
     
    return flag;
 }
+
+/**********TestStrCpy function *********/
+/* Checks StrCpy function by strcpy() */
+/*from the string library*/
+/* Arguments: void */
+/* Return value: void. massages according to the correctness */
+
+static int TestStrCpy(void)
+{	
+    int i = 0;
+    int flag = FALSE;
+    const char* src= "#%$#@!^&*(dn";
+    /*const char* src= "ab";*/
+    char dest[13] = "323t4d";
+    char dest1[13] = "gf43";
+    
+    char* DestCpy= StrCpy(dest, src);
+    char* destcpy= strcpy(dest1, src);
+
+	for (i = 0; *(dest + i) != '\0'; i++)
+	{
+	    if( *(DestCpy +i ) != *(destcpy + i))
+	        {
+	            puts("'StrCpy()' Function failed");
+	            flag = TRUE;
+	        }
+	}
+
+    puts("'StrCpy()' Function works great");
+    return flag ;
+}
+
 
 
