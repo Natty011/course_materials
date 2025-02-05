@@ -125,14 +125,19 @@ int main ()
 	return 0;
 }
 
-
+/* 
+TESTS TYPES:
+Add ints: " 3.5+2.3";
+Add doubles: " 3.5+2.3";
+space first: " 3.5+2.3";
+*/
 /********************  TestBstOneNode  ****************************/
 static void TestBstOneNode(void)
 {	
 	
 	int flag = FALSE;
 	status_t result_status = -1;
-	char* exp1 = "3+2";
+	char* exp1 = " 3.5 +2.3";
 	double res = 0.0;
 	double* result = NULL;
 	
