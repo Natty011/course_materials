@@ -40,13 +40,33 @@ int StrCmp(const char *s1, const char *s2)
  	assert(s1);
  	assert(s2);
  	
- 	if( !(*s1) && *s1 == *s2 )
+ 	if( !(*s1) || !(*s2) )
  	{
- 		StrCmp( ++s1, ++s2 ); 
+ 		return *s1 - *s2;
  	}
-
-	return *s1 - *s2;
+ 	
+ 	return StrCmp( ++s1, ++s2 );
 } 
+
+/****************StrCpy*********************/
+char *StrCpy(char *dest, const char *src)
+{
+	assert(dest);
+    assert(src);
+
+	*dest = *src ;
+
+	if( !(*src ) )
+	{
+		*dest = '\0' ;
+		return dest;
+	}
+	return StrCpy(++dest , ++src) - 1;
+	
+
+}
+
+
 
 
 
