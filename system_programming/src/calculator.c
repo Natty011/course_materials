@@ -245,7 +245,7 @@ state_t Space(calc_t *calc_state, double* result)
 		++(calc_state->str);
 	}
 	calc_state->curr_status = SUCCESS;
-	calc_state->curr_state = WAIT_FOR_NUM;
+	/*calc_state->curr_state = WAIT_FOR_NUM;*/
 	return calc_state->curr_state; 
 	
 }
@@ -394,18 +394,19 @@ status_t Calculate(const char* expression, double* result)
 		switch ( current_state )
 		{
 			case WAIT_FOR_NUM:
-				num_event = arr_events[ *(char*)(p_calc_state->str) ];
+				num_event = arr_events[ *(p_calc_state->str) ];
 				
 				if(num_arr_handlers[ num_event ] != NULL) /*Not to get segmentation fault */ 
         		{
             		current_state = 
             		num_arr_handlers[ num_event ](p_calc_state, result);
+            		/*current_state = p_calc_state->curr_state;*/
             		p_calc_state->curr_state = current_state;
        			}
        			break;
        			
 			case WAIT_FOR_OP:
-				 op_event = arr_events[ *(char*)(p_calc_state->str) ];
+				 op_event = arr_events[ *(p_calc_state->str) ];
 				
 				if(op_arr_handlers[ op_event ] != NULL)  /*Not to get segmentation fault*/
 				{
