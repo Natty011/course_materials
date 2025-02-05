@@ -135,6 +135,8 @@ space first & end (num): "       3.5+2.3    ";	P		    NUM
 space first (op): " 3.5 +2.3";					P			OP
 space end (num): " 3.5+ 2.3";					P			NUM
 space first & end (num): "  3.5  + 2.3  "	    P		    NUM+OP
+Sub ints: "3-2";							    P 			OP
+Sub ints with first negative: "-3-2";           P 			NUM+OP
 */
 /********************  TestBstOneNode  ****************************/
 static void TestBstOneNode(void)
@@ -142,7 +144,7 @@ static void TestBstOneNode(void)
 	
 	int flag = FALSE;
 	status_t result_status = -1;
-	char* exp1 = "  3.5  + 2.3  ";
+	char* exp1 = "-3-2";
 	double res = 0.0;
 	double* result = NULL;
 	
