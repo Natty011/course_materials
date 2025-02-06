@@ -45,17 +45,6 @@
 /*extern int destroy_check;*/
 /***************struct and enum declaration *******/
 
-
-/*
-typedef enum
-{
-	
-	SUCCESS = 0,
-	OPERATION_FAIL = 1
-	
-}bst_result_t;
-*/
-
 typedef enum
 {
 	
@@ -75,6 +64,8 @@ static int TestStrCat(void);
 static int TestStrStr(void);
 static int TestFibonacci(void);
 static int IteraiveFibonacci(int n);
+static node_t *IteraiveFlip(node_t *head);
+static int TestFlip(void);
 /***************************End of function declaration******************/
 
 /******************static functions definition**********************/
@@ -135,7 +126,11 @@ static void TestRecursion(void)
 	puts("'TestFibonacci()'");
     flag = TestFibonacci();
     puts("====================================================="); 
-         
+     
+    puts("'TestFlip()'");
+    flag = TestFlip();
+    puts("====================================================="); 
+       
 	if( !flag ) 
 	{
 		puts(RESET);		
@@ -439,7 +434,78 @@ static int IteraiveFibonacci(int n)
 	return sum3;	
 }
 
+/**********TestFlip function *********/
+static int TestFlip(void)
+{
 
+	int flag = FALSE;
+	int arr[6] = {0, 1, 2, 3, 4, 5};
+	int i = 0 ;
+	node_t n0, n1, n2, n3, n4, n5;  
+	node_t* head = &n0;
+	node_t *new_head = NULL, *new_head1 = NULL;
+	
+	n0.data = &arr[0];
+	n0.next = &n1;
+	n1.data = &arr[1];
+	n1.next = &n2;
+	n2.data = &arr[2];
+	n2.next = &n3;
+	n3.data = &arr[3];
+	n3.next = &n4;
+	n4.data = &arr[4];
+	n4.next = &n5;
+	n5.data = &arr[5];
+	n5.next = NULL;
+
+	new_head = IteraiveFlip(head);
+	new_head1 = FlipList(head);
+	
+	if(&n5 != new_head ) /* || &n5 != new_head1 */
+	{
+		puts("TestFlip Failed");
+		flag = TRUE;       			
+	}
+	
+	for(i = 5; i>=0 ; --i)
+	{
+		if(*(int*)(new_head->data) != i)
+		{
+			printf("TestFlip Failed in %d \n ", i);
+			flag = TRUE;       				
+		}
+		
+		new_head = new_head -> next;
+	}
+	
+	if ( !flag )
+	{
+		puts(" TestFlip Successed");		
+	}
+	
+    return flag;	
+}
+
+
+/******************* IteraiveFlip *********************/
+/* Flip the next of each node to point to the previous node */
+static node_t *IteraiveFlip(node_t *head)
+{
+
+	node_t* NextNode = NULL;
+	node_t* PrevNode = NULL;
+	
+	while(head)
+	{
+		
+		NextNode = head->next;
+		head->next = PrevNode;
+		PrevNode = head;
+		head = NextNode;
+	}
+	
+	return PrevNode;
+}
 
 
 
