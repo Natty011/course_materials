@@ -40,6 +40,8 @@
 #define MIN(a, b)		((a > b ) ? b : a )
 #define MAX(a, b)		((a > b ) ? a : b )
 
+#define SIZE_BUFFER 100
+
 /*extern int destroy_check;*/
 /***************struct and enum declaration *******/
 
@@ -69,6 +71,7 @@ static void TestRecursion(void);
 static int TestStrLen(void);
 static int TestStrCmp(void);
 static int TestStrCpy(void);
+static int TestStrCat(void);
 /***************************End of function declaration******************/
 
 /******************static functions definition**********************/
@@ -116,6 +119,10 @@ static void TestRecursion(void)
     
     puts("'TestStrCpy()'");
     flag = TestStrCpy();
+    puts("=====================================================");
+    
+    puts("'TestStrCat()'");
+    flag = TestStrCat();
     puts("=====================================================");
     
     
@@ -240,5 +247,54 @@ static int TestStrCpy(void)
     return flag ;
 }
 
+/**********TestStrCat function *********/
+/* Checks StrCat function by strcat() */
+/*from the strings library*/
+/* Arguments: void */
+/* Return value: void. massages according to the correctness */
+
+static int TestStrCat(void)
+{
+    
+    int flag = FALSE;
+    
+    char buffer1[SIZE_BUFFER] = "ab";  /* SIZE_BUFFER == 100 */
+    char buffer2[SIZE_BUFFER] = "ab";  /* SIZE_BUFFER == 100 */
+     
+    char* result1 = StrCat( buffer1, "cde" );
+    char* result2 = strcat( buffer2, "cde" );
+    
+    char* result3 = StrCat( buffer1, "haha45" );
+    char* result4 = strcat( buffer2, "haha45" );
+    
+    char str[50] = "World!";  
+    char* result5 = StrCat( buffer1, str );
+    char* result6 = strcat( buffer2, str );
+    
+    if (strcmp(result1, result2))
+    {
+       puts("TEST1: 'StrCat()' Function failed at the concatenation of 'src' string");
+	   flag = TRUE;       
+    }
+    
+    if (strcmp(result3, result4))
+    {
+       puts("TEST2: 'StrCat()' Function failed at the concatenation of 'src' string");
+       flag = TRUE;
+    }
+    
+    if (strcmp(result5, result6))
+    {
+       puts("TEST3: 'StrCat()' Function failed at the concatenation of 'src' string");
+	   flag = TRUE;       
+    }
+    
+    else
+    {
+        puts("'StrCat()' Function works great");
+    }
+    
+    return flag;
+}
 
 
