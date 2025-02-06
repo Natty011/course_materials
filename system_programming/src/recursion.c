@@ -1,18 +1,16 @@
 /***************************************
 * Author : Natty
-* Reviewer : Matan
-* Date : 03 / 03 / 2025
-* Last update: 03 / 02 / 2025
+* Reviewer : David
+* Date : 05 / 02 / 2025
+* Last update: 06 / 02 / 2025
 *****************************************/
-#include <stdio.h>
-#include <string.h> 	/* isspace, strlen */
+#include <string.h> 	/*  strlen */
 
 #include <assert.h> 	/* assert */
 #include <stdlib.h> 	/* malloc, free */
 #include "recursion.h" 
 
 #define UNUSED( var )       ( (void)var )
-#define UNUSED_1( var )			( __attribute__((unused))var )
 
 /****************struct and enum declaration*********************/
 /***************End of struct and enum declaration *******/
@@ -65,7 +63,7 @@ char *StrCpy(char *dest, const char *src)
 	
 
 }
-/****************StrCat*********************/
+/**********************StrCat*********************/
 char *StrCat(char *dest, const char *src)
 {
 	assert(dest);
@@ -81,8 +79,28 @@ char *StrCat(char *dest, const char *src)
     }
 }
 
-
-
+/************************StrStr*********************/
+char *StrStr(const char *haystack, const char *needle)
+{
+	assert(haystack);
+    assert(needle);
+    
+    if( ! strlen( needle ) )
+    {
+    	return (char*)haystack ;
+    }
+    
+    if( strlen( haystack ) >= strlen( needle ) )
+    {
+    	return  !strncmp( haystack, needle, strlen( needle )) ?  
+    							(char*)needle : StrStr(++haystack, needle) ;
+    }
+    
+    else
+    {
+    	return NULL;
+    }
+}
 
 
 
