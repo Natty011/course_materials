@@ -65,8 +65,21 @@ char *StrCpy(char *dest, const char *src)
 	
 
 }
-
-
+/****************StrCat*********************/
+char *StrCat(char *dest, const char *src)
+{
+	assert(dest);
+    assert(src);
+    
+    if( !( *dest ) )
+    {  
+    	return StrCpy(dest, src);
+    }
+   	else
+    {
+   		return StrCat(++dest, src ) - 1; 
+    }
+}
 
 
 
