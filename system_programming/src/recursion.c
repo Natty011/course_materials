@@ -117,8 +117,26 @@ int Fibonacci(int element_index)
 				(element_index > 1 ) * Fibonacci( element_index - 2 );
 
 }
+/************************FlipList*********************/
+node_t *FlipList(node_t *node)
+{
 
+	node_t* prev ; /* = NULL */
+	assert(node);
+	
+	if( NULL == node || NULL == node->next )
+	{
+		return node;
+	}
+	
+	prev = FlipList( node->next );
+	
+	(node->next)->next = node;
+	node->next = NULL;
+	
+	return prev;
 
+}
 
 
 
