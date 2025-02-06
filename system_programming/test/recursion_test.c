@@ -73,6 +73,8 @@ static int TestStrCmp(void);
 static int TestStrCpy(void);
 static int TestStrCat(void);
 static int TestStrStr(void);
+static int TestFibonacci(void);
+static int IteraiveFibonacci(int n);
 /***************************End of function declaration******************/
 
 /******************static functions definition**********************/
@@ -129,7 +131,11 @@ static void TestRecursion(void)
     puts("'TestStrStr()'");
     flag = TestStrStr();
     puts("=====================================================");
-    
+
+	puts("'TestFibonacci()'");
+    flag = TestFibonacci();
+    puts("====================================================="); 
+         
 	if( !flag ) 
 	{
 		puts(RESET);		
@@ -246,8 +252,10 @@ static int TestStrCpy(void)
 	            flag = TRUE;
 	        }
 	}
-
-    puts("'StrCpy()' Function works great");
+    if ( !flag )
+    {
+    	puts("'StrCpy()' Function works great");
+    }	
     return flag ;
 }
 
@@ -293,7 +301,7 @@ static int TestStrCat(void)
 	   flag = TRUE;       
     }
     
-    else
+    else if ( !flag )
     {
         puts("'StrCat()' Function works great");
     }
@@ -337,13 +345,100 @@ static int TestStrStr(void)
 	   flag = TRUE;       
     }
     
-    else
+    else if ( !flag )
     {
         puts("'StrStr()' Function works great");
     }
   
   return flag;
 }
+
+
+/**********TestFibonacci function *********/
+
+static int TestFibonacci(void)
+{
+    
+   int flag = FALSE;
+   int idx_0 = 0, idx_1 = 1, idx_2 = 2, idx_3 = 3, idx_4 = 4, idx_5 = 5 ;
+   
+	if ( 1 != Fibonacci( idx_0) || 1 != IteraiveFibonacci ( idx_0 ))
+    {
+       puts("'Fibonacci(idx_0)' Failed ");
+       flag = TRUE;       
+    }
+    if ( 1 != Fibonacci( idx_1) || 1 != IteraiveFibonacci ( idx_1 ) )
+    {
+       puts("'Fibonacci(idx_1)' Failed ");
+       flag = TRUE;       
+    }
+    
+    if ( 2 != Fibonacci( idx_2) || 2 != IteraiveFibonacci ( idx_2 ))
+    {
+       puts("'Fibonacci(idx_2)' Failed ");
+       flag = TRUE;       
+    }
+    
+    if ( 3 != Fibonacci( idx_3) || 3 != IteraiveFibonacci ( idx_3 ))
+    {
+       puts("'Fibonacci(idx_3)' Failed ");
+       flag = TRUE;       
+    }
+    
+    if ( 5 != Fibonacci( idx_4) || 5 != IteraiveFibonacci ( idx_4 ))
+    {
+       puts("'Fibonacci(idx_4)' Failed ");
+       flag = TRUE;       
+    }
+    
+    if ( 8 != Fibonacci( idx_5) || 8 != IteraiveFibonacci ( idx_5 ))
+    {
+       puts("'Fibonacci(idx_5)' Failed ");
+       flag = TRUE;       
+    }
+    
+    else if ( !flag )
+    {
+        puts("'Fibonacci()' Function works great");
+    }
+  
+  return flag;
+}     
+
+
+/**********   IteraiveFibonacci  ***********************/
+
+static int IteraiveFibonacci(int n)
+{
+	size_t sum1 = 1;
+	size_t sum2 = sum1;
+	size_t sum3 = sum1 + sum2;
+	
+	assert( n > -1);
+	
+	if( n <= 2)
+	{
+		if (n == 2)
+		{
+			return sum3;
+		}
+		
+		return sum2;
+	}
+	
+	while( n > 2)
+	{
+		
+		sum1 = sum2;
+		sum2 = sum3;
+		sum3 = sum1 + sum2;
+		
+		--n;
+	}
+	
+	return sum3;	
+}
+
 
 
 
