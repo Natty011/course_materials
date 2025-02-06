@@ -1,8 +1,8 @@
 /***************************************
 * Author : Natty
-* Reviewer : Matan
-* Date : 22 / 01 / 2025
-* Last update: 02 / 02 / 2025
+* Reviewer : David
+* Date : 05 / 02 / 2025
+* Last update: 06 / 02 / 2025
 *****************************************/
 
 #include <stdio.h> 		/* printf, puts, qsort  */
@@ -72,6 +72,7 @@ static int TestStrLen(void);
 static int TestStrCmp(void);
 static int TestStrCpy(void);
 static int TestStrCat(void);
+static int TestStrStr(void);
 /***************************End of function declaration******************/
 
 /******************static functions definition**********************/
@@ -125,6 +126,9 @@ static void TestRecursion(void)
     flag = TestStrCat();
     puts("=====================================================");
     
+    puts("'TestStrStr()'");
+    flag = TestStrStr();
+    puts("=====================================================");
     
 	if( !flag ) 
 	{
@@ -258,11 +262,11 @@ static int TestStrCat(void)
     
     int flag = FALSE;
     
-    char buffer1[SIZE_BUFFER] = "ab";  /* SIZE_BUFFER == 100 */
-    char buffer2[SIZE_BUFFER] = "ab";  /* SIZE_BUFFER == 100 */
+    char buffer1[SIZE_BUFFER] = "computer";  /* SIZE_BUFFER == 100 */
+    char buffer2[SIZE_BUFFER] = "computer";  /* SIZE_BUFFER == 100 */
      
-    char* result1 = StrCat( buffer1, "cde" );
-    char* result2 = strcat( buffer2, "cde" );
+    char* result1 = StrCat( buffer1, " program" );
+    char* result2 = strcat( buffer2, " program" );
     
     char* result3 = StrCat( buffer1, "haha45" );
     char* result4 = strcat( buffer2, "haha45" );
@@ -296,5 +300,51 @@ static int TestStrCat(void)
     
     return flag;
 }
+
+/**********TestStrStr function *********/
+
+static int TestStrStr(void)
+{
+    
+   int flag = FALSE;
+   char *s1 = "needle in a haystack";
+   char *s2 = "haystack";
+   char *result1 = StrStr(s1,s2);
+   char *result2 = strstr(s1,s2);
+   
+   char *result3 = StrStr(s1,""); /* s2 is zero length */
+   char *result4 = strstr(s1,"");
+   
+   char *result5 = StrStr(s1,"f"); /* s2 isn't a sub-string */
+   char *result6 = strstr(s1,"f");
+   
+   
+   if (strcmp(result1, result2) )
+    {
+       puts("'StrStr()' Function failed to found an exists sub-string");
+       flag = TRUE;       
+    }
+    
+    if (strcmp(result3, result4))
+    {
+       puts("'StrStr()' Function failed  when s2 is a zero length sub-string");
+	   flag = TRUE;           
+    }
+    
+    if ((NULL != result5) || (NULL != result6))
+    {
+       puts("'StrStr()' Function failed wheb s2 isn't a sub-string of s1");
+	   flag = TRUE;       
+    }
+    
+    else
+    {
+        puts("'StrStr()' Function works great");
+    }
+  
+  return flag;
+}
+
+
 
 
