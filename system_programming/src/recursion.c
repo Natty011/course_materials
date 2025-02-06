@@ -102,6 +102,30 @@ char *StrStr(const char *haystack, const char *needle)
     }
 }
 
+/************************Fibonacci*********************/
+int Fibonacci(int element_index)
+{
+	
+	assert( element_index > -1 );
+	
+	if( 2 > element_index )
+	{
+		return 1; 
+	}
+	
+	return Fibonacci( element_index - 1 ) +  
+				(element_index > 1 ) * Fibonacci( element_index - 2 );
+
+}
+
+
+
+
+
+
+
+
+
 
 
 
