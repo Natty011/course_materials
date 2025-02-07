@@ -40,6 +40,7 @@
 #define MIN(a, b)		((a > b ) ? b : a )
 #define MAX(a, b)		((a > b ) ? a : b )
 
+
 extern int destroy_check;
 /***************struct and enum declaration *******/
 
@@ -139,7 +140,9 @@ Sub ints: "3-2";							    P 			OP
 Sub ints with first negative: "-3-2";           P 			NUM+OP
 Sub/Add: "-1- 3  -  2  + 3 -  5  -10   ";       P 			NUM+OP
 2 Mimus in a row: "--1--10   "; / "-1--10   ";  P 			NUM+OP
-3 Mimus in a row: "---1   ";   					P 		NUM+OP
+3 Mimus in a row: "---1   ";   					P 		    NUM+OP
+3 Mimus in a row: "---1---4   ";   			   P 		   NUM+OP
+
 */
 /********************  TestBstOneNode  ****************************/
 static void TestBstOneNode(void)
@@ -147,7 +150,7 @@ static void TestBstOneNode(void)
 	
 	int flag = FALSE;
 	status_t result_status = -1;
-	char* exp1 = "1---10   ";
+	char* exp1 = "---1---4   ";
 	double res = 0.0;
 	double* result = NULL;
 	
