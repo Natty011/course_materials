@@ -141,16 +141,19 @@ Sub ints with first negative: "-3-2";           P 			NUM+OP
 Sub/Add: "-1- 3  -  2  + 3 -  5  -10   ";       P 			NUM+OP
 2 Mimus in a row: "--1--10   "; / "-1--10   ";  P 			NUM+OP
 3 Mimus in a row: "---1   ";   					P 		    NUM+OP
-3 Mimus in a row: "---1---4   ";   			   P 		   NUM+OP
-
+3 Mimus in a row: "---1---4   ";   			    P 		   NUM+OP
+Insert one positive number:  "0.5  "            P			NUM
+Syntax Error: "-1 -  ";                         P			NUM
+m
 */
 /********************  TestBstOneNode  ****************************/
 static void TestBstOneNode(void)
 {	
+	/* Amit seggest test :  Try this one:  2x3x2-2/2+2-2/2 */ 
 	
 	int flag = FALSE;
 	status_t result_status = -1;
-	char* exp1 = "---1---4   ";
+	char* exp1 = "2*3*2-2/2+2-2/2/0";
 	double res = 0.0;
 	double* result = NULL;
 	
