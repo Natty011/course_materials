@@ -61,7 +61,6 @@ typedef enum
 	WAIT_FOR_NUM = 0,
 	WAIT_FOR_OP = 1,
 	ERROR = 2
-	/*NUM_OF_STATES*/
 
 }state_t;
 
@@ -77,31 +76,236 @@ typedef struct calc
 
 typedef state_t (*handler_t)(calc_t* calc_state, double* result);
 
+
+/***************End of struct and enum declaration *******/
+
 /***********Functions declaration*******/
 
-state_t Space(calc_t* calc_state, double* result);
 status_t CalcRest(calc_t *calc_state, double* result);
 status_t InitArrEvent(int *arr_event);
 status_t InitStacks(const char* expression, calc_t *p_calc_state);
-static void InitNumHandlers(handler_t* num_arr_handlers  );
+
+state_t Space(calc_t* calc_state, double* result);
 state_t PushNum(calc_t *calc_state, double* result);
 state_t PushPlus(calc_t *calc_state, double* result);
 state_t PushDiv(calc_t *calc_state, double* result);
 state_t PushMult(calc_t *calc_state, double* result);
 state_t PushOpenBracket(calc_t *calc_state, double* result);
 state_t Error(calc_t *calc_state, double* result);
+
+static void InitNumHandlers(handler_t* num_arr_handlers  );
+static void InitOpHandlers(handler_t* op_arr_handlers  );
 static double CalcTwoNum(double num_left, double num_right, char op);
 static int IsDigit( char ch );
+
 /**********End of functions declaration *******/
 
 /*********************Globals****************************/
-/* global current and next state */
 
 state_t current_state = WAIT_FOR_NUM;
 int num_of_brackets = 0;
 int arr_events[256] = { 0 };
 
 /**************End Of Globals****************************/
+
+/***********Static Functions definition*******/
+
+/**************CalcTwoNum****************************/
+static double CalcTwoNum(double num_left, double num_right, char op)
+{
+	switch( op )
+	{
+		case PLUS_CHAR:
+			return num_left + num_right;
+				
+		case MINUS_CHAR:
+			return num_left - num_right;
+						
+		case MULT_CHAR:
+			return num_left * num_right;
+							
+		case DIV_CHAR:
+			return num_left / num_right;
+	}
+	
+	return 0.0; /* should not to arrive here */
+			
+}
+/**************IsDigit****************************/
+static int IsDigit( char ch )
+{
+	return  ('0' <= ch) &&  (ch <= '9' ) ;
+}
+
+/**********************InitNumHandlers *******************************/
+static void InitOpHandlers(handler_t* op_arr_handlers  )
+{
+	assert(op_arr_handlers);
+	
+	op_arr_handlers[ INVALID_INPUT ] = Error;
+	op_arr_handlers[ NUMBER_EVENT ] = Error;
+	
+	op_arr_handlers[ PLUS ] = PushPlus;
+	op_arr_handlers[ MINUS ] = PushMinus;
+	
+	op_arr_handlers[ DIV ] = PushDiv;
+	op_arr_handlers[ MULT ] = PushMult;
+	
+	op_arr_handlers[ OPEN_BRACKET ] = Error; 
+	
+	op_arr_handlers[ CLOSE_BRACKET ] = ClosedBracket; 
+	
+	op_arr_handlers[ SPACE ] = Space;
+
+}
+		
+/**********************InitNumHandlers *******************************/
+static void InitNumHandlers(handler_t* num_arr_handlers  )
+{
+	assert(num_arr_handlers);
+	
+	num_arr_handlers[ INVALID_INPUT ] = Error;
+	num_arr_handlers[ NUMBER_EVENT ] = PushNum; 
+	num_arr_handlers[ PLUS ] = Error;
+	num_arr_handlers[ MINUS ] = PushUnaryMinus;
+	num_arr_handlers[ DIV ] = Error;
+	num_arr_handlers[ MULT ] = Error;
+	
+	num_arr_handlers[ OPEN_BRACKET ] = PushOpenBracket; 
+	
+	num_arr_handlers[ CLOSE_BRACKET ] = Error; 
+	num_arr_handlers[ SPACE ] = Space;
+		
+}
+
+/***********End Of Static Functions definition*******/
+
+/***********Status Functions definition*******/
+
+/*****************************InitArrEvent*************************/
+status_t InitArrEvent(int *arr_event )
+{
+	size_t i = 0;
+	assert(arr_event);
+	
+	arr_event[BACK_SLASH_CHAR] = BACK_SLASH; 
+	arr_event[SPACE_CHAR] = SPACE;	
+	arr_event[OPEN_BRACKET_CHAR] = OPEN_BRACKET;	
+	arr_event[CLOSE_BRACKET_CHAR] = CLOSE_BRACKET;
+	arr_event[MULT_CHAR] = MULT;
+	arr_event[PLUS_CHAR] = PLUS;
+	arr_event[MINUS_CHAR] = MINUS;
+	arr_event[DIV_CHAR] = DIV;
+		
+	for( i = 48; i <=57; ++i )
+	{
+		arr_event[i] = NUMBER_EVENT;
+	}
+
+	return SUCCESS;
+}
+/**********************InitStacks *******************************/
+status_t InitStacks(const char* expression, calc_t *p_calc_state)
+{
+	size_t len = 0;
+
+	assert(p_calc_state);
+	assert(expression);
+	
+	len = strlen(expression);
+	p_calc_state->str = (char*)expression;
+
+	p_calc_state->num_stack = StackCreate( len, sizeof(double) );
+	
+	if( NULL == p_calc_state->num_stack )
+	{
+		p_calc_state->curr_status = SYSTEM_ERROR;
+		return SYSTEM_ERROR;
+	}
+	
+	p_calc_state->op_stack = StackCreate( len, sizeof(char) );	
+	
+	if( NULL == p_calc_state->op_stack )
+	{
+		StackDestroy(p_calc_state->num_stack );
+		p_calc_state->num_stack = NULL;
+		
+		p_calc_state->curr_status = SYSTEM_ERROR;
+		return SYSTEM_ERROR;
+		
+	}
+	
+	p_calc_state->curr_status = SUCCESS;
+	p_calc_state->curr_state = WAIT_FOR_NUM;
+	return SUCCESS;
+	
+}
+
+/**************CalcRest****************************/
+status_t CalcRest(calc_t *calc_state, double* result)
+{
+	
+	double res = 0.0, num_right = 0.0, num_left = 0.0;
+	char operator = DIV_CHAR;
+	
+	assert(calc_state);
+	assert(result);
+	
+	/* if the user insert only one positive number */
+	if ( ! StackIsEmpty(calc_state->num_stack) )
+	{
+		*result = *(double*)StackPeek(calc_state->num_stack);
+	}	
+
+	while(  !StackIsEmpty(calc_state->op_stack) && 
+			
+	         OPEN_BRACKET_CHAR != *(char*)StackPeek(calc_state->op_stack) ) 
+	{
+	
+		operator = *(char*)StackPeek(calc_state->op_stack);
+		StackPop( calc_state->op_stack );
+		
+		num_right  = *(double*)StackPeek(calc_state->num_stack);
+		StackPop(calc_state->num_stack);
+		num_left = *(double*)StackPeek(calc_state->num_stack);
+		StackPop(calc_state->num_stack);
+		
+		res = CalcTwoNum(num_left, num_right, operator );
+
+		*result = res; 
+
+		StackPush( calc_state->num_stack , result );
+		
+		res = 0.0, num_right = 0.0, num_left = 0.0;	
+	}
+	return SUCCESS;
+	
+}
+
+/***********End Of Status Functions definition*******/
+
+/***********State Functions definition*******/
+	
+/*****************************Space*************************/
+state_t Space(calc_t *calc_state, double* result)
+{
+	UNUSED(result);
+	
+	assert(calc_state);
+	assert( calc_state->str ); 
+	assert(result);
+
+	(void)result; /* maybe not neccessery */
+	
+	while( isspace( *calc_state->str ) )
+	{
+		++(calc_state->str);
+	}
+	calc_state->curr_status = SUCCESS;
+
+	return calc_state->curr_state; 
+	
+}
 
 /**************PushNum****************************/
 state_t PushNum(calc_t *calc_state, double* result)
@@ -121,7 +325,7 @@ state_t PushNum(calc_t *calc_state, double* result)
 	}
 
 	num1 = strtod( calc_state->str, &calc_state->str );
-	/*printf("PushNum_num1 = %f\n", num1);*/
+
 	if( !num1 && !StackIsEmpty( calc_state->op_stack ) 
 		&& DIV_CHAR == *(char*)StackPeek(calc_state->op_stack)   )
 	{
@@ -132,7 +336,6 @@ state_t PushNum(calc_t *calc_state, double* result)
 	
 	}
 	
-	/*printf("! PushNum_num1 = %d\n", !num1);*/
 	StackPush( calc_state->num_stack, &num1 );
 
 	return WAIT_FOR_OP;
@@ -225,17 +428,6 @@ state_t ClosedBracket(calc_t *calc_state, double* result)
 	++(calc_state->str);
 	--num_of_brackets;
 	StackPop( calc_state->op_stack );
-	/*
-	if( !StackIsEmpty(calc_state->op_stack) && 
-			OPEN_BRACKET_CHAR == *(char*)StackPeek(calc_state->op_stack) )
-	{		
-		puts("ennter_to_closed_bracket_if");
-		StackPop( calc_state->op_stack );
-		--num_of_brackets;
-	}
-	*/
-	/*StackPop( calc_state->op_stack );*/
-		
 	return WAIT_FOR_OP;
 	
 }
@@ -280,221 +472,12 @@ state_t Error(calc_t *calc_state, double* result)
 	return ERROR;
 }
 
-/**************CalcRest****************************/
-status_t CalcRest(calc_t *calc_state, double* result)
-{
-	
-	double res = 0.0, num_right = 0.0, num_left = 0.0;
-	char operator = DIV_CHAR;
-	/*double sign = +1.0;*/
-	
-	assert(calc_state);
-	assert(result);
-	
-	/* if the user insert only one positive number */
-	if ( ! StackIsEmpty(calc_state->num_stack) )
-	{
-		*result = *(double*)StackPeek(calc_state->num_stack);
-	}	
-	/* (StackSize(calc_state->num_stack) > 1 ) && */
-	/* !StackIsEmpty(calc_state->num_stack) &&*/
-	while(  !StackIsEmpty(calc_state->op_stack) && 
-			
-	         OPEN_BRACKET_CHAR != *(char*)StackPeek(calc_state->op_stack) ) 
-	{
-	
-		operator = *(char*)StackPeek(calc_state->op_stack);
-		StackPop( calc_state->op_stack );
-		
-		num_right  = *(double*)StackPeek(calc_state->num_stack);
-		StackPop(calc_state->num_stack);
-		num_left = *(double*)StackPeek(calc_state->num_stack);
-		StackPop(calc_state->num_stack);
-		
-		res = CalcTwoNum(num_left, num_right, operator );
-			
-		/*printf("num_right = %f \n", num_right);*/
-		/*printf("num_left = %f \n", num_left);	*/
-		/*printf("res  = %f \n", res);*/
-		
-		*result = res; 
 
-		/*printf(" *result(if empty_op_stack) = %f \n", *result);*/
-
-		StackPush( calc_state->num_stack , result );
-		
-		res = 0.0, num_right = 0.0, num_left = 0.0;	
-	}
-	/*
-	printf("num_of_barckets_after_CalcRest_1 = %d \n", num_of_brackets);
-	if( !StackIsEmpty(calc_state->op_stack) && 
-			OPEN_BRACKET_CHAR == *(char*)StackPeek(calc_state->op_stack) )
-	{		
-		StackPop( calc_state->op_stack );
-		--num_of_brackets;
-	}
-	*/
-	/*printf("num_of_barckets_after_CalcRest_2 = %d \n", num_of_brackets);*/
-	return SUCCESS;
-	
-}
-/**************CalcTwoNum****************************/
-static double CalcTwoNum(double num_left, double num_right, char op)
-{
-	switch( op )
-	{
-		case PLUS_CHAR:
-			return num_left + num_right;
-				
-		case MINUS_CHAR:
-			return num_left - num_right;
-						
-		case MULT_CHAR:
-			return num_left * num_right;
-							
-		case DIV_CHAR:
-			return num_left / num_right;
-	}
-	
-	return 0.0; /* should not to arrive here */
-			
-}
-/**************IsDigit****************************/
-static int IsDigit( char ch )
-{
-	return  ('0' <= ch) &&  (ch <= '9' ) ;
-}	
-		
-			
-/*****************************Space*************************/
-state_t Space(calc_t *calc_state, double* result)
-{
-	UNUSED(result);
-	
-	assert(calc_state);
-	assert( calc_state->str ); 
-	assert(result);
-
-	(void)result; /* maybe not neccessery */
-	
-	while( isspace( *calc_state->str ) )
-	{
-		++(calc_state->str);
-	}
-	calc_state->curr_status = SUCCESS;
-
-	return calc_state->curr_state; 
-	
-}
-
-/*****************************InitArrEvent*************************/
-status_t InitArrEvent(int *arr_event )
-{
-	size_t i = 0;
-	assert(arr_event);
-	
-	arr_event[BACK_SLASH_CHAR] = BACK_SLASH; 
-	arr_event[SPACE_CHAR] = SPACE;	
-	arr_event[OPEN_BRACKET_CHAR] = OPEN_BRACKET;	
-	arr_event[CLOSE_BRACKET_CHAR] = CLOSE_BRACKET;
-	arr_event[MULT_CHAR] = MULT;
-	arr_event[PLUS_CHAR] = PLUS;
-	arr_event[MINUS_CHAR] = MINUS;
-	arr_event[DIV_CHAR] = DIV;
-		
-	for( i = 48; i <=57; ++i )
-	{
-		arr_event[i] = NUMBER_EVENT;
-	}
-
-	return SUCCESS;
-}
-/**********************InitStacks *******************************/
-status_t InitStacks(const char* expression, calc_t *p_calc_state)
-{
-	size_t len = 0;
-
-	assert(p_calc_state);
-	assert(expression);
-	
-	len = strlen(expression);
-	p_calc_state->str = (char*)expression;
-
-	p_calc_state->num_stack = StackCreate( len, sizeof(double) );
-	
-	if( NULL == p_calc_state->num_stack )
-	{
-		p_calc_state->curr_status = SYSTEM_ERROR;
-		return SYSTEM_ERROR;
-	}
-	
-	p_calc_state->op_stack = StackCreate( len, sizeof(char) );	
-	
-	if( NULL == p_calc_state->op_stack )
-	{
-		StackDestroy(p_calc_state->num_stack );
-		p_calc_state->num_stack = NULL;
-		
-		p_calc_state->curr_status = SYSTEM_ERROR;
-		return SYSTEM_ERROR;
-		
-	}
-	
-	p_calc_state->curr_status = SUCCESS;
-	p_calc_state->curr_state = WAIT_FOR_NUM;
-	return SUCCESS;
-	
-}
-/**********************InitNumHandlers *******************************/
-static void InitNumHandlers(handler_t* num_arr_handlers  )
-{
-	assert(num_arr_handlers);
-	
-	num_arr_handlers[ INVALID_INPUT ] = Error;
-	num_arr_handlers[ NUMBER_EVENT ] = PushNum; 
-	num_arr_handlers[ PLUS ] = Error;
-	num_arr_handlers[ MINUS ] = PushUnaryMinus;
-	num_arr_handlers[ DIV ] = Error;
-	num_arr_handlers[ MULT ] = Error;
-	
-	num_arr_handlers[ OPEN_BRACKET ] = PushOpenBracket; 
-	
-	num_arr_handlers[ CLOSE_BRACKET ] = Error; 
-	num_arr_handlers[ SPACE ] = Space;
-		
-}
+/***********End Of State Functions definition*******/
 
 
-/**********************InitNumHandlers *******************************/
-static void InitOpHandlers(handler_t* op_arr_handlers  )
-{
-	assert(op_arr_handlers);
-	
-	op_arr_handlers[ INVALID_INPUT ] = Error;
-	op_arr_handlers[ NUMBER_EVENT ] = Error;
-	
-	op_arr_handlers[ PLUS ] = PushPlus;
-	op_arr_handlers[ MINUS ] = PushMinus;
-	
-	op_arr_handlers[ DIV ] = PushDiv;
-	op_arr_handlers[ MULT ] = PushMult;
-	
-	op_arr_handlers[ OPEN_BRACKET ] = Error; 
-	
-	op_arr_handlers[ CLOSE_BRACKET ] = ClosedBracket; 
-	
-	op_arr_handlers[ SPACE ] = Space;
 
-}
-	
-
-
-/***************End of struct and enum declaration *******/
-
-
-/***********Static Functions definition*******/
-
-/***********End Of Static Functions definition*******/
+/**************Calculate****************************/
 
 status_t Calculate(const char* expression, double* result)
 {
@@ -507,6 +490,9 @@ status_t Calculate(const char* expression, double* result)
 	handler_t num_arr_handlers[ 10 ] = { NULL };
 	handler_t op_arr_handlers[ 10 ] = { NULL };
 	
+	assert(expression);
+	assert(result);
+		
 	InitNumHandlers ( num_arr_handlers );
 	InitOpHandlers ( op_arr_handlers );
 	InitArrEvent(arr_events);
