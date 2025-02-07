@@ -37,23 +37,8 @@
 #define DEBUG		"DEBUG MODE"
 #define RELEASE		"RELEASE MODE"
 
-#define MIN(a, b)		((a > b ) ? b : a )
-#define MAX(a, b)		((a > b ) ? a : b )
-
-
 extern int destroy_check;
 /***************struct and enum declaration *******/
-
-/** possible return values **/
-/*
-typedef enum
-{
-	
-	SUCCESS = 0,
-	OPERATION_FAIL = 1
-	
-}bst_result_t;
-*/
 
 typedef enum
 {
@@ -72,36 +57,15 @@ typedef enum
     SYSTEM_ERROR = 3
 } status_t;
 */
-/*
-	#ifdef PRINTS
-		Aux_Pre_Print_Tree(bst1, 0);
-	#endif
-*/
+
 /***************End of struct and enum declaration *******/
 
 /***************************function declaration**************************/
-static void TestBstOneNode(void);
-/*
-static int SortingFunc(void* check_data , void* new_data);
-*/
+static void TestCalculator(void);
 /***************************End of function declaration******************/
 
 /******************static functions definition**********************/
 		
-/*******************SortingFunc*********************/
-/*
-static int SortingFunc(void* check_data , void* new_data)
-{
-	return (*(int*)check_data - *(int*)new_data);
-}
-*/
-/*******************Compare*********************/
-/*
-static int Compare(void* check_data , void* new_data)
-{
-	return !(SUCCESS == (*(int*)check_data - *(int*)new_data));
-}
-*/
 /******************End of static functions definition**********************/
 
 
@@ -118,8 +82,8 @@ int main ()
 
 	puts(BLUE"====================================================="RESET);
 	printf("%sTEST: %s "RESET" \n", background,  mode);
-   	puts(BACK_BLUE"'TestBstOneNode()'"RESET);
-    TestBstOneNode();
+   	puts(BACK_BLUE"'TestCalculator()'"RESET);
+    TestCalculator();
     
 	puts(BLUE"====================================================="RESET);
 
@@ -143,17 +107,21 @@ Sub/Add: "-1- 3  -  2  + 3 -  5  -10   ";       P 			NUM+OP
 3 Mimus in a row: "---1   ";   					P 		    NUM+OP
 3 Mimus in a row: "---1---4   ";   			    P 		   NUM+OP
 Insert one positive number:  "0.5  "            P			NUM
-Syntax Error: "-1 -  ";                         P			NUM
-m
+Syntax Error_1: "-1 -  ";                       P			NUM
+Plus & Minus & Mult & Div: "2*3*2-2/2+2-2/2";   P        NUM+OP
+Math Error_1: "2*3*2-2/2+2-2/2/0";              P         NUM+OP
+Brackets_1 : "((-(2-(1+2)*2)-2))";              P         NUM+OP 
+Syntax Error_2: "(2))";                         P		 NUM+OP 
+Syntax Error_3: "((2)";                         P		 NUM+OP 
+
 */
 /********************  TestBstOneNode  ****************************/
-static void TestBstOneNode(void)
+static void TestCalculator(void)
 {	
-	/* Amit seggest test :  Try this one:  2x3x2-2/2+2-2/2 */ 
-	
+
 	int flag = FALSE;
 	status_t result_status = -1;
-	char* exp1 = "2*3*2-2/2+2-2/2/0";
+	char* exp1 = "((2)"; /*  (1-(1+2)*2)*/
 	double res = 0.0;
 	double* result = NULL;
 	
