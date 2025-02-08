@@ -7,13 +7,13 @@
 #include <string.h> 	/* strlen */
 #include <ctype.h> 		/* isspace */ 
 #include <assert.h> 	/* assert */
-#include <stdlib.h> 	/* malloc, free */
+#include <stdlib.h> 	/* malloc, free, strtod */
 
 #include "stack.h" 
 #include "calculator.h" 
 
 #define UNUSED( var )       ( (void)var )
-
+#define ASCI_LEN			256
 /****************struct and enum declaration*********************/
 
 typedef enum
@@ -114,10 +114,10 @@ static state_t Error(calc_t *calc_state, double* result);
 
 static state_t current_state = WAIT_FOR_NUM;
 static int num_of_brackets = 0;
-int arr_events[256] = { 0 };
+int arr_events[ASCI_LEN] = { 0 };
 
-handler_t num_arr_handlers[ 10 ] = { NULL };
-handler_t op_arr_handlers[ 10 ] = { NULL };
+handler_t num_arr_handlers[ NUM_OF_EVENTS ] = { NULL };
+handler_t op_arr_handlers[ NUM_OF_EVENTS ] = { NULL };
 static status_t current_status = SUCCESS; 
 static event_t num_event = INVALID_INPUT;
 static event_t op_event = INVALID_INPUT;
