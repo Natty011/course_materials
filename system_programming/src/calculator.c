@@ -378,7 +378,8 @@ state_t PushUnaryMinus(calc_t *calc_state, double* result)
 	
 	assert(calc_state);
 	assert(result);
-
+	UNUSED(result);
+	
 	StackPush(calc_state->op_stack, &op );
 	StackPush( calc_state->num_stack, &num );
 	++(calc_state->str);
@@ -393,6 +394,7 @@ state_t PushOpenBracket(calc_t *calc_state, double* result)
 	
 	assert(calc_state);
 	assert(result);
+	UNUSED(result);
 	
 	StackPush(calc_state->op_stack ,calc_state->str );
 	++(calc_state->str);
@@ -433,6 +435,7 @@ state_t PushDiv(calc_t *calc_state, double* result)
 		
 	assert(calc_state);
 	assert(result);
+	UNUSED(result);
 	
 	StackPush(calc_state->op_stack, calc_state->str );
 	++(calc_state->str);
@@ -447,7 +450,8 @@ state_t PushMult(calc_t *calc_state, double* result)
 		
 	assert(calc_state);
 	assert(result);
-	
+	UNUSED(result);
+		
 	StackPush(calc_state->op_stack, calc_state->str );
 	++(calc_state->str);
 	
