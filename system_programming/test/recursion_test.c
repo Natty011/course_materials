@@ -64,7 +64,6 @@ static int TestStrCat(void);
 static int TestStrStr(void);
 static int TestFibonacci(void);
 static int IteraiveFibonacci(int n);
-static node_t *IteraiveFlip(node_t *head);
 static int TestFlip(void);
 /***************************End of function declaration******************/
 
@@ -485,9 +484,9 @@ static int TestFlip(void)
     return flag;	
 }
 
-
 /******************* IteraiveFlip *********************/
 /* Flip the next of each node to point to the previous node */
+/*
 static node_t *IteraiveFlip(node_t *head)
 {
 
@@ -505,6 +504,6 @@ static node_t *IteraiveFlip(node_t *head)
 	
 	return PrevNode;
 }
-
+*/
 
 
