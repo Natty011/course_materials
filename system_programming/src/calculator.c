@@ -1,14 +1,14 @@
 /***************************************
 * Author : Natty
-* Reviewer : Matan
+* Reviewer : Michael
 * Date : 03 / 03 / 2025
-* Last update: 03 / 02 / 2025
+* Last update: 08 / 02 / 2025
 *****************************************/
-#include <stdio.h>
 #include <string.h> 	/* strlen */
 #include <ctype.h> 		/* isspace */ 
 #include <assert.h> 	/* assert */
 #include <stdlib.h> 	/* malloc, free */
+
 #include "stack.h" 
 #include "calculator.h" 
 
@@ -35,7 +35,7 @@ typedef enum
 	OPEN_BRACKET = 6, /* 40 */
 	CLOSE_BRACKET = 7, /* 41 */
 	SPACE = 8, /* 32 */
-	BACK_SLASH = 9, /* '0/' */
+	BACK_SLASH = 9, /* '\0' */
 	NUM_OF_EVENTS
 	
 }event_t;
@@ -51,10 +51,9 @@ typedef enum
 	OPEN_BRACKET_CHAR = '(', /* 40 */
 	CLOSE_BRACKET_CHAR = ')', /* 41 */
 	SPACE_CHAR = ' ', /* 32 */
-	BACK_SLASH_CHAR = '\0' /* '0/' */
+	BACK_SLASH_CHAR = '\0' /* 0 */
 
-}characther_t;
-
+}character_t;
 
 typedef enum 
 {
@@ -76,21 +75,23 @@ typedef struct calc
 
 typedef state_t (*handler_t)(calc_t* calc_state, double* result);
 
-
 /***************End of struct and enum declaration *******/
 
 /***********Functions declaration*******/
 
-status_t CalcRest(calc_t *calc_state, double* result);
+status_t IntermediateResult(calc_t *calc_state, double* result);
 status_t InitArrEvent(int *arr_event);
 status_t InitStacks(const char* expression, calc_t *p_calc_state);
 
 state_t Space(calc_t* calc_state, double* result);
 state_t PushNum(calc_t *calc_state, double* result);
 state_t PushPlus(calc_t *calc_state, double* result);
+state_t PushMinus(calc_t *calc_state, double* result);
+state_t PushUnaryMinus(calc_t *calc_state, double* result);
 state_t PushDiv(calc_t *calc_state, double* result);
 state_t PushMult(calc_t *calc_state, double* result);
 state_t PushOpenBracket(calc_t *calc_state, double* result);
+state_t ClosedBracket(calc_t *calc_state, double* result);
 state_t Error(calc_t *calc_state, double* result);
 
 static void InitNumHandlers(handler_t* num_arr_handlers  );
@@ -144,17 +145,12 @@ static void InitOpHandlers(handler_t* op_arr_handlers  )
 	
 	op_arr_handlers[ INVALID_INPUT ] = Error;
 	op_arr_handlers[ NUMBER_EVENT ] = Error;
-	
 	op_arr_handlers[ PLUS ] = PushPlus;
 	op_arr_handlers[ MINUS ] = PushMinus;
-	
 	op_arr_handlers[ DIV ] = PushDiv;
 	op_arr_handlers[ MULT ] = PushMult;
-	
 	op_arr_handlers[ OPEN_BRACKET ] = Error; 
-	
 	op_arr_handlers[ CLOSE_BRACKET ] = ClosedBracket; 
-	
 	op_arr_handlers[ SPACE ] = Space;
 
 }
@@ -170,9 +166,7 @@ static void InitNumHandlers(handler_t* num_arr_handlers  )
 	num_arr_handlers[ MINUS ] = PushUnaryMinus;
 	num_arr_handlers[ DIV ] = Error;
 	num_arr_handlers[ MULT ] = Error;
-	
 	num_arr_handlers[ OPEN_BRACKET ] = PushOpenBracket; 
-	
 	num_arr_handlers[ CLOSE_BRACKET ] = Error; 
 	num_arr_handlers[ SPACE ] = Space;
 		
@@ -237,12 +231,13 @@ status_t InitStacks(const char* expression, calc_t *p_calc_state)
 	
 	p_calc_state->curr_status = SUCCESS;
 	p_calc_state->curr_state = WAIT_FOR_NUM;
+	
 	return SUCCESS;
 	
 }
 
-/**************CalcRest****************************/
-status_t CalcRest(calc_t *calc_state, double* result)
+/**************IntermediateResult****************************/
+status_t IntermediateResult(calc_t *calc_state, double* result)
 {
 	
 	double res = 0.0, num_right = 0.0, num_left = 0.0;
@@ -349,7 +344,7 @@ state_t PushPlus(calc_t *calc_state, double* result)
 	assert(calc_state);
 	assert(result);
 	
-	calc_state->curr_status = CalcRest(calc_state, result);
+	calc_state->curr_status = IntermediateResult(calc_state, result);
 
 	StackPush(calc_state->op_stack, calc_state->str );
 
@@ -365,7 +360,7 @@ state_t PushMinus(calc_t *calc_state, double* result)
 	assert(calc_state);
 	assert(result);
 	
-	calc_state->curr_status = CalcRest(calc_state, result);
+	calc_state->curr_status = IntermediateResult(calc_state, result);
 
 	StackPush(calc_state->op_stack, calc_state->str );
 	++(calc_state->str);
@@ -424,7 +419,7 @@ state_t ClosedBracket(calc_t *calc_state, double* result)
 		return ERROR;
 	}
 	
-	calc_state->curr_status = CalcRest(calc_state, result);
+	calc_state->curr_status = IntermediateResult(calc_state, result);
 	++(calc_state->str);
 	--num_of_brackets;
 	StackPop( calc_state->op_stack );
@@ -472,7 +467,6 @@ state_t Error(calc_t *calc_state, double* result)
 	return ERROR;
 }
 
-
 /***********End Of State Functions definition*******/
 
 
@@ -508,8 +502,6 @@ status_t Calculate(const char* expression, double* result)
 	while( (ERROR != current_state) &&
 			( BACK_SLASH_CHAR !=  *(p_calc_state->str) ) )
 	{
-		printf("before switch = %c\n" , *p_calc_state->str );
-		printf("curr_state_before switch = %d\n" , current_state );
 		switch ( current_state )
 		{
 			case WAIT_FOR_NUM:
@@ -555,10 +547,10 @@ status_t Calculate(const char* expression, double* result)
 		*result = 0.0;
 	}
 
-	printf("curr_state_after_while = %d\n" , current_state );
+	/*printf("curr_state_after_while = %d\n" , current_state );*/
 	if( (ERROR != current_state) ) 
 	{
-		current_status = CalcRest( p_calc_state, result);
+		current_status = IntermediateResult( p_calc_state, result);
 	}
 	
 	/* CHECK IF #BRACKETS ARE BALANCES*/
@@ -568,7 +560,11 @@ status_t Calculate(const char* expression, double* result)
 		current_state = ERROR;
 		p_calc_state->curr_state = current_state;
 		*result = 0.0;
+		
+		num_of_brackets = 0; /* Must be initilized again because it is global */
 	}
+	
+
 	
 	StackDestroy(p_calc_state->num_stack );
 	p_calc_state->num_stack = NULL;
