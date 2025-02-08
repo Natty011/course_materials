@@ -5,6 +5,7 @@
 * Last update: 06 / 02 / 2025
 *****************************************/
 #include <string.h> 	/*  strlen */
+#include <stdio.h>
 
 #include <assert.h> 	/* assert */
 #include <stdlib.h> 	/* malloc, free */
@@ -121,24 +122,23 @@ int Fibonacci(int element_index)
 node_t *FlipList(node_t *node)
 {
 
-	node_t* prev ; /* = NULL */
+	node_t *prev = NULL, *front = NULL;
 	assert(node);
-	
+
 	if( NULL == node || NULL == node->next )
 	{
 		return node;
 	}
 	
 	prev = FlipList( node->next );
+	front = node->next;
 	
-	(node->next)->next = node;
+	front->next = node;
 	node->next = NULL;
 	
 	return prev;
 
 }
-
-
 
 
 
