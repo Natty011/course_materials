@@ -437,14 +437,14 @@ static int IteraiveFibonacci(int n)
 /**********TestFlip function *********/
 static int TestFlip(void)
 {
-
 	int flag = FALSE;
 	int arr[6] = {0, 1, 2, 3, 4, 5};
 	int i = 0 ;
+	
 	node_t n0, n1, n2, n3, n4, n5;  
 	node_t* head = &n0;
-	node_t *new_head = NULL, *new_head1 = NULL;
-	
+	node_t *new_head = NULL;
+
 	n0.data = &arr[0];
 	n0.next = &n1;
 	n1.data = &arr[1];
@@ -458,10 +458,9 @@ static int TestFlip(void)
 	n5.data = &arr[5];
 	n5.next = NULL;
 
-	new_head = IteraiveFlip(head);
-	new_head1 = FlipList(head);
-	
-	if(&n5 != new_head ) /* || &n5 != new_head1 */
+	new_head = FlipList(head);
+
+	if(&n5 != new_head ) 
 	{
 		puts("TestFlip Failed");
 		flag = TRUE;       			
