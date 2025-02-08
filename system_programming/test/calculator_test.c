@@ -89,44 +89,14 @@ int main ()
 	return 0;
 }
 
-/* 
-TESTS TYPES:                  				Pass/Fail     curr_state
-Add ints: "3+2";							P			NUM+OP
-Add doubles: " 3.5+2.3"; 						P			NUM+OP
-space first(num): " 3.5+2.3";					P			NUM
-space end (num): 	"3.5+2.3 ";		    		P		    NUM
-space first & end (num): "       3.5+2.3    ";	P		    NUM
-space first (op): " 3.5 +2.3";					P			OP
-space end (num): " 3.5+ 2.3";					P			NUM
-space first & end (num): "  3.5  + 2.3  "	    P		    NUM+OP
-Sub ints: "3-2";							    P 			OP
-Sub ints with first negative: "-3-2";           P 			NUM+OP
-Sub/Add: "-1- 3  -  2  + 3 -  5  -10   ";       P 			NUM+OP
-2 Mimus in a row: "--1--10   "; / "-1--10   ";  P 			NUM+OP
-3 Mimus in a row_1: "---1   ";   			    P 		    NUM+OP
-3 Mimus in a row_2: "---1---4   ";   			P 		 NUM+OP
-Insert one positive number:  "0.5  "            P			NUM
-Syntax Error_1: "-1 -  ";                       P			NUM
-Plus & Minus & Mult & Div: "2*3*2-2/2+2-2/2";   P        NUM+OP
-Math Error_1: "2*3*2-2/2+2-2/2/0";              P         NUM+OP
-Math Error_2: "1/0.0000;                        P         NUM+OP
-Math Error_3: "1/    0;                         P         NUM+OP
-Brackets_1 : "((-(2-(1+2)*2)-2))";              P         NUM+OP
-Brackets_2 : "((-(2-(1+2)*2)-8/4))";            P         NUM+OP  
-Syntax Error_2: "(2))";                         P		 NUM+OP 
-Syntax Error_3: "((2)";                         P		 NUM+OP
-Syntax Error_4: "((((-(2-(1+2)*2)-2))";         P         NUM+OP 
-
-*/
-
 /********************  TestBstOneNode  ****************************/
 static void TestCalculator(void)
 {	
 
 	/*
 	status_t result_status = -1;
-	char* exp1 = "3+2"; */ 
-	
+	char* exp1 = "2*3*2 -8/2/2*6"; 
+	*/
 	int flag = FALSE;
 	double res = 0.0;
 	double* result = NULL;
@@ -139,253 +109,223 @@ static void TestCalculator(void)
 	*/	
 	puts(RED);
 	
-	if ( SUCCESS != Calculate("3+2", result) ||
-		 5.0 !=  *result )
+	if ( SUCCESS != Calculate("3+2", result) || 5.0 !=  *result )
 	{
 		puts("Failes in Add ints: 3+2 ");
 		flag = TRUE;
-	
 	}
 		
-	if ( SUCCESS != Calculate("3.5+2.3", result) ||
-		 5.8 !=  *result )
+	if ( SUCCESS != Calculate("3.5+2.3", result) || 5.8 !=  *result )
 	{
 		puts("Failes in Add doubles: 3.5+2.3");
 		flag = TRUE;
-	
 	}
 
-	if ( SUCCESS != Calculate(" 3.5+2.3", result) ||
-		 5.8 !=  *result )
+	if ( SUCCESS != Calculate(" 3.5+2.3", result) || 5.8 !=  *result )
 	{
 		puts("Failes in space(Num State): 3.5+2.3");
 		flag = TRUE;
-	
 	}
 	
-	if ( SUCCESS != Calculate(" 3.5 + 2.3 ", result) ||
-		 5.8 !=  *result )
+	if ( SUCCESS != Calculate(" 3.5 + 2.3 ", result) ||	 5.8 !=  *result )
 	{
 		puts("Failes in space(NUM+OP State): 3.5 + 2.3 ");
 		flag = TRUE;
-	
 	}
 	
-	
-	if ( SUCCESS != Calculate("3-2", result) ||
-		 1.0 !=  *result )
+	if ( SUCCESS != Calculate("3-2", result) || 1.0 !=  *result )
 	{
 		puts("Failes in Sub ints: 3-2 ");
 		flag = TRUE;
-	
 	}
 	
-	if ( SUCCESS != Calculate("-3-2", result) ||
-		 -5.0 !=  *result )
+	if ( SUCCESS != Calculate("-3-2", result) || -5.0 !=  *result )
 	{
 		puts("Failes in Sub ints(first negative): -3-2 ");
 		flag = TRUE;
-	
 	}
 	
 	if ( SUCCESS != Calculate(" -1- 3  - 2 + 3 - 5 -10 ", result) ||
-		 -18.0 !=  *result )
+			-18.0 !=  *result )
 	{
 		puts("Failes in Sub+Add: - 1- 3  - 2 + 3 - 5 -10 ");
 		flag = TRUE;
-	
 	}
 	
-	if ( SUCCESS != Calculate("--1--10", result) ||
-		 11.0 !=  *result )
+	if ( SUCCESS != Calculate("--1--10", result) || 11.0 !=  *result )
 	{
 		puts("Failes in 2 Mimus in a row_1: --1--10");
 		flag = TRUE;
-	
 	}
 	
-	if ( SUCCESS != Calculate("-1--10", result) ||
-		 9.0 !=  *result )
+	if ( SUCCESS != Calculate("-1--10", result) || 9.0 !=  *result )
 	{
 		puts("Failes in 2 Mimus in a row_2: -1--10");
 		flag = TRUE;
-	
 	}
 		
-	if ( SUCCESS != Calculate("---1", result) ||
-		 -1.0 !=  *result )
+	if ( SUCCESS != Calculate("---1", result) || -1.0 !=  *result )
 	{
 		puts("Failes in 3 Mimus in a row_1: ---1");
 		flag = TRUE;
-	
 	}
 	
-	if ( SUCCESS != Calculate("---1---4", result) ||
-		 -5.0 !=  *result )
+	if ( SUCCESS != Calculate("---1---4", result) || -5.0 !=  *result )
 	{
 		puts("Failes in 3 Mimus in a row_2:---1---4");
 		flag = TRUE;
-	
 	}
 	
-	if ( SUCCESS != Calculate("0.5 ", result) ||
-		 0.5 !=  *result )
+	if ( SUCCESS != Calculate("0.5 ", result) || 0.5 !=  *result )
 	{
 		puts("Failes in one positive number: 0.5");
 		flag = TRUE;
-	
 	}
 
-	if ( SYNTAX_ERROR != Calculate("-1 -  ", result) ||
-		 0.0 !=  *result )
+	if ( SYNTAX_ERROR != Calculate("-1 -  ", result) ||  0.0 !=  *result )
 	{
 		puts("Failes in Syntax Error_1: -1 -  ");
 		flag = TRUE;
-	
 	}
 	
-	if ( SUCCESS != Calculate("2*3*2-2/2+2-2/2", result) ||
-		 12.0 !=  *result )
+	if ( SUCCESS != Calculate("2*3*2-2/2+2-2/2", result) || 12.0 !=  *result )
 	{
 		puts("Failes in Plus & Minus & Mult & Div :2*3*2-2/2+2-2/2");
 		flag = TRUE;
-	
 	}
 	
-	if ( MATH_ERROR != Calculate("2*3*2-2/2+2-2/2/0", result) ||
-		 0.0 !=  *result )
+	if ( MATH_ERROR != Calculate("2*3*2-2/2+2-2/2/0", result) || 0.0 !=  *result )
 	{
 		puts("Failes in Math Error_1 : 2*3*2-2/2+2-2/2/0");
 		flag = TRUE;
-	
 	}
 	
-	if ( MATH_ERROR != Calculate("1/0.0000", result) ||
-		 0.0 !=  *result )
+	if ( MATH_ERROR != Calculate("1/0.0000", result) || 0.0 !=  *result )
 	{
 		puts("Failes in Math Error_2 : 1/0.0000");
 		flag = TRUE;
-	
 	}
 	
-	if ( MATH_ERROR != Calculate("1/     0", result) ||
-		 0.0 !=  *result )
+	if ( MATH_ERROR != Calculate("1/     0", result) || 0.0 !=  *result )
 	{
 		puts("Failes in Math Error_3 : 1/    0");
 		flag = TRUE;
-	
 	}
 	
-	if ( SYNTAX_ERROR != Calculate("1/01", result) ||
-		 0.0 !=  *result )
+	if ( (MATH_ERROR != Calculate("1/(1-1)", result) || 0.0 !=  *result ) ||
+		(MATH_ERROR != Calculate("1/((1-(1)))", result) || 0.0 !=  *result ) )
+	{
+		puts("Failes in Math Error_4 : 1/(1-1)  || 1/((1-(1)))");
+		flag = TRUE;
+	}
+	
+	if ( SYNTAX_ERROR != Calculate("1/01", result) || 0.0 !=  *result )
 	{
 		puts("Failes in Math Error_4 : 1/01");
 		flag = TRUE;
-	
 	}
 	
-	if ( (SYNTAX_ERROR != Calculate("0.0.0", result) || 0.0 !=  *result) && 
-		 (SYNTAX_ERROR != Calculate("0..5", result) || 0.0 !=  *result)  &&
-		 (SYNTAX_ERROR != Calculate("05", result) || 0.0 !=  *result ) &&
+	if ( (SYNTAX_ERROR != Calculate("0.0.0", result) || 0.0 !=  *result) || 
+		 (SYNTAX_ERROR != Calculate("0..5", result) || 0.0 !=  *result)  ||
+		 (SYNTAX_ERROR != Calculate("05", result) || 0.0 !=  *result ) ||
 		 (SYNTAX_ERROR != Calculate("1+0110", result) || 0.0 !=  *result ) )
 	{
 		puts("Failes in Syntax Error_2: 0.0.0 || 0..5 || 05 || 1+0110");
 		flag = TRUE;
-	
 	}
 	
-	if ( (SYNTAX_ERROR != Calculate("1+2  -", result) || 0.0 !=  *result) && 
-		 (SYNTAX_ERROR != Calculate("-  ", result) || 0.0 !=  *result)  &&
+	if ( (SYNTAX_ERROR != Calculate("1+2  -", result) || 0.0 !=  *result) || 
+		 (SYNTAX_ERROR != Calculate("-  ", result) || 0.0 !=  *result)  ||
 		 (SYNTAX_ERROR != Calculate("+1-1", result) || 0.0 !=  *result ) )
 	{
 		puts("Failes in Syntax Error_3: 1+2  - || - || +1-1 ");
 		flag = TRUE;
-	
 	}
 	
-	if ( SUCCESS != Calculate("0.00 ", result) ||
-		 0.0 !=  *result )
+	if ( SUCCESS != Calculate("0.00 ", result) || 0.0 !=  *result )
 	{
 		puts("Failes in ZERO number: 0.00");
 		flag = TRUE;
-	
 	}
 	
-	if ( SUCCESS != Calculate("1/0.00000005", result) ||
-		 20000000.0 !=  *result )
+	if ( SUCCESS != Calculate("1/0.00000005", result) || 20000000.0 !=  *result )
 	{
 		puts("Failes in small denominator number : 1/0.00000005");
 		flag = TRUE;
-	
 	}
 	
-	if ( SUCCESS != Calculate("0.00000005/1", result) ||
-		 0.00000005 !=  *result )
+	if ( SUCCESS != Calculate("0.00000005/1", result) || 0.00000005 !=  *result )
 	{
 		puts("Failes in small numerator number : 0.00000005/1");
 		flag = TRUE;
-	
 	}
 	
-	if ( SUCCESS != Calculate("((-(2-(1+2)*2)-2))", result) ||
-		 2.0 !=  *result )
+	if ( SUCCESS != Calculate("((-(2-(1+2)*2)-2))", result) || 2.0 !=  *result )
 	{
 		puts("Failes in Brackets_1:   ((-(2-(1+2)*2)-2)) ");
 		flag = TRUE;
-	
 	}
 	
-	if ( SUCCESS != Calculate("((-(2-(1+2)*2)-8/4))", result) ||
-		 2.0 !=  *result )
+	if ( SUCCESS != Calculate("((-(2-(1+2)*2)-8/4))", result) || 2.0 !=  *result )
 	{
 		puts("Failes in Brackets_2:   ((-(2-(1+2)*2)-8/4)) ");
 		flag = TRUE;
-	
 	}
 	
 	
-	if ( SYNTAX_ERROR != Calculate(" (2) ) ", result) ||
-		 0.0 !=  *result )
+	if ( SYNTAX_ERROR != Calculate(" (2) ) ", result) || 0.0 !=  *result )
 	{
 		puts("Failes in Syntax Error_4(Brackets unbalanced): (2) ) ");
 		flag = TRUE;
-	
 	}
 	
-	if ( SYNTAX_ERROR != Calculate("((2)", result) ||
-		 0.0 !=  *result )
+	if ( SYNTAX_ERROR != Calculate("((2)", result) || 0.0 !=  *result )
 	{
 		puts("Failes in Syntax Error_5(Brackets unbalanced): ((2)");
 		flag = TRUE;
-	
 	}
 	
-	if ( SYNTAX_ERROR != Calculate("(((-(2-(1+2)*2)-2))", result) ||
-		 0.0 !=  *result )
+	if ( SYNTAX_ERROR != Calculate("(((-(2-(1+2)*2)-2))", result) || 
+			0.0 !=  *result )
 	{
 		puts("Failes in Syntax Error_6(Brackets unbalanced):(((-(2-(1+2)*2)-2))");
 		flag = TRUE;
-	
 	}
 	
-	if ( (SYNTAX_ERROR != Calculate("1/0.5^", result) || 0.0 !=  *result) && 
-		 (SYNTAX_ERROR != Calculate("10%/ 1%", result) || 0.0 !=  *result)  &&
-		 (MATH_ERROR != Calculate("10/0 .5", result) || 0.0 !=  *result ) &&
+	if ( SUCCESS != Calculate("3+2", result) || 5.0 !=  *result )
+	{
+		puts("Failes in Add ints_global_initilized:   3+2 ");
+		flag = TRUE;
+	}
+	
+	
+	if ( (SYNTAX_ERROR != Calculate("1/0.5^", result) || 0.0 !=  *result) || 
+		 (SYNTAX_ERROR != Calculate("10%/ 1%", result) || 0.0 !=  *result)  ||
+		 (MATH_ERROR != Calculate("10/0 .5", result) || 0.0 !=  *result ) ||
 		 (SYNTAX_ERROR != Calculate("-@10/1", result) || 0.0 !=  *result ) )
 	{
 		puts("Failes in Syntax Error_2: 1/0.5^ || 10%/ 1% || 10/0 .5 || -@10/1");
 		flag = TRUE;
-	
 	}
 	
-	if ( SUCCESS != Calculate("3+2", result) ||
-		 5.0 !=  *result )
+	if ( SUCCESS != Calculate("12+12/(3+3)*4", result) || 20.0 !=  *result )
 	{
-		puts("Failes in Add ints_global_initilized:   3+2 ");
+		puts("Failes in MULT AFTER DIV_1: 12+12/(3+3)*4 ");
 		flag = TRUE;
-	
 	}
 	
+	if ( SUCCESS != Calculate("2*3*2 -8/2/2", result) || 10.0 !=  *result )
+	{
+		puts("Failes in DIV AFTER DIV_1: 2*3*2 -8/2/2 ");
+		flag = TRUE;
+	}
+	
+	if ( SUCCESS != Calculate("2*3*2 -8/2/2*6", result) || 0.0 !=  *result )
+	{
+		puts("Failes in MULT AFTER DIV_2: 2*3*2 -8/2/2*6 ");
+		flag = TRUE;
+	}
+		
 	if( !flag ) 
 	{
 		puts(RESET);		

@@ -4,6 +4,7 @@
 * Date : 03 / 03 / 2025
 * Last update: 08 / 02 / 2025
 *****************************************/
+#include <stdio.h>
 #include <string.h> 	/* strlen */
 #include <ctype.h> 		/* isspace */ 
 #include <assert.h> 	/* assert */
@@ -266,9 +267,14 @@ status_t IntermediateResult(calc_t *calc_state, double* result)
 		StackPop(calc_state->num_stack);
 		
 		res = CalcTwoNum(num_left, num_right, operator );
-
+		/*
+		printf("num_right = %f \n", num_right);
+		printf("num_left = %f \n", num_left);
+		printf("operator  = %c \n", operator);			
+		printf("res  = %f \n", res);
+		s*/		
 		*result = res; 
-
+		
 		StackPush( calc_state->num_stack , result );
 		
 		res = 0.0, num_right = 0.0, num_left = 0.0;	
@@ -321,6 +327,7 @@ state_t PushNum(calc_t *calc_state, double* result)
 
 	num1 = strtod( calc_state->str, &calc_state->str );
 
+	 /* Not to divide by zero */
 	if( !num1 && !StackIsEmpty( calc_state->op_stack ) 
 		&& DIV_CHAR == *(char*)StackPeek(calc_state->op_stack)   )
 	{
@@ -424,7 +431,19 @@ state_t ClosedBracket(calc_t *calc_state, double* result)
 	calc_state->curr_status = IntermediateResult(calc_state, result);
 	++(calc_state->str);
 	--num_of_brackets;
+	
 	StackPop( calc_state->op_stack );
+	 /* CHECK IF THE RESULT INDISE THE BRACKET IS ZERO*/
+	if( !(*result) && !StackIsEmpty( calc_state->op_stack ) 
+		&& DIV_CHAR == *(char*)StackPeek(calc_state->op_stack)   )
+	{
+	    calc_state->curr_status = MATH_ERROR;
+		calc_state->curr_state = ERROR;
+		*result = 0.0;
+		return ERROR;	
+	
+	}
+	
 	return WAIT_FOR_OP;
 	
 }
@@ -433,10 +452,25 @@ state_t ClosedBracket(calc_t *calc_state, double* result)
 state_t PushDiv(calc_t *calc_state, double* result)
 {
 		
+	char op = MULT_CHAR;
+	double num = *(double*)StackPeek(calc_state->num_stack);
+	
 	assert(calc_state);
 	assert(result);
 	UNUSED(result);
 	
+	if( !StackIsEmpty( calc_state->op_stack ) 
+		&& DIV_CHAR == *(char*)StackPeek(calc_state->op_stack)   )
+	{
+		
+		num = 1.0 / num;
+		StackPop( calc_state->op_stack );
+		StackPush(calc_state->op_stack, &op );
+		StackPop( calc_state->num_stack );
+		StackPush(calc_state->num_stack, &num );
+		
+	}
+
 	StackPush(calc_state->op_stack, calc_state->str );
 	++(calc_state->str);
 	
@@ -448,9 +482,27 @@ state_t PushDiv(calc_t *calc_state, double* result)
 state_t PushMult(calc_t *calc_state, double* result)
 {
 		
+	char op = MULT_CHAR;
+	double num =*(double*)StackPeek(calc_state->num_stack);  
+	
 	assert(calc_state);
 	assert(result);
 	UNUSED(result);
+	
+	/*printf("*(char*)StackPeek(calc_state->op_stack)  = %c \n", *(char*)StackPeek(calc_state->op_stack));*/			
+	/* mult is lower precedence then div */	
+	if( !StackIsEmpty( calc_state->op_stack ) 
+		&& DIV_CHAR == *(char*)StackPeek(calc_state->op_stack)   )
+	{
+		
+		num = 1.0 / num;
+		StackPop( calc_state->op_stack );
+		StackPush(calc_state->op_stack, &op );
+		StackPop( calc_state->num_stack );
+		StackPush(calc_state->num_stack, &num );
+		/*calc_state->curr_status = IntermediateResult(calc_state, result);*/
+		
+	}
 		
 	StackPush(calc_state->op_stack, calc_state->str );
 	++(calc_state->str);
@@ -506,6 +558,10 @@ status_t Calculate(const char* expression, double* result)
 	while( (ERROR != current_state) &&
 			( BACK_SLASH_CHAR !=  *(p_calc_state->str) ) )
 	{
+		/*
+		printf("before switch = %c\n" , *p_calc_state->str );
+		printf("curr_state_before switch = %d\n" , current_state );
+		*/
 		switch ( current_state )
 		{
 			case WAIT_FOR_NUM:
