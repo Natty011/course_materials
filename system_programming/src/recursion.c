@@ -121,7 +121,6 @@ int Fibonacci(int element_index)
 /************************FlipList*********************/
 node_t *FlipList(node_t *node)
 {
-
 	node_t *prev = NULL, *front = NULL;
 	assert(node);
 
@@ -137,7 +136,6 @@ node_t *FlipList(node_t *node)
 	node->next = NULL;
 	
 	return prev;
-
 }
 
 
