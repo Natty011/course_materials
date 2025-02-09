@@ -2,10 +2,9 @@
 * Author : Natty
 * Reviewer : David
 * Date : 05 / 02 / 2025
-* Last update: 06 / 02 / 2025
+* Last update: 09 / 02 / 2025
 *****************************************/
 #include <string.h> 	/*  strlen */
-#include <stdio.h>
 
 #include <assert.h> 	/* assert */
 #include <stdlib.h> 	/* malloc, free */
@@ -19,6 +18,28 @@
 static void AuxSortIntegers(stack_t* stack, int temp );
 /**********End of functions declaration *******/
 /******************static functions definition**********************/
+
+/************************AuxSortIntegers*********************/
+static void AuxSortIntegers(stack_t* stack, int temp )
+{		
+	int temp_aux = 0;
+		
+	if ( StackIsEmpty( stack ) || temp >= *(int*)StackPeek( stack ) )
+	{
+		StackPush( stack, &temp );
+		return;
+	}
+		
+	temp_aux = *(int*)StackPeek( stack );
+	StackPop( stack );
+		
+	AuxSortIntegers( stack, temp_aux );
+		
+	StackPush( stack, &temp_aux );
+	return;
+		
+}
+
 /******************End of static functions definition**********************/
 
 /****************StrLen*********************/
@@ -138,28 +159,6 @@ node_t *FlipList(node_t *node)
 	return prev;
 }
 
-/************************AuxSortIntegers*********************/
-static void AuxSortIntegers(stack_t* stack, int temp )
-{		
-	int temp_aux = 0;
-		
-	if ( StackIsEmpty( stack ) || temp >= *(int*)StackPeek( stack ) )
-	{
-		StackPush( stack, &temp );
-		return;
-	}
-		
-	temp_aux = *(int*)StackPeek( stack );
-	StackPop( stack );
-		
-	AuxSortIntegers( stack, temp_aux );
-		
-	StackPush( stack, &temp_aux );
-	return;
-		
-}
-
-
 
 /************************SortIntegers*********************/
 void SortIntegers(stack_t* stack)
@@ -169,42 +168,18 @@ void SortIntegers(stack_t* stack)
 	
 	assert(stack);
 	
-	if( StackIsEmpty( stack ) )
-	{
-		return;
+	if( !StackIsEmpty( stack ) )
+	{	
+		temp = *(int*)StackPeek( stack );
+		StackPop( stack );
+	
+		SortIntegers( stack );
+	
+		AuxSortIntegers( stack, temp );
+	
 	}
-	
-	temp = *(int*)StackPeek( stack );
-	StackPop( stack );
-	
-	SortIntegers( stack );
-	
-	AuxSortIntegers( stack, temp );
-	
 	
 }
-/*
-AuxSortIntegers(stack_t* stack, int temp )
-	{
-		
-		int temp_aux = 0;
-		
-		if ( StackIsEmpty( stack ) || temp => *(int*)StackPeek( stack ) )
-		{
-			StackPush( stack, &temp );
-			return;
-		}
-		
-		temp_aux = *(int*)StackPeek( stack );
-		StackPop( stack );
-		
-		AuxSortIntegers( stack, temp_aux );
-		
-		StackPush( stack, &temp_aux );
-		return;
-		
-	}
 
-*/
 
 
