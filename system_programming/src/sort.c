@@ -39,6 +39,9 @@ typedef struct min_max
 static void swap(int* ptr1, int* ptr2);
 static void FindMinMax(	int* arr, size_t size, int* min, int* max);
 static int CountingSortAux(int *arr, size_t size, int exp_digit);
+static void	AuxMergeSort(int *arr, size_t size, int* helper_array );
+static void	Merge( int* arr_left, int left, int* arr_right,
+					 int right, int* helper_array);
 /***************************End of function declaration******************/
 
 /******************static functions definition**********************/
@@ -345,24 +348,7 @@ int* BinarySearchRecursive(int *arr, size_t size, int num)
 	return BinarySearchRecursive(arr + mid  + 1, size - mid - 1, num );
 }
 
-/*************************MergeSort***************************/	
-
-int MergeSort(int *arr, size_t size)
-{
-	int *helper_array = NULL;
-	int left = size / 2, right = size - left;
-	
-	assert( helper_array );
-	
-	helper_array = (int*)malloc( size * sizeof( arr[0] ) ); 
-	
-	if( NULL == helper_array )
-	{
-		return FAIL;
-	}
-	
-	AuxMergeSort(arr ,size ,helper_array );
-	memcpy
+/*************************AuxMergeSort***************************/	
 static void	AuxMergeSort(int *arr, size_t size, int* helper_array )
 {
 	int left = size / 2, right = size - left;	
@@ -376,59 +362,74 @@ static void	AuxMergeSort(int *arr, size_t size, int* helper_array )
 	
 	AuxMergeSort(arr ,left ,helper_array);
 	AuxMergeSort(arr + left ,right ,helper_array );	
-	Merge (arr, left, arr + left, right, helper_array );
-	
+	Merge(arr, left, arr + left, right, helper_array );
+	memcpy( arr, helper_array, sizeof(arr[0]) * size  );	
 }
-	
-static void	Merge ( int* arr_l, int left, int* arr_r,
+
+/*************************Merge***************************/	
+static void	Merge( int* arr_left, int left, int* arr_right,
 					 int right, int* helper_array)
 {
-	
 	int len_left = 0, len_right = 0, len_helper = 0 ;
 	
 	assert( helper_array );
-	assert( arr_l );
-	assert( arr_r );
+	assert( arr_left );
+	assert( arr_right );
 	
 	for ( ; (len_left < left ) && (len_right < right ) ; ++len_helper )
 	{
-		if ( arr_l[len_left] < arr_r[len_right] )
+		if ( arr_left[len_left] < arr_right[len_right] )
 		{
-			helper_array[len_helper] = arr_l[len_left];
+			helper_array[len_helper] = arr_left[len_left];
 			++len_left;
 		}
 		
 		else
 		{
-			helper_array[len_helper] = arr_l[len_right];
+			helper_array[len_helper] = arr_right[len_right];
 			++len_right;
 		}
 		
-		++len_helper;
-	
 	}
 	
 	while( 	len_left < left )
 	{
-		helper_array[len_helper] = arr_l[len_left];
+		helper_array[len_helper] = arr_left[len_left];
 		++len_left;
 		++len_helper;
 	}
 	
 	while( 	len_right < right )
 	{
-		helper_array[len_helper] = arr_l[len_right];
+		helper_array[len_helper] = arr_right[len_right];
 		++len_right;
 		++len_helper;
 	}		
+}
+	 
+/*************************MergeSort***************************/	
 
-}
-	 
-	 
-	 
-	 
-}
-}
+int MergeSort(int *arr, size_t size)
+{
+	int *helper_array = NULL;
+	/*int left = size / 2, right = size - left;*/
+	
+	helper_array = (int*)malloc( size * sizeof( arr[0] ) ); 
+	assert( helper_array );
+	
+	if( NULL == helper_array )
+	{
+		return FAIL;
+	}
+	
+	AuxMergeSort(arr ,size ,helper_array );
+
+	free( helper_array );
+	helper_array = NULL;
+	
+	return SUCCESS;
+}	
+
 
 /*
 void QuickSort(void *arr, size_t count, size_t element_size,
