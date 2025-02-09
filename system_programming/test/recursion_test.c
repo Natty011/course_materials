@@ -65,6 +65,8 @@ static int TestStrStr(void);
 static int TestFibonacci(void);
 static int IteraiveFibonacci(int n);
 static int TestFlip(void);
+static int TestSortIntegers(void);
+
 /***************************End of function declaration******************/
 
 /******************static functions definition**********************/
@@ -128,7 +130,13 @@ static void TestRecursion(void)
      
     puts("'TestFlip()'");
     flag = TestFlip();
+    puts("=====================================================");
+    
+    puts("'TestSortIntegers()'");
+    flag = TestSortIntegers();
     puts("====================================================="); 
+    
+     
        
 	if( !flag ) 
 	{
@@ -483,6 +491,53 @@ static int TestFlip(void)
 	
     return flag;	
 }
+
+/**********TestSortIntegers function *********/
+static int TestSortIntegers(void)
+{
+	int arr[3] = {8, 10, 7};
+	size_t cap = sizeof(arr)/sizeof(arr[0]) , i = 0 ;
+	int top = 0;
+	int flag = FALSE;
+	
+	stack_t* s1 = StackCreate(cap, sizeof(arr[0]));
+	
+	if(StackCapacity(s1) != cap || !StackIsEmpty(s1) || StackSize(s1))
+	{
+		puts("Failes in : Create & Capacity");
+	}
+	
+	for(i = 0; i < cap; ++i)
+	{
+		
+		StackPush(s1, arr + i);
+		if(arr[i] != *(char*)StackPeek(s1))
+		{
+			puts("Failes in: Push & Peek ");
+		}
+		
+		if(StackIsEmpty(s1) || StackSize(s1) != (i + 1))
+		{
+			puts("Failes in TestChars: IsEmpty & Size ");
+		}
+		
+	}
+	
+	SortIntegers( s1 );
+
+	while ( ! StackIsEmpty( s1 ) )
+	{	
+		top = *(char*)StackPeek(s1);
+	
+		if ( *(char*)StackPeek(s1) > top )
+		{
+			puts("TestSortIntegers Failed");
+			flag = TRUE;   
+		}
+	}
+	
+	return flag;		
+}	
 
 /******************* IteraiveFlip *********************/
 /* Flip the next of each node to point to the previous node */
