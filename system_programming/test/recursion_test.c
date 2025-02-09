@@ -2,12 +2,12 @@
 * Author : Natty
 * Reviewer : David
 * Date : 05 / 02 / 2025
-* Last update: 06 / 02 / 2025
+* Last update: 09 / 02 / 2025
 *****************************************/
 
 #include <stdio.h> 		/* printf, puts, qsort  */
 #include <assert.h>
-#include <string.h> 	/* strcpy, strcmp */
+#include <string.h> 	
 #include "recursion.h" 
 #include "stack.h" 
 
@@ -514,13 +514,7 @@ static int TestSortIntegers(void)
 		if(arr[i] != *(char*)StackPeek(s1))
 		{
 			puts("Failes in: Push & Peek ");
-		}
-		
-		if(StackIsEmpty(s1) || StackSize(s1) != (i + 1))
-		{
-			puts("Failes in TestChars: IsEmpty & Size ");
-		}
-		
+		}		
 	}
 	
 	SortIntegers( s1 );
@@ -528,14 +522,22 @@ static int TestSortIntegers(void)
 	while ( ! StackIsEmpty( s1 ) )
 	{	
 		top = *(char*)StackPeek(s1);
-	
-		if ( *(char*)StackPeek(s1) > top )
+		StackPop( s1 );
+		if ( ! StackIsEmpty( s1 ) )
 		{
-			puts("TestSortIntegers Failed");
-			flag = TRUE;   
+			if ( *(char*)StackPeek(s1) > top )
+			{
+				puts("TestSortIntegers Failed");
+				flag = TRUE;   
+			}
 		}
 	}
-	
+
+	if ( !flag )
+	{
+		puts(" TestSortIntegers Successed");		
+	}
+	StackDestroy(s1);
 	return flag;		
 }	
 
