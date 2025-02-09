@@ -248,6 +248,7 @@ int CountingSort(int *arr, size_t size)
 				
 		return FAIL;
 	}
+	
 	/* do the sorting */	
 	for(i = len - 1 ; i >= 0; --i)
 	{
