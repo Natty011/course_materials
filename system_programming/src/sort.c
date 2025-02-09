@@ -248,7 +248,6 @@ int CountingSort(int *arr, size_t size)
 				
 		return FAIL;
 	}
-	
 	/* do the sorting */	
 	for(i = len - 1 ; i >= 0; --i)
 	{
@@ -431,11 +430,20 @@ int MergeSort(int *arr, size_t size)
 	return SUCCESS;
 }	
 
+/* For qsort
 
-/*
+int Compare(const void* a, const void* b)
+{
+    return (*(int*)a - *(int*)b);
+}
+
+*/
+
+
+/*************************QuickSort***************************/	
 void QuickSort(void *arr, size_t count, size_t element_size,
                        int (*cmp_func)(const void *, const void *));
-*/
+
 
 
 
