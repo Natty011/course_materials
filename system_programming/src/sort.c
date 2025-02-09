@@ -13,7 +13,6 @@
 #define MAX(a, b)		((a > b ) ? a : b )
 /***************struct and enum declaration *******/
 
-
 typedef enum state
 {
 	FALSE = 0,
@@ -117,6 +116,8 @@ static int CountingSortAux(int *arr, size_t size, int exp_digit)
 	return SUCCESS; /* 0 */
 
 }
+
+
 
 /******************End of static functions definition**********************/
 
@@ -284,4 +285,78 @@ int RadixSort(int *arr, size_t size)
 	
 	return SUCCESS;
 }
+
+/*************************BinarySearchIterative***************************/
+int BinarySearchIterative(int *arr, size_t size, int num)
+{
+	int low = 0, high = 0, mid = 0;
+	assert( arr );
+	
+	low = 0;
+	high = size - 1 ;
+	mid = (low +high ) / 2;
+	
+	while ( low <= high )
+	{
+		if ( num == arr[mid] )	
+		{
+			return mid;
+		}
+		
+		else if( num < arr[mid] )
+		{
+			high = mid - 1;
+		}
+		
+		else
+		{
+			low = mid + 1;
+		}
+		
+		mid = (low +high ) / 2;
+	}
+	
+	return -1;
+}	
+
+/*************************BinarySearchRecursive***************************/	
+int* BinarySearchRecursive(int *arr, size_t size, int num)
+{
+	int  mid = 0;
+	assert( arr );
+
+	if ( 0 == size )
+	{
+		return NULL;
+	}	
+	mid = size / 2;
+		
+	if ( num == arr[mid] )
+	{
+		return arr + mid;
+	}
+		
+	if ( num < arr[mid] )
+	{
+		return BinarySearchRecursive(arr, mid, num );
+	}
+	
+	return BinarySearchRecursive(arr + mid  + 1, size - mid - 1, num );
+}
+
+/*************************MergeSort***************************/	
+/*
+int MergeSort(int *arr, size_t size)
+{
+
+
+}
+*/
+/*
+void QuickSort(void *arr, size_t count, size_t element_size,
+                       int (*cmp_func)(const void *, const void *));
+*/
+
+
+
 
