@@ -16,7 +16,7 @@
 /****************struct and enum declaration*********************/
 /***************End of struct and enum declaration *******/
 /***********Functions declaration*******/
-
+static void AuxSortIntegers(stack_t* stack, int temp );
 /**********End of functions declaration *******/
 /******************static functions definition**********************/
 /******************End of static functions definition**********************/
@@ -138,10 +138,73 @@ node_t *FlipList(node_t *node)
 	return prev;
 }
 
+/************************AuxSortIntegers*********************/
+static void AuxSortIntegers(stack_t* stack, int temp )
+{		
+	int temp_aux = 0;
+		
+	if ( StackIsEmpty( stack ) || temp >= *(int*)StackPeek( stack ) )
+	{
+		StackPush( stack, &temp );
+		return;
+	}
+		
+	temp_aux = *(int*)StackPeek( stack );
+	StackPop( stack );
+		
+	AuxSortIntegers( stack, temp_aux );
+		
+	StackPush( stack, &temp_aux );
+	return;
+		
+}
 
 
 
+/************************SortIntegers*********************/
+void SortIntegers(stack_t* stack)
+{
+	
+	int temp = 0;
+	
+	assert(stack);
+	
+	if( StackIsEmpty( stack ) )
+	{
+		return;
+	}
+	
+	temp = *(int*)StackPeek( stack );
+	StackPop( stack );
+	
+	SortIntegers( stack );
+	
+	AuxSortIntegers( stack, temp );
+	
+	
+}
+/*
+AuxSortIntegers(stack_t* stack, int temp )
+	{
+		
+		int temp_aux = 0;
+		
+		if ( StackIsEmpty( stack ) || temp => *(int*)StackPeek( stack ) )
+		{
+			StackPush( stack, &temp );
+			return;
+		}
+		
+		temp_aux = *(int*)StackPeek( stack );
+		StackPop( stack );
+		
+		AuxSortIntegers( stack, temp_aux );
+		
+		StackPush( stack, &temp_aux );
+		return;
+		
+	}
 
-
+*/
 
 
