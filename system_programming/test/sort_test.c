@@ -76,6 +76,7 @@ static void TestSort2(void);
 int ArrIsSorted(int* arr, size_t len);
 static int TestBinarySearchIterative(void);
 static int TestBinarySearchRecursive(void);
+static int TestMergeSort(void);
 /*static void PrintArr(int* arr, size_t len);*/
 /***************************End of function declaration******************/
 
@@ -107,6 +108,10 @@ int ArrIsSorted(int* arr, size_t len)
 	
 	for(i = 0; i < len - 1; i++)
 	{
+		/*
+		printf("arr[i] = %d , i = %lu \n", arr[i], i);
+		printf("arr[i + 1] = %d , i + 1 = %lu \n", arr[i + 1], i + 1);	
+		*/	
 		if(arr[i] > arr[i + 1] )
 		{
 			flag = TRUE; /* not sorted */
@@ -186,7 +191,11 @@ static void TestSort2(void)
     
 	puts("'TestBinarySearchRecursive()'");
     flag = TestBinarySearchRecursive();
-    puts("====================================================="); 	
+    puts("=====================================================");
+    
+    puts("'TestMergeSort()'");
+    flag = TestMergeSort();
+    puts("====================================================="); 	 	
     
     if( !flag ) 
 	{
@@ -236,7 +245,7 @@ static int TestBinarySearchIterative(void)
 	
 	if ( !flag )
 	{
-		puts(" TestBinarySearchIterative Successed");		
+		puts(BACK_BLUE"TestBinarySearchIterative Successed"RESET);		
 	}
 	
 	return flag;		
@@ -283,13 +292,42 @@ static int TestBinarySearchRecursive(void)
 	
 	if ( !flag )
 	{
-		puts(" TestBinarySearchRecursive Successed");		
+		puts(BACK_BLUE"TestBinarySearchRecursive Successed"RESET);		
 	}
 	
 	return flag;		
 }			 
 	
-
+/******************  TestMergeSort  ***********************/
+static int TestMergeSort(void)
+{
+	int arr[6] = {45 ,14 ,61 ,37, 56, 22};
+	size_t size = sizeof(arr)/sizeof(arr[0])  ;
+	int flag = FALSE, flag_malloc = FALSE ;
+	
+	flag_malloc = MergeSort(arr, size );
+	
+	flag = ArrIsSorted( arr, size );
+	
+	if ( flag_malloc )
+	{
+		puts("TestMergeSort Failed in Allocation ");
+		flag = TRUE; 
+	}
+	
+	if ( !flag )
+	{
+		puts(BACK_BLUE"TestMergeSort Successed"RESET);		
+	}
+	
+	else
+	{
+		puts("TestMergeSort Failed");		
+	}
+	
+	return flag;		
+}			 
+	
 /********************  Test2Block  ****************************/
 static void TestSort(void)
 {	
