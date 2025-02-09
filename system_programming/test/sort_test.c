@@ -1,8 +1,8 @@
 /***************************************
 * Author : Natty
-* Reviewer : David
+* Reviewer : Matan
 * Date : 22 / 01 / 2025
-* Last update: 23 / 01 / 2025
+* Last update: 22 / 01 / 2025
 *****************************************/
 
 #include <stdio.h> 		/* printf, puts, qsort  */
@@ -33,6 +33,7 @@
 #define BACK_CYAN 	 "\x1b[46m"
 #define BACK_WHITE   "\x1b[47m"
 
+
 #define DEBUG		"DEBUG MODE"
 #define RELEASE		"RELEASE MODE"
 
@@ -57,11 +58,7 @@ typedef struct sort_time_req
 }sort_time_req_t;
 */
 
-/*
-	#ifdef PRINTS
-	PrintArr(arr, 10);
-	#endif
-	
+/*	
 	# ifndef NDEBUG
 	PrintArr(arr, 10);
 	#endif
@@ -69,9 +66,12 @@ typedef struct sort_time_req
 /***************End of struct and enum declaration *******/
 
 /***************************function declaration**************************/
-static void TestSort(void);
-static void GenRandArr(int* arr, size_t len, size_t min, size_t max);
+/*static void TestSort(void);*/
+static void TestSort2(void);
+/*static void GenRandArr(int* arr, size_t len, size_t min, size_t max);*/
 int ArrIsSorted(int* arr, size_t len);
+static int TestBinarySearchIterative(void);
+static int TestBinarySearchRecursive(void);
 /*static void PrintArr(int* arr, size_t len);*/
 /***************************End of function declaration******************/
 
@@ -79,6 +79,7 @@ int ArrIsSorted(int* arr, size_t len);
 
 /********************  GenRandArr  ****************************/
 /* range [min, max] */
+/*
 static void GenRandArr(int* arr, size_t len, size_t min, size_t max)
 {
 	size_t i = 0;
@@ -87,12 +88,12 @@ static void GenRandArr(int* arr, size_t len, size_t min, size_t max)
 	
 	for(i = 0 ; i < len; ++i)
 	{
-		arr[i] = rand() % (max - min) + min;
+		arr[i] = rand() % (max - min - 1) + min;
 		
 	}
 	
 }
-
+*/
 /********************  ArrIsSorted  ****************************/
 int ArrIsSorted(int* arr, size_t len)
 {
@@ -116,9 +117,8 @@ int ArrIsSorted(int* arr, size_t len)
 }
 
 /********************  PrintArr  ****************************/
-/* # ifndef NDEBUG */
+# ifndef NDEBUG
 /*
-	#ifdef PRINTS
 static void PrintArr(int* arr, size_t len)
 {	
 	size_t i = 0;
@@ -130,9 +130,8 @@ static void PrintArr(int* arr, size_t len)
 	}
 	
 }
-	
+*/	
 #endif
-*/
 /********************  Compare  ****************************/
 /* For qsort*/
 int Compare(const void* a, const void* b)
@@ -156,21 +155,140 @@ int main ()
 
 	puts(BLUE"====================================================="RESET);
 	printf("%sTEST: %s "RESET" \n", background,  mode);
+	/*
    	puts(BACK_BLUE"'TestSort()'"RESET);
     TestSort();
+    */
+	puts(BLUE"====================================================="RESET);  
+	  
+    puts(BACK_BLUE"'TestSort2()'"RESET);
+    TestSort2();
     
 	puts(BLUE"====================================================="RESET);
 
 	return 0;
 }
 
-
-
 /********************  Test2Block  ****************************/
+static void TestSort2(void)
+{	
+	int flag = FALSE;
+
+	puts("'TestBinarySearchIterative()'");
+    flag = TestBinarySearchIterative();
+    puts("====================================================="); 	
+    
+	puts("'TestBinarySearchRecursive()'");
+    flag = TestBinarySearchRecursive();
+    puts("====================================================="); 	
+    
+    if( !flag ) 
+	{
+		puts(RESET);		
+		puts(BACK_BLUE"Test: Success"RESET);
+
+	}
+	
+	else
+	{
+		puts(BACK_YELLOW"Test: Failure"RESET);	
+	}
+		
+	
+}
+
+/******************  TestBinarySearchIterative  ***********************/
+static int TestBinarySearchIterative(void)
+{
+	int arr[4] = {-5, 0, 5, 10};
+	size_t size = sizeof(arr)/sizeof(arr[0])  ;
+	int flag = FALSE, res = -2 ;
+	
+	res = BinarySearchIterative(arr, size, 5);
+	
+	if ( 2 != res )
+	{
+		puts("TestBinarySearchIterative Failed_1");
+		flag = TRUE; 
+	}
+
+	res = BinarySearchIterative(arr, size, -6 );
+	
+	if ( -1 != res )
+	{
+		puts("TestBinarySearchIterative Failed_2");
+		flag = TRUE; 
+	}
+	
+	res = BinarySearchIterative(arr, size, 10 );
+	
+	if ( 3 != res )
+	{
+		puts("TestBinarySearchIterative Failed_3");
+		flag = TRUE; 
+	}
+	
+	if ( !flag )
+	{
+		puts(" TestBinarySearchIterative Successed");		
+	}
+	
+	return flag;		
+}
+
+/******************  TestBinarySearchRecursive  ***********************/
+static int TestBinarySearchRecursive(void)
+{
+	int arr[4] = {-5, 0, 5, 10};
+	size_t size = sizeof(arr)/sizeof(arr[0])  ;
+	int flag = FALSE, *res = NULL ;
+	
+	res = BinarySearchRecursive(arr, size, 5);
+	
+	if ( 5 != *res )
+	{
+		puts("TestBinarySearchRecursive Failed_1");
+		flag = TRUE; 
+	}
+	
+	res = BinarySearchRecursive(arr, size, -6 );
+	
+	if ( NULL != res )
+	{
+		puts("TestBinarySearchRecursive Failed_2");
+		flag = TRUE; 
+	}
+	
+	res = BinarySearchRecursive(arr, size, 10 );
+
+	if ( 10 != *res )
+	{
+		puts("TestBinarySearchRecursive Failed_3");
+		flag = TRUE; 
+	}
+	
+	res = BinarySearchRecursive(arr, size, -5);
+	
+	if ( -5 != *res )
+	{
+		puts("TestBinarySearchRecursive Failed_4");
+		flag = TRUE; 
+	}	
+	
+	if ( !flag )
+	{
+		puts(" TestBinarySearchRecursive Successed");		
+	}
+	
+	return flag;		
+}			 
+	
+/********************  Test2Block  ****************************/
+/*
 static void TestSort(void)
 {	
-	int flag = FALSE, flag_bubble = FALSE, flag_insertion = FALSE,
-		flag_selection = FALSE, flag_counting = FALSE, flag_radix = FALSE;
+	int flag = FALSE, flag_bubble = FALSE, flag_insertion = FALSE;
+	int flag_selection = FALSE;
 	int arr[MAX] = { 0 };
 	size_t len = MAX;
 	
@@ -178,49 +296,36 @@ static void TestSort(void)
     clock_t time_req_insertion = clock();
     clock_t time_req_selection = clock();
     clock_t time_req_qsort = clock();
-	clock_t time_req_counting = clock();
-	clock_t time_req_radix = clock();
-		
-	float t_bubble = 0.0, t_insert = 0.0, t_select = 0.0, 
-		  t_count = 0.0, t_radix = 0.0, t_qsort = 0.0;
 
-	/* BubbleSort test	*/    
+	float t_bubble = 0.0, t_insert = 0.0, t_select = 0.0, t_qsort = 0.0;
+*/
+	/* BubbleSort test	*/
+/*	    
 	GenRandArr(arr, len, MIN, MAX);	
 	time_req_bubble = clock();
 	BubbleSort(arr, len);
 	time_req_bubble = clock() - time_req_bubble;
 	flag_bubble  = ArrIsSorted(arr, MAX);
 	
-	
-	/* InsertionSort test	*/    
+*/	
+	/* InsertionSort test	*/  
+/*	  
 	GenRandArr(arr, len, MIN, MAX);
 	time_req_insertion = clock();
 	InsertionSort(arr, len);
 	time_req_insertion = clock() - time_req_insertion;
 	flag_insertion  = ArrIsSorted(arr, MAX);
-
-	/* SelectionSort test	*/    
+*/
+	/* SelectionSort test	*/  
+/*	  
 	GenRandArr(arr, len, MIN, MAX);
 	time_req_selection = clock();
 	SelectionSort(arr, len);
 	time_req_selection = clock() - time_req_selection;
 	flag_insertion  = ArrIsSorted(arr, MAX);
-
-	/* CountingSort test	*/    
-	GenRandArr(arr, MAX, 1, 101);
-	time_req_counting = clock();
-	CountingSort(arr, MAX);
-	time_req_counting = clock() - time_req_counting;
-	flag_counting  = ArrIsSorted(arr, MAX);
-
-	/* RedixSort test	*/    
-	GenRandArr(arr, MAX, 1000000, 2000000);
-	time_req_radix = clock();
-	RadixSort(arr, MAX);
-	time_req_radix = clock() - time_req_radix;
-	flag_radix  = ArrIsSorted(arr, MAX);	
-	if(flag_bubble || flag_insertion || flag_selection
-		|| flag_counting || flag_radix)
+*/
+/*				
+	if(flag_bubble || flag_insertion || flag_selection)
 	{
 		puts(RED);
 		
@@ -238,20 +343,11 @@ static void TestSort(void)
 		{
 			puts("Failes in SelectionSort: Unsorted array of numbers");
 		}
-		
-		if(flag_counting)
-		{
-			puts("Failes in CountingSort: Unsorted array of numbers");
-		}
-		
-		if(flag_radix)
-		{
-			puts("Failes in RedixSort: Unsorted array of numbers");
-		}
 					
 		flag = TRUE;
 	}
-				
+*/
+/*				
 	GenRandArr(arr, len, MIN, MAX);		
 	time_req_qsort = clock();
 	qsort(arr, len, sizeof(int), Compare);
@@ -261,9 +357,7 @@ static void TestSort(void)
 	t_insert = (float)time_req_insertion / CLOCKS_PER_SEC;
 	t_qsort = (float)time_req_qsort / CLOCKS_PER_SEC;
 	t_select = (float)time_req_selection / CLOCKS_PER_SEC;	
-	t_count = (float)time_req_counting / CLOCKS_PER_SEC;	
-	t_radix = (float)time_req_radix / CLOCKS_PER_SEC;
-		
+
 	puts("\n" BACK_CYAN"Processor time taken for:"RESET"\n");
 		
 	printf("BubbleSort   : "BACK_GREEN" %f "RESET" seconds  \n", t_bubble);
@@ -271,11 +365,7 @@ static void TestSort(void)
 	printf("SelectionSort: "BACK_GREEN" %f "RESET" seconds  \n", t_select);
            
 	printf("InsertionSort: "BACK_GREEN" %f "RESET" seconds  \n", t_insert);
-	
- 	printf("CountingSort : "BACK_GREEN" %f "RESET" seconds  \n", t_count); 
- 		
- 	printf("RadixSort    : "BACK_GREEN" %f "RESET" seconds  \n", t_radix);
- 	 	 	                     
+                     
 	printf("QuickSort    : "BACK_GREEN" %f "RESET" seconds  \n", t_qsort);
 
 	puts("\n" BACK_CYAN"Ratio time:"RESET"\n");
@@ -287,7 +377,9 @@ static void TestSort(void)
                       
 	printf("InsertionSort/QuickSort: "BACK_GREEN" %f "RESET" \n", \
            t_insert/t_qsort);           
-	  	                  
+
+  	puts("");
+  	                  
 	if( !flag )
 	{		
 		puts(BACK_BLUE"Test: Success"RESET);
@@ -301,5 +393,5 @@ static void TestSort(void)
 
 }
 
-
+*/
 
