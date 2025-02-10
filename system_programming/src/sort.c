@@ -124,6 +124,98 @@ static int CountingSortAux(int *arr, size_t size, int exp_digit)
 }
 
 
+/*************************AuxMergeSort***************************/	
+static void	AuxMergeSort(int *arr, size_t size, int* helper_array )
+{
+	int left = size / 2, right = size - left;	
+	assert( helper_array );
+	assert( arr );
+		
+	if ( size < 2 ) 
+	{
+		return;
+	}
+	
+	AuxMergeSort(arr ,left ,helper_array);
+	AuxMergeSort(arr + left ,right ,helper_array );	
+	Merge(arr, left, arr + left, right, helper_array );
+	memcpy( arr, helper_array, sizeof(arr[0]) * size  );	
+}
+
+/*************************Merge***************************/	
+static void	Merge( int* arr_left, int left, int* arr_right,
+					 int right, int* helper_array)
+{
+	int len_left = 0, len_right = 0, len_helper = 0 ;
+	
+	assert( helper_array );
+	assert( arr_left );
+	assert( arr_right );
+	
+	for ( ; (len_left < left ) && (len_right < right ) ; ++len_helper )
+	{
+		if ( arr_left[len_left] < arr_right[len_right] )
+		{
+			helper_array[len_helper] = arr_left[len_left];
+			++len_left;
+		}
+		
+		else
+		{
+			helper_array[len_helper] = arr_right[len_right];
+			++len_right;
+		}
+		
+	}
+	
+	while( 	len_left < left )
+	{
+		helper_array[len_helper] = arr_left[len_left];
+		++len_left;
+		++len_helper;
+	}
+	
+	while( 	len_right < right )
+	{
+		helper_array[len_helper] = arr_right[len_right];
+		++len_right;
+		++len_helper;
+	}		
+}
+
+/***************************SwapQuick***************************/
+static int SwapQuick(void* ptr1, void* ptr2, size_t element_size)
+{
+	char* temp = NULL;
+	
+	assert( ptr1 );
+	assert ( ptr2 );
+	
+	temp = (char*)malloc( element_size );
+
+	if ( NULL == temp )
+	{
+		return FAIL;
+	}
+	
+	memcpy(temp, ptr1, element_size );
+	memcpy(ptr1, ptr2, element_size );
+	memcpy(ptr2, temp, element_size );
+	
+	free( temp );
+	temp = NULL;
+	
+	return SUCCESS;
+}
+/*************************Random***************************/	
+static size_t Random( size_t count )
+{
+	size_t random_pivot = 0 ;
+	srand(time(NULL));
+	random_pivot = rand() % count ;
+
+	return random_pivot;
+}
 
 /******************End of static functions definition**********************/
 
@@ -350,64 +442,6 @@ int* BinarySearchRecursive(int *arr, size_t size, int num)
 	return BinarySearchRecursive(arr + mid  + 1, size - mid - 1, num );
 }
 
-/*************************AuxMergeSort***************************/	
-static void	AuxMergeSort(int *arr, size_t size, int* helper_array )
-{
-	int left = size / 2, right = size - left;	
-	assert( helper_array );
-	assert( arr );
-		
-	if ( size < 2 ) 
-	{
-		return;
-	}
-	
-	AuxMergeSort(arr ,left ,helper_array);
-	AuxMergeSort(arr + left ,right ,helper_array );	
-	Merge(arr, left, arr + left, right, helper_array );
-	memcpy( arr, helper_array, sizeof(arr[0]) * size  );	
-}
-
-/*************************Merge***************************/	
-static void	Merge( int* arr_left, int left, int* arr_right,
-					 int right, int* helper_array)
-{
-	int len_left = 0, len_right = 0, len_helper = 0 ;
-	
-	assert( helper_array );
-	assert( arr_left );
-	assert( arr_right );
-	
-	for ( ; (len_left < left ) && (len_right < right ) ; ++len_helper )
-	{
-		if ( arr_left[len_left] < arr_right[len_right] )
-		{
-			helper_array[len_helper] = arr_left[len_left];
-			++len_left;
-		}
-		
-		else
-		{
-			helper_array[len_helper] = arr_right[len_right];
-			++len_right;
-		}
-		
-	}
-	
-	while( 	len_left < left )
-	{
-		helper_array[len_helper] = arr_left[len_left];
-		++len_left;
-		++len_helper;
-	}
-	
-	while( 	len_right < right )
-	{
-		helper_array[len_helper] = arr_right[len_right];
-		++len_right;
-		++len_helper;
-	}		
-}
 	 
 /*************************MergeSort***************************/	
 
@@ -432,52 +466,6 @@ int MergeSort(int *arr, size_t size)
 	return SUCCESS;
 }	
 
-/* For qsort
-The user insert
-
-int Compare(const void* a, const void* b)
-{
-    return (*(int*)a - *(int*)b);
-}
-
-*/
-
-/***************************SwapQuick***************************/
-static int SwapQuick(void* ptr1, void* ptr2, size_t element_size)
-{
-	char* temp = NULL;
-	
-	assert( ptr1 );
-	assert ( ptr2 );
-	
-	temp = (char*)malloc( element_size );
-
-	if ( NULL == temp )
-	{
-		return FAIL;
-	}
-	
-	memcpy(temp, ptr1, element_size );
-	memcpy(ptr1, ptr2, element_size );
-	memcpy(ptr2, temp, element_size );
-	
-	free( temp );
-	temp = NULL;
-	
-	return SUCCESS;
-}
-/*************************Random***************************/	
-static size_t Random( size_t count )
-{
-	size_t random_pivot = 0 ;
-	srand(time(NULL));
-	random_pivot = rand() % count ;
-	/*printf(" random_pivot = %lu \n", random_pivot );*/
-	return random_pivot;
-	 
-}
-	/* (elem * Random( count )) */
-	/* elem*(count/2) */
 	
 /*************************QuickSort***************************/	
 void QuickSort(void *arr, size_t count, size_t element_size,
@@ -515,7 +503,8 @@ void QuickSort(void *arr, size_t count, size_t element_size,
 		
 		if( base < tail )
 		{
-			if ( FAIL == SwapQuick( arr_ptr + (elem * base ), arr_ptr + (elem * tail) , elem) )
+			if ( FAIL == SwapQuick( arr_ptr + (elem * base ),
+				 arr_ptr + (elem * tail) , elem) )
 			{
 				return;
 			}
@@ -523,16 +512,15 @@ void QuickSort(void *arr, size_t count, size_t element_size,
 			--tail;
 			++base;			
 		}
-			
 	}
 	
-	if ( FAIL == SwapQuick( pivot, arr_ptr + (elem * tail) , elem) )
-	{
+    if ( FAIL == SwapQuick( pivot, arr_ptr + (elem * tail) , elem) )
+    {
 		return;
 	}
 	
-	 QuickSort(arr_ptr, tail, elem, cmp_func );
-	 QuickSort(arr_ptr + (elem * (tail + 1)) , count - tail - 1, elem, cmp_func );	
+	QuickSort(arr_ptr, tail, elem, cmp_func );
+	QuickSort(arr_ptr + (elem * (tail + 1)) , count - tail - 1, elem, cmp_func );	
 
 }                       
 
