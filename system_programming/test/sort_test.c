@@ -1,8 +1,8 @@
 /***************************************
 * Author : Natty
-* Reviewer : David
+* Reviewer : Natan
 * Date : 22 / 01 / 2025
-* Last update: 23 / 01 / 2025
+* Last update: 10 / 02 / 2025
 *****************************************/
 
 #include <stdio.h> 		/* printf, puts, qsort  */
