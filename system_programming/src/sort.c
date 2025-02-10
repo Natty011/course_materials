@@ -7,7 +7,7 @@
 #include <assert.h> 	/* assert */
 #include <stdlib.h> 	/* malloc, calloc, free, srand/rand */
 #include <string.h> 	/* memcpy */
-
+#include <time.h> 		/* time */
 #include "sort.h"
 
 #define MIN(a, b)		((a > b ) ? b : a )
@@ -469,9 +469,15 @@ static int SwapQuick(void* ptr1, void* ptr2, size_t element_size)
 /*************************Random***************************/	
 static size_t Random( size_t count )
 {
-		return rand() % count ;
+	size_t random_pivot = 0 ;
+	srand(time(NULL));
+	random_pivot = rand() % count ;
+	/*printf(" random_pivot = %lu \n", random_pivot );*/
+	return random_pivot;
+	 
 }
-	
+	/* (elem * Random( count )) */
+	/* elem*(count/2) */
 	
 /*************************QuickSort***************************/	
 void QuickSort(void *arr, size_t count, size_t element_size,
@@ -483,7 +489,12 @@ void QuickSort(void *arr, size_t count, size_t element_size,
 	assert( arr );
 	assert( cmp_func );
 	arr_ptr = (char*)arr;
-	if (FAIL == SwapQuick( arr, (char*)arr + (elem * Random( count )) , elem) )
+	
+	if ( count < 2 )
+	{
+		return;
+	}
+	if (FAIL == SwapQuick( arr_ptr, arr_ptr +  elem * Random( count ) , elem) )
 	{
 		return;
 	}
@@ -492,19 +503,19 @@ void QuickSort(void *arr, size_t count, size_t element_size,
 	
 	while( base <= tail )
 	{
-		while ( base <= tail &&  (0 <= cmp_func(arr + (elem * tail), pivot ) ) )
+		while ( base <= tail &&  (0 <= cmp_func(arr_ptr + (elem * tail), pivot ) ) )
 		{
 			--tail;
 		}
 		
-		while ( base <= tail &&  (0 < cmp_func(pivot, arr + (elem * base )  ) ) )
+		while ( base <= tail &&  (0 < cmp_func(pivot, arr_ptr + (elem * base )  ) ) )
 		{
 			++base;
 		}
 		
 		if( base < tail )
 		{
-			if ( FAIL == SwapQuick( (char*)arr + (elem * base ), (char*)arr + (elem * tail) , elem) )
+			if ( FAIL == SwapQuick( arr_ptr + (elem * base ), arr_ptr + (elem * tail) , elem) )
 			{
 				return;
 			}
@@ -515,13 +526,13 @@ void QuickSort(void *arr, size_t count, size_t element_size,
 			
 	}
 	
-	if ( FAIL == SwapQuick( pivot, arr + (elem * tail) , elem) )
+	if ( FAIL == SwapQuick( pivot, arr_ptr + (elem * tail) , elem) )
 	{
 		return;
 	}
 	
-	 QuickSort((char*)arr, tail, elem, cmp_func );
-	 QuickSort((char*)arr + (elem * tail) + 1, size - tail - 1, elem, cmp_func );	
+	 QuickSort(arr_ptr, tail, elem, cmp_func );
+	 QuickSort(arr_ptr + (elem * (tail + 1)) , count - tail - 1, elem, cmp_func );	
 
 }                       
 
