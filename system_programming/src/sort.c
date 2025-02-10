@@ -42,6 +42,8 @@ static int CountingSortAux(int *arr, size_t size, int exp_digit);
 static void	AuxMergeSort(int *arr, size_t size, int* helper_array );
 static void	Merge( int* arr_left, int left, int* arr_right,
 					 int right, int* helper_array);
+static int SwapQuick(void* ptr1, void* ptr2, size_t element_size);
+static size_t Random( size_t count );					 
 /***************************End of function declaration******************/
 
 /******************static functions definition**********************/
@@ -431,6 +433,7 @@ int MergeSort(int *arr, size_t size)
 }	
 
 /* For qsort
+The user insert
 
 int Compare(const void* a, const void* b)
 {
@@ -439,10 +442,56 @@ int Compare(const void* a, const void* b)
 
 */
 
+/***************************swap***************************/
+static int SwapQuick(void* ptr1, void* ptr2, size_t element_size)
+{
+	char* temp = NULL;
+	
+	assert( ptr1 );
+	assert ( ptr2 );
+	
+	temp = (char*)malloc( element_size );
 
+	if ( NULL == temp )
+	{
+		return FAIL;
+	}
+	
+	memcpy(temp, ptr1, element_size );
+	memcpy(ptr1, ptr2, element_size );
+	memcpy(ptr2, temp, element_size );
+	
+	free( temp );
+	temp = NULL;
+	
+	return SUCCESS;
+}
+/*************************Random***************************/	
+static size_t Random( size_t count )
+{
+		return rand() % count ;
+}
+	
+	
 /*************************QuickSort***************************/	
 void QuickSort(void *arr, size_t count, size_t element_size,
-                       int (*cmp_func)(const void *, const void *));
+                       int (*cmp_func)(const void *, const void *))
+{
+
+	char *pivot = NULL, 
+	size t base = 1, tail = count - 1;
+	
+	assert( arr );
+	assert( cmp_func );
+
+	SwapQuick( arr, arr + Random( count ) );
+	
+	pivot = (char*)arr;
+
+
+
+
+}                       
 
 
 
