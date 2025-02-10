@@ -1,13 +1,12 @@
 /***************************************
 * Author : Natty
-* Reviewer : David  
+* Reviewer : Natan
 * Date : 22 / 01 / 2025
-* Last update: 23 / 01 / 2025
+* Last update: 10 / 02 / 2025
 *****************************************/
 #include <assert.h> 	/* assert */
 #include <stdlib.h> 	/* malloc, calloc, free, srand/rand */
 #include <string.h> 	/* memcpy */
-#include <time.h> 		/* time */
 #include "sort.h"
 
 #define MIN(a, b)		((a > b ) ? b : a )
@@ -33,6 +32,7 @@ typedef struct min_max
 	int max;
 }min_max_t;
 */
+
 /***************End of struct and enum declaration *******/
 
 /***************************function declaration***************************/
@@ -43,7 +43,7 @@ static void	AuxMergeSort(int *arr, size_t size, int* helper_array );
 static void	Merge( int* arr_left, int left, int* arr_right,
 					 int right, int* helper_array);
 static int SwapQuick(void* ptr1, void* ptr2, size_t element_size);
-static size_t Random( size_t count );					 
+/*static size_t Random( size_t count );		*/			 
 /***************************End of function declaration******************/
 
 /******************static functions definition**********************/
@@ -208,15 +208,15 @@ static int SwapQuick(void* ptr1, void* ptr2, size_t element_size)
 	return SUCCESS;
 }
 /*************************Random***************************/	
+/*
 static size_t Random( size_t count )
 {
 	size_t random_pivot = 0 ;
-	srand(time(NULL));
 	random_pivot = rand() % count ;
 
 	return random_pivot;
 }
-
+*/
 /******************End of static functions definition**********************/
 
 /***************************BubbleSort***************************/
@@ -448,7 +448,6 @@ int* BinarySearchRecursive(int *arr, size_t size, int num)
 int MergeSort(int *arr, size_t size)
 {
 	int *helper_array = NULL;
-	/*int left = size / 2, right = size - left;*/
 	
 	helper_array = (int*)malloc( size * sizeof( arr[0] ) ); 
 	assert( helper_array );
@@ -482,46 +481,34 @@ void QuickSort(void *arr, size_t count, size_t element_size,
 	{
 		return;
 	}
-	if (FAIL == SwapQuick( arr_ptr, arr_ptr +  elem * Random( count ) , elem) )
-	{
-		return;
-	}
 	
 	pivot = (char*)arr;
 	
 	while( base <= tail )
 	{
-		while ( base <= tail &&  (0 <= cmp_func(arr_ptr + (elem * tail), pivot ) ) )
+		while( base <= tail &&  (0 <= cmp_func(arr_ptr + (elem * tail), pivot )))
 		{
 			--tail;
 		}
 		
-		while ( base <= tail &&  (0 < cmp_func(pivot, arr_ptr + (elem * base )  ) ) )
+		while( base <= tail &&  (0 < cmp_func(pivot, arr_ptr + (elem * base ))))
 		{
 			++base;
 		}
 		
 		if( base < tail )
 		{
-			if ( FAIL == SwapQuick( arr_ptr + (elem * base ),
-				 arr_ptr + (elem * tail) , elem) )
-			{
-				return;
-			}
-			
+			SwapQuick( arr_ptr + (elem * base ), arr_ptr + (elem * tail) , elem);
+
 			--tail;
 			++base;			
 		}
 	}
 	
-    if ( FAIL == SwapQuick( pivot, arr_ptr + (elem * tail) , elem) )
-    {
-		return;
-	}
+	SwapQuick( pivot, arr_ptr + (elem * tail) , elem);
 	
 	QuickSort(arr_ptr, tail, elem, cmp_func );
 	QuickSort(arr_ptr + (elem * (tail + 1)) , count - tail - 1, elem, cmp_func );	
-
 }                       
 
 
