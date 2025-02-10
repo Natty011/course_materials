@@ -5,7 +5,7 @@
 * Last update: 23 / 01 / 2025
 *****************************************/
 #include <assert.h> 	/* assert */
-#include <stdlib.h> 	/* malloc, calloc, free */
+#include <stdlib.h> 	/* malloc, calloc, free, srand/rand */
 #include <string.h> 	/* memcpy */
 
 #include "sort.h"
@@ -469,7 +469,7 @@ static int SwapQuick(void* ptr1, void* ptr2, size_t element_size)
 /*************************Random***************************/	
 static size_t Random( size_t count )
 {
-		return rand() % count ;
+		return srand(0) % count ;
 }
 	
 	
@@ -477,19 +477,46 @@ static size_t Random( size_t count )
 void QuickSort(void *arr, size_t count, size_t element_size,
                        int (*cmp_func)(const void *, const void *))
 {
-
-	char *pivot = NULL, 
+	char *pivot = NULL;
 	size t base = 1, tail = count - 1;
 	
 	assert( arr );
 	assert( cmp_func );
 
-	SwapQuick( arr, arr + Random( count ) );
+	if (FAIL == SwapQuick( arr, arr + Random( count ) , element_size) )
+	{
+		return;
+	}
 	
 	pivot = (char*)arr;
-
-
-
+	
+	while( base <= tail )
+	{
+		while ( base <= tail &&  (0 <= cmp_func(arr + tail, pivot ) ) )
+		{
+			--tail;
+		}
+		
+		while ( base <= tail &&  (0 < cmp_func(pivot, arr + base  ) ) )
+		{
+			++base;
+		}
+		
+		if( base < tail )
+		{
+			if ( FAIL == SwapQuick( arr + base, arr + tail , element_size) )
+			{
+				return;
+			}
+			
+			--tail;
+			++base;			
+		}
+			
+	}
+	
+	QuickSort(arr, tail, element_size, cmp_func );
+	QuickSort(arr + tail + 1, size - tail - 1, element_size, cmp_func );	
 
 }                       
 
