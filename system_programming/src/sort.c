@@ -442,7 +442,7 @@ int Compare(const void* a, const void* b)
 
 */
 
-/***************************swap***************************/
+/***************************SwapQuick***************************/
 static int SwapQuick(void* ptr1, void* ptr2, size_t element_size)
 {
 	char* temp = NULL;
@@ -469,7 +469,7 @@ static int SwapQuick(void* ptr1, void* ptr2, size_t element_size)
 /*************************Random***************************/	
 static size_t Random( size_t count )
 {
-		return srand(0) % count ;
+		return rand() % count ;
 }
 	
 	
@@ -477,13 +477,13 @@ static size_t Random( size_t count )
 void QuickSort(void *arr, size_t count, size_t element_size,
                        int (*cmp_func)(const void *, const void *))
 {
-	char *pivot = NULL;
-	size t base = 1, tail = count - 1;
+	char *pivot = NULL, *arr_ptr = NULL;
+	size_t base = 1, tail = count - 1, elem = element_size;
 	
 	assert( arr );
 	assert( cmp_func );
-
-	if (FAIL == SwapQuick( arr, arr + Random( count ) , element_size) )
+	arr_ptr = (char*)arr;
+	if (FAIL == SwapQuick( arr, (char*)arr + (elem * Random( count )) , elem) )
 	{
 		return;
 	}
@@ -492,19 +492,19 @@ void QuickSort(void *arr, size_t count, size_t element_size,
 	
 	while( base <= tail )
 	{
-		while ( base <= tail &&  (0 <= cmp_func(arr + tail, pivot ) ) )
+		while ( base <= tail &&  (0 <= cmp_func(arr + (elem * tail), pivot ) ) )
 		{
 			--tail;
 		}
 		
-		while ( base <= tail &&  (0 < cmp_func(pivot, arr + base  ) ) )
+		while ( base <= tail &&  (0 < cmp_func(pivot, arr + (elem * base )  ) ) )
 		{
 			++base;
 		}
 		
 		if( base < tail )
 		{
-			if ( FAIL == SwapQuick( arr + base, arr + tail , element_size) )
+			if ( FAIL == SwapQuick( (char*)arr + (elem * base ), (char*)arr + (elem * tail) , elem) )
 			{
 				return;
 			}
@@ -515,8 +515,13 @@ void QuickSort(void *arr, size_t count, size_t element_size,
 			
 	}
 	
-	QuickSort(arr, tail, element_size, cmp_func );
-	QuickSort(arr + tail + 1, size - tail - 1, element_size, cmp_func );	
+	if ( FAIL == SwapQuick( pivot, arr + (elem * tail) , elem) )
+	{
+		return;
+	}
+	
+	 QuickSort((char*)arr, tail, elem, cmp_func );
+	 QuickSort((char*)arr + (elem * tail) + 1, size - tail - 1, elem, cmp_func );	
 
 }                       
 
