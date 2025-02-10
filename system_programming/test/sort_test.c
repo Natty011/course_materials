@@ -70,13 +70,15 @@ typedef struct sort_time_req
 /***************End of struct and enum declaration *******/
 
 /***************************function declaration**************************/
-/*static void TestSort(void);*/
+static void TestSort(void);
 static void TestSort2(void);
-/*static void GenRandArr(int* arr, size_t len, size_t min, size_t max);*/
+static void GenRandArr(int* arr, size_t len, size_t min, size_t max);
 int ArrIsSorted(int* arr, size_t len);
 static int TestBinarySearchIterative(void);
 static int TestBinarySearchRecursive(void);
 static int TestMergeSort(void);
+static int TestQuickSort(void);
+
 /*static void PrintArr(int* arr, size_t len);*/
 /***************************End of function declaration******************/
 
@@ -89,7 +91,7 @@ static void GenRandArr(int* arr, size_t len, size_t min, size_t max)
 	size_t i = 0;
 	
 	assert(arr);
-	
+	srand(time(NULL));	
 	for(i = 0 ; i < len; ++i)
 	{
 		arr[i] = rand() % (max - min) + min;
@@ -111,11 +113,11 @@ int ArrIsSorted(int* arr, size_t len)
 		/*
 		printf("arr[i] = %d , i = %lu \n", arr[i], i);
 		printf("arr[i + 1] = %d , i + 1 = %lu \n", arr[i + 1], i + 1);	
-		*/	
+		*/
 		if(arr[i] > arr[i + 1] )
 		{
 			flag = TRUE; /* not sorted */
-			break;
+			/*break;*/
 		}	
 		
 	}
@@ -151,10 +153,8 @@ int Compare(const void* a, const void* b)
 
 /******************End of static functions definition**********************/
 
-
 int main ()
 {
-
 	char* mode = RELEASE;
 	char* background =  BACK_MAGENTA;	
 	
@@ -165,10 +165,10 @@ int main ()
 
 	puts(BLUE"====================================================="RESET);
 	printf("%sTEST: %s "RESET" \n", background,  mode);
-	/*
+	
    	puts(BACK_BLUE"'TestSort()'"RESET);
     TestSort();
-    */
+    
 	puts(BLUE"====================================================="RESET);  
 	  
     puts(BACK_BLUE"'TestSort2()'"RESET);
@@ -197,11 +197,14 @@ static void TestSort2(void)
     flag = TestMergeSort();
     puts("====================================================="); 	 	
     
+	puts("'TestQuickSort()'");
+    flag = TestQuickSort();
+    puts("====================================================="); 	    
+    
     if( !flag ) 
 	{
 		puts(RESET);		
 		puts(BACK_BLUE"Test: Success"RESET);
-
 	}
 	
 	else
@@ -209,7 +212,6 @@ static void TestSort2(void)
 		puts(BACK_YELLOW"Test: Failure"RESET);	
 	}
 		
-	
 }
 
 /******************  TestBinarySearchIterative  ***********************/
@@ -326,13 +328,41 @@ static int TestMergeSort(void)
 	}
 	
 	return flag;		
-}			 
+}
+
+/******************  TestMergeSort  ***********************/
+static int TestQuickSort(void)
+{
+	int arr[6] = {45 ,14 ,61 ,37, 56, 22};
+	int arr1[6] = {-7 ,5 ,2 , 1, -5, 7};
+	size_t size = sizeof(arr)/sizeof(arr[0])  ;
+	int flag = FALSE ;
+	
+	QuickSort(arr, size, sizeof(arr[0]) , Compare );
+	QuickSort(arr1, size, sizeof(arr[0]) , Compare );
+	
+	flag = ArrIsSorted( arr, size );
+	flag = ArrIsSorted( arr1, size );
+	
+	if ( !flag )
+	{
+		puts(BACK_BLUE"TestQuickSort Successed"RESET);		
+	}
+	
+	else
+	{
+		puts("TestQuickSort Failed");		
+	}
+	
+	return flag;		
+}				 
 	
 /********************  Test2Block  ****************************/
 static void TestSort(void)
 {	
 	int flag = FALSE, flag_bubble = FALSE, flag_insertion = FALSE,
-		flag_selection = FALSE, flag_counting = FALSE, flag_radix = FALSE;
+		flag_selection = FALSE, flag_counting = FALSE, flag_radix = FALSE,
+		flag_merge = FALSE, flag_my_quick = FALSE;
 	int arr[MAX] = { 0 };
 	size_t len = MAX;
 	
@@ -342,9 +372,13 @@ static void TestSort(void)
     clock_t time_req_qsort = clock();
 	clock_t time_req_counting = clock();
 	clock_t time_req_radix = clock();
-		
+	
+	clock_t time_req_merge = clock();
+	clock_t time_req_my_quick = clock();
+			
 	float t_bubble = 0.0, t_insert = 0.0, t_select = 0.0, 
-		  t_count = 0.0, t_radix = 0.0, t_qsort = 0.0;
+		  t_count = 0.0, t_radix = 0.0, t_qsort = 0.0,
+		  t_merge = 0.0, t_my_quick = 0.0;
 
 	/* BubbleSort test	*/    
 	GenRandArr(arr, len, MIN, MAX);	
@@ -380,9 +414,24 @@ static void TestSort(void)
 	time_req_radix = clock();
 	RadixSort(arr, MAX);
 	time_req_radix = clock() - time_req_radix;
-	flag_radix  = ArrIsSorted(arr, MAX);	
-	if(flag_bubble || flag_insertion || flag_selection
-		|| flag_counting || flag_radix)
+	flag_radix  = ArrIsSorted(arr, MAX);
+
+	/* MergeSort test	*/    
+	GenRandArr(arr, len, MIN, MAX);
+	time_req_merge = clock();
+	MergeSort(arr, len);
+	time_req_merge = clock() - time_req_merge;
+	flag_merge  = ArrIsSorted(arr, MAX);
+
+	/* QuickSort test	*/    
+	GenRandArr(arr, len, MIN, MAX);		
+	time_req_my_quick = clock();
+	QuickSort(arr, len, sizeof(int), Compare);
+	time_req_my_quick = clock() - time_req_my_quick;
+	flag_my_quick  = ArrIsSorted(arr, MAX);	
+				
+	if(flag_bubble || flag_insertion || flag_selection || flag_counting
+		 || flag_radix || flag_merge || flag_my_quick)
 	{
 		puts(RED);
 		
@@ -410,6 +459,16 @@ static void TestSort(void)
 		{
 			puts("Failes in RedixSort: Unsorted array of numbers");
 		}
+		
+		if(flag_merge)
+		{
+			puts("Failes in MergeSort: Unsorted array of numbers");
+		}
+		
+		if(flag_my_quick)
+		{
+			puts("Failes in QuickSort: Unsorted array of numbers");
+		}
 					
 		flag = TRUE;
 	}
@@ -425,6 +484,9 @@ static void TestSort(void)
 	t_select = (float)time_req_selection / CLOCKS_PER_SEC;	
 	t_count = (float)time_req_counting / CLOCKS_PER_SEC;	
 	t_radix = (float)time_req_radix / CLOCKS_PER_SEC;
+
+	t_merge = (float)time_req_merge / CLOCKS_PER_SEC;	
+	t_my_quick = (float)time_req_my_quick / CLOCKS_PER_SEC;	
 		
 	puts("\n" BACK_CYAN"Processor time taken for:"RESET"\n");
 		
@@ -439,8 +501,13 @@ static void TestSort(void)
  	printf("RadixSort    : "BACK_GREEN" %f "RESET" seconds  \n", t_radix);
  	 	 	                     
 	printf("QuickSort    : "BACK_GREEN" %f "RESET" seconds  \n", t_qsort);
-
+	 	 	 	                     
+	printf("My_QuickSort : "BACK_GREEN" %f "RESET" seconds  \n", t_my_quick);
+	
+	printf("MergeSort    : "BACK_GREEN" %f "RESET" seconds  \n", t_merge);
+		
 	puts("\n" BACK_CYAN"Ratio time:"RESET"\n");
+	
 	printf("BubbleSort/QuickSort   : "BACK_GREEN" %f "RESET" \n", \
            t_bubble/t_qsort);
 
@@ -448,7 +515,13 @@ static void TestSort(void)
            t_select/t_qsort); 
                       
 	printf("InsertionSort/QuickSort: "BACK_GREEN" %f "RESET" \n", \
-           t_insert/t_qsort);           
+           t_insert/t_qsort);
+           
+    printf("MergeSort/QuickSort    : "BACK_GREEN" %f "RESET" \n", \
+           t_merge/t_qsort); 
+                      
+	printf("My_QuickSort/QuickSort : "BACK_GREEN" %f "RESET" \n", \
+           t_my_quick/t_qsort);                        
 	  	                  
 	if( !flag )
 	{		
