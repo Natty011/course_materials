@@ -7,16 +7,16 @@
 #include <string.h> 	/*  strlen */
 
 #include <assert.h> 	/* assert */
-#include <stdlib.h> 	/* malloc, free */
 #include "recursion.h" 
 
 #define UNUSED( var )       ( (void)var )
 
-/****************struct and enum declaration*********************/
-/***************End of struct and enum declaration *******/
+
 /***********Functions declaration*******/
 static void AuxSortIntegers(stack_t* stack, int temp );
+
 /**********End of functions declaration *******/
+
 /******************static functions definition**********************/
 
 /************************AuxSortIntegers*********************/
