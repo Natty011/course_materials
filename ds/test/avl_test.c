@@ -143,7 +143,7 @@ static void TestAvlOneNode(void)
 	int arr[8] = {100, 70, 110, 85, 80, 75 ,65 , 85 };
 	
 	avl_t *avl1 = AVLCreate(SortingFunc);
-		
+
 	/*puts(RED);*/
 
 	if( !AVLIsEmpty(avl1) ) 
@@ -151,6 +151,18 @@ static void TestAvlOneNode(void)
 		puts("Failes in_1: IsEmpty");
 		flag =  TRUE;
 	}
+	
+	flag = AVLInsert(avl1, arr);
+	/*AvlPrintData( AvlGetData );	*/
+	/*
+	if( SortingFunc(avlGetData(itr1) ,avlGetData(avlBegin(avl1)))  
+	     || avlSize(avl1) != 1 || avlIsEmpty(avl1) )
+		 
+	{
+		puts("Failes in_1: Insert || Begin || GetData || Size || IsEmpty");
+		flag =  TRUE;
+	}
+	*/
 	
 	AVLDestroy(avl1);
 	avl1 = NULL;
