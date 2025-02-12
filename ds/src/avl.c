@@ -180,32 +180,11 @@ static void AuxAVLInsert(avl_t *tree, avl_node_t *curr_node,
 	{
 		res = tree->cmp_func( curr_node->data, new_data );
 		parent = curr_node;
-		what_child = (res > 0) ? LEFT : RIGHT;
-		AuxAVLInsert(tree, curr_node->child[what_child],
-									 new_node,  new_data );
-		/*							 
-		if( res > 0 )
-		{
-			what_child = LEFT;
-			 AuxAVLInsert(tree, curr_node->child[what_child],
-									 new_node,  new_data );
-									 
-		    return;					 
-		}	
 		
-		else if ( res < 0 )
-		{
-			what_child = RIGHT;
-			 AuxAVLInsert(tree, curr_node->child[what_child],
-								 new_node, new_data );
-			return;					 
-								 
-		}
-		*/
+		what_child = res > 0 ? LEFT : RIGHT;
+		AuxAVLInsert(tree, curr_node->child[what_child], new_node,  new_data );
+		 
 	}
-	/*
-	AVLIsEmpty(tree) ? tree->root = new_node : parent->child[what_child] = new_node;		
-	*/
 	
 	if( !AVLIsEmpty(tree) )
 	{
@@ -217,7 +196,6 @@ static void AuxAVLInsert(avl_t *tree, avl_node_t *curr_node,
 		tree->root = new_node;	
 	}	
 		
-
 	new_node->child[LEFT] = NULL;
 	new_node->child[RIGHT] = NULL;
 	new_node->height = 0;
