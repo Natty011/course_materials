@@ -14,8 +14,9 @@
 
 
 /****************struct and enum declaration*********************/
+/*
 typedef struct avl_node avl_node_t;
-
+*/
 struct avl
 {
 	avl_node_t *root;
@@ -66,14 +67,42 @@ int destroy_check_avl = SUCCESS; /* extern */
 
 /***********Functions declaration*******/
 static void AuxAVLDestroy(avl_node_t *node);
+static void AuxAVLInsert(avl_t *tree, avl_node_t *curr_node,
+						 avl_node_t *new_node, void* new_data);
 
-
+#ifdef PRINTS
+void *AvlGetData(avl_node_t *node);
+void AvlPrintData(avl_node_t *node);
+#endif
 /**********End of functions declaration *******/
 
 /***********Static Functions definition*******/
 
 
 /***********End Of Static Functions definition*******/
+
+/********************  AuxAVLDestroy  ****************************/
+static void AuxAVLDestroy(avl_node_t *node)
+{
+	/*
+	assert ( node );
+	*/
+	if(NULL != node )
+	{
+		
+		/*printf(" node_1 = %p \n ", node);*/
+		AuxAVLDestroy(node->child[LEFT] );
+		AuxAVLDestroy(node->child[RIGHT] );
+		
+		free( node );
+		node = NULL;
+		/*printf(" node_2 = %p \n ", node);*/
+	}
+
+	/*printf(" node_3 = %p \n ", node);*/
+	
+
+}
 
 /********************  AVLCreate  ****************************/
 avl_t *AVLCreate(cmp_func_t sort_func)
@@ -105,7 +134,142 @@ size_t AVLHeight(const avl_t* tree)
 	return AVLIsEmpty( tree ) ? 0 : tree->root->height ; 
 }
 
-/********************  AuxAVLDestroy  ****************************/
+/********************  AVLDestroy  ****************************/
+void AVLDestroy(avl_t *tree)
+{
+	avl_node_t* curr_node = NULL;
+	assert( tree );
+	curr_node = tree->root ;
+	
+	if( NULL != curr_node )
+	{
+
+		AuxAVLDestroy( curr_node );
+	}
+	
+	/*
+	if( TRUE != AVLIsEmpty(tree) )
+	{
+
+	   destroy_check_avl = OPERATION_FAIL;
+	}
+	*/
+
+	free(tree);
+	tree = NULL;
+	
+}	
+/********************  AVLSize  ****************************/
+/*
+size_t AVLSize(const avl_t* tree)
+{
+	assert( tree );
+}
+*/
+/********************  AuxAVLInsert  ****************************/
+static void AuxAVLInsert(avl_t *tree, avl_node_t *curr_node,
+						 avl_node_t *new_node, void* new_data)
+{	
+	avl_node_t *parent = NULL;
+	int res = 0, what_child = LEFT;
+	
+	assert( tree );
+	/*assert( curr_node );*/
+	
+	if(NULL != curr_node ) /* !AVLIsEmpty(tree) &&   */
+	{
+		res = tree->cmp_func( curr_node->data, new_data );
+		parent = curr_node;
+		what_child = (res > 0) ? LEFT : RIGHT;
+		AuxAVLInsert(tree, curr_node->child[what_child],
+									 new_node,  new_data );
+		/*							 
+		if( res > 0 )
+		{
+			what_child = LEFT;
+			 AuxAVLInsert(tree, curr_node->child[what_child],
+									 new_node,  new_data );
+									 
+		    return;					 
+		}	
+		
+		else if ( res < 0 )
+		{
+			what_child = RIGHT;
+			 AuxAVLInsert(tree, curr_node->child[what_child],
+								 new_node, new_data );
+			return;					 
+								 
+		}
+		*/
+	}
+	/*
+	AVLIsEmpty(tree) ? tree->root = new_node : parent->child[what_child] = new_node;		
+	*/
+	
+	if( !AVLIsEmpty(tree) )
+	{
+		parent->child[what_child] = new_node;	
+	}
+	
+	else 
+	{
+		tree->root = new_node;	
+	}	
+		
+
+	new_node->child[LEFT] = NULL;
+	new_node->child[RIGHT] = NULL;
+	new_node->height = 0;
+	
+	return;
+	
+}
+
+/********************  AVLInsert  ****************************/
+int AVLInsert(avl_t *tree, void *data)
+{
+	/* *parnt = NULL, *curr_node = NULL;*/
+	avl_node_t *new_node = NULL, *curr_node = NULL;
+	/*int res = 0, what_child = LEFT;*/
+	
+	assert(tree);
+	
+	new_node =  (avl_node_t*)malloc(sizeof(avl_node_t));
+	
+	if(NULL == new_node)
+	{
+		return OPERATION_FAIL;
+	}
+	new_node->data = (void*)data;
+	/*parent = tree->root;*/
+	
+	curr_node = tree->root; /* get the root */
+	
+	AuxAVLInsert(tree, curr_node, new_node, (void*)data);
+	AvlPrintData( new_node );
+	return SUCCESS; 
+				 
+}
+
+
+#ifdef PRINTS
+/********************  AvlGetData  ****************************/
+void *AvlGetData(avl_node_t *node)
+{
+	assert( node );
+	return node->data;
+}
+/********************  AvlPrintData  ****************************/
+void AvlPrintData(avl_node_t *node)
+{
+	assert( node );
+	printf("%d\n",  *(int*)AvlGetData(node ) );
+}
+
+#endif
+
+/*
 static void AuxAVLDestroy(avl_node_t *node)
 {
 	assert ( node );
@@ -119,27 +283,10 @@ static void AuxAVLDestroy(avl_node_t *node)
 		node = NULL;
 	}
 }
-/********************  AVLDestroy  ****************************/
-void AVLDestroy(avl_t *tree)
-{
-	avl_node_t* curr_node = NULL;
-	assert( tree );
-	curr_node = tree->root ;
-	
-	if( NULL != curr_node )
-	{
-		AuxAVLDestroy( curr_node );
-	}
-	
-	if( TRUE != AVLIsEmpty(tree) )
-	{
-	   destroy_check_avl = OPERATION_FAIL;
-	}
-	
-	free(tree);
-	tree = NULL;
-	
-}	
+
+*/
+
+
 
 
 
