@@ -11,7 +11,6 @@
 
 #define UNUSED( var )       ( (void)var )
 
-
 /***********Functions declaration*******/
 static void AuxSortIntegers(stack_t* stack, int temp );
 
