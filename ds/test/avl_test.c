@@ -140,8 +140,9 @@ static void TestAvlOneNode(void)
 {	
 	int flag = FALSE;
 
-	int arr[8] = {100, 70, 110, 85, 80, 75 ,65 , 85 };
-	
+	int arr[11] = {100, 70, 110, 85, 80, 75 ,65 , 67, 130, 30, 150};
+	size_t i = 0;
+		
 	avl_t *avl1 = AVLCreate(SortingFunc);
 
 	/*puts(RED);*/
@@ -152,7 +153,22 @@ static void TestAvlOneNode(void)
 		flag =  TRUE;
 	}
 	
-	flag = AVLInsert(avl1, arr);
+	for(i = 0; i <= 10; ++i)
+	{
+		flag = AVLInsert(avl1, arr + i);
+		
+		if( flag )
+		{
+			puts("Failes in_1: Insert");
+			flag =  TRUE;
+		}
+
+	}
+	Aux_Pre_Print_Tree_Avl(avl1, 0);
+	/*Aux_Pre_Print_Tree_Avl(avl1, 0);*/
+	
+	/*flag = AVLInsert(avl1, arr);*/
+		/*Aux_Pre_Print_Tree_Avl(avl1, 0);*/
 	/*AvlPrintData( AvlGetData );	*/
 	/*
 	if( SortingFunc(avlGetData(itr1) ,avlGetData(avlBegin(avl1)))  
@@ -163,7 +179,8 @@ static void TestAvlOneNode(void)
 		flag =  TRUE;
 	}
 	*/
-	
+	/*flag = AVLInsert(avl1, arr + 1);*/
+
 	AVLDestroy(avl1);
 	avl1 = NULL;
 	
