@@ -340,24 +340,6 @@ void Aux_Pre_Print_Tree_Avl(avl_t *avl, int level)
 #endif
 
 
-/*
-static void AuxAVLDestroy(avl_node_t *node)
-{
-	assert ( node );
-	
-	if(NULL != node )
-	{
-		AuxAVLDestroy(node->child[LEFT] );
-		AuxAVLDestroy(node->child[RIGHT] );
-		
-		free( node );
-		node = NULL;
-	}
-}
-
-*/
-
-
 
 
 
