@@ -159,12 +159,19 @@ static void TestAvlOneNode(void)
 		
 		if( flag )
 		{
-			puts("Failes in_1: Insert");
+			puts("Failes in_1: Insert Allocation failed ");
 			flag =  TRUE;
 		}
 
 	}
 	Aux_Pre_Print_Tree_Avl(avl1, 0);
+	
+	if( 4 != AVLHeight(avl1) )
+	{
+		puts("Failes in_2: Insert");
+		flag =  TRUE;
+	
+	}
 	/*Aux_Pre_Print_Tree_Avl(avl1, 0);*/
 	
 	/*flag = AVLInsert(avl1, arr);*/
