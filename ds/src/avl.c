@@ -219,6 +219,7 @@ int AVLInsert(avl_t *tree, void *data)
 	}
 	new_node->data = (void*)data;
 
+	
 	curr_node = tree->root; /* get the root */
 	
 	AuxAVLInsert(tree, curr_node, new_node, (void*)data);
