@@ -175,7 +175,17 @@ static void AuxAVLInsert(avl_t *tree, avl_node_t *curr_node,
 	
 	if(NULL == curr_node ) /* !AVLIsEmpty(tree) &&   */
 	{
+		
+		if( AVLIsEmpty(tree) )
+		{
+			tree->root = new_node;
+			new_node->child[LEFT] = NULL;
+			new_node->child[RIGHT] = NULL;
+			new_node->height = 0;	
+		}
+		
 		return;
+		
 	}
 	
 	res = tree->cmp_func( curr_node->data, new_data );
@@ -184,16 +194,7 @@ static void AuxAVLInsert(avl_t *tree, avl_node_t *curr_node,
 	what_child = res > 0 ? LEFT : RIGHT;
 	AuxAVLInsert(tree, curr_node->child[what_child], new_node,  new_data );
 
-	if( !AVLIsEmpty(tree) )
-	{
-		parent->child[what_child] = new_node;	
-	}
-	
-	else 
-	{
-		tree->root = new_node;	
-	}	
-		
+	parent->child[what_child] = new_node;	
 	new_node->child[LEFT] = NULL;
 	new_node->child[RIGHT] = NULL;
 	new_node->height = 0;
@@ -205,10 +206,9 @@ static void AuxAVLInsert(avl_t *tree, avl_node_t *curr_node,
 /********************  AVLInsert  ****************************/
 int AVLInsert(avl_t *tree, void *data)
 {
-	/* *parnt = NULL, *curr_node = NULL;*/
+
 	avl_node_t *new_node = NULL, *curr_node = NULL;
-	/*int res = 0, what_child = LEFT;*/
-	
+
 	assert(tree);
 	
 	new_node =  (avl_node_t*)malloc(sizeof(avl_node_t));
@@ -218,12 +218,12 @@ int AVLInsert(avl_t *tree, void *data)
 		return OPERATION_FAIL;
 	}
 	new_node->data = (void*)data;
-	/*parent = tree->root;*/
-	
+
 	curr_node = tree->root; /* get the root */
 	
 	AuxAVLInsert(tree, curr_node, new_node, (void*)data);
 	AvlPrintData( new_node );
+	/*AvlPrintData( tree->root );*/
 	return SUCCESS; 
 				 
 }
