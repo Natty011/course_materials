@@ -82,6 +82,7 @@ static int FindNumChilds(avl_node_t* node);
 static int IsChildExist(avl_node_t* node, int child_pos);
 static void	SetHeight(avl_node_t* node, int child_pos, op_type_t op );
 static size_t GetHeight( avl_node_t* node);
+static void AuxAVLSize(avl_node_t *node, size_t *size);
 
 #ifdef PRINTS
 void *AvlGetData(avl_node_t *node);
@@ -213,14 +214,30 @@ void AVLDestroy(avl_t *tree)
 	free(tree);
 	tree = NULL;
 	
+}
+
+/********************  AuxAVLSize  ****************************/
+static void AuxAVLSize(avl_node_t *node, size_t *size)
+{
+	if(NULL != node )
+	{
+		AuxAVLSize(node->child[LEFT],  size);
+		AuxAVLSize(node->child[RIGHT], size);
+		
+		++(*size);
+	}
 }	
 /********************  AVLSize  ****************************/
-/*
+
 size_t AVLSize(const avl_t* tree)
 {
+	size_t size = 0;
 	assert( tree );
+	
+	AuxAVLSize( tree->root, &size);
+	return size;
 }
-*/
+
 /********************  AuxAVLInsert  ****************************/
 static void AuxAVLInsert(avl_t *tree,  avl_node_t *parent ,avl_node_t *curr_node,
 						int res, avl_node_t *new_node, void* new_data)
