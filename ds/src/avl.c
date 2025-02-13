@@ -65,12 +65,15 @@ int destroy_check_avl = SUCCESS; /* extern */
 
 /***********Functions declaration*******/
 static void AuxAVLDestroy(avl_node_t *node);
-static void AuxAVLInsert(avl_t *tree, avl_node_t *curr_node,
-						 avl_node_t *new_node, void* new_data);
+static void AuxAVLInsert(avl_t *tree, avl_node_t *par, avl_node_t *curr_node,
+						 int res, avl_node_t *new_node, void* new_data);
 
 #ifdef PRINTS
 void *AvlGetData(avl_node_t *node);
 void AvlPrintData(avl_node_t *node);
+
+void Pre_Print_Tree_Avl(avl_node_t* root, avl_t *avl, int level);
+void Aux_Pre_Print_Tree_Avl(avl_t *avl, int level);
 #endif
 /**********End of functions declaration *******/
 
@@ -164,49 +167,77 @@ size_t AVLSize(const avl_t* tree)
 }
 */
 /********************  AuxAVLInsert  ****************************/
-static void AuxAVLInsert(avl_t *tree, avl_node_t *curr_node,
-						 avl_node_t *new_node, void* new_data)
+static void AuxAVLInsert(avl_t *tree,  avl_node_t *par ,avl_node_t *curr_node,
+						int res, avl_node_t *new_node, void* new_data)
 {	
-	avl_node_t *parent = NULL;
-	int res = 0, what_child = LEFT;
-	
+	/*avl_node_t *parent = par;*/
+	int what_child = LEFT; /* res = 0, */
+	 /* ! AVLIsEmpty(tree) && */
+	 /*
+	if (  NULL != curr_node)
+	{
+		res = tree->cmp_func( curr_node->data, new_data );
+		what_child = res > 0 ? LEFT : RIGHT;
+	}	
+*/
 	assert( tree );
+	/*printf("what_child = %d\n", what_child);*/
+	/*puts("curr_node");*/
+	/*AvlPrintData(curr_node);*/
+		/*puts("par");*/
+	/*AvlPrintData(par);*/
 	/*assert( curr_node );*/
-	
+	/*res = tree->cmp_func( curr_node->data, new_data );*/
+	/*AuxAVLInsert(tree, curr_node, curr_node->child[what_child], res,  new_node,  new_data );*/
 	if(NULL == curr_node ) /* !AVLIsEmpty(tree) &&   */
 	{
 		
 		if( AVLIsEmpty(tree) )
 		{
 			tree->root = new_node;
+		}
+		else if ( res < 0)
+		{
+			/*what_child = RIGHT;*/
+			par->child[RIGHT] = new_node;	
+		}
+		else
+		{
+			par->child[LEFT] = new_node;	
+		}
 			new_node->child[LEFT] = NULL;
 			new_node->child[RIGHT] = NULL;
 			new_node->height = 0;	
-		}
-		
-		return;
-		
-	}
+	
+			return;
+	}	
 	
 	res = tree->cmp_func( curr_node->data, new_data );
-	parent = curr_node;
-		
 	what_child = res > 0 ? LEFT : RIGHT;
-	AuxAVLInsert(tree, curr_node->child[what_child], new_node,  new_data );
+	AuxAVLInsert(tree, curr_node, curr_node->child[what_child], res,  new_node,  new_data );
+}	
+	/*res = tree->cmp_func( curr_node->data, new_data );*/
+	/*parent = curr_node;*/
+		
+	/*what_child = res > 0 ? LEFT : RIGHT;*/
+	/*printf("what_child = %d\n", what_child);*/
+	/*AvlPrintData(parent);*/
+	/*AuxAVLInsert(tree, curr_node, curr_node->child[what_child], res,  new_node,  new_data );*/
 
-	parent->child[what_child] = new_node;	
+	/*parent->child[what_child] = new_node;	*/
+	/*
 	new_node->child[LEFT] = NULL;
 	new_node->child[RIGHT] = NULL;
 	new_node->height = 0;
+	*/
+	/*return;*/
 	
-	return;
-	
-}
+
 
 /********************  AVLInsert  ****************************/
 int AVLInsert(avl_t *tree, void *data)
 {
-
+	avl_node_t *parent = NULL;
 	avl_node_t *new_node = NULL, *curr_node = NULL;
 
 	assert(tree);
@@ -221,9 +252,9 @@ int AVLInsert(avl_t *tree, void *data)
 
 	
 	curr_node = tree->root; /* get the root */
-	
-	AuxAVLInsert(tree, curr_node, new_node, (void*)data);
-	AvlPrintData( new_node );
+	parent = curr_node;
+	AuxAVLInsert(tree, parent, curr_node, 0, new_node, (void*)data);
+	/*AvlPrintData( new_node );*/
 	/*AvlPrintData( tree->root );*/
 	return SUCCESS; 
 				 
@@ -233,17 +264,54 @@ int AVLInsert(avl_t *tree, void *data)
 /********************  AvlGetData  ****************************/
 void *AvlGetData(avl_node_t *node)
 {
-	assert( node );
+	/*assert( node );*/
+	
+	if(NULL == node )
+	{
+		return NULL;
+	}
+	
 	return node->data;
 }
 /********************  AvlPrintData  ****************************/
 void AvlPrintData(avl_node_t *node)
 {
-	assert( node );
+	/*assert( node );*/
+	
+	if(NULL == node )
+	{
+		printf("%p\n",  AvlGetData(node ) );
+		return ;
+	}
+	
 	printf("%d\n",  *(int*)AvlGetData(node ) );
 }
+/********************  Pre_Print_Tree_Avl  ****************************/
+void Pre_Print_Tree_Avl(avl_node_t* root, avl_t *avl, int level)
+{
+	int i = 0;
+	if(NULL != root ) 
+	{
+		for(i = 0; i < level; ++i)
+		{
+			printf(i == level-1 ? "|-" : "  ");
+		}
+		AvlPrintData( root );
+		/*printf("%d\n",  *(int*)BstGetData(NodeToIter(root) ) );*/
+		Pre_Print_Tree_Avl(root->child[LEFT], avl, level + 1 );
+		Pre_Print_Tree_Avl(root->child[RIGHT], avl, level + 1);
+	}
 
+}
+
+/********************  Aux_Pre_Print_Tree_Avl  ****************************/
+void Aux_Pre_Print_Tree_Avl(avl_t *avl, int level)
+{
+	Pre_Print_Tree_Avl(avl->root , avl, level);
+
+}
 #endif
+
 
 /*
 static void AuxAVLDestroy(avl_node_t *node)
