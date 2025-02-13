@@ -14,9 +14,7 @@
 
 
 /****************struct and enum declaration*********************/
-/*
-typedef struct avl_node avl_node_t;
-*/
+
 struct avl
 {
 	avl_node_t *root;
@@ -93,7 +91,7 @@ static void AuxAVLDestroy(avl_node_t *node)
 		/*printf(" node_1 = %p \n ", node);*/
 		AuxAVLDestroy(node->child[LEFT] );
 		AuxAVLDestroy(node->child[RIGHT] );
-		
+		/*node->child[LEFT] = node->child[RIGHT] = NULL;*/
 		free( node );
 		node = NULL;
 		/*printf(" node_2 = %p \n ", node);*/
@@ -143,18 +141,17 @@ void AVLDestroy(avl_t *tree)
 	
 	if( NULL != curr_node )
 	{
-
 		AuxAVLDestroy( curr_node );
 	}
-	
+
 	/*
 	if( TRUE != AVLIsEmpty(tree) )
 	{
-
 	   destroy_check_avl = OPERATION_FAIL;
 	}
 	*/
 
+	tree->root = NULL;
 	free(tree);
 	tree = NULL;
 	
@@ -176,16 +173,17 @@ static void AuxAVLInsert(avl_t *tree, avl_node_t *curr_node,
 	assert( tree );
 	/*assert( curr_node );*/
 	
-	if(NULL != curr_node ) /* !AVLIsEmpty(tree) &&   */
+	if(NULL == curr_node ) /* !AVLIsEmpty(tree) &&   */
 	{
-		res = tree->cmp_func( curr_node->data, new_data );
-		parent = curr_node;
-		
-		what_child = res > 0 ? LEFT : RIGHT;
-		AuxAVLInsert(tree, curr_node->child[what_child], new_node,  new_data );
-		 
+		return;
 	}
 	
+	res = tree->cmp_func( curr_node->data, new_data );
+	parent = curr_node;
+		
+	what_child = res > 0 ? LEFT : RIGHT;
+	AuxAVLInsert(tree, curr_node->child[what_child], new_node,  new_data );
+
 	if( !AVLIsEmpty(tree) )
 	{
 		parent->child[what_child] = new_node;	
@@ -229,7 +227,6 @@ int AVLInsert(avl_t *tree, void *data)
 	return SUCCESS; 
 				 
 }
-
 
 #ifdef PRINTS
 /********************  AvlGetData  ****************************/
