@@ -12,7 +12,8 @@
 #include <stdlib.h> 	/* malloc, free */
 #include "avl.h" 
 
-
+#define MIN(a, b)		((a > b ) ? b : a )
+#define MAX(a, b)		((a > b ) ? a : b )
 /****************struct and enum declaration*********************/
 
 struct avl
@@ -59,14 +60,28 @@ typedef enum
 	
 }nume_of_childs_t;
 
+typedef enum
+{
+	
+	REMOVE = 0,
+	INSERT = 2
+	
+}op_type_t;
+
 int destroy_check_avl = SUCCESS; /* extern */
 
 /***************End of struct and enum declaration *******/
 
 /***********Functions declaration*******/
 static void AuxAVLDestroy(avl_node_t *node);
-static void AuxAVLInsert(avl_t *tree, avl_node_t *par, avl_node_t *curr_node,
+static void AuxAVLInsert(avl_t *tree, avl_node_t *parent, avl_node_t *curr_node,
 						 int res, avl_node_t *new_node, void* new_data);
+
+static int IsLeftChild(avl_node_t* parent, avl_node_t* child);
+static int FindNumChilds(avl_node_t* node);
+static int IsChildExist(avl_node_t* node, int child_pos);
+static void	SetHeight(avl_node_t* node, int child_pos, op_type_t op );
+static size_t GetHeight( avl_node_t* node);
 
 #ifdef PRINTS
 void *AvlGetData(avl_node_t *node);
@@ -77,10 +92,7 @@ void Aux_Pre_Print_Tree_Avl(avl_t *avl, int level);
 #endif
 /**********End of functions declaration *******/
 
-/***********Static Functions definition*******/
-
-
-/***********End Of Static Functions definition*******/
+/*****************Static Functions definition*********************************/
 
 /********************  AuxAVLDestroy  ****************************/
 static void AuxAVLDestroy(avl_node_t *node)
@@ -89,12 +101,65 @@ static void AuxAVLDestroy(avl_node_t *node)
 	{
 		AuxAVLDestroy(node->child[LEFT] );
 		AuxAVLDestroy(node->child[RIGHT] );
-		/*node->child[LEFT] = node->child[RIGHT] = NULL;*/
+		
+		node->child[LEFT] = node->child[RIGHT] = NULL;
 		free( node );
 		node = NULL;
 
 	}
 }
+
+/********************  IsLeftChild  ****************************/
+static int IsLeftChild(avl_node_t* parent, avl_node_t* child)
+{
+	assert(parent);
+	assert(child);
+	return child == parent->child[LEFT];
+	
+}
+/********************  FindNumChilds  ****************************/
+static int FindNumChilds(avl_node_t* node)
+{
+	assert(node);
+	return IsChildExist(node, LEFT) + IsChildExist(node, RIGHT);
+
+}
+/********************  IsChildExist  ****************************/
+static int IsChildExist(avl_node_t* node, int child_pos)
+{
+	assert(node);
+	return  LEFT == child_pos ? NULL != node->child[LEFT] :
+								NULL != node->child[RIGHT]; 
+}
+/********************  SetHeight  ****************************/
+static void	SetHeight(avl_node_t* node, int child_pos, op_type_t op )
+{
+	switch( FindNumChilds( node ) )
+	{
+		case 0:
+			node->height +=	1 * (op - 1 ) ;
+			break;
+			
+		case 1:
+			node->height +=	IsChildExist(node, child_pos) * (op - 1 ) ; 
+			break;	
+		
+		case 2:
+			node->height = MAX( GetHeight( node->child[LEFT]) , 
+								GetHeight( node->child[RIGHT]) )
+								 +  (op - 1 );
+			break;
+	}
+
+}
+
+/********************  GetHeight  ****************************/
+static size_t GetHeight( avl_node_t* node)
+{
+	assert(node);
+	return node->height;
+}
+/*******************End Of Static Functions definition************************/
 
 /********************  AVLCreate  ****************************/
 avl_t *AVLCreate(cmp_func_t sort_func)
@@ -157,9 +222,12 @@ size_t AVLSize(const avl_t* tree)
 }
 */
 /********************  AuxAVLInsert  ****************************/
-static void AuxAVLInsert(avl_t *tree,  avl_node_t *par ,avl_node_t *curr_node,
+static void AuxAVLInsert(avl_t *tree,  avl_node_t *parent ,avl_node_t *curr_node,
 						int res, avl_node_t *new_node, void* new_data)
 {	
+	
+	int what_child = LEFT;
+	
 	assert( tree );
 
 	if(NULL == curr_node ) 
@@ -172,7 +240,8 @@ static void AuxAVLInsert(avl_t *tree,  avl_node_t *par ,avl_node_t *curr_node,
 		
 		else  
 		{
-			par->child[res < 0] = new_node;	
+			what_child = res > 0 ? LEFT : RIGHT;
+			parent->child[what_child] = new_node;	
 		}
 
 		new_node->child[LEFT] = NULL;
@@ -183,8 +252,11 @@ static void AuxAVLInsert(avl_t *tree,  avl_node_t *par ,avl_node_t *curr_node,
 	}	
 	
 	res = tree->cmp_func( curr_node->data, new_data );
-
-	AuxAVLInsert(tree, curr_node, curr_node->child[res < 0], res,
+	what_child = res > 0 ? LEFT : RIGHT;
+	
+	SetHeight( curr_node, what_child, INSERT );
+	
+	AuxAVLInsert(tree, curr_node, curr_node->child[what_child], res,
 				  new_node,  new_data );
 }	
 
@@ -239,7 +311,7 @@ void AvlPrintData(avl_node_t *node)
 		return ;
 	}
 	
-	printf("%d\n",  *(int*)AvlGetData(node ) );
+	printf("%d(h=%lu)\n",  *(int*)AvlGetData(node ), node->height );
 }
 /********************  Pre_Print_Tree_Avl  ****************************/
 void Pre_Print_Tree_Avl(avl_node_t* root, avl_t *avl, int level)
