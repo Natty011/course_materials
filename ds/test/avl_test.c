@@ -172,22 +172,16 @@ static void TestAvlOneNode(void)
 		flag =  TRUE;
 	
 	}
-	/*Aux_Pre_Print_Tree_Avl(avl1, 0);*/
 	
-	/*flag = AVLInsert(avl1, arr);*/
-		/*Aux_Pre_Print_Tree_Avl(avl1, 0);*/
-	/*AvlPrintData( AvlGetData );	*/
-	/*
-	if( SortingFunc(avlGetData(itr1) ,avlGetData(avlBegin(avl1)))  
-	     || avlSize(avl1) != 1 || avlIsEmpty(avl1) )
-		 
+	printf("size = %lu \n", AVLSize(avl1));
+	if( 11 != AVLSize(avl1) )
 	{
-		puts("Failes in_1: Insert || Begin || GetData || Size || IsEmpty");
+		
+		puts("Failes in_1: Size");
 		flag =  TRUE;
+	
 	}
-	*/
-	/*flag = AVLInsert(avl1, arr + 1);*/
-
+	
 	AVLDestroy(avl1);
 	avl1 = NULL;
 	
