@@ -146,7 +146,7 @@ static void TestAvlOneNode(void)
 
 	int arr[11] = {100, 70, 110, 85, 80, 75 ,65 , 67, 130, 30, 150};
 	size_t i = 0;
-	int foreach[2] = {151, 150};
+	int foreach[2] = {151, 69};
 		
 	avl_t *avl1 = AVLCreate(SortingFunc);
 
@@ -208,6 +208,22 @@ static void TestAvlOneNode(void)
 		{
 			/*printf("Iteration = %lu \n",  i);*/
 			puts("Failes in_1: ForEachPreOrder");
+			flag =  TRUE;
+		}
+		
+		if( SUCCESS != AVLForEachInOrder(avl1, Compare2, foreach , POST_ORDER)
+		|| OPERATION_FAIL != AVLForEachInOrder(avl1, Compare2, foreach + 1, POST_ORDER) )  
+		{
+			/*printf("Iteration = %lu \n",  i);*/
+			puts("Failes in_2: ForEachPostOrder");
+			flag =  TRUE;
+		}
+		
+		if( SUCCESS != AVLForEachInOrder(avl1, Compare2, foreach , IN_ORDER)
+		|| OPERATION_FAIL != AVLForEachInOrder(avl1, Compare2, foreach + 1, IN_ORDER) )  
+		{
+			/*printf("Iteration = %lu \n",  i);*/
+			puts("Failes in_3: ForEachInOrder");
 			flag =  TRUE;
 		}
 	/*
