@@ -157,12 +157,10 @@ enum avl_traversal_order
 #endif                   /* __AVL_H__	*/
 
 #ifdef PRINTS
-/*
-void Pre_Print_Tree(bst_node_t* root, bst_t *bst, int level);
-void Aux_Pre_Print_Tree(bst_t *bst, int level);
-*/
+
 void *AvlGetData(avl_node_t *node);
 void AvlPrintData(avl_node_t *node);
 void Pre_Print_Tree_Avl(avl_node_t* root, avl_t *avl, int level);
 void Aux_Pre_Print_Tree_Avl(avl_t *avl, int level);
+
 #endif
