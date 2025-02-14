@@ -105,13 +105,17 @@ static int Compare(void* check_data , void* new_data)
 {
 	return !(SUCCESS == (*(int*)check_data - *(int*)new_data));
 }
+/*******************Compare2*********************/
+static int Compare2(void* check_data , void* new_data)
+{
+	return  ( *(int*)check_data >= *(int*)new_data );
+}
 
 /******************End of static functions definition**********************/
 
 
 int main ()
 {
-
 	char* mode = RELEASE;
 	char* background =  BACK_MAGENTA;	
 	
@@ -142,6 +146,7 @@ static void TestAvlOneNode(void)
 
 	int arr[11] = {100, 70, 110, 85, 80, 75 ,65 , 67, 130, 30, 150};
 	size_t i = 0;
+	int foreach[2] = {151, 150};
 		
 	avl_t *avl1 = AVLCreate(SortingFunc);
 
@@ -193,6 +198,21 @@ static void TestAvlOneNode(void)
 		}
 
 	}
+	/*|| SUCCESS != avlForEach(avlPrev(itr4), itr4, Compare, arr_sort + 10 - i) */
+	/*
+	for( i = 0; i <= 10; ++i)
+	{	
+	*/	
+		if( SUCCESS != AVLForEachInOrder(avl1, Compare2, foreach , PRE_ORDER)
+		|| OPERATION_FAIL != AVLForEachInOrder(avl1, Compare2, foreach + 1, PRE_ORDER) )  
+		{
+			/*printf("Iteration = %lu \n",  i);*/
+			puts("Failes in_1: ForEachPreOrder");
+			flag =  TRUE;
+		}
+	/*
+	} 
+	*/
 	
 	AVLDestroy(avl1);
 	avl1 = NULL;
