@@ -325,7 +325,7 @@ static void* AuxAVLInsertAVLFind(avl_t *tree, avl_node_t *node,
 	
 	if( 0 == res )
 	{
-		return node;
+		return node->data;
 	}
 
 	return AuxAVLInsertAVLFind(tree, node->child[what_child], data_to_find);
