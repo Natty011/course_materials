@@ -173,13 +173,25 @@ static void TestAvlOneNode(void)
 	
 	}
 	
-	printf("size = %lu \n", AVLSize(avl1));
+	/*printf("size = %lu \n", AVLSize(avl1));*/
 	if( 11 != AVLSize(avl1) )
 	{
 		
 		puts("Failes in_1: Size");
 		flag =  TRUE;
 	
+	}
+	
+	for(i = 0; i <= 10; ++i)
+	{
+		flag = Compare(AVLFind(avl1, arr + i), arr + i);
+		
+		if( flag )
+		{
+			printf("Failes in_1: Find, i = %lu \n", i);
+			flag =  TRUE;
+		}
+
 	}
 	
 	AVLDestroy(avl1);
