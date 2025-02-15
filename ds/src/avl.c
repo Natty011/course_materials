@@ -606,6 +606,7 @@ static void AuxAVLRemove1Child(avl_t *tree,  avl_node_t *parent, avl_node_t
 				
 				AvlPrintData( next_child);
 				AvlPrintData( parent);
+				
 					
 				curr_node->data = next_child->data;
 				
