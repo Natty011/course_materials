@@ -83,7 +83,7 @@ static int IsChildExist(avl_node_t* node, int child_pos);
 static void	SetHeight(avl_node_t* node, int child_pos, op_type_t op );
 static size_t GetHeight( avl_node_t* node);
 static void AuxAVLSize(avl_node_t *node, size_t *size);
-static void* AuxAVLInsertAVLFind(avl_t *tree, avl_node_t *node,
+static avl_node_t* AuxAVLFind(avl_t *tree, avl_node_t *node,
 								  	const void *data_to_find );
 
 static void AuxAVLForEachPreOrder(avl_node_t *node, op_func_t op_func,
@@ -91,7 +91,9 @@ static void AuxAVLForEachPreOrder(avl_node_t *node, op_func_t op_func,
 static void AuxAVLForEachPostOrder(avl_node_t *node, op_func_t op_func,
 								 void *user_param, int *res_op);
 static void AuxAVLForEachInOrder(avl_node_t *node, op_func_t op_func, 
-								void *user_param, int *res_op);								 								 
+								void *user_param, int *res_op);
+								
+static void *AvlGetDataFind(avl_node_t *node);																 								 
 								  	
 #ifdef PRINTS
 void *AvlGetData(avl_node_t *node);
@@ -171,6 +173,161 @@ static size_t GetHeight( avl_node_t* node)
 	assert(node);
 	return node->height;
 }
+
+
+/********************  AuxAVLSize  ****************************/
+static void AuxAVLSize(avl_node_t *node, size_t *size)
+{
+	if(NULL != node )
+	{
+		AuxAVLSize(node->child[LEFT],  size);
+		AuxAVLSize(node->child[RIGHT], size);
+		
+		++(*size);
+	}
+}	
+
+/********************  AuxAVLInsert  ****************************/
+static void AuxAVLInsert(avl_t *tree,  avl_node_t *parent ,avl_node_t *curr_node,
+						int res, avl_node_t *new_node, void* new_data)
+{	
+	
+	int what_child = LEFT;
+	
+	assert( tree );
+
+	if(NULL == curr_node ) 
+	{
+		
+		if( AVLIsEmpty(tree) )
+		{
+			tree->root = new_node;
+		}
+		
+		else  
+		{
+			what_child = res > 0 ? LEFT : RIGHT;
+			parent->child[what_child] = new_node;	
+		}
+
+		new_node->child[LEFT] = NULL;
+		new_node->child[RIGHT] = NULL;
+		new_node->height = 0;	
+	
+		return;
+	}	
+	
+	res = tree->cmp_func( curr_node->data, new_data );
+	what_child = res > 0 ? LEFT : RIGHT;
+	
+	/*SetHeight( curr_node, what_child, INSERT );*/
+	
+	AuxAVLInsert(tree, curr_node, curr_node->child[what_child], res,
+				  new_node,  new_data );
+				  
+	SetHeight( curr_node, what_child, INSERT );			  
+}	
+
+/********************  AuxAVLFind  ****************************/
+static avl_node_t* AuxAVLFind(avl_t *tree, avl_node_t *node,
+								  	const void *data_to_find )
+{
+	int what_child = LEFT, res = 0;
+	
+	assert(tree);
+	assert(node);
+	
+	if( NULL == node )
+	{
+		return NULL;	
+	}
+	
+	res = tree->cmp_func( node->data, data_to_find );
+	what_child = res > 0 ? LEFT : RIGHT;
+	
+	if( 0 == res )
+	{
+		return node;
+	}
+
+	return AuxAVLFind(tree, node->child[what_child], data_to_find);
+}
+/********************  AuxAVLForEachPreOrder  ****************************/
+static void AuxAVLForEachPreOrder(avl_node_t *node, op_func_t op_func,
+								 void *user_param, int *res_op)
+{
+	assert( op_func);
+
+	if( NULL != node )
+	{
+		if(SUCCESS == *res_op && OPERATION_FAIL == op_func(node->data, user_param) )
+		{
+			/*
+			puts("Pre");
+			AvlPrintData( node);
+			*/
+			*res_op =  OPERATION_FAIL;	
+		}
+
+		else if ( SUCCESS == *res_op )
+		{
+			AuxAVLForEachPreOrder( node->child[LEFT], op_func, user_param, res_op);
+			AuxAVLForEachPreOrder( node->child[RIGHT], op_func, user_param, res_op);
+		}
+	}
+}								 
+
+/********************  AuxAVLForEachPostOrder  ****************************/
+static void AuxAVLForEachPostOrder(avl_node_t *node, op_func_t op_func,
+								 void *user_param, int *res_op)
+{
+	assert( op_func);
+
+	if( NULL != node )
+	{
+		if ( SUCCESS == *res_op )
+		{
+			AuxAVLForEachPostOrder( node->child[LEFT], op_func, user_param, res_op);
+			AuxAVLForEachPostOrder( node->child[RIGHT], op_func, user_param, res_op);
+			
+			if(SUCCESS == *res_op &&  OPERATION_FAIL == op_func(node->data, user_param) )
+			{
+				/*
+				puts("Post");
+				AvlPrintData( node);
+				*/
+				*res_op =  OPERATION_FAIL;
+			}
+		}
+	}
+}		
+                          
+/********************  AuxAVLForEachInOrder  ****************************/
+static void AuxAVLForEachInOrder(avl_node_t *node, op_func_t op_func,
+								 void *user_param, int *res_op)
+{
+	assert( op_func);
+
+	if( NULL != node )
+	{
+		if ( SUCCESS == *res_op )
+		{
+			AuxAVLForEachInOrder( node->child[LEFT], op_func, user_param, res_op);
+			
+			if(SUCCESS == *res_op && OPERATION_FAIL == op_func(node->data, user_param) )
+			{
+				/*
+				puts("In");
+				AvlPrintData( node);
+				*/
+				*res_op =  OPERATION_FAIL;	
+			}
+	
+			AuxAVLForEachInOrder( node->child[RIGHT], op_func, user_param, res_op);
+		}
+	}
+}		
+
 /*******************End Of Static Functions definition************************/
 
 /********************  AVLCreate  ****************************/
@@ -227,17 +384,6 @@ void AVLDestroy(avl_t *tree)
 	
 }
 
-/********************  AuxAVLSize  ****************************/
-static void AuxAVLSize(avl_node_t *node, size_t *size)
-{
-	if(NULL != node )
-	{
-		AuxAVLSize(node->child[LEFT],  size);
-		AuxAVLSize(node->child[RIGHT], size);
-		
-		++(*size);
-	}
-}	
 /********************  AVLSize  ****************************/
 
 size_t AVLSize(const avl_t* tree)
@@ -249,44 +395,6 @@ size_t AVLSize(const avl_t* tree)
 	return size;
 }
 
-/********************  AuxAVLInsert  ****************************/
-static void AuxAVLInsert(avl_t *tree,  avl_node_t *parent ,avl_node_t *curr_node,
-						int res, avl_node_t *new_node, void* new_data)
-{	
-	
-	int what_child = LEFT;
-	
-	assert( tree );
-
-	if(NULL == curr_node ) 
-	{
-		
-		if( AVLIsEmpty(tree) )
-		{
-			tree->root = new_node;
-		}
-		
-		else  
-		{
-			what_child = res > 0 ? LEFT : RIGHT;
-			parent->child[what_child] = new_node;	
-		}
-
-		new_node->child[LEFT] = NULL;
-		new_node->child[RIGHT] = NULL;
-		new_node->height = 0;	
-	
-		return;
-	}	
-	
-	res = tree->cmp_func( curr_node->data, new_data );
-	what_child = res > 0 ? LEFT : RIGHT;
-	
-	SetHeight( curr_node, what_child, INSERT );
-	
-	AuxAVLInsert(tree, curr_node, curr_node->child[what_child], res,
-				  new_node,  new_data );
-}	
 
 
 /********************  AVLInsert  ****************************/
@@ -314,30 +422,18 @@ int AVLInsert(avl_t *tree, void *data)
 	return SUCCESS; 
 				 
 }
-/********************  AuxAVLInsertAVLFind  ****************************/
-static void* AuxAVLInsertAVLFind(avl_t *tree, avl_node_t *node,
-								  	const void *data_to_find )
+/********************  AvlGetDataFind  ****************************/
+static void *AvlGetDataFind(avl_node_t *node)
 {
-	int what_child = LEFT, res = 0;
-	
-	assert(tree);
-	assert(node);
-	
-	if( NULL == node )
+	if(NULL == node )
 	{
-		return NULL;	
+		return NULL;
 	}
 	
-	res = tree->cmp_func( node->data, data_to_find );
-	what_child = res > 0 ? LEFT : RIGHT;
-	
-	if( 0 == res )
-	{
-		return node->data;
-	}
-
-	return AuxAVLInsertAVLFind(tree, node->child[what_child], data_to_find);
+	return node->data;
 }
+
+
 /********************  AVLFind  ****************************/
 void *AVLFind(avl_t *tree, const void *data)
 {
@@ -347,7 +443,7 @@ void *AVLFind(avl_t *tree, const void *data)
 	
 	curr_node = tree->root; /* get the root */
 	
-	return AuxAVLInsertAVLFind(tree, curr_node, data);
+	return AvlGetDataFind(AuxAVLFind(tree, curr_node, data));
 								 
 }
 /********************  AVLForEachInOrder  ****************************/
@@ -361,90 +457,48 @@ int AVLForEachInOrder(avl_t *tree, op_func_t op_func,
 	switch( traversal_order )
 	{
 	
-	case IN_ORDER:
-		AuxAVLForEachInOrder(tree->root, op_func, user_param, &op_state);
-		break;
-	case PRE_ORDER:
-		AuxAVLForEachPreOrder(tree->root, op_func, user_param, &op_state);
-		break;
-	case POST_ORDER:
-		AuxAVLForEachPostOrder(tree->root, op_func, user_param, &op_state);
-		break;	
+		case IN_ORDER:
+			AuxAVLForEachInOrder(tree->root, op_func, user_param, &op_state);
+			break;
+		case PRE_ORDER:
+			AuxAVLForEachPreOrder(tree->root, op_func, user_param, &op_state);
+			break;
+		case POST_ORDER:
+			AuxAVLForEachPostOrder(tree->root, op_func, user_param, &op_state);
+			break;	
 	}
 
 	return op_state;
 }
-/********************  AuxAVLForEachPreOrder  ****************************/
-static void AuxAVLForEachPreOrder(avl_node_t *node, op_func_t op_func,
-								 void *user_param, int *res_op)
+
+/********************  AVLRemove  ****************************/
+
+void AVLRemove(avl_t *tree, void *data)
 {
-	assert( op_func);
-
-	if( NULL != node )
-	{
-		if(SUCCESS == *res_op && OPERATION_FAIL == op_func(node->data, user_param) )
-		{
-			puts("Pre");
-			AvlPrintData( node);
-			*res_op =  OPERATION_FAIL;	
-		}
-
-		else if ( SUCCESS == *res_op )
-		{
-			AuxAVLForEachPreOrder( node->child[LEFT], op_func, user_param, res_op);
-			AuxAVLForEachPreOrder( node->child[RIGHT], op_func, user_param, res_op);
-		}
-
-	}
-}								 
-
-/********************  AuxAVLForEachPostOrder  ****************************/
-static void AuxAVLForEachPostOrder(avl_node_t *node, op_func_t op_func,
-								 void *user_param, int *res_op)
-{
-	assert( op_func);
-
-	if( NULL != node )
-	{
-		if ( SUCCESS == *res_op )
-		{
-			AuxAVLForEachPostOrder( node->child[LEFT], op_func, user_param, res_op);
-			AuxAVLForEachPostOrder( node->child[RIGHT], op_func, user_param, res_op);
-			
-			if(SUCCESS == *res_op &&  OPERATION_FAIL == op_func(node->data, user_param) )
-			{
-				puts("Post");
-				AvlPrintData( node);
-				*res_op =  OPERATION_FAIL;
-			}
-		}
-	}
-}		
-                          
-/********************  AuxAVLForEachInOrder  ****************************/
-static void AuxAVLForEachInOrder(avl_node_t *node, op_func_t op_func,
-								 void *user_param, int *res_op)
-{
-	assert( op_func);
-
-	if( NULL != node )
-	{
-		if ( SUCCESS == *res_op )
-		{
-			AuxAVLForEachInOrder( node->child[LEFT], op_func, user_param, res_op);
-			
-			if(SUCCESS == *res_op && OPERATION_FAIL == op_func(node->data, user_param) )
-			{
-				puts("In");
-				AvlPrintData( node);
-				*res_op =  OPERATION_FAIL;	
-			}
+	avl_node_t *curr_node = NULL;
+	assert(tree);
 	
-			AuxAVLForEachInOrder( node->child[RIGHT], op_func, user_param, res_op);
-		}
-	}
-}		
+	curr_node = AuxAVLFind(tree, curr_node, data);
 
+	if( NULL == curr_node ) /* there is no such data*/
+	
+	{
+		return;
+	}
+	
+	switch( FindNumChilds(curr_node) )
+	{
+		case NO_CHILDS:
+			AuxAVLRemove0Child(tree->root, op_func, user_param, &op_state);
+			break;
+		case ONE_CHILD:
+			AuxAVLForEachPreOrder(tree->root, op_func, user_param, &op_state);
+			break;
+		case TWO_CHILDS:
+			AuxAVLForEachPostOrder(tree->root, op_func, user_param, &op_state);
+			break;	
+	}
+}
 
 #ifdef PRINTS
 /********************  AvlGetData  ****************************/
