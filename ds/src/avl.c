@@ -77,7 +77,7 @@ static void AuxAVLDestroy(avl_node_t *node);
 static void AuxAVLInsert(avl_t *tree, avl_node_t *parent, avl_node_t *curr_node,
 						 int res, avl_node_t *new_node, void* new_data);
 
-/*static int IsLeftChild(avl_node_t* parent, avl_node_t* child);*/
+static int IsLeftChild(avl_node_t* parent, avl_node_t* child);
 static int FindNumChilds(avl_node_t* node);
 static int IsChildExist(avl_node_t* node, int child_pos);
 static void	SetHeight(avl_node_t* node, int child_pos, op_type_t op );
@@ -100,7 +100,8 @@ static void AuxAVLRemove0Child(avl_t *tree,  avl_node_t *parent, avl_node_t
 static void AuxAVLRemove1Child(avl_t *tree,  avl_node_t *parent, avl_node_t
 								 *curr_node, int res, void* data_to_remove);
 								 
-								 								 								  	
+
+static avl_node_t* AvlNodeBegin(avl_node_t **parent, avl_node_t* curr_node);								 								 								  	
 #ifdef PRINTS
 void *AvlGetData(avl_node_t *node);
 void AvlPrintData(avl_node_t *node);
@@ -128,7 +129,7 @@ static void AuxAVLDestroy(avl_node_t *node)
 }
 
 /********************  IsLeftChild  ****************************/
-/*
+
 static int IsLeftChild(avl_node_t* parent, avl_node_t* child)
 {
 	assert(parent);
@@ -136,7 +137,7 @@ static int IsLeftChild(avl_node_t* parent, avl_node_t* child)
 	return child == parent->child[LEFT];
 	
 }
-*/
+
 /********************  FindNumChilds  ****************************/
 static int FindNumChilds(avl_node_t* node)
 {
@@ -497,20 +498,23 @@ void AVLRemove(avl_t *tree, void *data)
 	curr_node = tree->root; /* get the root */
 	
 	curr_node = AuxAVLFind(tree, curr_node, data);
-	/*AvlPrintData( curr_node);*/
-	
-	if( NULL == curr_node ) /* there is no such data*/
+	AvlPrintData( curr_node);
+	/* there is no such data*/
+	/*
+	if( NULL == curr_node ) 
 	{
 		return;
 	}
+	*/
 	/*curr_node = tree->root; *//* get the root */
 	
 	parent = curr_node;
-	
+	AuxAVLRemove1Child(tree, parent, tree->root, 0, data);	
+	/*
 	switch( FindNumChilds(curr_node) )
 	{
 		case NO_CHILDS:
-			AuxAVLRemove0Child(tree, parent, tree->root, 0, data);
+			AuxAVLRemove1Child(tree, parent, tree->root, 0, data);
 			break;
 			
 		case ONE_CHILD:
@@ -520,6 +524,7 @@ void AVLRemove(avl_t *tree, void *data)
 			AuxAVLRemove0Child(tree, parent, tree->root, 0, data);
 			break;	
 	}
+	*/
 	/*AvlPrintData( curr_node);*/
 	/*curr_node = NULL;*/
 }
@@ -529,6 +534,7 @@ static void AuxAVLRemove1Child(avl_t *tree,  avl_node_t *parent, avl_node_t
 								 *curr_node, int res, void* data_to_remove)
 {	
 	int what_child = LEFT, what_son = LEFT;
+	avl_node_t *next_child = NULL;
 	assert( tree );
 
 	if(NULL == curr_node ) 
@@ -544,10 +550,12 @@ static void AuxAVLRemove1Child(avl_t *tree,  avl_node_t *parent, avl_node_t
 	what_child = res > 0 ? LEFT : RIGHT;
 	/*
 	printf("what_child = %d\n", what_child);
-	printf("res = %d\n", res);
 	*/
+	printf("res = %d\n", res);
+	
 	if( 0 == res ) /* the node to remove */
 	{
+		printf(" FindNumChilds( curr_node )= %d\n", FindNumChilds( curr_node ) );
 		res = tree->cmp_func(parent->data, curr_node->data );
 		what_child = res > 0 ? LEFT : RIGHT;
 		what_son = IsChildExist(curr_node, LEFT) ? LEFT : RIGHT;
@@ -555,6 +563,7 @@ static void AuxAVLRemove1Child(avl_t *tree,  avl_node_t *parent, avl_node_t
 		switch(  FindNumChilds(curr_node) )
 		{
 			case NO_CHILDS:
+			
 				if( tree->root ==  curr_node)
 				{
 					tree->root = NULL;
@@ -566,9 +575,13 @@ static void AuxAVLRemove1Child(avl_t *tree,  avl_node_t *parent, avl_node_t
 					AvlPrintData( parent);*/
 					parent->child[what_child] = NULL;
 				}
+				
+				free( curr_node );
+				curr_node = NULL;
 				break;
 				
 			case ONE_CHILD:
+			
 				if( tree->root ==  curr_node)
 				{
 					tree->root = curr_node->child[what_son];
@@ -580,13 +593,38 @@ static void AuxAVLRemove1Child(avl_t *tree,  avl_node_t *parent, avl_node_t
 					AvlPrintData( parent);*/
 					parent->child[what_child] = curr_node->child[what_son];
 				}
+				
+				free( curr_node );
+				curr_node = NULL;
+				
 				break;	
+		
+			case TWO_CHILDS:
+			
+				next_child = AvlNodeBegin(&parent, curr_node->child[RIGHT]);
+				what_child = IsLeftChild(parent, next_child) ? LEFT: RIGHT;
+				
+				AvlPrintData( next_child);
+				AvlPrintData( parent);
+					
+				curr_node->data = next_child->data;
+				
+				if(	IsChildExist(next_child, RIGHT) )
+				{
+					parent->child[what_child] = next_child->child[RIGHT];
+				}
+				
+				else
+				{
+					parent->child[what_child] = NULL;
+				}
+				
+				free(next_child);
+				next_child = NULL;
+				break;
 		}
 		
 		/*curr_node->height = 0;*/
-		free( curr_node );
-		curr_node = NULL;
-	
 		return;
 	}
 	
@@ -609,7 +647,27 @@ static void AuxAVLRemove1Child(avl_t *tree,  avl_node_t *parent, avl_node_t
 		/*AvlPrintData( curr_node);  */
 }	
 
-
+/*********************  AvlNodeBegin  ****************************/
+/*	
+	Find the begin of node's sub tree 
+*/
+static avl_node_t* AvlNodeBegin(avl_node_t **parent, avl_node_t* curr_node)
+{
+	/*avl_node_t* curr_node = NULL;*/
+	assert(curr_node);
+	assert(parent);
+	/*assert(*parent);	*/
+	/*curr_node = node;*/
+	
+	if( NULL != curr_node->child[LEFT] )
+	{
+		*parent = curr_node;
+		curr_node = curr_node->child[LEFT];
+		return AvlNodeBegin( parent, curr_node);
+		
+	}
+	return curr_node;
+}
 /********************  AuxAVLRemove0Child  ****************************/
 static void AuxAVLRemove0Child(avl_t *tree,  avl_node_t *parent, avl_node_t
 								 *curr_node, int res, void* data_to_remove)
