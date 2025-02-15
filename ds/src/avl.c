@@ -229,9 +229,15 @@ static void AuxAVLInsert(avl_t *tree,  avl_node_t *parent ,avl_node_t *curr_node
 	AuxAVLInsert(tree, curr_node, curr_node->child[what_child], res,
 				  new_node,  new_data );
 				  
-	AvlPrintData( curr_node);		  
+	/*AvlPrintData( curr_node);		  */
 	SetHeight( curr_node, what_child, INSERT );
 	printf(" BalancedFactor(curr_node)= %d\n " ,BalancedFactor(tree, curr_node) );
+	/*
+	printf(" BalancedFactor(curr_node->child[what_child])= %d\n " 
+				,BalancedFactor(tree, curr_node->child[what_child]) );
+				*/
+	AvlPrintData( curr_node->child[what_child]);			
+	printf(" BalancedFactor(parent)= %d\n " ,BalancedFactor(tree, parent) );
 	AvlPrintData( curr_node);
 	/*AvlPrintData( parent);*/
 				  
