@@ -254,6 +254,26 @@ static void TestAvlOneNode(void)
 	
 	}
 	*/
+	
+	if( 11 != AVLSize(avl1) )
+	{
+		
+		puts("Failes in_3: Size");
+		flag =  TRUE;
+	
+	}
+		
+	Aux_Pre_Print_Tree_Avl(avl1, 0);
+	AVLRemove(avl1, arr + 4); 
+	
+	if( 10 != AVLSize(avl1) )
+	{
+		
+		puts("Failes in_4: Size");
+		flag =  TRUE;
+	
+	}
+	
 	Aux_Pre_Print_Tree_Avl(avl1, 0);
 	
 	AVLDestroy(avl1);
