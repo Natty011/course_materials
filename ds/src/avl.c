@@ -99,6 +99,9 @@ static void AuxAVLRemove(avl_t *tree,  avl_node_t *parent, avl_node_t
 								 *curr_node, int res, void* data_to_remove);
 								 
 static avl_node_t* AvlNodeMax(avl_node_t **parent, avl_node_t* curr_node);	
+
+static int BalancedFactor(avl_t *tree, avl_node_t *curr_node);
+static int GetChildHeight(avl_node_t *node, int child_pos);
 							 								 								  	
 #ifdef PRINTS
 void *AvlGetData(avl_node_t *node);
@@ -175,6 +178,7 @@ static void	SetHeight(avl_node_t* node, int child_pos, op_type_t op )
 static size_t GetHeight( avl_node_t* node)
 {
 	assert(node);
+	
 	return node->height;
 }
 
@@ -221,15 +225,34 @@ static void AuxAVLInsert(avl_t *tree,  avl_node_t *parent ,avl_node_t *curr_node
 	
 	res = tree->cmp_func( curr_node->data, new_data );
 	what_child = res > 0 ? LEFT : RIGHT;
-	
-	/*SetHeight( curr_node, what_child, INSERT );*/
-	
+		
 	AuxAVLInsert(tree, curr_node, curr_node->child[what_child], res,
 				  new_node,  new_data );
 				  
-	SetHeight( curr_node, what_child, INSERT );			  
-}	
+	AvlPrintData( curr_node);		  
+	SetHeight( curr_node, what_child, INSERT );
+	printf(" BalancedFactor(curr_node)= %d\n " ,BalancedFactor(tree, curr_node) );
+	AvlPrintData( curr_node);
+	/*AvlPrintData( parent);*/
+				  
+}
 
+/********************  BalancedFactor  ****************************/	
+static int BalancedFactor(avl_t *tree, avl_node_t *node)
+{
+	assert(tree);
+	assert(node);
+	
+	return GetChildHeight(node, LEFT) - GetChildHeight(node, RIGHT);
+	
+}
+/********************  GetChildHeight  ****************************/
+static int GetChildHeight(avl_node_t *node, int child_pos)
+{
+	assert(node);
+	return IsChildExist(node, child_pos) ? (int)GetHeight(node->child[child_pos]) : -1;
+
+}
 /********************  AuxAVLFind  ****************************/
 static avl_node_t* AuxAVLFind(avl_t *tree, avl_node_t *node,
 								  	const void *data_to_find )
