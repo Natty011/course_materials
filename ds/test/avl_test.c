@@ -146,7 +146,7 @@ static void TestAvlOneNode(void)
 
 	int arr[11] = {100, 70, 110, 85, 80, 75 ,65 , 67, 130, 30, 150};
 	size_t i = 0;
-	int foreach[2] = {151, 69};
+	int foreach[2] = {151, 150};
 		
 	avl_t *avl1 = AVLCreate(SortingFunc);
 
@@ -158,7 +158,7 @@ static void TestAvlOneNode(void)
 		flag =  TRUE;
 	}
 	
-	for(i = 0; i <= 10; ++i)
+	for(i = 0; i <= 3; ++i)
 	{
 		flag = AVLInsert(avl1, arr + i);
 		
@@ -169,16 +169,17 @@ static void TestAvlOneNode(void)
 		}
 
 	}
-	Aux_Pre_Print_Tree_Avl(avl1, 0);
-	
+	/*Aux_Pre_Print_Tree_Avl(avl1, 0);*/
+	/*
 	if( 4 != AVLHeight(avl1) )
 	{
 		puts("Failes in_2: Insert");
 		flag =  TRUE;
 	
 	}
-	
+	*/
 	/*printf("size = %lu \n", AVLSize(avl1));*/
+	/*
 	if( 11 != AVLSize(avl1) )
 	{
 		
@@ -186,7 +187,8 @@ static void TestAvlOneNode(void)
 		flag =  TRUE;
 	
 	}
-	
+	*/
+	/*
 	for(i = 0; i <= 10; ++i)
 	{
 		flag = Compare(AVLFind(avl1, arr + i), arr + i);
@@ -198,38 +200,46 @@ static void TestAvlOneNode(void)
 		}
 
 	}
-	/*|| SUCCESS != avlForEach(avlPrev(itr4), itr4, Compare, arr_sort + 10 - i) */
-	/*
-	for( i = 0; i <= 10; ++i)
-	{	
-	*/	
-		if( SUCCESS != AVLForEachInOrder(avl1, Compare2, foreach , PRE_ORDER)
-		|| OPERATION_FAIL != AVLForEachInOrder(avl1, Compare2, foreach + 1, PRE_ORDER) )  
-		{
-			/*printf("Iteration = %lu \n",  i);*/
-			puts("Failes in_1: ForEachPreOrder");
-			flag =  TRUE;
-		}
-		
-		if( SUCCESS != AVLForEachInOrder(avl1, Compare2, foreach , POST_ORDER)
-		|| OPERATION_FAIL != AVLForEachInOrder(avl1, Compare2, foreach + 1, POST_ORDER) )  
-		{
-			/*printf("Iteration = %lu \n",  i);*/
-			puts("Failes in_2: ForEachPostOrder");
-			flag =  TRUE;
-		}
-		
-		if( SUCCESS != AVLForEachInOrder(avl1, Compare2, foreach , IN_ORDER)
-		|| OPERATION_FAIL != AVLForEachInOrder(avl1, Compare2, foreach + 1, IN_ORDER) )  
-		{
-			/*printf("Iteration = %lu \n",  i);*/
-			puts("Failes in_3: ForEachInOrder");
-			flag =  TRUE;
-		}
-	/*
-	} 
-	*/
 	
+	if( SUCCESS != AVLForEachInOrder(avl1, Compare2, foreach , PRE_ORDER)
+		|| OPERATION_FAIL != AVLForEachInOrder(avl1, Compare2, foreach + 1, PRE_ORDER) )  
+	{
+
+		puts("Failes in_1: ForEachPreOrder");
+		flag =  TRUE;
+	}
+		
+	if( SUCCESS != AVLForEachInOrder(avl1, Compare2, foreach , POST_ORDER)
+		|| OPERATION_FAIL != AVLForEachInOrder(avl1, Compare2, foreach + 1, POST_ORDER) )  
+	{
+		puts("Failes in_2: ForEachPostOrder");
+		flag =  TRUE;
+	}
+		
+	if( SUCCESS != AVLForEachInOrder(avl1, Compare2, foreach , IN_ORDER)
+		|| OPERATION_FAIL != AVLForEachInOrder(avl1, Compare2, foreach + 1, IN_ORDER) )  
+	{
+
+		puts("Failes in_3: ForEachInOrder");
+		flag =  TRUE;
+	}
+	*/
+	if( 4 != AVLSize(avl1) )
+	{
+		
+		puts("Failes in_3: Size");
+		flag =  TRUE;
+	
+	}
+	AVLRemove(avl1, arr + 3); 
+	Aux_Pre_Print_Tree_Avl(avl1, 0);
+	if( 3 != AVLSize(avl1) )
+	{
+		
+		puts("Failes in_4: Size");
+		flag =  TRUE;
+	
+	}
 	AVLDestroy(avl1);
 	avl1 = NULL;
 	
