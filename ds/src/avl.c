@@ -94,7 +94,8 @@ static void AuxAVLForEachInOrder(avl_node_t *node, op_func_t op_func,
 								void *user_param, int *res_op);
 								
 static void *AvlGetDataFind(avl_node_t *node);																 								 
-								  	
+static void AuxAVLRemove0Child(avl_t *tree,  avl_node_t *parent, avl_node_t
+								 *curr_node, int res, void* data_to_remove);								  	
 #ifdef PRINTS
 void *AvlGetData(avl_node_t *node);
 void AvlPrintData(avl_node_t *node);
@@ -159,6 +160,7 @@ static void	SetHeight(avl_node_t* node, int child_pos, op_type_t op )
 			break;	
 		
 		case 2:
+			op = INSERT;
 			node->height = MAX( GetHeight( node->child[LEFT]) , 
 								GetHeight( node->child[RIGHT]) )
 								 +  (op - 1 );
@@ -475,7 +477,7 @@ int AVLForEachInOrder(avl_t *tree, op_func_t op_func,
 
 void AVLRemove(avl_t *tree, void *data)
 {
-	avl_node_t *curr_node = NULL;
+	avl_node_t *curr_node = NULL, *parent = NULL;
 	assert(tree);
 	
 	curr_node = AuxAVLFind(tree, curr_node, data);
@@ -485,20 +487,68 @@ void AVLRemove(avl_t *tree, void *data)
 	{
 		return;
 	}
-	
+	curr_node = tree->root; /* get the root */
+	parent = curr_node;
 	switch( FindNumChilds(curr_node) )
 	{
 		case NO_CHILDS:
-			AuxAVLRemove0Child(tree->root, op_func, user_param, &op_state);
+			AuxAVLRemove0Child(tree, parent, curr_node, -1, data);
 			break;
+			
 		case ONE_CHILD:
-			AuxAVLForEachPreOrder(tree->root, op_func, user_param, &op_state);
+			AuxAVLRemove0Child(tree, parent, curr_node, -1, data);
 			break;
 		case TWO_CHILDS:
-			AuxAVLForEachPostOrder(tree->root, op_func, user_param, &op_state);
+			AuxAVLRemove0Child(tree, parent, curr_node, -1, data);
 			break;	
 	}
 }
+
+/********************  AuxAVLRemove0Child  ****************************/
+static void AuxAVLRemove0Child(avl_t *tree,  avl_node_t *parent, avl_node_t
+								 *curr_node, int res, void* data_to_remove)
+{	
+	int what_child = LEFT;
+	
+	assert( tree );
+
+	if(NULL == curr_node ) 
+	{
+		return;
+	}
+	
+	res = tree->cmp_func( curr_node->data, data_to_remove );
+	what_child = res > 0 ? LEFT : RIGHT;
+	
+	if( 0 == res ) /* the node to remove */
+	{
+		if( tree->root ==  curr_node)
+		{
+			tree->root = NULL;
+		}
+		
+		else  
+		{
+			parent->child[what_child] = NULL;
+		}
+
+		free( curr_node );
+		curr_node = NULL;
+	
+		return;
+	}
+	
+	/*
+	res = tree->cmp_func( curr_node->data, new_data );
+	what_child = res > 0 ? LEFT : RIGHT;
+	*/
+	/*SetHeight( curr_node, what_child, INSERT );*/
+	
+	AuxAVLRemove0Child(tree, curr_node, curr_node->child[what_child],
+						 res, data_to_remove );
+				  
+	SetHeight( curr_node, what_child, REMOVE );			  
+}	
 
 #ifdef PRINTS
 /********************  AvlGetData  ****************************/
