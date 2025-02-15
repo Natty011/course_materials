@@ -158,7 +158,7 @@ static void TestAvlOneNode(void)
 		flag =  TRUE;
 	}
 	
-	for(i = 0; i <= 3; ++i)
+	for(i = 0; i <= 10; ++i)
 	{
 		flag = AVLInsert(avl1, arr + i);
 		
@@ -245,7 +245,7 @@ static void TestAvlOneNode(void)
 	
 	}
 	*/
-	if( 4 != AVLSize(avl1) )
+	if( 11 != AVLSize(avl1) )
 	{
 		
 		puts("Failes in_4: Size");
@@ -254,9 +254,9 @@ static void TestAvlOneNode(void)
 	}
 	Aux_Pre_Print_Tree_Avl(avl1, 0);
 	
-	AVLRemove(avl1, arr ); 
+	AVLRemove(avl1, arr + 1); 
 	
-	if( 3 != AVLSize(avl1) )
+	if( 10 != AVLSize(avl1) )
 	{
 		
 		puts("Failes in_5: Size");
