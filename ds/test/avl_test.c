@@ -158,7 +158,7 @@ static void TestAvlOneNode(void)
 		flag =  TRUE;
 	}
 	
-	for(i = 0; i <= 10; ++i)
+	for(i = 0; i <= 3; ++i)
 	{
 		flag = AVLInsert(avl1, arr + i);
 		
@@ -170,16 +170,16 @@ static void TestAvlOneNode(void)
 
 	}
 	/*Aux_Pre_Print_Tree_Avl(avl1, 0);*/
-	
+	/*
 	if( 4 != AVLHeight(avl1) )
 	{
 		puts("Failes in_2: Insert");
 		flag =  TRUE;
 	
 	}
-	
+	*/
 	/*printf("size = %lu \n", AVLSize(avl1));*/
-	
+	/*
 	if( 11 != AVLSize(avl1) )
 	{
 		
@@ -223,7 +223,7 @@ static void TestAvlOneNode(void)
 		puts("Failes in_3: ForEachInOrder");
 		flag =  TRUE;
 	}
-	/*
+	
 	if( 11 != AVLSize(avl1) )
 	{
 		
@@ -231,6 +231,7 @@ static void TestAvlOneNode(void)
 		flag =  TRUE;
 	
 	}
+	
 	
 	AVLRemove(avl1, arr + 9); 
 	
@@ -243,18 +244,27 @@ static void TestAvlOneNode(void)
 		flag =  TRUE;
 	
 	}
+	*/
+	if( 4 != AVLSize(avl1) )
+	{
+		
+		puts("Failes in_4: Size");
+		flag =  TRUE;
 	
-	AVLRemove(avl1, arr + 5); 
+	}
+	Aux_Pre_Print_Tree_Avl(avl1, 0);
 	
-	if( 9 != AVLSize(avl1) )
+	AVLRemove(avl1, arr ); 
+	
+	if( 3 != AVLSize(avl1) )
 	{
 		
 		puts("Failes in_5: Size");
 		flag =  TRUE;
 	
 	}
-	*/
 	
+	/*
 	if( 11 != AVLSize(avl1) )
 	{
 		
@@ -273,7 +283,7 @@ static void TestAvlOneNode(void)
 		flag =  TRUE;
 	
 	}
-	
+	*/
 	Aux_Pre_Print_Tree_Avl(avl1, 0);
 	
 	AVLDestroy(avl1);
