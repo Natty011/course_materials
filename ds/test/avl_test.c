@@ -170,16 +170,16 @@ static void TestAvlOneNode(void)
 
 	}
 	/*Aux_Pre_Print_Tree_Avl(avl1, 0);*/
-	/*
+	
 	if( 4 != AVLHeight(avl1) )
 	{
 		puts("Failes in_2: Insert");
 		flag =  TRUE;
 	
 	}
-	*/
+	
 	/*printf("size = %lu \n", AVLSize(avl1));*/
-	/*
+	
 	if( 11 != AVLSize(avl1) )
 	{
 		
@@ -187,8 +187,8 @@ static void TestAvlOneNode(void)
 		flag =  TRUE;
 	
 	}
-	*/
-	/*
+	
+	
 	for(i = 0; i <= 10; ++i)
 	{
 		flag = Compare(AVLFind(avl1, arr + i), arr + i);
@@ -223,7 +223,7 @@ static void TestAvlOneNode(void)
 		puts("Failes in_3: ForEachInOrder");
 		flag =  TRUE;
 	}
-	*/
+	/*
 	if( 11 != AVLSize(avl1) )
 	{
 		
@@ -231,8 +231,10 @@ static void TestAvlOneNode(void)
 		flag =  TRUE;
 	
 	}
+	
 	AVLRemove(avl1, arr + 9); 
-	Aux_Pre_Print_Tree_Avl(avl1, 0);
+	
+
 	
 	if( 10 != AVLSize(avl1) )
 	{
@@ -241,6 +243,19 @@ static void TestAvlOneNode(void)
 		flag =  TRUE;
 	
 	}
+	
+	AVLRemove(avl1, arr + 5); 
+	
+	if( 9 != AVLSize(avl1) )
+	{
+		
+		puts("Failes in_5: Size");
+		flag =  TRUE;
+	
+	}
+	*/
+	Aux_Pre_Print_Tree_Avl(avl1, 0);
+	
 	AVLDestroy(avl1);
 	avl1 = NULL;
 	
