@@ -247,7 +247,7 @@ static void AuxAVLInsert(avl_t *tree,  avl_node_t *parent ,avl_node_t *curr_node
 	AvlPrintData( curr_node);	
 	printf(" BalancedFactor(parent)= %d\n " ,BalancedFactor(tree, parent) );
 	AvlPrintData( parent);
-	HandleRebalance( tree, parent, curr_node, what_child);			  
+	HandleRebalance( tree, parent, curr_node, what_child);		  
 }
 						 
 /********************  HandleRebalance  ****************************/	
@@ -263,34 +263,44 @@ static avl_node_t *HandleRebalance( avl_t *tree,  avl_node_t *parent
 	switch( BalancedFactor(tree, parent) )
 	{
 		case -2:
-			switch( BalancedFactor(tree, curr_node) )
+			puts("hi1");
+			x = RightRotate(curr_node, what_child);
+				parent->child[RIGHT] = x;
+				SetHeight( parent, RIGHT, INSERT );
+				
+			if( 1 == BalancedFactor(tree, curr_node) )
 			{
-				/*case -1:*/
-				/*case 0: *//* for remove*/
-				default:
-					x = RightRotate(curr_node, what_child);
-					parent->child[RIGHT] = x;
-					SetHeight( parent, RIGHT, INSERT );
-				case 1: 	
-					return LeftRotate( parent, RIGHT ); 
-					break;
-			}
-			
+				puts("hi2");
+				return LeftRotate( parent, RIGHT ); 
+			}	
+			break;
 		case 2:	
-			switch( BalancedFactor(tree, curr_node) )
+			puts("hi3");
+			x = LeftRotate(curr_node, what_child);
+			parent->child[LEFT] = x;
+			SetHeight( parent, LEFT, INSERT );
+			
+			if( -1 == BalancedFactor(tree, curr_node) )
 			{
-				default:
-					x = LeftRotate(curr_node, what_child);
-					parent->child[LEFT] = x;
-					SetHeight( parent, LEFT, INSERT );
-				case -1: 	
-					return RightRotate( parent, LEFT ); 
-					break;	
+				puts("hi4");
+				return LeftRotate( parent, LEFT ); 
 			}
+			break;					
 	}			
 }
 
+/*
+puts("hi1");
 
+puts("hi2");
+x = RightRotate(curr_node, what_child);
+parent->child[RIGHT] = x;
+SetHeight( parent, RIGHT, INSERT );
+case 1: 	
+puts("hi3");
+return LeftRotate( parent, RIGHT ); 
+break;
+*/
 /********************  RightRotate  ****************************/	
 static avl_node_t *RightRotate(avl_node_t *y, int what_child)
 {
