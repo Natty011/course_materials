@@ -78,7 +78,7 @@ int balanced_broken = FALSE;
 
 /***********Functions declaration*******/
 static void AuxAVLDestroy(avl_node_t *node);
-static avl_node_t * AuxAVLInsert(avl_t *tree,avl_node_t *grandmiser, avl_node_t *parent, avl_node_t *curr_node,
+static avl_node_t * AuxAVLInsert(avl_t *tree, avl_node_t *parent, avl_node_t *curr_node,
 						 int res, avl_node_t *new_node, void* new_data);
 
 static int IsLeftChild(avl_node_t* parent, avl_node_t* child);
@@ -107,9 +107,9 @@ static avl_node_t* AvlNodeMax(avl_node_t **parent, avl_node_t* curr_node);
 static int BalancedFactor(avl_t *tree, avl_node_t *curr_node);
 static int GetChildHeight(avl_node_t *node, int child_pos);
 
-static avl_node_t *RightRotate(avl_node_t *y, int what_child);
-static avl_node_t *LeftRotate(avl_node_t *x, int what_child);
-static avl_node_t *HandleRebalance( avl_t *tree, avl_node_t *grandmiser,  avl_node_t *parent
+static avl_node_t *RightRotate(avl_t *tree, avl_node_t *y, int what_child);
+static avl_node_t *LeftRotate(avl_t *tree, avl_node_t *x, int what_child);
+static avl_node_t *HandleRebalance( avl_t *tree,  avl_node_t *parent
 						 ,avl_node_t *curr_node, int what_child);
 						 							 								 								  	
 #ifdef PRINTS
@@ -205,7 +205,7 @@ static void AuxAVLSize(avl_node_t *node, size_t *size)
 }	
 
 /********************  AuxAVLInsert  ****************************/
-static avl_node_t * AuxAVLInsert(avl_t *tree,avl_node_t *grandmiser,  avl_node_t *parent ,
+static avl_node_t * AuxAVLInsert(avl_t *tree,  avl_node_t *parent ,
          avl_node_t *curr_node, int res, avl_node_t *new_node, void* new_data)
 {	
 	int what_child = LEFT;
@@ -223,7 +223,7 @@ static avl_node_t * AuxAVLInsert(avl_t *tree,avl_node_t *grandmiser,  avl_node_t
 		{
 			what_child = res > 0 ? LEFT : RIGHT;
 			parent->child[what_child] = new_node;
-			grandmiser = parent;	
+
 		}
 
 		new_node->child[LEFT] = NULL;
@@ -237,7 +237,7 @@ static avl_node_t * AuxAVLInsert(avl_t *tree,avl_node_t *grandmiser,  avl_node_t
 	what_child = res > 0 ? LEFT : RIGHT;
 	/*grandmiser = parent;*/
 		
-	x = AuxAVLInsert(tree, grandmiser, curr_node, curr_node->child[what_child], res,
+	x = AuxAVLInsert(tree, curr_node, curr_node->child[what_child], res,
 				  new_node,  new_data );
 	AvlPrintData( x);
 	if(NULL != x && x->child[ !what_child ] == curr_node )
@@ -271,7 +271,7 @@ static avl_node_t * AuxAVLInsert(avl_t *tree,avl_node_t *grandmiser,  avl_node_t
 	/*puts("hi111");	*/
 
 	/*puts("hi1111");	*/
-	return HandleRebalance( tree, grandmiser, parent, curr_node, what_child);
+	return HandleRebalance( tree, parent, curr_node, what_child);
 			/*			AvlPrintData( x);*/
 						/*	AvlPrintData( grandmiser);*/
 	
@@ -289,10 +289,10 @@ static avl_node_t * AuxAVLInsert(avl_t *tree,avl_node_t *grandmiser,  avl_node_t
 }
 						 
 /********************  HandleRebalance  ****************************/	
-static avl_node_t *HandleRebalance( avl_t *tree, avl_node_t *grandmiser, avl_node_t *parent
+static avl_node_t *HandleRebalance( avl_t *tree, avl_node_t *parent
 						 ,avl_node_t *curr_node, int what_child)
 {
-	int perent_balance = 0, curr_node_balanced = 0;
+	/*int perent_balance = 0, curr_node_balanced = 0;*/
 	avl_node_t *x = NULL;
 	assert( tree );
 	assert( parent );
@@ -306,7 +306,7 @@ static avl_node_t *HandleRebalance( avl_t *tree, avl_node_t *grandmiser, avl_nod
 	{
 
 			puts("RL");
-			x = RightRotate(curr_node, what_child);
+			x = RightRotate(tree, curr_node, what_child);
 				/*AvlPrintData( x);*/
 			/*	AvlPrintData( parent);	*/
 				parent->child[RIGHT] = x;
@@ -331,7 +331,7 @@ static avl_node_t *HandleRebalance( avl_t *tree, avl_node_t *grandmiser, avl_nod
 				return RightRotate( parent, RIGHT );
 				*/
 				
-		x = LeftRotate( parent, RIGHT ); 
+		x = LeftRotate(tree, parent, RIGHT ); 
 		/*grandmiser->child[LEFT] = x;*/
 					/*puts("hi11112322");*/
 					/*AvlPrintData( grandmiser);*/
@@ -349,51 +349,36 @@ static avl_node_t *HandleRebalance( avl_t *tree, avl_node_t *grandmiser, avl_nod
 	{
 
 			puts("LR");
-			x = LeftRotate(curr_node, what_child);
-				/*AvlPrintData( x);*/
-			/*	AvlPrintData( parent);	*/
+			x = LeftRotate(tree, curr_node, what_child);
+				
 				parent->child[LEFT] = x;
 
-				/*SetHeight( parent, RIGHT, INSERT );*/
-		/*	Aux_Pre_Print_Tree_Avl(tree, 0);*/
-				/*		puts("hi11");	*/
-		/*	printf(" BalancedFactor(parent)= %d\n " ,BalancedFactor(tree, parent) );*/
-						/*AvlPrintData( parent);*/
 						curr_node = x;
 						
 						Aux_Pre_Print_Tree_Avl(tree, 0);				
 	}
-	/* LL */									
+/*|| (0 == BalancedFactor(tree, curr_node)) */
+/*
 	if( 2 == BalancedFactor(tree, parent) && 
-				 (1 == BalancedFactor(tree, curr_node) || 
-				 (0 == BalancedFactor(tree, curr_node))  ) )
+				 (1 == BalancedFactor(tree, curr_node) 
+				  
+				 ) )
 	{
 			puts("LL");
 				
-				/*
-				return RightRotate( parent, RIGHT );
-				*/
-				
 		x = RightRotate( parent, LEFT ); 
-		/*grandmiser->child[LEFT] = x;*/
-					/*puts("hi11112322");*/
-					/*AvlPrintData( grandmiser);*/
-							/*	puts("h1111213i2");	*/			
-			/*tree->root->child[LEFT] = x;*/
+	
 			
 			return x;
 	}
 	
-	
+	*/
 	return x;	
-			
-
-				
-				
+					
 }
 
 /********************  RightRotate  ****************************/	
-static avl_node_t *RightRotate(avl_node_t *y, int what_child)
+static avl_node_t *RightRotate(avl_t *tree, avl_node_t *y, int what_child)
 {
 	avl_node_t *x = NULL, *tree_x_child = NULL;
 	assert( y );
@@ -406,11 +391,17 @@ static avl_node_t *RightRotate(avl_node_t *y, int what_child)
 	SetHeight( y, what_child, REMOVE );
 	SetHeight( x, RIGHT, INSERT );
 	
+	if( y == tree->root )
+	{
+		tree->root = x;
+	}
+	
 	return x;
+
 
 }
 /********************  LeftRotate  ****************************/	
-static avl_node_t *LeftRotate(avl_node_t *x, int what_child)
+static avl_node_t *LeftRotate(avl_t *tree, avl_node_t *x, int what_child)
 {
 	avl_node_t *y = NULL, *tree_y_child = NULL;
 	assert( x );
@@ -425,13 +416,17 @@ static avl_node_t *LeftRotate(avl_node_t *x, int what_child)
 /*	IsLeftChild(x, tree_y_child);*/
 	/*SetHeight( x, !IsLeftChild(x, tree_y_child), REMOVE );*/
 	/*SetHeight( y, LEFT, INSERT );*/
-		SetHeight( x, what_child, REMOVE );
+	SetHeight( x, what_child, REMOVE );
 	
 	SetHeight( y, LEFT, INSERT );
 	SetHeight( x, what_child, REMOVE );
 	
-	return y;
+	if( x == tree->root )
+	{
+		tree->root = y;
+	}
 
+	return y;
 }
 /********************  BalancedFactor  ****************************/	
 static int BalancedFactor(avl_t *tree, avl_node_t *node)
@@ -622,7 +617,7 @@ int AVLInsert(avl_t *tree, void *data)
 
 	curr_node = tree->root; /* get the root */
 	parent = curr_node;
-	AuxAVLInsert(tree, tree->root, parent, curr_node, 0, new_node, (void*)data);
+	AuxAVLInsert(tree, parent, curr_node, 0, new_node, (void*)data);
 	
 	return SUCCESS; 
 				 
