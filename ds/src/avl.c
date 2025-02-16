@@ -248,13 +248,19 @@ static avl_node_t * AuxAVLInsert(avl_t *tree,avl_node_t *grandmiser,  avl_node_t
 	x = AuxAVLInsert(tree, grandmiser, curr_node, curr_node->child[what_child], res,
 				  new_node,  new_data );
 	AvlPrintData( x);
-	if(NULL != x  )
+	if(NULL != x && x->child[ !what_child ] == curr_node )
 	{
 					/*&& x->child[ what_child ] == curr_node */
 					puts("find");
 					AvlPrintData( x);
+					AvlPrintData( x->child[ !what_child ]);
+					parent->child[!what_child] = x;
 					AvlPrintData( curr_node);
 					AvlPrintData( parent);
+					/*
+					SetHeight( y, LEFT, INSERT );
+					SetHeight( x, what_child, REMOVE );
+					*/
 					/*return x;*/
 	}			  
 	/*AvlPrintData( curr_node);		  */
@@ -299,8 +305,10 @@ static avl_node_t *HandleRebalance( avl_t *tree, avl_node_t *grandmiser, avl_nod
 	assert( tree );
 	assert( parent );
 	assert( curr_node );
-	/* RL */
 	
+	
+
+	/* RL */										
 	if( -2 == BalancedFactor(tree, parent) && 
 			 1 == BalancedFactor(tree, curr_node))
 	{
@@ -320,8 +328,50 @@ static avl_node_t *HandleRebalance( avl_t *tree, avl_node_t *grandmiser, avl_nod
 						
 						Aux_Pre_Print_Tree_Avl(tree, 0);				
 	}
-										
+	/* RR */									
 	if( -2 == BalancedFactor(tree, parent) && 
+				 (-1 == BalancedFactor(tree, curr_node) || 
+				 (0 == BalancedFactor(tree, curr_node))  )
+	{
+			puts("hi2");
+				
+				/*
+				return RightRotate( parent, RIGHT );
+				*/
+				
+		x = LeftRotate( parent, RIGHT ); 
+		/*grandmiser->child[LEFT] = x;*/
+					/*puts("hi11112322");*/
+					/*AvlPrintData( grandmiser);*/
+							/*	puts("h1111213i2");	*/
+			balanced_broken = TRUE;
+							
+			/*tree->root->child[LEFT] = x;*/
+			
+			return x;
+	}
+		/* LL */
+	if( 2 == BalancedFactor(tree, parent) && 
+			 1 == BalancedFactor(tree, curr_node))
+	{
+
+			puts("hi1");
+			x = RightRotate(curr_node, what_child);
+				/*AvlPrintData( x);*/
+			/*	AvlPrintData( parent);	*/
+				parent->child[RIGHT] = x;
+
+				/*SetHeight( parent, RIGHT, INSERT );*/
+		/*	Aux_Pre_Print_Tree_Avl(tree, 0);*/
+				/*		puts("hi11");	*/
+		/*	printf(" BalancedFactor(parent)= %d\n " ,BalancedFactor(tree, parent) );*/
+						/*AvlPrintData( parent);*/
+						curr_node = x;
+						
+						Aux_Pre_Print_Tree_Avl(tree, 0);				
+	}
+	/* LR */									
+	if( 2 == BalancedFactor(tree, parent) && 
 				 -1 == BalancedFactor(tree, curr_node) )
 	{
 			puts("hi2");
@@ -337,9 +387,11 @@ static avl_node_t *HandleRebalance( avl_t *tree, avl_node_t *grandmiser, avl_nod
 							/*	puts("h1111213i2");	*/
 			balanced_broken = TRUE;
 							
-			tree->root->child[LEFT] = x;
+			/*tree->root->child[LEFT] = x;*/
+			
 			return x;
 	}
+	
 	
 	return x;	
 			
