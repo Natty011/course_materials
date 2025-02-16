@@ -166,6 +166,7 @@ static int IsChildExist(avl_node_t* node, int child_pos)
 /********************  SetHeight  ****************************/
 static void	SetHeight(avl_node_t* node, int child_pos, op_type_t op )
 {
+	assert(node);
 	switch( FindNumChilds( node ) )
 	{
 		case 0:
@@ -443,6 +444,7 @@ static avl_node_t *RightRotate(avl_t *tree, avl_node_t *y, int what_child, op_ty
 	/*SetHeight( y, what_child, INSERT );*/
 	if( y == tree->root )
 	{
+		puts("y_is_root_RightRotate");
 		tree->root = x;
 			SetHeight( y, what_child, REMOVE );
 		/*SetHeight( curr_node, what_child, INSERT );*/
