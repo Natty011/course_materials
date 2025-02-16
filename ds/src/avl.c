@@ -240,7 +240,8 @@ static avl_node_t * AuxAVLInsert(avl_t *tree,  avl_node_t *parent ,
 	x = AuxAVLInsert(tree, curr_node, curr_node->child[what_child], res,
 				  new_node,  new_data );
 	AvlPrintData( x);
-	if(NULL != x && x->child[ !what_child ] == curr_node )
+	if(NULL != x && x->child[ !what_child ] == curr_node &&
+		x != tree->root)
 	{
 					/*&& x->child[ what_child ] == curr_node */
 					puts("find");
@@ -358,21 +359,20 @@ static avl_node_t *HandleRebalance( avl_t *tree, avl_node_t *parent
 						Aux_Pre_Print_Tree_Avl(tree, 0);				
 	}
 /*|| (0 == BalancedFactor(tree, curr_node)) */
-/*
+
 	if( 2 == BalancedFactor(tree, parent) && 
 				 (1 == BalancedFactor(tree, curr_node) 
-				  
-				 ) )
+				 || (0 == BalancedFactor(tree, curr_node))) )
 	{
 			puts("LL");
 				
-		x = RightRotate( parent, LEFT ); 
+		x = RightRotate(tree, parent, LEFT ); 
 	
 			
 			return x;
 	}
 	
-	*/
+	
 	return x;	
 					
 }
