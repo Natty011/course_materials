@@ -168,7 +168,14 @@ static void	SetHeight(avl_node_t* node, int child_pos, op_type_t op )
 	switch( FindNumChilds( node ) )
 	{
 		case 0:
-			node->height +=	(1 * ((size_t)op - 1 )) ;
+			/*
+			if( op == REMOVE &&  node->height )
+			{
+				break;
+			}
+			*/	
+				node->height +=	(1 * ((size_t)op - 1 )) ;
+			
 			break;
 			
 		case 1:
@@ -235,8 +242,7 @@ static avl_node_t * AuxAVLInsert(avl_t *tree,  avl_node_t *parent ,
 	
 	res = tree->cmp_func( curr_node->data, new_data );
 	what_child = res > 0 ? LEFT : RIGHT;
-	/*grandmiser = parent;*/
-		
+
 	x = AuxAVLInsert(tree, curr_node, curr_node->child[what_child], res,
 				  new_node,  new_data );
 	AvlPrintData( x);
@@ -272,7 +278,10 @@ static avl_node_t * AuxAVLInsert(avl_t *tree,  avl_node_t *parent ,
 	/*puts("hi111");	*/
 
 	/*puts("hi1111");	*/
+			/*SetHeight( curr_node, what_child, INSERT );*/
 	return HandleRebalance( tree, parent, curr_node, what_child);
+		/*SetHeight( curr_node, what_child, INSERT );*/
+		/*SetHeight( curr_node, what_child, INSERT );*/
 			/*			AvlPrintData( x);*/
 						/*	AvlPrintData( grandmiser);*/
 	
@@ -359,7 +368,7 @@ static avl_node_t *HandleRebalance( avl_t *tree, avl_node_t *parent
 						Aux_Pre_Print_Tree_Avl(tree, 0);				
 	}
 /*|| (0 == BalancedFactor(tree, curr_node)) */
-
+	/* LL */										
 	if( 2 == BalancedFactor(tree, parent) && 
 				 (1 == BalancedFactor(tree, curr_node) 
 				 || (0 == BalancedFactor(tree, curr_node))) )
@@ -367,8 +376,7 @@ static avl_node_t *HandleRebalance( avl_t *tree, avl_node_t *parent
 			puts("LL");
 				
 		x = RightRotate(tree, parent, LEFT ); 
-	
-			
+
 			return x;
 	}
 	
@@ -389,11 +397,14 @@ static avl_node_t *RightRotate(avl_t *tree, avl_node_t *y, int what_child)
 	x->child[RIGHT] = y;
 	y->child[what_child] = tree_x_child;
 	SetHeight( y, what_child, REMOVE );
+	/*SetHeight( y, what_child, REMOVE );*/
 	SetHeight( x, RIGHT, INSERT );
-	
+	/*SetHeight( y, what_child, INSERT );*/
 	if( y == tree->root )
 	{
 		tree->root = x;
+			SetHeight( y, what_child, REMOVE );
+		/*SetHeight( curr_node, what_child, INSERT );*/
 	}
 	
 	return x;
@@ -416,7 +427,7 @@ static avl_node_t *LeftRotate(avl_t *tree, avl_node_t *x, int what_child)
 /*	IsLeftChild(x, tree_y_child);*/
 	/*SetHeight( x, !IsLeftChild(x, tree_y_child), REMOVE );*/
 	/*SetHeight( y, LEFT, INSERT );*/
-	SetHeight( x, what_child, REMOVE );
+	/*SetHeight( x, what_child, INSERT );*/
 	
 	SetHeight( y, LEFT, INSERT );
 	SetHeight( x, what_child, REMOVE );
@@ -424,6 +435,7 @@ static avl_node_t *LeftRotate(avl_t *tree, avl_node_t *x, int what_child)
 	if( x == tree->root )
 	{
 		tree->root = y;
+		SetHeight( x, what_child, REMOVE );
 	}
 
 	return y;
