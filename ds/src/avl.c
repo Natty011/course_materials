@@ -252,12 +252,13 @@ static avl_node_t * AuxAVLInsert(avl_t *tree,  avl_node_t *parent ,
 		x != tree->root)
 	{
 					/*&& x->child[ what_child ] == curr_node */
-					puts("find");
+					puts("find_INSERT_START");
 					AvlPrintData( x);
 					AvlPrintData( x->child[ !what_child ]);
 					parent->child[!what_child] = x;
 					AvlPrintData( curr_node);
 					AvlPrintData( parent);
+					puts("find_INSERT_END");
 					/*
 					SetHeight( y, LEFT, INSERT );
 					SetHeight( x, what_child, REMOVE );
@@ -266,7 +267,7 @@ static avl_node_t * AuxAVLInsert(avl_t *tree,  avl_node_t *parent ,
 	}			  
 	/*AvlPrintData( curr_node);		  */
 	SetHeight( curr_node, what_child, op );
-	AvlPrintData( curr_node->child[what_child]);
+	/*AvlPrintData( curr_node->child[what_child]);*/
 	/*printf(" BalancedFactor(curr_node)= %d\n " ,BalancedFactor(tree, curr_node) );*/
 	/*
 	printf(" BalancedFactor(curr_node->child[what_child])= %d\n " 
@@ -304,14 +305,26 @@ static avl_node_t * AuxAVLInsert(avl_t *tree,  avl_node_t *parent ,
 static avl_node_t *HandleRebalance( avl_t *tree, avl_node_t *parent
 						 ,avl_node_t *curr_node, int what_child, op_type_t op)
 {
+
 	/*int perent_balance = 0, curr_node_balanced = 0;*/
 	avl_node_t *x = NULL;
 	assert( tree );
 	assert( parent );
 	assert( curr_node );
+	printf("op = %d \n", op);
+	/*
+	if( NULL == parent )
+	{
+		return NULL;
 	
+	}
 	
-
+	if( NULL == curr_node )
+	{
+		return NULL;
+	
+	}
+*/
 	/* RL */										
 	if( -2 == BalancedFactor(tree, parent) && 
 			 1 == BalancedFactor(tree, curr_node))
@@ -706,6 +719,7 @@ static avl_node_t *AuxAVLRemove(avl_t *tree,  avl_node_t *parent, avl_node_t
 	int what_child = LEFT, what_son = LEFT;
 	avl_node_t *next_child = NULL;
 	avl_node_t *x = NULL;
+	
 	assert( tree );
 
 	if(NULL == curr_node ) 
@@ -735,7 +749,7 @@ static avl_node_t *AuxAVLRemove(avl_t *tree,  avl_node_t *parent, avl_node_t
 		switch(  FindNumChilds(curr_node) )
 		{
 			case NO_CHILDS:
-			
+
 				if( tree->root ==  curr_node)
 				{
 					tree->root = NULL;
@@ -744,14 +758,16 @@ static avl_node_t *AuxAVLRemove(avl_t *tree,  avl_node_t *parent, avl_node_t
 				else  
 				{
 					parent->child[what_child] = NULL;
+					/*SetHeight( parent, !what_child, REMOVE );*/
 				}
-				
+
 				free( curr_node );
 				curr_node = NULL;
+
 				break;
 				
 			case ONE_CHILD:
-			
+
 				if( tree->root ==  curr_node)
 				{
 					tree->root = curr_node->child[what_son];
@@ -787,29 +803,31 @@ static avl_node_t *AuxAVLRemove(avl_t *tree,  avl_node_t *parent, avl_node_t
 		return;
 	}
 	
-	
+
 	x = AuxAVLRemove(tree, curr_node, curr_node->child[what_child],
 						 res, data_to_remove, op );
-						 
+					 
 	if(NULL != x && x->child[ !what_child ] == curr_node &&
 		x != tree->root)
 	{
-					/*&& x->child[ what_child ] == curr_node */
+
 					puts("find_remove");
 					AvlPrintData( x);
 					AvlPrintData( x->child[ !what_child ]);
 					parent->child[!what_child] = x;
 					AvlPrintData( curr_node);
 					AvlPrintData( parent);
-					/*
-					SetHeight( y, LEFT, INSERT );
-					SetHeight( x, what_child, REMOVE );
-					*/
-					/*return x;*/
+					
 	}
-									 	  				  			  
-	SetHeight( curr_node, what_child, REMOVE );	
-	return HandleRebalance( tree, parent, curr_node, what_child, op);
+						 	  				  			  
+	SetHeight( curr_node, what_child, op );
+	puts("curr_node");
+	AvlPrintData( curr_node);
+	puts("curr_node->child[!what_child ]");
+	AvlPrintData( curr_node->child[!what_child ]);
+	puts("parent");	
+	AvlPrintData( parent);	
+	return HandleRebalance( tree, curr_node, curr_node->child[!what_child ], what_child, op);
 }	
 
 /*********************  AvlNodeMax  ****************************/
