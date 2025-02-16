@@ -231,16 +231,62 @@ static void AuxAVLInsert(avl_t *tree,  avl_node_t *parent ,avl_node_t *curr_node
 				  
 	/*AvlPrintData( curr_node);		  */
 	SetHeight( curr_node, what_child, INSERT );
-	printf(" BalancedFactor(curr_node)= %d\n " ,BalancedFactor(tree, curr_node) );
+	AvlPrintData( curr_node->child[what_child]);
+	/*printf(" BalancedFactor(curr_node)= %d\n " ,BalancedFactor(tree, curr_node) );*/
 	/*
 	printf(" BalancedFactor(curr_node->child[what_child])= %d\n " 
 				,BalancedFactor(tree, curr_node->child[what_child]) );
 				*/
-	AvlPrintData( curr_node->child[what_child]);			
+	/*AvlPrintData( curr_node->child[what_child]);		*/
+	printf(" BalancedFactor(curr_node)= %d\n " ,BalancedFactor(tree, curr_node) );
+	AvlPrintData( curr_node);	
 	printf(" BalancedFactor(parent)= %d\n " ,BalancedFactor(tree, parent) );
-	AvlPrintData( curr_node);
-	/*AvlPrintData( parent);*/
+	AvlPrintData( parent);
 				  
+}
+
+static void HandleRebalance( avl_t *tree,  avl_node_t *parent
+						 ,avl_node_t *curr_node, int what_child)
+{
+	int perent_balance = 0, curr_node = 0;
+	avl_node_t *x = NULL;
+	assert( tree );
+	assert( parent );
+	assert( curr_node );
+	
+	switch( BalancedFactor(tree, parent) )
+	{
+		case -2:
+			switch( BalancedFactor(tree, curr_node) )
+			{
+				case -1:
+				case 0: /* for remove*/
+				default:
+					x = RightRotate(curr_node, what_child);
+				case 1: 	
+					RotateRight( parent, 
+			}
+			
+	
+	
+	}
+	
+	 	
+
+
+}
+static avl_node_t *RightRotate(avl_node_t *y, int what_child)
+{
+	avl_node_t *y_child = NULL, *tree_y_child = NULL;
+	assert( y );
+	
+	y_child = y->child[what_child]; /*what_child --> LEFT ? */
+	tree_y_child = y_child->child[RIGHT];
+	
+	y_child->child[RIGHT] = y;
+	y->child[what_child] = 
+	
+
 }
 
 /********************  BalancedFactor  ****************************/	
