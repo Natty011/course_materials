@@ -380,7 +380,8 @@ static avl_node_t *HandleRebalance( avl_t *tree, avl_node_t *parent
 
 						curr_node = x;
 						
-						Aux_Pre_Print_Tree_Avl(tree, 0);				
+						Aux_Pre_Print_Tree_Avl(tree, 0);
+									puts("END_LR");				
 	}
 /*|| (0 == BalancedFactor(tree, curr_node)) */
 	/* LL */										
@@ -405,17 +406,40 @@ static avl_node_t *RightRotate(avl_t *tree, avl_node_t *y, int what_child, op_ty
 {
 	avl_node_t *x = NULL, *tree_x_child = NULL;
 	assert( y );
-	
+	puts("RightRotate");
 	x = y->child[what_child]; /*what_child --> LEFT ? */
 	tree_x_child = x->child[RIGHT];
 	
+	AvlPrintData( x);
+	AvlPrintData( y);
+		
 	x->child[RIGHT] = y;
 	y->child[what_child] = tree_x_child;
+	/*
+	if( op == REMOVE )
+	{
+		SetHeight( y, what_child, INSERT );
+	}
+	else 
+	{
+		SetHeight( y, what_child, REMOVE );	
+		SetHeight( y, what_child, REMOVE );
+	}
+	*/
 	SetHeight( y, what_child, REMOVE );
-	/*SetHeight( y, what_child, REMOVE );*/
 	/*	SetHeight( x, RIGHT, INSERT );*/
 	SetHeight( x, RIGHT, op );
-	
+	AvlPrintData( y->child[what_child]);		
+	/*
+	if( op == REMOVE )
+	{
+		SetHeight( y, LEFT, INSERT );
+	}
+	else 
+	{
+		SetHeight( y, LEFT, op );
+	}
+	*/	
 	/*SetHeight( y, what_child, INSERT );*/
 	if( y == tree->root )
 	{
@@ -423,7 +447,7 @@ static avl_node_t *RightRotate(avl_t *tree, avl_node_t *y, int what_child, op_ty
 			SetHeight( y, what_child, REMOVE );
 		/*SetHeight( curr_node, what_child, INSERT );*/
 	}
-	
+	puts("END_RightRotate");
 	return x;
 
 
@@ -433,10 +457,10 @@ static avl_node_t *LeftRotate(avl_t *tree, avl_node_t *x, int what_child, op_typ
 {
 	avl_node_t *y = NULL, *tree_y_child = NULL;
 	assert( x );
-	
+					puts("LeftRotate");
 	y = x->child[what_child]; /*what_child --> LEFT ? */
 	tree_y_child = y->child[LEFT];
-				/*puts("hi6");*/
+
 	AvlPrintData( x);
 		AvlPrintData( y);
 	y->child[LEFT] = x;
@@ -447,16 +471,25 @@ static avl_node_t *LeftRotate(avl_t *tree, avl_node_t *x, int what_child, op_typ
 	/*SetHeight( x, what_child, INSERT );*/
 	
 	/*SetHeight( y, LEFT, INSERT );*/
-		SetHeight( y, LEFT, op );
+		/*SetHeight( x, what_child, REMOVE );*/
+		/*SetHeight( y, LEFT, op );*/
 
 	SetHeight( x, what_child, REMOVE );
-	
+	if( op == REMOVE )
+	{
+		SetHeight( y, LEFT, INSERT );
+	}
+	else /*  if( op == INSERT) */
+	{
+		SetHeight( y, LEFT, op );
+	}	
+	AvlPrintData( y->child[LEFT]);		
 	if( x == tree->root )
 	{
 		tree->root = y;
 		SetHeight( x, what_child, REMOVE );
 	}
-
+				puts("END_LeftRotate");
 	return y;
 }
 /********************  BalancedFactor  ****************************/	
