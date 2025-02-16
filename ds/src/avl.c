@@ -99,8 +99,9 @@ static void AuxAVLForEachInOrder(avl_node_t *node, op_func_t op_func,
 								
 static void *AvlGetDataFind(avl_node_t *node);																 								 
 					 
-static void AuxAVLRemove(avl_t *tree,  avl_node_t *parent, avl_node_t
-								 *curr_node, int res, void* data_to_remove);
+static avl_node_t *AuxAVLRemove(avl_t *tree,  avl_node_t *parent, avl_node_t
+								 *curr_node, int res,
+								  void* data_to_remove, op_type_t op);
 								 
 static avl_node_t* AvlNodeMax(avl_node_t **parent, avl_node_t* curr_node);	
 
@@ -693,16 +694,18 @@ void AVLRemove(avl_t *tree, void *data)
 	assert(tree);
 	
 	parent = curr_node;
-	AuxAVLRemove(tree, parent, tree->root, 0, data);	
+	AuxAVLRemove(tree, parent, tree->root, 0, data, REMOVE);	
 
 }
 
 /********************  AuxAVLRemove  ****************************/
-static void AuxAVLRemove(avl_t *tree,  avl_node_t *parent, avl_node_t
-								 *curr_node, int res, void* data_to_remove)
+static avl_node_t *AuxAVLRemove(avl_t *tree,  avl_node_t *parent, avl_node_t
+								 *curr_node, int res, 
+								 void* data_to_remove, op_type_t op)
 {	
 	int what_child = LEFT, what_son = LEFT;
 	avl_node_t *next_child = NULL;
+	avl_node_t *x = NULL;
 	assert( tree );
 
 	if(NULL == curr_node ) 
@@ -784,11 +787,29 @@ static void AuxAVLRemove(avl_t *tree,  avl_node_t *parent, avl_node_t
 		return;
 	}
 	
-
-	AuxAVLRemove(tree, curr_node, curr_node->child[what_child],
-						 res, data_to_remove );
-						 	  				  			  
+	
+	x = AuxAVLRemove(tree, curr_node, curr_node->child[what_child],
+						 res, data_to_remove, op );
+						 
+	if(NULL != x && x->child[ !what_child ] == curr_node &&
+		x != tree->root)
+	{
+					/*&& x->child[ what_child ] == curr_node */
+					puts("find_remove");
+					AvlPrintData( x);
+					AvlPrintData( x->child[ !what_child ]);
+					parent->child[!what_child] = x;
+					AvlPrintData( curr_node);
+					AvlPrintData( parent);
+					/*
+					SetHeight( y, LEFT, INSERT );
+					SetHeight( x, what_child, REMOVE );
+					*/
+					/*return x;*/
+	}
+									 	  				  			  
 	SetHeight( curr_node, what_child, REMOVE );	
+	return HandleRebalance( tree, parent, curr_node, what_child, op);
 }	
 
 /*********************  AvlNodeMax  ****************************/
