@@ -102,7 +102,12 @@ static avl_node_t* AvlNodeMax(avl_node_t **parent, avl_node_t* curr_node);
 
 static int BalancedFactor(avl_t *tree, avl_node_t *curr_node);
 static int GetChildHeight(avl_node_t *node, int child_pos);
-							 								 								  	
+
+static avl_node_t *RightRotate(avl_node_t *y, int what_child);
+static avl_node_t *LeftRotate(avl_node_t *x, int what_child);
+static avl_node_t *HandleRebalance( avl_t *tree,  avl_node_t *parent
+						 ,avl_node_t *curr_node, int what_child);
+						 							 								 								  	
 #ifdef PRINTS
 void *AvlGetData(avl_node_t *node);
 void AvlPrintData(avl_node_t *node);
@@ -242,13 +247,14 @@ static void AuxAVLInsert(avl_t *tree,  avl_node_t *parent ,avl_node_t *curr_node
 	AvlPrintData( curr_node);	
 	printf(" BalancedFactor(parent)= %d\n " ,BalancedFactor(tree, parent) );
 	AvlPrintData( parent);
-				  
+	HandleRebalance( tree, parent, curr_node, what_child);			  
 }
-
-static void HandleRebalance( avl_t *tree,  avl_node_t *parent
+						 
+/********************  HandleRebalance  ****************************/	
+static avl_node_t *HandleRebalance( avl_t *tree,  avl_node_t *parent
 						 ,avl_node_t *curr_node, int what_child)
 {
-	int perent_balance = 0, curr_node = 0;
+	int perent_balance = 0, curr_node_balanced = 0;
 	avl_node_t *x = NULL;
 	assert( tree );
 	assert( parent );
@@ -259,36 +265,66 @@ static void HandleRebalance( avl_t *tree,  avl_node_t *parent
 		case -2:
 			switch( BalancedFactor(tree, curr_node) )
 			{
-				case -1:
-				case 0: /* for remove*/
+				/*case -1:*/
+				/*case 0: *//* for remove*/
 				default:
 					x = RightRotate(curr_node, what_child);
+					parent->child[RIGHT] = x;
+					SetHeight( parent, RIGHT, INSERT );
 				case 1: 	
-					RotateRight( parent, 
+					return LeftRotate( parent, RIGHT ); 
+					break;
 			}
 			
-	
-	
-	}
-	
-	 	
-
-
+		case 2:	
+			switch( BalancedFactor(tree, curr_node) )
+			{
+				default:
+					x = LeftRotate(curr_node, what_child);
+					parent->child[LEFT] = x;
+					SetHeight( parent, LEFT, INSERT );
+				case -1: 	
+					return RightRotate( parent, LEFT ); 
+					break;	
+			}
+	}			
 }
+
+
+/********************  RightRotate  ****************************/	
 static avl_node_t *RightRotate(avl_node_t *y, int what_child)
 {
-	avl_node_t *y_child = NULL, *tree_y_child = NULL;
+	avl_node_t *x = NULL, *tree_x_child = NULL;
 	assert( y );
 	
-	y_child = y->child[what_child]; /*what_child --> LEFT ? */
-	tree_y_child = y_child->child[RIGHT];
+	x = y->child[what_child]; /*what_child --> LEFT ? */
+	tree_x_child = x->child[RIGHT];
 	
-	y_child->child[RIGHT] = y;
-	y->child[what_child] = 
+	x->child[RIGHT] = y;
+	y->child[what_child] = tree_x_child;
+	SetHeight( y, what_child, INSERT );
+	SetHeight( x, RIGHT, INSERT );
 	
+	return x;
 
 }
+/********************  LeftRotate  ****************************/	
+static avl_node_t *LeftRotate(avl_node_t *x, int what_child)
+{
+	avl_node_t *y = NULL, *tree_y_child = NULL;
+	assert( x );
+	
+	y = x->child[what_child]; /*what_child --> LEFT ? */
+	tree_y_child = y->child[LEFT];
+	
+	y->child[LEFT] = x;
+	x->child[what_child] = tree_y_child;
+	SetHeight( x, what_child, INSERT );
+	SetHeight( y, LEFT, INSERT );
+	
+	return y;
 
+}
 /********************  BalancedFactor  ****************************/	
 static int BalancedFactor(avl_t *tree, avl_node_t *node)
 {
