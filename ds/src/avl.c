@@ -233,14 +233,6 @@ static avl_node_t * AuxAVLInsert(avl_t *tree,avl_node_t *grandmiser,  avl_node_t
 		return;
 	}	
 	
-	if(balanced_broken)
-	{
-				puts("broken");
-					balanced_broken = FALSE;
-					
-				AvlPrintData( parent);
-	}	
-	
 	res = tree->cmp_func( curr_node->data, new_data );
 	what_child = res > 0 ? LEFT : RIGHT;
 	/*grandmiser = parent;*/
@@ -313,7 +305,7 @@ static avl_node_t *HandleRebalance( avl_t *tree, avl_node_t *grandmiser, avl_nod
 			 1 == BalancedFactor(tree, curr_node))
 	{
 
-			puts("hi1");
+			puts("RL");
 			x = RightRotate(curr_node, what_child);
 				/*AvlPrintData( x);*/
 			/*	AvlPrintData( parent);	*/
@@ -331,9 +323,9 @@ static avl_node_t *HandleRebalance( avl_t *tree, avl_node_t *grandmiser, avl_nod
 	/* RR */									
 	if( -2 == BalancedFactor(tree, parent) && 
 				 (-1 == BalancedFactor(tree, curr_node) || 
-				 (0 == BalancedFactor(tree, curr_node))  )
+				 (0 == BalancedFactor(tree, curr_node))  ) )
 	{
-			puts("hi2");
+			puts("RR");
 				
 				/*
 				return RightRotate( parent, RIGHT );
@@ -344,22 +336,23 @@ static avl_node_t *HandleRebalance( avl_t *tree, avl_node_t *grandmiser, avl_nod
 					/*puts("hi11112322");*/
 					/*AvlPrintData( grandmiser);*/
 							/*	puts("h1111213i2");	*/
-			balanced_broken = TRUE;
+
 							
 			/*tree->root->child[LEFT] = x;*/
 			
 			return x;
 	}
-		/* LL */
+
+	/* LR */										
 	if( 2 == BalancedFactor(tree, parent) && 
-			 1 == BalancedFactor(tree, curr_node))
+			 -1 == BalancedFactor(tree, curr_node))
 	{
 
-			puts("hi1");
-			x = RightRotate(curr_node, what_child);
+			puts("LR");
+			x = LeftRotate(curr_node, what_child);
 				/*AvlPrintData( x);*/
 			/*	AvlPrintData( parent);	*/
-				parent->child[RIGHT] = x;
+				parent->child[LEFT] = x;
 
 				/*SetHeight( parent, RIGHT, INSERT );*/
 		/*	Aux_Pre_Print_Tree_Avl(tree, 0);*/
@@ -370,23 +363,22 @@ static avl_node_t *HandleRebalance( avl_t *tree, avl_node_t *grandmiser, avl_nod
 						
 						Aux_Pre_Print_Tree_Avl(tree, 0);				
 	}
-	/* LR */									
+	/* LL */									
 	if( 2 == BalancedFactor(tree, parent) && 
-				 -1 == BalancedFactor(tree, curr_node) )
+				 (1 == BalancedFactor(tree, curr_node) || 
+				 (0 == BalancedFactor(tree, curr_node))  ) )
 	{
-			puts("hi2");
+			puts("LL");
 				
 				/*
 				return RightRotate( parent, RIGHT );
 				*/
 				
-		x = LeftRotate( parent, RIGHT ); 
+		x = RightRotate( parent, LEFT ); 
 		/*grandmiser->child[LEFT] = x;*/
 					/*puts("hi11112322");*/
 					/*AvlPrintData( grandmiser);*/
-							/*	puts("h1111213i2");	*/
-			balanced_broken = TRUE;
-							
+							/*	puts("h1111213i2");	*/			
 			/*tree->root->child[LEFT] = x;*/
 			
 			return x;
@@ -396,36 +388,10 @@ static avl_node_t *HandleRebalance( avl_t *tree, avl_node_t *grandmiser, avl_nod
 	return x;	
 			
 
-			
-			/*
-		case 2:	
-			puts("hi3");
-			x = LeftRotate(curr_node, what_child);
-			parent->child[LEFT] = x;
-			SetHeight( parent, LEFT, INSERT );
-			
-			if( -1 == BalancedFactor(tree, curr_node) )
-			{
-				puts("hi4");
-				return LeftRotate( parent, LEFT ); 
-			}
-			break;	
-			*/				
+				
 				
 }
 
-/*
-puts("hi1");
-
-puts("hi2");
-x = RightRotate(curr_node, what_child);
-parent->child[RIGHT] = x;
-SetHeight( parent, RIGHT, INSERT );
-case 1: 	
-puts("hi3");
-return LeftRotate( parent, RIGHT ); 
-break;
-*/
 /********************  RightRotate  ****************************/	
 static avl_node_t *RightRotate(avl_node_t *y, int what_child)
 {
