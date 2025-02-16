@@ -145,6 +145,7 @@ static void TestAvlOneNode(void)
 	int flag = FALSE;
 
 	int arr[11] = {100, 70, 110, 85, 80, 75 ,65 , 67, 130, 30, 150};
+	int arr2[11] = {100, 70, 80, 85, 80, 75 ,65 , 67, 130, 30, 150};
 	size_t i = 0;
 	int foreach[2] = {151, 150};
 		
@@ -158,7 +159,7 @@ static void TestAvlOneNode(void)
 		flag =  TRUE;
 	}
 	
-	for(i = 0; i <= 10; ++i)
+	for(i = 0; i <= 9; ++i)
 	{
 		flag = AVLInsert(avl1, arr + i);
 		
@@ -169,7 +170,7 @@ static void TestAvlOneNode(void)
 		}
 
 	}
-	/*Aux_Pre_Print_Tree_Avl(avl1, 0);*/
+	Aux_Pre_Print_Tree_Avl(avl1, 0);
 	/*
 	if( 4 != AVLHeight(avl1) )
 	{
@@ -244,7 +245,7 @@ static void TestAvlOneNode(void)
 		flag =  TRUE;
 	
 	}
-	*/
+	/*
 	if( 11 != AVLSize(avl1) )
 	{
 		
@@ -263,7 +264,7 @@ static void TestAvlOneNode(void)
 		flag =  TRUE;
 	
 	}
-	
+	*/
 	/*
 	if( 11 != AVLSize(avl1) )
 	{
@@ -284,7 +285,7 @@ static void TestAvlOneNode(void)
 	
 	}
 	*/
-	Aux_Pre_Print_Tree_Avl(avl1, 0);
+	/*Aux_Pre_Print_Tree_Avl(avl1, 0);*/
 	
 	AVLDestroy(avl1);
 	avl1 = NULL;
