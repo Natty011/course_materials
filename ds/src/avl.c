@@ -249,10 +249,10 @@ static avl_node_t * AuxAVLInsert(avl_t *tree,  avl_node_t *parent ,
 	x = AuxAVLInsert(tree, curr_node, curr_node->child[what_child], res,
 				  new_node,  new_data, op );
 	/*AvlPrintData( x);*/
+	
 	if(NULL != x && x->child[ !what_child ] == curr_node &&
 		x != tree->root)
 	{
-					/*&& x->child[ what_child ] == curr_node */
 					puts("find_INSERT_START");
 					AvlPrintData( x);
 					AvlPrintData( x->child[ !what_child ]);
@@ -260,12 +260,10 @@ static avl_node_t * AuxAVLInsert(avl_t *tree,  avl_node_t *parent ,
 					AvlPrintData( curr_node);
 					AvlPrintData( parent);
 					puts("find_INSERT_END");
-					/*
-					SetHeight( y, LEFT, INSERT );
-					SetHeight( x, what_child, REMOVE );
-					*/
-					/*return x;*/
-	}			  
+					
+
+	}
+			  
 	/*AvlPrintData( curr_node);		  */
 	SetHeight( curr_node, what_child, op );
 	/*AvlPrintData( curr_node->child[what_child]);*/
@@ -427,10 +425,11 @@ static avl_node_t *RightRotate(avl_t *tree, avl_node_t *y, int what_child, op_ty
 		SetHeight( y, what_child, REMOVE );
 	}
 	*/
+	
 	SetHeight( y, what_child, REMOVE );
 	/*	SetHeight( x, RIGHT, INSERT );*/
 	SetHeight( x, RIGHT, op );
-	AvlPrintData( y->child[what_child]);		
+	/*AvlPrintData( y->child[what_child]);	*/	
 	/*
 	if( op == REMOVE )
 	{
