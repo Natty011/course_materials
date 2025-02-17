@@ -162,8 +162,14 @@ void HashTableRemove(hash_table_t *table, void *value)
 
 size_t HashTableSize(const hash_table_t *table)
 {
+	size_t i = 0, sum = 0;
 	assert(table);
-	return table->size;
+
+	for( i = 0; i < table->capacity ; ++i )
+	{
+		sum += DListCount( *(table->hash_array + i ) );
+	}
+	return sum;
 }
 
 /********************  HashTableIsEmpty  ****************************/ 
@@ -178,6 +184,7 @@ int HashTableIsEmpty(const hash_table_t *table)
 void *HashTableFind(const hash_table_t *table, void *equivalent_value)
 {
 	assert(table);
+	
 	
 	
 	
