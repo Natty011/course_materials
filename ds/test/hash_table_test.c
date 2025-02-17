@@ -43,6 +43,14 @@ extern int destroy_check_avl;
 
 /***************struct and enum declaration *******/
 
+struct set
+{
+  size_t key;
+  int data;
+};
+
+size_t capacity = 10;
+
 typedef enum
 {
 	SUCCESS = 0,
@@ -59,6 +67,7 @@ typedef enum
 }func_result_t;
 
 
+
 /*
 	#ifdef PRINTS
 		Aux_Pre_Print_Tree(avl1, 0);
@@ -68,27 +77,39 @@ typedef enum
 
 /***************************function declaration**************************/
 static void TestHash(void);
-
+size_t HashFunction(const void* key);
+/*
 static int SortingFunc(const void* check_data ,const void* new_data);
-
+*/
 /***************************End of function declaration******************/
 
 /******************static functions definition**********************/
 		
 /*******************SortingFunc*********************/
+/*
 static int SortingFunc(const void* check_data ,const void* new_data)
 {
 	return (*(int*)check_data - *(int*)new_data);
 }
+*/
 /*******************Compare*********************/
+
 static int Compare(void* check_data , void* new_data)
 {
-	return !(SUCCESS == (*(int*)check_data - *(int*)new_data));
+	return (SUCCESS == (*(int*)check_data - *(int*)new_data));
 }
+
 /*******************Compare2*********************/
+/*
 static int Compare2(void* check_data , void* new_data)
 {
 	return  ( *(int*)check_data >= *(int*)new_data );
+}
+*/
+/*******************hashFunction*********************/
+size_t HashFunction(const void* key)
+{
+  return (*(size_t*)key) % capacity;
 }
 
 /******************End of static functions definition**********************/
@@ -123,11 +144,35 @@ int main ()
 static void TestHash(void)
 {	
 	int flag = FALSE;
+	struct set *array;
 
-	int arr[11] = {100, 70, 110, 85, 80, 75 ,65 , 67, 130, 30, 150};
-	int arr2[11] = {100, 70, 80, 85, 80, 75 ,65 , 67, 130, 30, 150};
-	size_t i = 0;
-	int foreach[2] = {151, 150};
+	/*size_t size = 0;*/
+	
+	/*int arr[11] = {100, 70, 110, 85, 80, 75 ,65 , 67, 130, 30, 150};*/
+
+	hash_table_t *table1 = HashTableCreate(HashFunction, Compare, capacity);
+	
+	
+	HashTableDestroy(table1);
+	table1 = NULL;
+	
+	if( OPERATION_FAIL == destroy_check_avl )
+	{
+		puts("Failes in_1: Destroy");
+		flag =  TRUE;
+	}
+	
+	if( !flag )
+	{
+		puts(RESET);		
+		puts(BACK_BLUE"Test: Success"RESET);
+
+	}
+	
+	else
+	{
+		puts(BACK_YELLOW"Test: Failure"RESET);	
+	}
 }	
 	/*	
 	avl_t *avl1 = AVLCreate(SortingFunc);
