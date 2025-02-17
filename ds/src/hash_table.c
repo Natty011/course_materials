@@ -144,7 +144,8 @@ void HashTableRemove(hash_table_t *table, void *value)
 	
 	/*return the index of the correct dlist*/
 	index = table->hash_func( value );
- 	
+	index %= table->capacity;
+	
 	dlst_indx = *(table->hash_array + index );
 	
 	if( DListIsEmpty(dlst_indx) )
@@ -193,6 +194,8 @@ void *HashTableFind(const hash_table_t *table, void *value)
 	assert(table);
 	index = table->hash_func( value );
 
+	index %= table->capacity;
+
 	dlst_indx = *(table->hash_array + index );
 	
 	if( DListIsEmpty(dlst_indx) )
@@ -210,7 +213,7 @@ void *HashTableFind(const hash_table_t *table, void *value)
 
 	return NULL;
 }
-
+/********************  HashTableInsert  ****************************/ 
 int HashTableInsert(hash_table_t *table, void *value)
 {
 	size_t index = 0;
@@ -220,20 +223,20 @@ int HashTableInsert(hash_table_t *table, void *value)
 	assert(table);
 
 	index = table->hash_func( value );
-
-	dlst_indx = *(table->hash_array + index );
-	
-	start = DListPushBack( dlst_indx, value);
+	index %= table->capacity;
+	/*dlst_indx = *(table->hash_array + index );*/
+	printf("index = %d \n ", index);
+	/*start = DListPushBack( dlst_indx, value);*/
 
 	#ifdef PRINTS
-		printf("Insert=  DListGetData(start) =%d \n", *(int*)DListGetData(start) );
+		/*printf("Insert=  DListGetData(start) =%d \n", *(int*)DListGetData(start) );*/
 	#endif
-
+/*
 	if( ! DListIterIsEqual( start, DListEnd(dlst_indx) ) )
 	{
 		return SUCCESS;
 	}
-
+*/
 	return OPERATION_FAIL;
 	
 }
