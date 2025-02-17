@@ -4,6 +4,9 @@
 * Date : 17 / 02 / 2025
 * Last update: 17 / 02 / 2025
 *****************************************/
+#ifdef PRINTS
+#include <stdio.h> 	
+#endif
 
 #include <assert.h> 	/* assert */
 #include <stdlib.h> 	/* malloc, free */
@@ -208,6 +211,32 @@ void *HashTableFind(const hash_table_t *table, void *value)
 	return NULL;
 }
 
+int HashTableInsert(hash_table_t *table, void *value)
+{
+	size_t index = 0;
+	dlist_t* dlst_indx = NULL;
+	dlist_iter_t start = NULL_ITER;
+
+	assert(table);
+
+	index = table->hash_func( value );
+
+	dlst_indx = *(table->hash_array + index );
+	
+	start = DListPushBack( dlst_indx, value);
+
+	#ifdef PRINTS
+		printf("Insert=  DListGetData(start) =%d \n", *(int*)DListGetData(start) );
+	#endif
+
+	if( ! DListIterIsEqual( start, DListEnd(dlst_indx) ) )
+	{
+		return SUCCESS;
+	}
+
+	return OPERATION_FAIL;
+	
+}
 
 /********************  HashTableForEach  ****************************/ 
 /*
