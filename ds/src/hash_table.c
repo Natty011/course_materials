@@ -62,7 +62,6 @@ hash_table_t *HashTableCreate(hash_func_t hash_func, match_func_t match_func,
  	
 	assert(hash_func);
   	assert(match_func);
-  	
   	table = (hash_table_t*)malloc(sizeof( hash_table_t ) );
   		 	
  	if(  NULL == table )
