@@ -396,12 +396,12 @@ int BinarySearchIterative(int *arr, size_t size, int num)
 	
 	while ( low <= high )
 	{
-		if ( num == arr[mid] )	
+		if ( num == *(arr + mid) )	
 		{
 			return mid;
 		}
 		
-		else if( num < arr[mid] )
+		else if( num < *(arr + mid) )
 		{
 			high = mid - 1;
 		}
@@ -429,12 +429,12 @@ int* BinarySearchRecursive(int *arr, size_t size, int num)
 	}	
 	mid = size / 2;
 		
-	if ( num == arr[mid] )
+	if ( num == *(arr + mid) )
 	{
 		return arr + mid;
 	}
 		
-	if ( num < arr[mid] )
+	if ( num < *(arr + mid) )
 	{
 		return BinarySearchRecursive(arr, mid, num );
 	}
@@ -467,11 +467,11 @@ int MergeSort(int *arr, size_t size)
 
 	
 /*************************QuickSort***************************/	
-void QuickSort(void *arr, size_t count, size_t element_size,
+void QuickSort(void *arr, size_t count, size_t elem,
                        int (*cmp_func)(const void *, const void *))
 {
 	char *pivot = NULL, *arr_ptr = NULL;
-	size_t base = 1, tail = count - 1, elem = element_size;
+	size_t base = 1, tail = count - 1;
 	
 	assert( arr );
 	assert( cmp_func );
@@ -498,14 +498,22 @@ void QuickSort(void *arr, size_t count, size_t element_size,
 		
 		if( base < tail )
 		{
-			SwapQuick( arr_ptr + (elem * base ), arr_ptr + (elem * tail) , elem);
+			if ( FAIL == SwapQuick( arr_ptr + (elem * base ),
+					 arr_ptr + (elem * tail) , elem) )
+			{
+				return;
+			}		 
+			
 
 			--tail;
 			++base;			
 		}
 	}
 	
-	SwapQuick( pivot, arr_ptr + (elem * tail) , elem);
+	if ( FAIL == SwapQuick( pivot, arr_ptr + (elem * tail) , elem) )
+	{
+		return;	
+	}
 	
 	QuickSort(arr_ptr, tail, elem, cmp_func );
 	QuickSort(arr_ptr + (elem * (tail + 1)) , count - tail - 1, elem, cmp_func );	
