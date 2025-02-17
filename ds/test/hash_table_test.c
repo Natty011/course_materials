@@ -108,7 +108,7 @@ static int Compare2(void* check_data , void* new_data)
 /*******************hashFunction*********************/
 size_t HashFunction(const void* key)
 {
-  return (*(size_t*)key) / 9;
+  return (*(int*)key) / 10;
 }
 
 /******************End of static functions definition**********************/
@@ -142,7 +142,7 @@ int main ()
 /********************  TestHash  ****************************/
 static void TestHash(void)
 {	
-	int flag = FALSE;
+	int flag = FALSE, res = -1;
 	/*struct set *array;*/
 	hash_table_t *table1 = NULL;
 
@@ -168,6 +168,22 @@ static void TestHash(void)
 	{
 		
 		puts("Failes in_1: Size");
+		flag =  TRUE;
+	
+	}
+	res = HashTableInsert(table1, ages);
+	printf("res = %d \n ", res);
+
+	if( HashTableIsEmpty(table1) ) 
+	{
+		puts("Failes in_2: IsEmpty");
+		flag =  TRUE;
+	}
+
+	if( 1 != HashTableSize(table1) )
+	{
+		
+		puts("Failes in_2: Size");
 		flag =  TRUE;
 	
 	}
