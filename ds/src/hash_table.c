@@ -58,7 +58,7 @@ hash_table_t *HashTableCreate(hash_func_t hash_func, match_func_t match_func,
  	hash_table_t *table = NULL;
  	
 	assert(hash_func);
-  	assert(cmp_func);
+  	assert(match_func);
   	
   	table = (hash_table_t*)malloc(sizeof( hash_table_t ) );
   		 	
@@ -100,7 +100,7 @@ hash_table_t *HashTableCreate(hash_func_t hash_func, match_func_t match_func,
  	
  	table->capacity = capacity;
  	table->size = 0;
-	table->cmp_func = match_func;
+	table->match_func = match_func;
 	table->hash_func = hash_func;
 	
 	return table;
@@ -148,9 +148,9 @@ void HashTableRemove(hash_table_t *table, void *value)
 	assert(table);
 	
 	/*return the index of the correct dlist*/
-	index = table->hash_func( value, table->capacity );
+	index = table->hash_func( value );
  	
-	dlst_indx = *(table->hash_array) + index;
+	dlst_indx = *(table->hash_array + index );
 	
 	if( DListIsEmpty(dlst_indx) )
 	{
@@ -158,7 +158,7 @@ void HashTableRemove(hash_table_t *table, void *value)
 	}
 	
 	start = DListBegin(dlst_indx);
-	start = DListFind(start, DListEnd(dlst_idnx),match_func, value);
+	start = DListFind(start, DListEnd(dlst_indx),table->match_func, value);
 	
 	if( ! DListIterIsEqual( start, DListEnd(dlst_indx) ) )
 	{
