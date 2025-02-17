@@ -17,11 +17,12 @@
 
 struct hash_table
 {
-	size_t arr_size;
-	dlist_t* hash_array[ size ];
+	size_t capacity;	/* size of the array -> result_hash_func % capacity will bring the index */
+	size_t size; /* size of the total node ( sum of each dlist */
+	dlist_t **hash_array; /* dlist_t* hash_array[ size ] */
 	cmp_func_t cmp_func;
 	hash_func_t hash_func;
-	capacity;	
+
 
 };
 
@@ -45,35 +46,61 @@ typedef enum
 
 /********************  HashTableCreate  ****************************/
 hash_table_t *HashTableCreate(hash_func_t hash_func, cmp_func_t cmp_func, 
-								size_t size)
+								size_t capacity )
 {	
- 	hash_table_t *table = (hash_table_t*)malloc(sizeof( hash_table_t ) );
- 	if( 
-}                                
-sort_list_t* SortlistCreate(cmp_func_t sort_func)
-{
-
-	sort_list_t* list = (sort_list_t*)malloc(sizeof(sort_list_t));
+ 	size_t i = 0;
+ 	hash_table_t *table = NULL;
+ 	
+	assert(hash_func);
+  	assert(cmp_func);
+  	
+  	table = (hash_table_t*)malloc(sizeof( hash_table_t ) );
+  		 	
+ 	if(  NULL == table )
+ 	{
+ 		return NULL;
+ 	}
+ 	
+ 	table->hash_array  = (dlist_t*)malloc( capacity * sizeof(dlist_t) );
+ 	
+ 	if( NULL == table->hash_array )
+ 	{
+ 		free(table);
+ 		table = NULL;
+ 		
+ 		return NULL;
+ 	}
+ 	
+ 	for ( i = 0; i < capacity; ++i )
+ 	{
+ 	 	if ( NULL == *( (table->hash_array) + i ) = DListCreate() )
+ 	 	{
+ 	 		while ( i > 0 )
+ 	 		{
+ 	 			free( *( (table->hash_array) + i - 1 ) );
+ 	 			*( (table->hash_array) + i - 1 ) = NULL;
+ 	 			--i;
+ 	 		}
+ 	 		
+ 	 		free( table->hash_array );
+ 	 		table->hash_array = NULL;
+ 	 		
+ 	 		free(table);
+ 			table = NULL;
+ 		
+ 			return NULL;
+ 	 	} 
+ 	}
+ 	
+ 	table->capacity = capacity;
+ 	table->size = 0;
+	table->cmp_func = cmp_func;
+	table->hash_func = hash_func;
 	
-	if(NULL == list)
-	{
-		return NULL;
-	}
-	
-	list->dlist =  DListCreate();
-	
-	if(NULL == list->dlist)
-	{
-		free(list);
-		list = NULL;
-		return NULL;
-	}
-
-	list->cmp_func = sort_func;
-	return list;
-
+	return table;
+ 	
 }
-
+  
 /********************  SortlistIsEmpty  ****************************/
 int SortlistIsEmpty(const sort_list_t* sort_list)
 {
