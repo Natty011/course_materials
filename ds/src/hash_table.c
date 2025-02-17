@@ -19,7 +19,7 @@
 struct hash_table
 {
 	size_t capacity;	/* size of the array -> result_hash_func % capacity will bring the index */
-	size_t size; /* size of the total node ( sum of each dlist */
+	 /* size of the total node ( sum of each dlist */
 	dlist_t **hash_array; /* dlist_t* hash_array[ size ] */
 	match_func_t match_func;
 	hash_func_t hash_func;
@@ -99,7 +99,6 @@ hash_table_t *HashTableCreate(hash_func_t hash_func, match_func_t match_func,
  	}
  	
  	table->capacity = capacity;
- 	table->size = 0;
 	table->match_func = match_func;
 	table->hash_func = hash_func;
 	
@@ -128,14 +127,7 @@ void HashTableDestroy(hash_table_t *table)
  	table = NULL;
 
 }
-	/*return !(SUCCESS == (*(int*)check_data - *(int*)new_data));*/
-/*	
-static int match_func(void* check_data , void* data_to_remove)
-{
-	return memcmp( check_data, data_to_remove);
 
-}
-*/
 /********************  HashTableRemove  ****************************/ 
 /* need to update the size after the removing */
 
