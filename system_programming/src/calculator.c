@@ -124,6 +124,96 @@ static event_t op_event = INVALID_INPUT;
 
 /**************End Of Globals****************************/
 
+/**************Calculate****************************/
+
+status_t Calculate(const char* expression, double* result)
+{
+	calc_t calc_state = { 0 };
+	calc_t *p_calc_state = &calc_state;
+
+	assert(expression);
+	assert(result);
+
+	current_status = InitArrays(num_arr_handlers, op_arr_handlers, arr_events,
+	 							p_calc_state, expression);
+	 											
+	current_state = WAIT_FOR_NUM;
+
+	if( SYSTEM_ERROR == current_status )
+	{
+		return SYSTEM_ERROR;
+	}
+	while( (ERROR != current_state) &&
+			( BACK_SLASH_CHAR !=  *(p_calc_state->str) ) )
+	{
+		switch ( current_state )
+		{
+			case WAIT_FOR_NUM:
+				num_event = arr_events[ (size_t)*(p_calc_state->str) ];
+				
+				/*Not to get segmentation fault */ 
+				if(NULL != num_arr_handlers[ num_event ] ) 
+        		{
+            		current_state = 
+            			num_arr_handlers[ num_event ](p_calc_state, result);
+            		p_calc_state->curr_state = current_state;
+            		current_status = p_calc_state->curr_status;
+       			}
+       			
+       			break;
+       			
+			case WAIT_FOR_OP:
+				 op_event = arr_events[ (size_t)(*(p_calc_state->str)) ];
+				
+				if(NULL != op_arr_handlers[ op_event ] )  
+				{
+            		current_state = 
+            			op_arr_handlers[ op_event ](p_calc_state, result);
+            		p_calc_state->curr_state = current_state;
+            		current_status = p_calc_state->curr_status;	
+       			}
+       			
+       			break;
+       			
+       		default:
+       			break;	
+		}
+	}
+
+	/* Not possible to finish with that state */
+	if ( WAIT_FOR_NUM == current_state && 
+		BACK_SLASH_CHAR == *(p_calc_state->str)) 
+	{
+		current_status = SYNTAX_ERROR;
+		current_state = ERROR;
+		p_calc_state->curr_state = current_state;
+		*result = 0.0;
+	}
+	
+	if( (ERROR != current_state) ) 
+	{
+		current_status = IntermediateResult( p_calc_state, result);
+	}
+	
+	/* CHECK IF #BRACKETS ARE BALANCES*/
+	if ( 0 !=  num_of_brackets ) 
+	{
+		current_status = SYNTAX_ERROR;
+		current_state = ERROR;
+		p_calc_state->curr_state = current_state;
+		*result = 0.0;
+		
+		/* Must be initilized again because it is a global */
+		num_of_brackets = 0; 
+	}
+
+	DestroyStacks( p_calc_state );
+
+	return current_status;
+}
+
+
+
 /***********Static Functions definition*******/
 
 /**************CalcTwoNums****************************/
@@ -316,7 +406,7 @@ static status_t InitArrEvent(int *arr_event )
 	arr_event[MINUS_CHAR] = MINUS;
 	arr_event[DIV_CHAR] = DIV;
 		
-	for( i = 48; i <=57; ++i )
+	for( i = '0'; i <='9'; ++i )
 	{
 		arr_event[i] = NUMBER_EVENT;
 	}
@@ -608,92 +698,5 @@ static state_t Error(calc_t *calc_state, double* result)
 
 /***********End Of Static Functions definition*******/
 
-/**************Calculate****************************/
-
-status_t Calculate(const char* expression, double* result)
-{
-	calc_t calc_state = { 0 };
-	calc_t *p_calc_state = &calc_state;
-
-	assert(expression);
-	assert(result);
-
-	current_status = InitArrays(num_arr_handlers, op_arr_handlers, arr_events,
-	 							p_calc_state, expression);
-	 											
-	current_state = WAIT_FOR_NUM;
-
-	if( SYSTEM_ERROR == current_status )
-	{
-		return SYSTEM_ERROR;
-	}
-	while( (ERROR != current_state) &&
-			( BACK_SLASH_CHAR !=  *(p_calc_state->str) ) )
-	{
-		switch ( current_state )
-		{
-			case WAIT_FOR_NUM:
-				num_event = arr_events[ (size_t)*(p_calc_state->str) ];
-				
-				/*Not to get segmentation fault */ 
-				if(NULL != num_arr_handlers[ num_event ] ) 
-        		{
-            		current_state = 
-            			num_arr_handlers[ num_event ](p_calc_state, result);
-            		p_calc_state->curr_state = current_state;
-            		current_status = p_calc_state->curr_status;
-       			}
-       			
-       			break;
-       			
-			case WAIT_FOR_OP:
-				 op_event = arr_events[ (size_t)(*(p_calc_state->str)) ];
-				
-				if(NULL != op_arr_handlers[ op_event ] )  
-				{
-            		current_state = 
-            			op_arr_handlers[ op_event ](p_calc_state, result);
-            		p_calc_state->curr_state = current_state;
-            		current_status = p_calc_state->curr_status;	
-       			}
-       			
-       			break;
-       			
-       		default:
-       			break;	
-		}
-	}
-
-	/* Not possible to finish with that state */
-	if ( WAIT_FOR_NUM == current_state && 
-		BACK_SLASH_CHAR == *(p_calc_state->str)) 
-	{
-		current_status = SYNTAX_ERROR;
-		current_state = ERROR;
-		p_calc_state->curr_state = current_state;
-		*result = 0.0;
-	}
-	
-	if( (ERROR != current_state) ) 
-	{
-		current_status = IntermediateResult( p_calc_state, result);
-	}
-	
-	/* CHECK IF #BRACKETS ARE BALANCES*/
-	if ( 0 !=  num_of_brackets ) 
-	{
-		current_status = SYNTAX_ERROR;
-		current_state = ERROR;
-		p_calc_state->curr_state = current_state;
-		*result = 0.0;
-		
-		/* Must be initilized again because it is a global */
-		num_of_brackets = 0; 
-	}
-
-	DestroyStacks( p_calc_state );
-
-	return current_status;
-}
 
 
