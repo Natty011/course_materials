@@ -181,14 +181,33 @@ int HashTableIsEmpty(const hash_table_t *table)
 
 /********************  HashTableFind  ****************************/ 
 
-void *HashTableFind(const hash_table_t *table, void *equivalent_value)
+void *HashTableFind(const hash_table_t *table, void *value)
 {
+	size_t index = 0;
+	dlist_t* dlst_indx = NULL;
+	dlist_iter_t start = NULL_ITER;
+
 	assert(table);
+	index = table->hash_func( value );
+
+	dlst_indx = *(table->hash_array + index );
 	
+	if( DListIsEmpty(dlst_indx) )
+	{
+		return NULL;
+	}
+
+	start = DListBegin(dlst_indx);
+	start = DListFind(start, DListEnd(dlst_indx),table->match_func, value);
 	
-	
-	
+	if( ! DListIterIsEqual( start, DListEnd(dlst_indx) ) )
+	{
+		return value;
+	}
+
+	return NULL;
 }
+
 
 /********************  HashTableForEach  ****************************/ 
 /*
