@@ -42,14 +42,13 @@
 extern int destroy_check_avl;
 
 /***************struct and enum declaration *******/
-
-struct set
+/*
+struct person
 {
   size_t key;
   int data;
-};
-
-size_t capacity = 10;
+}person_t;
+*/
 
 typedef enum
 {
@@ -109,7 +108,7 @@ static int Compare2(void* check_data , void* new_data)
 /*******************hashFunction*********************/
 size_t HashFunction(const void* key)
 {
-  return (*(size_t*)key) % capacity;
+  return (*(size_t*)key) / 9;
 }
 
 /******************End of static functions definition**********************/
@@ -144,16 +143,37 @@ int main ()
 static void TestHash(void)
 {	
 	int flag = FALSE;
-	struct set *array;
+	/*struct set *array;*/
+	hash_table_t *table1 = NULL;
 
 	/*size_t size = 0;*/
-	
-	/*int arr[11] = {100, 70, 110, 85, 80, 75 ,65 , 67, 130, 30, 150};*/
+	size_t capacity = 10;
+	int ages[10] = {1, 10, 20, 30, 30, 40 ,50 , 60, 70, 80};
+	capacity = sizeof(ages)/sizeof(ages[0]);
+	/*puts(RED);*/
 
-	hash_table_t *table1 = HashTableCreate(HashFunction, Compare, capacity);
+	table1 = HashTableCreate(HashFunction, Compare, capacity);
+	if ( !table1 )
+	{
+		puts("Failes in_1: HashTableCreate - Allocation");
+	}
+
+	if( !HashTableIsEmpty(table1) ) 
+	{
+		puts("Failes in_1: IsEmpty");
+		flag =  TRUE;
+	}
+
+	if( 0 != HashTableSize(table1) )
+	{
+		
+		puts("Failes in_1: Size");
+		flag =  TRUE;
 	
-	
+	}
+
 	HashTableDestroy(table1);
+
 	table1 = NULL;
 	
 	if( OPERATION_FAIL == destroy_check_avl )
