@@ -14,6 +14,8 @@
 
 #define MIN(a, b)		((a > b ) ? b : a )
 #define MAX(a, b)		((a > b ) ? a : b )
+
+#define UNUSED( var )       ( (void)var )
 /****************struct and enum declaration*********************/
 
 struct avl
@@ -167,15 +169,34 @@ static int IsChildExist(avl_node_t* node, int child_pos)
 static void	SetHeight(avl_node_t* node, int child_pos, op_type_t op )
 {
 	assert(node);
+	UNUSED( op );
 	switch( FindNumChilds( node ) )
 	{
 		case 0:
-			/*
-			if( op == REMOVE &&  node->height )
-			{
-				break;
-			}
-			*/	
+			node->height = 0 ;
+			break;
+			
+		case 1:
+			printf("child_pos = %d \n", child_pos);
+			/*child_pos = IsLeftChild(node, node->child[child_pos]);*/
+			node->height = (node->child[child_pos])->height + 1;
+			break;	
+		
+		case 2:
+			op = (size_t)INSERT;
+			node->height = MAX( GetHeight( node->child[LEFT]) , 
+								GetHeight( node->child[RIGHT]) )  +  1;
+			break;
+	}
+}
+/*
+static void	SetHeight(avl_node_t* node, int child_pos, op_type_t op )
+{
+	assert(node);
+	switch( FindNumChilds( node ) )
+	{
+		case 0:
+		
 				node->height +=	(1 * ((size_t)op - 1 )) ;
 			
 			break;
@@ -191,7 +212,7 @@ static void	SetHeight(avl_node_t* node, int child_pos, op_type_t op )
 			break;
 	}
 }
-
+*/
 /********************  GetHeight  ****************************/
 static size_t GetHeight( avl_node_t* node)
 {
@@ -240,7 +261,7 @@ static avl_node_t * AuxAVLInsert(avl_t *tree,  avl_node_t *parent ,
 		new_node->child[RIGHT] = NULL;
 		new_node->height = 0;	
 	
-		return;
+		return new_node;
 	}	
 	
 	res = tree->cmp_func( curr_node->data, new_data );
@@ -256,6 +277,7 @@ static avl_node_t * AuxAVLInsert(avl_t *tree,  avl_node_t *parent ,
 					puts("find_INSERT_START");
 					AvlPrintData( x);
 					AvlPrintData( x->child[ !what_child ]);
+					AvlPrintData( parent);
 					parent->child[!what_child] = x;
 					AvlPrintData( curr_node);
 					AvlPrintData( parent);
@@ -458,6 +480,7 @@ static avl_node_t *LeftRotate(avl_t *tree, avl_node_t *x, int what_child, op_typ
 {
 	avl_node_t *y = NULL, *tree_y_child = NULL;
 	assert( x );
+		UNUSED( op );
 					puts("LeftRotate");
 	y = x->child[what_child]; /*what_child --> LEFT ? */
 	tree_y_child = y->child[LEFT];
@@ -475,15 +498,17 @@ static avl_node_t *LeftRotate(avl_t *tree, avl_node_t *x, int what_child, op_typ
 		/*SetHeight( x, what_child, REMOVE );*/
 		/*SetHeight( y, LEFT, op );*/
 
-	SetHeight( x, what_child, REMOVE );
+	SetHeight( x, what_child, INSERT );
+	/*
 	if( op == REMOVE )
 	{
 		SetHeight( y, LEFT, INSERT );
 	}
-	else /*  if( op == INSERT) */
+	else 
 	{
 		SetHeight( y, LEFT, op );
-	}	
+	}
+	*/	
 	AvlPrintData( y->child[LEFT]);		
 	if( x == tree->root )
 	{
@@ -758,7 +783,7 @@ static avl_node_t *AuxAVLRemove(avl_t *tree,  avl_node_t *parent, avl_node_t
 
 	if(NULL == curr_node ) 
 	{
-		return;
+		return NULL;
 	}
 	/*
 	AvlPrintData( curr_node);
@@ -834,7 +859,7 @@ static avl_node_t *AuxAVLRemove(avl_t *tree,  avl_node_t *parent, avl_node_t
 				break;
 		}
 		
-		return;
+		return curr_node ? curr_node: NULL;
 	}
 	
 
