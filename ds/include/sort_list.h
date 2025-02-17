@@ -27,7 +27,7 @@ typedef struct sort_list_iter
 *				* 'new_data' - data to be inserted to the list
 *   Return: >0 , <0 , =0 if check_data is bigger(after), smaller(before) or equal than new data
 * 
-*/  typedef int( *cmp_func_t )(void* check_data, void* new_data );
+*/  /*typedef int( *cmp_func_t )(void* check_data, void* new_data );*/
 /* 
 ******************************************************************************/
 
