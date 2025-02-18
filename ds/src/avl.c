@@ -829,7 +829,7 @@ static avl_node_t *AuxAVLRemove(avl_t *tree,  avl_node_t *parent, avl_node_t
 								 void* data_to_remove, op_type_t op)
 {	
 	int what_child = LEFT, what_son = LEFT;
-	avl_node_t *next_child = NULL;
+	avl_node_t *next_child = NULL, *parent2 = NULL;
 	avl_node_t *x = NULL, *y = NULL;
 	
 	assert( tree );
@@ -869,7 +869,12 @@ static avl_node_t *AuxAVLRemove(avl_t *tree,  avl_node_t *parent, avl_node_t
 		res = tree->cmp_func(parent->data, curr_node->data );
 		what_child = res > 0 ? LEFT : RIGHT;
 		what_son = IsChildExist(curr_node, LEFT) ? LEFT : RIGHT;
-				
+		puts("ENTER_to_switch_remove");
+
+		printf("what_child = %d\n", what_child);
+		printf("res = %d\n", res);
+		printf(" FindNumChilds(curr_node) = %d\n",  FindNumChilds(curr_node));
+
 		switch(  FindNumChilds(curr_node) )
 		{
 			case NO_CHILDS:
@@ -915,17 +920,40 @@ static avl_node_t *AuxAVLRemove(avl_t *tree,  avl_node_t *parent, avl_node_t
 
 				/*parent->child[what_child] = next_child->child[LEFT];*/
 			}
-				next_child = AvlNodeMax(&parent, curr_node->child[LEFT]);
-				what_child = IsLeftChild(parent, next_child) ? LEFT: RIGHT;
-				
-				AvlPrintData( next_child);
+				/*AvlPrintData( next_child);*/
+				AvlPrintData( curr_node);
+				printf("IsLeftChild(parent, curr_node)_1 = %d\n",IsLeftChild(parent, curr_node));	
+
 				AvlPrintData( parent);
+				/*next_child = AvlNodeMax(&curr_node, curr_node->child[LEFT]);*/
+				parent2 = curr_node;
+				next_child = AvlNodeMax(&parent2, curr_node->child[LEFT]);
+				what_child = IsLeftChild(parent2, next_child) ? LEFT: RIGHT;
+				printf("IsLeftChild(parent2, next_child) = %d\n",IsLeftChild(parent2, next_child));	
+				printf("what_child = %d\n",what_child);		
+	
+				AvlPrintData( next_child);
+				AvlPrintData( curr_node);
+				AvlPrintData( parent);
+
+				AvlPrintData( parent2);
 				
 				curr_node->data = next_child->data;
-				
-				parent->child[what_child] = next_child->child[LEFT];
+				/*
+				if (tree->root == curr_node)
+				{
+				parent = curr_node;
+
+				}
+
+				*/
+				parent2->child[what_child] = next_child->child[LEFT];
 				free(next_child);
 				next_child = NULL;
+				/*SetHeight( parent2, LEFT, REMOVE );*/
+
+				SetHeight( curr_node, LEFT, REMOVE );
+
 				if (tree->root == curr_node)
 				{
 					/*curr_node = curr_node->child[LEFT ];*/
@@ -938,19 +966,28 @@ static avl_node_t *AuxAVLRemove(avl_t *tree,  avl_node_t *parent, avl_node_t
 					AvlPrintData( y);
 
 					curr_node->child[LEFT] = y;
-
-
+					
 				}
 				else
 				{
-					HandleRebalance( tree, curr_node, curr_node->child[!what_child ], what_child, op);
+					y = HandleRebalance( tree, curr_node, curr_node->child[!what_child ], what_child, op);
+					puts("hiiiiiiii+no_root");
+					AvlPrintData( y);
+					AvlPrintData( curr_node);
+					AvlPrintData( parent);
+					printf("IsLeftChild(parent, curr_node)_2 = %d\n",IsLeftChild(parent, curr_node));	
+					what_child = IsLeftChild(parent, curr_node) ? LEFT: RIGHT;
+
+					parent->child[what_child] = y;
+
 
 				}
 				/*SetHeight( curr_node, LEFT, REMOVE );*/
 				break;
 		}
-		
-		return curr_node ? curr_node: NULL;
+		return curr_node;
+	
+		/*return curr_node ? curr_node: NULL;*/
 	}
 	
 
@@ -959,7 +996,8 @@ static avl_node_t *AuxAVLRemove(avl_t *tree,  avl_node_t *parent, avl_node_t
 	puts("what_x_return");
 	AvlPrintData( x);
 	AvlPrintData( curr_node);
-
+	AvlPrintData( parent);
+	
 
 	printf("what_child = %d \n", what_child);
 			 
