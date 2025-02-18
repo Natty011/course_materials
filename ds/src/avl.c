@@ -315,7 +315,6 @@ static avl_node_t * AuxAVLInsert(avl_t *tree,  avl_node_t *parent ,
 
 					}
 
-					
 					AvlPrintData( curr_node);
 					AvlPrintData( parent);
 					puts("find_INSERT_END");
