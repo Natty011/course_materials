@@ -849,6 +849,7 @@ static avl_node_t *AuxAVLRemove(avl_t *tree,  avl_node_t *parent, avl_node_t
 	
 	printf("what_child = %d\n", what_child);
 	printf("res = %d\n", res);
+	
 /*
 	if (tree->root != curr_node)
 	{
