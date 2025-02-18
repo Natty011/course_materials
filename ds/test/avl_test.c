@@ -173,9 +173,16 @@ static void TestAvlOneNode(void)
 	}
 	Aux_Pre_Print_Tree_Avl(avl1, 0);
 	
-
+	AVLRemove(avl1, arr + 0  );
+/*
 	AVLRemove(avl1, arr + 2  );
 	
+	AVLRemove(avl1, arr + 3  );
+*/
+	AVLRemove(avl1, arr + 4  );
+
+	AVLRemove(avl1, arr + 10  );
+
 
 	Aux_Pre_Print_Tree_Avl(avl1, 0);
 	
