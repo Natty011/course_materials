@@ -369,7 +369,7 @@ static avl_node_t *HandleRebalance( avl_t *tree, avl_node_t *parent
 	avl_node_t *x = NULL;
 	assert( tree );
 	assert( parent );
-	assert( curr_node );
+	/*assert( curr_node );*/
 	printf("op = %d \n", op);
 	/*
 	if( NULL == parent )
@@ -377,13 +377,13 @@ static avl_node_t *HandleRebalance( avl_t *tree, avl_node_t *parent
 		return NULL;
 	
 	}
-	
+	*/
 	if( NULL == curr_node )
 	{
 		return NULL;
 	
 	}
-*/
+
 	/* RL */										
 	if( -2 == BalancedFactor(tree, parent) && 
 			 1 == BalancedFactor(tree, curr_node))
