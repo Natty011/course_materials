@@ -856,6 +856,7 @@ static avl_node_t *AuxAVLRemove(avl_t *tree,  avl_node_t *parent, avl_node_t
 	}
 */
 	
+
 	if( 0 == res ) /* the node to remove */
 	{
 	
