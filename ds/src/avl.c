@@ -86,7 +86,7 @@ static avl_node_t * AuxAVLInsert(avl_t *tree, avl_node_t *parent, avl_node_t *cu
 static int IsLeftChild(avl_node_t* parent, avl_node_t* child);
 static int FindNumChilds(avl_node_t* node);
 static int IsChildExist(avl_node_t* node, int child_pos);
-static void	SetHeight(avl_node_t* node, int child_pos, op_type_t op );
+static size_t SetHeight(avl_node_t* node, int child_pos, op_type_t op );
 static size_t GetHeight( avl_node_t* node);
 static void AuxAVLSize(avl_node_t *node, size_t *size);
 static avl_node_t* AuxAVLFind(avl_t *tree, avl_node_t *node,
@@ -114,7 +114,9 @@ static avl_node_t *RightRotate(avl_t *tree, avl_node_t *y, int what_child, op_ty
 static avl_node_t *LeftRotate(avl_t *tree, avl_node_t *x, int what_child, op_type_t op);
 static avl_node_t *HandleRebalance( avl_t *tree,  avl_node_t *parent
 						 ,avl_node_t *curr_node, int what_child, op_type_t op);
-						 							 								 								  	
+
+/*size_t avl_node_height( avl_node_t *node ); */
+						 
 #ifdef PRINTS
 void *AvlGetData(avl_node_t *node);
 void AvlPrintData(avl_node_t *node);
@@ -165,11 +167,51 @@ static int IsChildExist(avl_node_t* node, int child_pos)
 	return  LEFT == child_pos ? NULL != node->child[LEFT] :
 								NULL != node->child[RIGHT]; 
 }
+
+/* Find the height of an AVL node recursively */
 /********************  SetHeight  ****************************/
+
+static size_t SetHeight( avl_node_t *node, int child_pos, op_type_t op ) 
+{
+	
+	size_t height_left = 0;
+	size_t height_right = 0;
+
+	assert(node);
+	UNUSED( op );
+	UNUSED( child_pos );
+
+	if( node->child[LEFT] ) height_left = SetHeight( node->child[LEFT],  child_pos, op);
+	if( node->child[RIGHT] ) height_right = SetHeight( node->child[RIGHT],  child_pos, op );
+	puts("set_heiht_start");
+	AvlPrintData( node);
+	if (0  == FindNumChilds( node ) )
+	{
+		node->height = 0 ;
+		return node->height;
+
+
+	}
+	node->height = height_right > height_left ? ++height_right : ++height_left;
+	AvlPrintData( node);
+
+	puts("set_heiht_end");
+
+	return node->height;
+
+	/*return height_right > height_left ? ++height_right : ++height_left;*/
+}
+
+/********************  SetHeight  ****************************/
+/*
 static void	SetHeight(avl_node_t* node, int child_pos, op_type_t op )
 {
 	assert(node);
 	UNUSED( op );
+
+	int height_left = 0;
+	int height_right = 0;
+
 	switch( FindNumChilds( node ) )
 	{
 		case 0:
@@ -178,7 +220,6 @@ static void	SetHeight(avl_node_t* node, int child_pos, op_type_t op )
 			
 		case 1:
 			printf("child_pos = %d \n", child_pos);
-			/*child_pos = IsLeftChild(node, node->child[child_pos]);*/
 			node->height = (node->child[child_pos])->height + 1;
 			break;	
 		
@@ -186,29 +227,6 @@ static void	SetHeight(avl_node_t* node, int child_pos, op_type_t op )
 			op = (size_t)INSERT;
 			node->height = MAX( GetHeight( node->child[LEFT]) , 
 								GetHeight( node->child[RIGHT]) )  +  1;
-			break;
-	}
-}
-/*
-static void	SetHeight(avl_node_t* node, int child_pos, op_type_t op )
-{
-	assert(node);
-	switch( FindNumChilds( node ) )
-	{
-		case 0:
-		
-				node->height +=	(1 * ((size_t)op - 1 )) ;
-			
-			break;
-			
-		case 1:
-			node->height +=	IsChildExist(node, child_pos) * ((size_t)op - 1 ) ; 
-			break;	
-		
-		case 2:
-			op = (size_t)INSERT;
-			node->height = MAX( GetHeight( node->child[LEFT]) , 
-								GetHeight( node->child[RIGHT]) )  +  (op - 1 );
 			break;
 	}
 }
