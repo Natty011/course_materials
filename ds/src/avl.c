@@ -849,7 +849,7 @@ static avl_node_t *AuxAVLRemove(avl_t *tree,  avl_node_t *parent, avl_node_t
 	
 	printf("what_child = %d\n", what_child);
 	printf("res = %d\n", res);
-	
+
 /*
 	if (tree->root != curr_node)
 	{
@@ -893,7 +893,26 @@ static avl_node_t *AuxAVLRemove(avl_t *tree,  avl_node_t *parent, avl_node_t
 
 				free( curr_node );
 				curr_node = NULL;
+				printf("NO_CHILDS = %d\n", NO_CHILDS);
 
+				AvlPrintData( curr_node);
+				AvlPrintData( parent);
+				/*SetHeight( parent, LEFT, REMOVE );*/
+
+				y = HandleRebalance( tree, parent, parent->child[!what_child ], what_child, op);
+				puts("NO_CHILDS+n");
+				AvlPrintData( y);
+				AvlPrintData( y->child[LEFT]);
+				AvlPrintData( y->child[RIGHT]);
+
+				AvlPrintData( curr_node);
+				AvlPrintData( parent);
+				printf("IsLeftChild(parent, curr_node)_2 = %d\n",IsLeftChild(parent, curr_node));	
+				/*what_child = IsLeftChild(parent, curr_node) ? LEFT: RIGHT;*/
+
+				/*parent->child[what_child] = y;*/
+
+				return y;
 				break;
 				
 			case ONE_CHILD:
