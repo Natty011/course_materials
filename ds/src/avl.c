@@ -292,6 +292,7 @@ static avl_node_t * AuxAVLInsert(avl_t *tree,  avl_node_t *parent ,
 	if(NULL != x && x->child[ !what_child ] == curr_node &&
 		x != tree->root)
 	{
+					/*
 					puts("find_INSERT_START");
 					printf("what_child = %d \n", what_child);
 					AvlPrintData( x);
@@ -301,7 +302,7 @@ static avl_node_t * AuxAVLInsert(avl_t *tree,  avl_node_t *parent ,
 					AvlPrintData( parent);
 					AvlPrintData( parent->child[!what_child]);
 					AvlPrintData( parent->child[what_child]);
-
+						*/
 					/*parent->child[!what_child] = x;*/
 					/* HANDLE RR parent*/
 					if ( RIGHT == what_child &&
@@ -314,11 +315,12 @@ static avl_node_t * AuxAVLInsert(avl_t *tree,  avl_node_t *parent ,
 						parent->child[!what_child] = x;
 
 					}
-
+/*
 					AvlPrintData( curr_node);
 					AvlPrintData( parent);
-					puts("find_INSERT_END");
 					
+					puts("find_INSERT_END");
+*/					
 
 	}
 	  
@@ -526,12 +528,16 @@ static avl_node_t *LeftRotate(avl_t *tree, avl_node_t *x, int what_child, op_typ
 	assert( x );
 		UNUSED( op );
 					puts("LeftRotate");
+	printf("what_child = %d \n" , what_child);				
 	y = x->child[what_child]; /*what_child --> LEFT ? */
 	AvlPrintData( x);
+	AvlPrintData( y);
+
+	AvlPrintData( y);
 
 	tree_y_child = y->child[LEFT];
 
-	AvlPrintData( x);
+	AvlPrintData( tree_y_child);
 		AvlPrintData( y);
 	y->child[LEFT] = x;
 	x->child[what_child] = tree_y_child;
@@ -545,6 +551,7 @@ static avl_node_t *LeftRotate(avl_t *tree, avl_node_t *x, int what_child, op_typ
 		/*SetHeight( y, LEFT, op );*/
 
 	SetHeight( x, what_child, INSERT );
+	SetHeight( y, LEFT, INSERT );
 	/*
 	if( op == REMOVE )
 	{
@@ -823,7 +830,7 @@ static avl_node_t *AuxAVLRemove(avl_t *tree,  avl_node_t *parent, avl_node_t
 {	
 	int what_child = LEFT, what_son = LEFT;
 	avl_node_t *next_child = NULL;
-	avl_node_t *x = NULL;
+	avl_node_t *x = NULL, *y = NULL;
 	
 	assert( tree );
 
@@ -911,23 +918,51 @@ static avl_node_t *AuxAVLRemove(avl_t *tree,  avl_node_t *parent, avl_node_t
 
 	x = AuxAVLRemove(tree, curr_node, curr_node->child[what_child],
 						 res, data_to_remove, op );
-					 
+	puts("what_x_return");
+	AvlPrintData( x);
+	AvlPrintData( curr_node);
 
-	if(NULL != x && x->child[ !what_child ] == curr_node &&
+
+	printf("what_child = %d \n", what_child);
+			 
+	AvlPrintData( x);
+		/*AvlPrintData( x->child[ !what_child ]);*/
+		/*AvlPrintData( x->child[ what_child ]);*/
+
+		AvlPrintData( parent);
+		/*
+		AvlPrintData( parent->child[!what_child]);
+		AvlPrintData( parent->child[what_child]);
+		*/
+	if(NULL != x && x->child[ !what_child ] == curr_node->child[ what_child ] &&
 	x != tree->root)
 {
 		puts("find_REMOVE_START");
 		printf("what_child = %d \n", what_child);
 		AvlPrintData( x);
+		/*
 		AvlPrintData( x->child[ !what_child ]);
 		AvlPrintData( x->child[ what_child ]);
-
+*/
 		AvlPrintData( parent);
+		/*
 		AvlPrintData( parent->child[!what_child]);
 		AvlPrintData( parent->child[what_child]);
-
+*/
 				/*parent->child[!what_child] = x;*/
 				/* HANDLE RR parent*/
+		
+				if ( RIGHT == what_child &&
+					x->child[ !what_child ] == curr_node->child[what_child] )
+				{
+					curr_node->child[what_child] = x;
+				}
+				else
+				{
+					curr_node->child[!what_child] = x;
+		
+				}		
+				/*		
 		if ( RIGHT == what_child &&
 			x->child[ !what_child ] == parent->child[what_child] )
 		{
@@ -938,6 +973,10 @@ static avl_node_t *AuxAVLRemove(avl_t *tree,  avl_node_t *parent, avl_node_t
 			parent->child[!what_child] = x;
 
 		}
+*/
+		
+			/*parent->child[!what_child] = x;*/
+
 
 				AvlPrintData( curr_node);
 				AvlPrintData( parent);
@@ -954,7 +993,13 @@ static avl_node_t *AuxAVLRemove(avl_t *tree,  avl_node_t *parent, avl_node_t
 	puts("parent");	
 	AvlPrintData( parent);	
 	*/
-	return HandleRebalance( tree, curr_node, curr_node->child[!what_child ], what_child, op);
+	y = HandleRebalance( tree, curr_node, curr_node->child[!what_child ], what_child, op);
+	puts("what_y_return");
+	AvlPrintData( y);
+	AvlPrintData( curr_node);
+
+	return y;
+
 }	
 
 /*********************  AvlNodeMax  ****************************/
