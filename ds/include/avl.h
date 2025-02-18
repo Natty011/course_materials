@@ -100,7 +100,7 @@ enum avl_traversal_order
 *       Return: Height of the tree
 *       Complexity: O(1)
 * 
-*/      size_t AVLHeight(const avl_t* tree);
+*/      int AVLHeight(const avl_t* tree);
 /*
 ******************************************************************************/
 
@@ -149,7 +149,7 @@ enum avl_traversal_order
 *       Notes: 'traversal_order' uses 'enum avl_traversal_order' to pick the
 *              traversal method of the for-each's iterations
 * 
-*/      int AVLForEachInOrder(avl_t *tree, op_func_t op_func, 
+*/      int AVLForEach(avl_t *tree, op_func_t op_func, 
                               void *user_param, int traversal_order);
 /*
 ******************************************************************************/
