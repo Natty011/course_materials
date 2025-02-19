@@ -39,8 +39,6 @@
 #define MIN(a, b)		((a > b ) ? b : a )
 #define MAX(a, b)		((a > b ) ? a : b )
 
-extern int destroy_check_avl;
-
 /***************struct and enum declaration *******/
 /*
 struct person
@@ -128,11 +126,7 @@ int main ()
 	printf("%sTEST: %s "RESET" \n", background,  mode);
    	puts(BACK_BLUE"'TestHash()'"RESET);
     TestHash();
-       /*
- 	puts(BLUE"====================================================="RESET);  	
-   	puts(BACK_BLUE"'TestAvlTwoeNode()'"RESET);
-    TestAvlTwoeNode();
-    */
+ 
 	puts(BLUE"====================================================="RESET);
 
 	return 0;
@@ -146,7 +140,7 @@ static void TestHash(void)
 	/*struct set *array;*/
 	hash_table_t *table1 = NULL;
 
-	/*size_t size = 0;*/
+	size_t i = 0;
 	size_t capacity = 10;
 	int ages[10] = {1, 10, 20, 30, 30, 40 ,50 , 60, 70, 80};
 	capacity = sizeof(ages)/sizeof(ages[0]);
@@ -171,16 +165,19 @@ static void TestHash(void)
 		flag =  TRUE;
 	
 	}
-	res = HashTableInsert(table1, ages);
-	printf("res = %d \n ", res);
 
-	if( HashTableIsEmpty(table1) ) 
+	for(i = 0; i <= 10; ++i)
 	{
-		puts("Failes in_2: IsEmpty");
-		flag =  TRUE;
-	}
-
-	if( 1 != HashTableSize(table1) )
+		flag = HashTableInsert(table1, ages + i);
+		
+		if( flag )
+		{
+			printf("Iteration = %lu \n", i); 
+			puts("Failes in_1: Insert Allocation failed ");
+			flag =  TRUE;
+		}
+		
+		if( (i + 1) != HashTableSize(table1) )
 	{
 		
 		puts("Failes in_2: Size");
@@ -188,16 +185,24 @@ static void TestHash(void)
 	
 	}
 
+	}
+
+
+	/*res = HashTableInsert(table1, ages);*/
+	/*printf("res = %d \n ", res);*/
+
+	if(  HashTableIsEmpty(table1) ) 
+	{
+		puts("Failes in_2: IsEmpty");
+		flag =  TRUE;
+	}
+
+	
+
 	HashTableDestroy(table1);
 
 	table1 = NULL;
-	
-	if( OPERATION_FAIL == destroy_check_avl )
-	{
-		puts("Failes in_1: Destroy");
-		flag =  TRUE;
-	}
-	
+
 	if( !flag )
 	{
 		puts(RESET);		
