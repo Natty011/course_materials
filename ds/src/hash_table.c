@@ -230,6 +230,7 @@ int HashTableInsert(hash_table_t *table, void *value)
 	start = DListPushBack( dlst_indx, value);
 
 	#ifdef PRINTS
+	/*puts("(char*)DListGetData(start)");*/
 	/*printf("Insert=  DListGetData(start) =%d \n", *(int*)DListGetData(start) );*/
 	#endif
 
@@ -262,13 +263,12 @@ int HashTableForEach(hash_table_t *table, operation_func_t op_func,
 
 		if ( DListForEach(start, end, op_func, user_param) )
 		{
-			return TRUE;
+			return SUCCESS;
 
 		}
 	}
 
-	return FALSE;
+	return OPERATION_FAIL;
 
 }                             
-
 
