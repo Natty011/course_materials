@@ -93,7 +93,12 @@ static int SortingFunc(const void* check_data ,const void* new_data)
 
 static int Compare(void* check_data , void* new_data)
 {
-	return (SUCCESS == (*(int*)check_data - *(int*)new_data));
+	if( NULL != check_data && NULL != new_data)
+	{
+		return (SUCCESS == (*(int*)check_data - *(int*)new_data));
+	}	
+
+	return -1;
 }
 
 /*******************Compare2*********************/
@@ -252,6 +257,20 @@ static void TestHash(void)
 		
 	}
 	
+
+	for( i = 0; i < 10 ; ++i )
+	{
+		res = HashTableForEach(table1 ,Compare, HashTableFind( table1, ages + i));
+		
+		if( 1 != res) 
+		{
+			
+			printf("line: %d, Iteration = %lu \n" , __LINE__, i );
+			puts("Failes in : HashTableFind");
+		} 
+		
+	}
+
 	res = HashTableForEach(table1 ,Compare, ages2 );
 		
 	if( 0 != res) 
@@ -259,6 +278,15 @@ static void TestHash(void)
 			
 		printf("line: %d \n" , __LINE__ );
 		puts("Failes in : HashTableForEach");
+	}
+	
+	res = HashTableForEach(table1 ,Compare, HashTableFind( table1, ages2 ) );
+		
+	if( 0 != res) 
+	{
+			
+		printf("line: %d \n" , __LINE__ );
+		puts("Failes in : HashTableFind");
 	} 
 
 	
