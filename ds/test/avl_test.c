@@ -8,6 +8,7 @@
 #include <stdio.h> 		/* printf, puts, qsort  */
 #include <assert.h>
 #include <string.h> 	/* strcpy, strcmp */
+#include <math.h> 	
 
 #include "avl.h" 
 
@@ -38,8 +39,6 @@
 
 #define MIN(a, b)		((a > b ) ? b : a )
 #define MAX(a, b)		((a > b ) ? a : b )
-
-extern int destroy_check_avl;
 
 /***************struct and enum declaration *******/
 
@@ -146,7 +145,7 @@ static void TestAvlOneNode(void)
 /*110*/
 	int arr[11] = {100, 70, 110, 85, 80, 75 ,
 				65 , 67, 130, 30, 150};
-	int arr2[11] = {100, 70, 80, 85, 80, 75 ,65 , 67, 130, 30, 150};
+	/*int arr2[11] = {100, 70, 80, 85, 80, 75 ,65 , 67, 130, 30, 150};*/
 	size_t i = 0;
 	int foreach[2] = {151, 150};
 		
@@ -171,35 +170,13 @@ static void TestAvlOneNode(void)
 		}
 
 	}
-	Aux_Pre_Print_Tree_Avl(avl1, 0);
+	/*Aux_Pre_Print_Tree_Avl(avl1, 0);*/
 	
-	AVLRemove(avl1, arr + 0  );
-/*
-	AVLRemove(avl1, arr + 2  );
 	
-	AVLRemove(avl1, arr + 3  );
-*/
-	AVLRemove(avl1, arr + 4  );
-
-	AVLRemove(avl1, arr + 10  );
-
-
-	Aux_Pre_Print_Tree_Avl(avl1, 0);
-	
-	/*
-	if( 4 != AVLHeight(avl1) )
-	{
-		puts("Failes in_2: Insert");
-		flag =  TRUE;
-	
-	}
-	*/
-	/*printf("size = %lu \n", AVLSize(avl1));*/
-	/*
-	if( 11 != AVLSize(avl1) )
+	if( 11 != AVLSize(avl1) || 3 != AVLHeight(avl1) )
 	{
 		
-		puts("Failes in_1: Size");
+		puts("Failes in_1: Size || Height");
 		flag =  TRUE;
 	
 	}
@@ -217,102 +194,143 @@ static void TestAvlOneNode(void)
 
 	}
 	
-	if( SUCCESS != AVLForEachInOrder(avl1, Compare2, foreach , PRE_ORDER)
-		|| OPERATION_FAIL != AVLForEachInOrder(avl1, Compare2, foreach + 1, PRE_ORDER) )  
+	if( SUCCESS != AVLForEach(avl1, Compare2, foreach , PRE_ORDER)
+		|| OPERATION_FAIL != AVLForEach(avl1, Compare2, foreach + 1, PRE_ORDER) )  
 	{
 
 		puts("Failes in_1: ForEachPreOrder");
 		flag =  TRUE;
 	}
 		
-	if( SUCCESS != AVLForEachInOrder(avl1, Compare2, foreach , POST_ORDER)
-		|| OPERATION_FAIL != AVLForEachInOrder(avl1, Compare2, foreach + 1, POST_ORDER) )  
+	if( SUCCESS != AVLForEach(avl1, Compare2, foreach , POST_ORDER)
+		|| OPERATION_FAIL != AVLForEach(avl1, Compare2, foreach + 1, POST_ORDER) )  
 	{
 		puts("Failes in_2: ForEachPostOrder");
 		flag =  TRUE;
 	}
 		
-	if( SUCCESS != AVLForEachInOrder(avl1, Compare2, foreach , IN_ORDER)
-		|| OPERATION_FAIL != AVLForEachInOrder(avl1, Compare2, foreach + 1, IN_ORDER) )  
+	if( SUCCESS != AVLForEach(avl1, Compare2, foreach , IN_ORDER)
+		|| OPERATION_FAIL != AVLForEach(avl1, Compare2, foreach + 1, IN_ORDER) )  
 	{
 
 		puts("Failes in_3: ForEachInOrder");
 		flag =  TRUE;
 	}
 	
-	if( 11 != AVLSize(avl1) )
-	{
-		
-		puts("Failes in_3: Size");
-		flag =  TRUE;
 	
-	}
-	
-	
+	/*30 */
+
 	AVLRemove(avl1, arr + 9); 
 	
+	if( 10 != AVLSize(avl1) || 3 != AVLHeight(avl1))
+	{
+		
+		puts("Failes in_4: Size || Height || Remove"  );
+		flag =  TRUE;
+	
+	}
 
-	
-	if( 10 != AVLSize(avl1) )
-	{
-		
-		puts("Failes in_4: Size");
-		flag =  TRUE;
-	
-	}
-	
-	*/
-	
-	/*
-	if( 11 != AVLSize(avl1) )
-	{
-		
-		puts("Failes in_4: Size");
-		flag =  TRUE;
-	
-	}
-	Aux_Pre_Print_Tree_Avl(avl1, 0);
-	
+
+	/*Aux_Pre_Print_Tree_Avl(avl1, 0);*/
+		/*70 */
+
 	AVLRemove(avl1, arr + 1); 
 	
-	if( 10 != AVLSize(avl1) )
+	if( 9 != AVLSize(avl1) || 3 != AVLHeight(avl1))
 	{
 		
-		puts("Failes in_5: Size");
+		puts("Failes in_5: Size || Height || Remove");
 		flag =  TRUE;
 	
 	}
-	*/
-	/*
-	if( 11 != AVLSize(avl1) )
-	{
-		
-		puts("Failes in_3: Size");
-		flag =  TRUE;
 	
-	}
-		
-	Aux_Pre_Print_Tree_Avl(avl1, 0);
+	/*Aux_Pre_Print_Tree_Avl(avl1, 0);*/
+	/*80 */
 	AVLRemove(avl1, arr + 4); 
 	
-	if( 10 != AVLSize(avl1) )
+	if( 8 != AVLSize(avl1) || 3 != AVLHeight(avl1))
 	{
 		
-		puts("Failes in_4: Size");
+		puts("Failes in_6: Size || Height || Remove");
 		flag =  TRUE;
 	
 	}
-	*/
-	/*Aux_Pre_Print_Tree_Avl(avl1, 0);*/
+
+	/*100 */
+	AVLRemove(avl1, arr + 0  );
+
+	if( 7 != AVLSize(avl1) || 2 != AVLHeight(avl1))
+	{
+		
+		puts("Failes in_7: Size || Height || Remove");
+		flag =  TRUE;
+	
+	}
+	/*110 */
+
+	AVLRemove(avl1, arr + 2  );
+	
+	if( 6 != AVLSize(avl1) || 2 != AVLHeight(avl1))
+	{
+		
+		puts("Failes in_8: Size || Height || Remove");
+		flag =  TRUE;
+	
+	}
+
+	/*80 */
+	AVLRemove(avl1, arr + 3  );
+
+	if( 5 != AVLSize(avl1) || 2 != AVLHeight(avl1))
+	{
+		
+		puts("Failes in_9: Size || Height || Remove");
+		flag =  TRUE;
+	
+	}
+	/*do not exist  */
+	AVLRemove(avl1, arr + 4  );
+
+	if( 5 != AVLSize(avl1) || 2 != AVLHeight(avl1))
+	{
+		
+		puts("Failes in_10: Size || Height || Remove");
+		flag =  TRUE;
+	
+	}
+	/*150 */
+	AVLRemove(avl1, arr + 10  );
+	if( 4 != AVLSize(avl1) || 2 != AVLHeight(avl1))
+	{
+		
+		puts("Failes in_11: Size || Height || Remove");
+		flag =  TRUE;
+	
+	}
+
+   /*65 */
+  AVLRemove(avl1, arr + 6  );
+  if( 3 != AVLSize(avl1) || 1 != AVLHeight(avl1))
+  {
+	
+	puts("Failes in_12: Size || Height || Remove");
+	flag =  TRUE;
+
+  }
+
+   /*75 */
+   AVLRemove(avl1, arr + 5  );
+   if( 2 != AVLSize(avl1) || 1 != AVLHeight(avl1))
+   {
+	 
+	 puts("Failes in_13: Size || Height || Remove ");
+	 flag =  TRUE;
+ 
+   }
 	
 	AVLDestroy(avl1);
 	avl1 = NULL;
 	
-	if( OPERATION_FAIL == destroy_check_avl )
-	{
-		puts("Failes in_1: Destroy");
-		flag =  TRUE;
-	}
 	
 	if( !flag )
 	{
@@ -328,296 +346,3 @@ static void TestAvlOneNode(void)
 	
 }
 	
-	/*
-	if( avlSize(avl1) != 0 )  
-	{
-		puts("Failes in_1: Size");
-		flag =  TRUE;
-	}
-	*/
-	/*
-	dummy_itr1 = avlBegin(avl1);
-	*/
-	/*
-	if( avlEnd(avl1) != dummy_itr1 )
-	{
-		puts("Failes in_1: Begin || End ");
-		flag =  TRUE;
-	}
-	
-	itr1 = avlInsert(avl1, arr);
-	if( SortingFunc(avlGetData(itr1) ,avlGetData(avlBegin(avl1)))  
-	     || avlSize(avl1) != 1 || avlIsEmpty(avl1) )
-		 
-	{
-		puts("Failes in_1: Insert || Begin || GetData || Size || IsEmpty");
-		flag =  TRUE;
-	}
-	
-	if( itr1 != avlPrev(dummy_itr1) || dummy_itr1 != avlPrev(itr1) )
-	{
-		puts("Failes in_1: Prev");
-		flag =  TRUE;	
-	}
-	
-	if( dummy_itr1 != avlNext(dummy_itr1) || dummy_itr1 != avlNext(itr1) )
-	{
-		puts("Failes in_1: Next");
-		flag =  TRUE;	
-	}
-	
-	if( itr1 != avlFind(avl1, arr) || dummy_itr1 != avlFind(avl1, arr + 1) 
-		|| dummy_itr1 != avlFind(avl1, arr + 2) )
-	{
-		puts("Failes in_1: Find");
-		flag =  TRUE;	
-	}
-	
-	if( TRUE != avlIsIterSame(itr1, itr1) || 
-		FALSE != avlIsIterSame(itr1, dummy_itr1) )
-	{
-		puts("Failes in_1: avlIsIterSame");
-		flag =  TRUE;
-	} 
-	
-	if( SUCCESS != avlForEach(itr1, dummy_itr1, Compare, arr) || 
-		OPERATION_FAIL != avlForEach(itr1, dummy_itr1, Compare, arr + 1) )
-	{
-		puts("Failes in_1: ForEach");
-		flag =  TRUE;
-	
-	} 
-	
-	if( dummy_itr1 != avlRemove(itr1) || avlSize(avl1) != 0 )
-	{
-		puts("Failes in_1: Remove || Size");
-		flag =  TRUE;	
-	}
-	
-	itr1 = avlInsert(avl1, arr);
-	*/  
-	
-/********************  TestavlOneNode  ****************************/
-/*
-static void TestavlTwoeNode(void)
-{	
-	int arr[11] = {100, 70, 110, 85, 80, 75 ,65 , 67, 130, 30, 150};
-	int arr_sort[11] = {30, 65, 67, 70, 75, 80, 85 ,100 , 110, 130, 150};
-	int to_insert[10] = { 76 }; 
-	
-	int* data = NULL;
-	
-	int flag = FALSE, max = arr[0], min = arr[0];
-	size_t i = 0;
-
-	avl_iter_t dummy_itr1;
-	avl_iter_t itr1;
-	avl_iter_t itr2;
-	avl_iter_t itr3;
-	avl_iter_t itr4;
-	avl_iter_t itr5;
-	avl_iter_t itr6;
-	avl_iter_t itr7;
-	
-	avl_t *avl1 = avlCreate(SortingFunc);	
-	puts(RED);
-
-	if( !avlIsEmpty(avl1) )  
-	{
-
-		puts("Failes in_2: IsEmpty");
-		flag =  TRUE;
-	}
-	
-	if( avlSize(avl1) != 0 )  
-	{
-		puts("Failes in_2: Size");
-		flag =  TRUE;
-	}
-	
-	dummy_itr1 = avlBegin(avl1);
-	
-	if( avlEnd(avl1) != dummy_itr1 )
-	{
-		puts("Failes in_2: Begin || End ");
-		flag =  TRUE;
-	}
-
-	for(i = 0; i <= 10; ++i)
-	{
-		itr1 = avlInsert(avl1, arr + i);
-		min = MIN(arr[i], min);
-		max = MAX(arr[i], max);
-		
-		if(	avlSize(avl1) != (i + 1) )
-		{
-			printf("Failes in_2: Size || Next || Insert, Iteration = %lu \n", i);
-			flag =  TRUE;
-		}
-		
-		if( SortingFunc(avlGetData(avlBegin(avl1) ) , &min ) ) 
-		{
-			printf("Failes in_2: Insert || Begin Iteration: %lu \n", i);
-			flag =  TRUE;
-		}
-		
-		if( SortingFunc(avlGetData(avlPrev(dummy_itr1) ) , &max ) )
-		{
-			printf("Failes in_2: Insert || Prev Iteration: %lu \n", i);
-			flag =  TRUE;
-		}
-	}
-	
-	*/
-	/*Aux_Pre_Print_Tree(avl1, 0);*/
-	
-	/*itr3 = avlFind(avl1, arr + 3);*/ /* 85 */
-/*	itr2 = avlFind(avl1, arr); *//* 100 (root) */
-/*
-	if(SortingFunc(avlGetData(itr3)  ,arr + 3 )) 
-	{
-		puts("Failes in_2: Find");
-		flag =  TRUE;	
-	}
-	*/
-	/*
-	if( TRUE != avlIsIterSame(itr2 , avlNext(itr3)) )   itr3->data == 85 
-	{
-		puts("Failes in_2: Next");
-		flag =  TRUE;	
-	}
-	*/
-	/*
-	if( TRUE != avlIsIterSame(dummy_itr1 , avlNext(itr1)) )  itr1->data == 150 
-	{
-		puts("Failes in_3: Next");
-		flag =  TRUE;	
-	}
-	
-	*/
-	
-/*	itr4 = avlNext(itr1);*/ /* itr4->data == end->data*/
-	/*itr5 = avlBegin(avl1);*/ /* itr5->data == 30*/
-	/*
-	for( i = 0; i <= 10; ++i)
-	{	
-		if( SUCCESS != avlForEach(itr5, avlNext(itr5), Compare, arr_sort + i)
-			|| SUCCESS != avlForEach(avlPrev(itr4), itr4, Compare, arr_sort + 10 - i) )  
-		{
-
-			printf("Iteration = %lu \n",  i);
-			puts("Failes in_3: ForEach || Next || Prev");
-			flag =  TRUE;
-	
-		}
-		itr5 = avlNext(itr5);
-		itr4 = avlPrev(itr4);
-	
-	} 
-	*/
-	/*Aux_Pre_Print_Tree(avl1, 0);*/
-	/*itr5 = avlPrev(itr5);*/ /* the Prev result: itr5->data == 150 */
-	/*itr6 = avlFind(avl1, arr_sort + 9);*/ /*itr6->data == 130  */
-	/*itr6 = avlRemove(itr6);*/ /* the node (itr6) has one child */
-	/*itr7 = avlFind(avl1, arr_sort + 8); *//*itr7->data == 110  */
-	/*
-	if( !avlIsIterSame(itr6, itr5) || avlSize(avl1) != 10 || 
-		!avlIsIterSame(itr6, avlNext(itr7)) || !avlIsIterSame(avlPrev(itr6), itr7) )
-	{
-		puts("Failes in_3 - One child case: Remove ");
-		flag =  TRUE;
-	}
-	*/	
-	/*Aux_Pre_Print_Tree(avl1, 0);*/
-	/*itr1 = avlInsert(avl1, to_insert);*/ /* itr1->data == 76*/
-	/*
-	if ( avlSize(avl1) != 11)
-	{
-		puts("Failes in_3: Insert");
-		flag =  TRUE;
-	}
-	*/
-	/*itr3 = avlFind(avl1, arr_sort + 3); *//*itr3->data == 70 */
-	/*itr4 = avlNext(itr3);*/ /*itr4->data == 75 */
-	
-	/*data = avlGetData(itr4); *//* 75 */
-	
-	/*itr5 = avlNext(itr4); *//*itr5->data == 76 */
-	/*itr6 = avlNext(itr5); *//*itr6->data == 80 */
-	
-	/*Aux_Pre_Print_Tree(avl1, 0);*/
-		
-	/*itr3 = avlRemove(itr3); *//* the node (itr3) has two childs */
-	/*After remove: itr3->data == 75 */
-/*
-	if( SortingFunc(avlGetData(itr3), data) ||
-		!avlIsIterSame(avlNext(itr3), itr5) || avlSize(avl1) != 10 )
-	{
-		puts("Failes in_4 - Two childs case: Remove ");
-		flag =  TRUE;
-	}
-*/	
-	/*data = avlGetData(avlNext(itr3)); *//* 76 */
-	/*itr3 = avlRemove(itr3); *//* itr3->data == 75, the node has two childs */
-/*
-	if( SortingFunc(avlGetData(itr3), data) ||
-		!avlIsIterSame(avlNext(itr3), itr6) || avlSize(avl1) != 9 )
-	{
-		puts("Failes in_5 - Two childs case: Remove ");
-		flag =  TRUE;
-	}
-*/	
-	/*itr2 = avlFind(avl1, arr); *//* itr2->data == 100 ,  (root) */
-	/*data = avlGetData(avlNext(itr2));*//* 110 */
-	/*itr3 = avlNext(avlNext(itr2)); *//* itr2->data == 150 */
-	/*itr2 = avlRemove(itr2);*//* the node has two childs */
-	/*
-	if( SortingFunc(avlGetData(itr2), data) ||
-		!avlIsIterSame(avlNext(itr2), itr3) || avlSize(avl1) != 8 )
-	{
-		puts("Failes in_5 - Two childs case: Remove ");
-		flag =  TRUE;
-	}
-	*/
-	/*itr2 = avlFind(avl1, arr_sort + 2); *//* itr2->data == 67 ,   */
-	/*itr2 = avlRemove(itr2);*/ /* the node has two childs */
-	/*
-	if( SortingFunc(avlGetData(itr2), to_insert) || avlSize(avl1) != 7 )
-	{
-		puts("Failes in_6 - Two childs case: Remove ");
-		flag =  TRUE;
-	}
-	*/
-	/*itr2 = avlFind(avl1, to_insert);*/ /* itr2->data == 76 ,   */
-	/*itr2 = avlRemove(itr2);*//* the node has two childs */
-	/*
-	if( SortingFunc(avlGetData(itr2), arr_sort + 5) || avlSize(avl1) != 6 )
-	{
-		puts("Failes in_7 - Two childs case: Remove ");
-		flag =  TRUE;
-	}
-
-	itr1 = avlInsert(avl1, to_insert);
-	avlDestroy(avl1);
-	avl1 = NULL;
-	
-	if( OPERATION_FAIL == destroy_check )
-	{
-		puts("Failes in_2: Destroy || Remove ");
-		flag =  TRUE;
-	}
-
-	if( !flag )
-	{
-		puts(RESET);		
-		puts(BACK_BLUE"Test: Success"RESET);
-	}
-	
-	else
-	{
-		puts(BACK_YELLOW"Test: Failure"RESET);	
-	}
-	
-}    
-*/
-
