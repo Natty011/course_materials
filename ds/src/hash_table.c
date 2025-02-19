@@ -228,7 +228,7 @@ int HashTableInsert(hash_table_t *table, void *value)
 	start = DListPushBack( dlst_indx, value);
 
 	#ifdef PRINTS
-	/*	printf("Insert=  DListGetData(start) =%d \n", *(int*)DListGetData(start) );*/
+	/*printf("Insert=  DListGetData(start) =%d \n", *(int*)DListGetData(start) );*/
 	#endif
 
 	if( ! DListIterIsEqual( start, DListEnd(dlst_indx) ) )
