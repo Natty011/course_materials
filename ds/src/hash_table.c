@@ -241,13 +241,32 @@ int HashTableInsert(hash_table_t *table, void *value)
 }
 
 /********************  HashTableForEach  ****************************/ 
-/*
-int HashTableForEach(hash_table_t *table, op_func_t op_func, 
+
+int HashTableForEach(hash_table_t *table, operation_func_t op_func, 
                              void *user_param)
 {
+	size_t i = 0;
 
+	dlist_t* dlst_indx = NULL;
+	dlist_iter_t start = NULL_ITER, end = NULL_ITER;
+
+	assert(table);
+
+	for( i = 0; i < table->capacity ; ++i )
+	{
+		dlst_indx = *(table->hash_array + i );
+		start = DListBegin(dlst_indx);
+		end = DListEnd(dlst_indx);
+		
+		if ( DListForEach(start, end, op_func, user_param) )
+		{
+			return TRUE;
+
+		}
+	}
+
+	return FALSE;
 
 }                             
 
-*/
 
