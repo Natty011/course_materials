@@ -79,7 +79,7 @@ typedef enum
 /***************************function declaration**************************/
 static void TestHash(void);
 static void TestHashDictionary(void);
-static char* RemoveNewLineAddNull( char* str );
+/*static char* RemoveNewLineAddNull( char* str );*/
 size_t HashFunction(const void* key);
 /*
 static int SortingFunc(const void* check_data ,const void* new_data);
@@ -134,6 +134,7 @@ size_t HashFunction2(const void* key)
 
 /* Must not to copy back the new line characther '\n', 
    and should replace it with a null termination characther '\0' */
+   /*
 static char* RemoveNewLineAddNull( char* str )
 {
 	size_t i = 0;
@@ -145,6 +146,7 @@ static char* RemoveNewLineAddNull( char* str )
 	*(str + i) = '\0';
 	return str;
 }
+	*/
 /******************End of static functions definition**********************/
 
 
@@ -178,15 +180,12 @@ int main ()
 static void TestHashDictionary(void)
 {	
 	int flag = FALSE, res = -1;
-	/*struct set *array;*/
 	hash_table_t *dictionary = NULL;
 	FILE* file = NULL;
 	size_t i = 0;
 	char* word_arr[11] = { "a", "AC", "ASCII", "mod", "coerce", 
 							"got", "half", "impact", "react", "toward", "zygotess"};
 	char *tmp_word[DICTIONARY_SIZE ] = { NULL };
-	/*char **tmp_word = NULL;*/
-	/*char temp_str[MAX_WORD_SIZE] = { 0 };*/
 
 	dictionary = HashTableCreate(HashFunction2, match_func, WORD_NUM);
 
@@ -204,8 +203,6 @@ static void TestHashDictionary(void)
 	   flag =  TRUE ;
     }
     
-	/*tmp_word = (char**)malloc(DICTIONARY_SIZE * sizeof( char* ) );*/
-
 	i = 0;
 
 	for( i = 0; i < DICTIONARY_SIZE; ++i)
@@ -230,16 +227,6 @@ static void TestHashDictionary(void)
 
 	i = 0;
 
-	/*rewind(file);*/
-	/*strncpy(p_std->surname, temp_str,strlen(tmp_word[i]) + 1 ); */ 
-
-    /* Not to get warning of unused return value*/
-	/*
-	fgets(tmp_word[i], MAX_WORD_SIZE, file); 
-	RemoveNewLineAddNull(tmp_word[i]);
-	strncpy(tmp_word[i], tmp_word[i],strlen(tmp_word[i]) + 1 ); 
-	*/
-
 	for( i = 0; i < DICTIONARY_SIZE; ++i)
 	{
 		fgets(tmp_word[i], MAX_WORD_SIZE, file); 
@@ -258,24 +245,13 @@ static void TestHashDictionary(void)
 		}	
 
 	}
-	
-
-
-	res = HashTableForEach(dictionary ,match_func,
-		HashTableFind( dictionary, (char*)word_arr[2] ) );
-   puts((char*)HashTableFind( dictionary, word_arr[2] ) );
-   if( 0 != res) 
-   {
-		   
-	   printf("line: %d \n" , __LINE__ );
-	   puts("Failes in : HashTableFind");
-   } 
-	
+		
 	for( i = 0; i < 10 ; ++i )
 	{
 		res = HashTableForEach(dictionary ,match_func,
 			HashTableFind( dictionary, (char*)word_arr[i] ) );
-		
+		   /*puts((char*)HashTableFind( dictionary, word_arr[i] ) );*/
+
 		if( SUCCESS != res) 
 		{
 			
@@ -293,38 +269,6 @@ static void TestHashDictionary(void)
 		printf("line: %d \n" , __LINE__ );
 		puts("Failes in : HashTableForEach");
 	}
-
-
-
-
-	/*
-	do
-	{
-		if(!fgets(tmp_word[i], MAX_WORD_SIZE, file)){} 
-		RemoveNewLineAddNull(tmp_word[i]);
-		if (OPERATION_FAIL == HashTableInsert( dictionary, tmp_word[i]) )
-		{
-			puts("Failes in_4: Dictionary - HashTableInsert");
-			printf("line: %d, Iteration = %lu \n" , __LINE__, i );
-		}
-
-		++i;
-		
-	} while (!feof(file));
-	*/
-		/*if(!fgets(tmp_word[i], MAX_WORD_SIZE, file)){} */
-		/*if(!fgets(tmp_word[i], MAX_WORD_SIZE, file)){} */
-	/*	RemoveNewLineAddNull(tmp_word[i]);*/
-	/*strncpy(tmp_word[i], tmp_word[i],strlen(tmp_word[i]) + 1 );*/
-	/*
-	if (OPERATION_FAIL == HashTableInsert( dictionary, tmp_word[i]) )
-		{
-			puts("Failes in_4: Dictionary - HashTableInsert");
-			printf("line: %d, Iteration = %lu \n" , __LINE__, i );
-		}
-
-		++i;
-	*/	
 	
 	if (feof(file)) 
     {
@@ -344,9 +288,6 @@ static void TestHashDictionary(void)
 		tmp_word[i] = NULL;
 	}
 
-	/*free( tmp_word );
-	tmp_word = NULL;*/
-
 	HashTableDestroy(dictionary);
 
 	dictionary = NULL;
@@ -363,10 +304,6 @@ static void TestHashDictionary(void)
 		puts(BACK_YELLOW"Test_dictionary: Failure"RESET);	
 	}
 }	
-
-
-   
-   
 
 /********************  TestHash  ****************************/
 static void TestHash(void)
