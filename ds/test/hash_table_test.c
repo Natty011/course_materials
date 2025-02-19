@@ -160,8 +160,8 @@ int main ()
 
 	puts(BLUE"====================================================="RESET);
 	printf("%sTEST: %s "RESET" \n", background,  mode);
-   /*puts(BACK_BLUE"'TestHash()'"RESET); */
-    /*TestHash();*/
+  	puts(BACK_BLUE"'TestHash()'"RESET); 
+    TestHash();
  
 	puts(BLUE"====================================================="RESET);
 
@@ -182,8 +182,8 @@ static void TestHashDictionary(void)
 	hash_table_t *dictionary = NULL;
 	FILE* file = NULL;
 	size_t i = 0;
-	char* word_arr[10] = { "a", "AC", "ASCII", "mod", "coerce", 
-							"got", "half", "impact", "react", "toward"};
+	char* word_arr[11] = { "a", "AC", "ASCII", "mod", "coerce", 
+							"got", "half", "impact", "react", "toward", "zygotess"};
 	char *tmp_word[DICTIONARY_SIZE ] = { NULL };
 	/*char **tmp_word = NULL;*/
 	/*char temp_str[MAX_WORD_SIZE] = { 0 };*/
@@ -242,6 +242,8 @@ static void TestHashDictionary(void)
 
 	for( i = 0; i < DICTIONARY_SIZE; ++i)
 	{
+		fgets(tmp_word[i], MAX_WORD_SIZE, file); 
+
 		if(tmp_word[i])
         {
 			tmp_word[i][strcspn(tmp_word[i] , "\n")] = '\0';
@@ -257,14 +259,42 @@ static void TestHashDictionary(void)
 
 	}
 	
-	res = HashTableForEach(dictionary ,Compare, HashTableFind( dictionary, word_arr ) );
+
+
+	res = HashTableForEach(dictionary ,match_func,
+		HashTableFind( dictionary, (char*)word_arr[2] ) );
+   puts((char*)HashTableFind( dictionary, word_arr[2] ) );
+   if( 0 != res) 
+   {
+		   
+	   printf("line: %d \n" , __LINE__ );
+	   puts("Failes in : HashTableFind");
+   } 
+	
+	for( i = 0; i < 10 ; ++i )
+	{
+		res = HashTableForEach(dictionary ,match_func,
+			HashTableFind( dictionary, (char*)word_arr[i] ) );
 		
-	if( 0 != res) 
+		if( SUCCESS != res) 
+		{
+			
+			printf("line: %d, Iteration = %lu \n" , __LINE__, i );
+			puts("Failes in_insert : HashTableFind_dictionary");
+		} 
+		
+	}
+
+	res = HashTableForEach(dictionary ,match_func, (char*)word_arr[10] );
+		
+	if( OPERATION_FAIL != res) 
 	{
 			
 		printf("line: %d \n" , __LINE__ );
-		puts("Failes in : HashTableFind");
-	} 
+		puts("Failes in : HashTableForEach");
+	}
+
+
 
 
 	/*
@@ -448,7 +478,7 @@ static void TestHash(void)
 		
 		res = HashTableForEach(table1 ,Compare, ages + i);
 		
-		if( 1 != res) 
+		if( SUCCESS != res) 
 		{
 			
 			printf("line: %d, Iteration = %lu \n" , __LINE__, i );
@@ -462,7 +492,7 @@ static void TestHash(void)
 	{
 		res = HashTableForEach(table1 ,Compare, HashTableFind( table1, ages + i));
 		
-		if( 1 != res) 
+		if( SUCCESS != res) 
 		{
 			
 			printf("line: %d, Iteration = %lu \n" , __LINE__, i );
@@ -473,7 +503,7 @@ static void TestHash(void)
 
 	res = HashTableForEach(table1 ,Compare, ages2 );
 		
-	if( 0 != res) 
+	if( OPERATION_FAIL != res) 
 	{
 			
 		printf("line: %d \n" , __LINE__ );
@@ -482,7 +512,7 @@ static void TestHash(void)
 	
 	res = HashTableForEach(table1 ,Compare, HashTableFind( table1, ages2 ) );
 		
-	if( 0 != res) 
+	if( OPERATION_FAIL != res) 
 	{
 			
 		printf("line: %d \n" , __LINE__ );
