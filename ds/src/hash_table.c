@@ -223,19 +223,19 @@ int HashTableInsert(hash_table_t *table, void *value)
 
 	index = table->hash_func( value );
 	index %= table->capacity;
-	/*dlst_indx = *(table->hash_array + index );*/
-	printf("index = %d \n ", index);
-	/*start = DListPushBack( dlst_indx, value);*/
+	dlst_indx = *(table->hash_array + index );
+	/*printf("index = %d \n ", index);*/
+	start = DListPushBack( dlst_indx, value);
 
 	#ifdef PRINTS
-		/*printf("Insert=  DListGetData(start) =%d \n", *(int*)DListGetData(start) );*/
+	/*	printf("Insert=  DListGetData(start) =%d \n", *(int*)DListGetData(start) );*/
 	#endif
-/*
+
 	if( ! DListIterIsEqual( start, DListEnd(dlst_indx) ) )
 	{
 		return SUCCESS;
 	}
-*/
+
 	return OPERATION_FAIL;
 	
 }
