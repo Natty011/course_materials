@@ -1,7 +1,7 @@
 /******************************************************************************
-*	Version 1.1
+*	Version 1.2
 *   Last Updated:   19/2/2025
-*                   15:50
+*                   18:10
 ******************************************************************************/
 #ifndef __HEAP_H__      /* __HEAP_H__      */
 #define __HEAP_H__      /* __HEAP_H__      */
@@ -15,7 +15,7 @@ typedef struct heap heap_t;
 * 
 *   Description:
 * 
-*       Comparison function to compare two data values , uוsing the variable
+*       Comparison function to compare two data values , using the 'param'
 *       that was provided when creating the heap.
 * 
 *   Arguments:
@@ -33,14 +33,15 @@ typedef struct heap heap_t;
 * 
 *       <0 - If the 'check_data' needs to be positioned below
 *            the 'new_data' being examined.
+*   
+*   Notes: 
+*	
+*		* Undefined behaviour if comparison return 0;
 */
 typedef int
 (*expand_cmp_func_t)(const void* check_data ,const void* new_data, void* param);
 /* 
 ******************************************************************************/
-
-
-
 /******************************************************************************
 *
 *   Description: 
@@ -88,7 +89,6 @@ typedef int
 */      void HeapDestroy( heap_t* heap );
 /*
 *******************************************************************************
-/******************************************************************************
 *
 *   Description: 
 * 
@@ -142,7 +142,6 @@ typedef int
 */      void HeapPop( heap_t* heap );
 /*
 *******************************************************************************
-/******************************************************************************
 *
 *   Description: 
 *
