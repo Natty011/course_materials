@@ -120,7 +120,6 @@ void HeapDestroy(heap_t *heap)
 		free( heap );
 		heap = NULL;
 	}
-
 }
 
 /********************  HeapIsEmpty  ****************************/
@@ -128,6 +127,12 @@ int HeapIsEmpty(const heap_t *heap)
 {
 	assert( heap );
 	return  ! VectorSize( heap->vector );
+}
+/********************  HeapSize  ****************************/
+size_t HeapSize(const heap_t *heap)
+{
+	assert( heap );
+	return VectorSize( heap->vector); 
 }
 
 /********************  AVLIsEmpty  ****************************/
