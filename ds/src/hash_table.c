@@ -212,6 +212,7 @@ void *HashTableFind(const hash_table_t *table, void *value)
 
 	return NULL;
 }
+
 /********************  HashTableInsert  ****************************/ 
 int HashTableInsert(hash_table_t *table, void *value)
 {
@@ -257,7 +258,7 @@ int HashTableForEach(hash_table_t *table, operation_func_t op_func,
 		dlst_indx = *(table->hash_array + i );
 		start = DListBegin(dlst_indx);
 		end = DListEnd(dlst_indx);
-		
+
 		if ( DListForEach(start, end, op_func, user_param) )
 		{
 			return TRUE;
