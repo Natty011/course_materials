@@ -142,7 +142,7 @@ static void TestHash(void)
 
 	size_t i = 0;
 	size_t capacity = 10;
-	int ages[10] = {1, 10, 20, 30, 30, 40 ,50 , 60, 70, 80};
+	int ages[10] = {1, 10, 20, 30, 40 ,50 , 60, 70, 80, 90};
 	capacity = sizeof(ages)/sizeof(ages[0]);
 	/*puts(RED);*/
 
@@ -166,7 +166,7 @@ static void TestHash(void)
 	
 	}
 
-	for(i = 0; i <= 10; ++i)
+	for(i = 0; i < 10; ++i)
 	{
 		flag = HashTableInsert(table1, ages + i);
 		
@@ -178,22 +178,40 @@ static void TestHash(void)
 		}
 		
 		if( (i + 1) != HashTableSize(table1) )
-	{
+		{
 		
-		puts("Failes in_2: Size");
-		flag =  TRUE;
+			puts("Failes in_2: Size");
+			flag =  TRUE;
 	
+		}
 	}
 
+	for(i = 0; i < 10; ++i)
+	{
+		HashTableRemove(table1, ages + i);
+		
+		if( flag )
+		{
+			printf("Iteration = %lu \n", i); 
+			puts("Failes in_1: Remove failed ");
+			flag =  TRUE;
+		}
+		
+		if( (10 - i - 1) != HashTableSize(table1) )
+		{
+		
+			puts("Failes in_3: Size");
+			flag =  TRUE;
+	
+		}
 	}
-
 
 	/*res = HashTableInsert(table1, ages);*/
 	/*printf("res = %d \n ", res);*/
 
-	if(  HashTableIsEmpty(table1) ) 
+	if(  ! HashTableIsEmpty(table1) ) 
 	{
-		puts("Failes in_2: IsEmpty");
+		puts("Failes in_3: IsEmpty");
 		flag =  TRUE;
 	}
 
