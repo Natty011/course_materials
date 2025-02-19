@@ -5,11 +5,12 @@
 * Last update: 15 / 02 / 2025
 *****************************************/
 
-#include <stdio.h> 		/* printf, puts, qsort  */
+#include <stdio.h> /* printf, fputs, puts, sprinf, fgets, feof, rewind */
 #include <assert.h>
 #include <string.h> 	/* strcpy, strcmp */
-
+#include <ctype.h> 		/* tolower  */
 #include "hash_table.h" 
+#include <stdlib.h> /* free, malloc */
 
 #define BLACK        "\x1b[30m"
 #define RED          "\x1b[31m"
@@ -38,6 +39,9 @@
 
 #define MIN(a, b)		((a > b ) ? b : a )
 #define MAX(a, b)		((a > b ) ? a : b )
+#define DICTIONARY_SIZE      105000
+#define MAX_WORD_SIZE     		 40
+#define WORD_NUM     		 26
 
 /***************struct and enum declaration *******/
 /*
@@ -74,6 +78,8 @@ typedef enum
 
 /***************************function declaration**************************/
 static void TestHash(void);
+static void TestHashDictionary(void);
+static char* RemoveNewLineAddNull( char* str );
 size_t HashFunction(const void* key);
 /*
 static int SortingFunc(const void* check_data ,const void* new_data);
@@ -114,6 +120,31 @@ size_t HashFunction(const void* key)
   return (*(int*)key) / 10;
 }
 
+/*******************match_function*********************/
+static int match_func(void *check_data, void *user_param )
+{
+	return !strcmp(check_data, user_param);
+}
+
+/*******************HashFunction2*********************/
+size_t HashFunction2(const void* key)
+{
+  return (	*(int*)key - 'a' );
+}
+
+/* Must not to copy back the new line characther '\n', 
+   and should replace it with a null termination characther '\0' */
+static char* RemoveNewLineAddNull( char* str )
+{
+	size_t i = 0;
+	while( *(str + i) != '\n' ) 
+	{
+		*(str + i) = tolower( *(str + i) );
+		++i;
+	}
+	*(str + i) = '\0';
+	return str;
+}
 /******************End of static functions definition**********************/
 
 
@@ -129,14 +160,141 @@ int main ()
 
 	puts(BLUE"====================================================="RESET);
 	printf("%sTEST: %s "RESET" \n", background,  mode);
-   	puts(BACK_BLUE"'TestHash()'"RESET);
-    TestHash();
+   /*puts(BACK_BLUE"'TestHash()'"RESET); */
+    /*TestHash();*/
  
+	puts(BLUE"====================================================="RESET);
+
+	puts(BLUE"====================================================="RESET);
+	printf("%sTEST: %s "RESET" \n", background,  mode);
+   	puts(BACK_BLUE"'TestHashDictionary()'"RESET);
+	TestHashDictionary();
 	puts(BLUE"====================================================="RESET);
 
 	return 0;
 }
+/********************  TestHashDictionary  ****************************/
 
+static void TestHashDictionary(void)
+{	
+	int flag = FALSE, res = -1;
+	/*struct set *array;*/
+	hash_table_t *dictionary = NULL;
+	FILE* file = NULL;
+	size_t i = 0;
+
+	char *tmp_word[DICTIONARY_SIZE ] = { NULL };
+	/*char **tmp_word = NULL;*/
+	/*char temp_str[MAX_WORD_SIZE] = { 0 };*/
+
+	dictionary = HashTableCreate(HashFunction2, match_func, WORD_NUM);
+
+    
+	if ( !dictionary )
+	{
+		puts("Failes in_1: HashTableCreate - Allocation");
+	}
+
+	file = fopen("/usr/share/dict/words", "r");
+
+    if(  NULL == file)
+    {
+       printf("Failed to open the file\n");
+	   flag =  TRUE ;
+    }
+    
+	/*tmp_word = (char**)malloc(DICTIONARY_SIZE * sizeof( char* ) );*/
+
+	i = 0;
+
+	for( i = 0; i < DICTIONARY_SIZE; ++i)
+	{
+		tmp_word[i] = (char*)malloc( MAX_WORD_SIZE );
+
+		if( NULL == tmp_word[i] )
+		{
+			puts("Failes in_2: Dictionary - Allocation");
+			printf("line: %d, Iteration = %lu \n" , __LINE__, i );
+
+			while ( i > 0 )
+			{
+				free( tmp_word[i - 1] );
+				tmp_word[i - 1] = NULL;
+				--i;
+			}
+
+			break;
+		}
+	}
+
+	i = 0;
+
+	/*rewind(file);*/
+	/*strncpy(p_std->surname, temp_str,strlen(tmp_word[i]) + 1 ); */ 
+
+    /* Not to get warning of unused return value*/
+	/*
+	fgets(tmp_word[i], MAX_WORD_SIZE, file); 
+	RemoveNewLineAddNull(tmp_word[i]);
+	strncpy(tmp_word[i], tmp_word[i],strlen(tmp_word[i]) + 1 ); 
+	*/
+
+	for( i = 0; )
+		/*if(!fgets(tmp_word[i], MAX_WORD_SIZE, file)){} */
+		if(!fgets(tmp_word[i], MAX_WORD_SIZE, file)){} 
+		RemoveNewLineAddNull(tmp_word[i]);
+	strncpy(tmp_word[i], tmp_word[i],strlen(tmp_word[i]) + 1 ); 
+	if (OPERATION_FAIL == HashTableInsert( dictionary, tmp_word[i]) )
+		{
+			puts("Failes in_4: Dictionary - HashTableInsert");
+			printf("line: %d, Iteration = %lu \n" , __LINE__, i );
+		}
+
+		++i;
+		
+	}while (!feof(file));
+	
+	if (feof(file)) 
+    {
+        puts("End of file is reached successfully");
+    }
+    
+    if( 0 != fclose(file)  )
+    {
+       printf("Failed to close the file\n");
+	   flag =  TRUE ;
+    }
+    
+
+	for( i = 0; i < DICTIONARY_SIZE; ++i)
+	{
+		free( tmp_word[i] );
+		tmp_word[i] = NULL;
+	}
+
+	/*free( tmp_word );
+	tmp_word = NULL;*/
+
+	HashTableDestroy(dictionary);
+
+	dictionary = NULL;
+
+	if( !flag )
+	{
+		puts(RESET);		
+		puts(BACK_BLUE"Test_dictionary: Success"RESET);
+
+	}
+	
+	else
+	{
+		puts(BACK_YELLOW"Test_dictionary: Failure"RESET);	
+	}
+}	
+
+
+   
+   
 
 /********************  TestHash  ****************************/
 static void TestHash(void)
@@ -307,245 +465,4 @@ static void TestHash(void)
 		puts(BACK_YELLOW"Test: Failure"RESET);	
 	}
 }	
-	/*	
-	avl_t *avl1 = AVLCreate(SortingFunc);
-*/
-	/*puts(RED);*/
-/*
-	if( !AVLIsEmpty(avl1) ) 
-	{
-		puts("Failes in_1: IsEmpty");
-		flag =  TRUE;
-	}
 	
-	for(i = 0; i <= 10; ++i)
-	{
-		flag = AVLInsert(avl1, arr + i);
-		
-		if( flag )
-		{
-			puts("Failes in_1: Insert Allocation failed ");
-			flag =  TRUE;
-		}
-
-	}
-
-	
-	AVLDestroy(avl1);
-	avl1 = NULL;
-	
-	if( OPERATION_FAIL == destroy_check_avl )
-	{
-		puts("Failes in_1: Destroy");
-		flag =  TRUE;
-	}
-	
-	if( !flag )
-	{
-		puts(RESET);		
-		puts(BACK_BLUE"Test: Success"RESET);
-
-	}
-	
-	else
-	{
-		puts(BACK_YELLOW"Test: Failure"RESET);	
-	}
-	
-}
-*/
-	/*AVLRemove(avl1, arr + 1  ); */
-	
-/*
-	Aux_Pre_Print_Tree_Avl(avl1, 0);
-*/	
-	/*
-	if( 4 != AVLHeight(avl1) )
-	{
-		puts("Failes in_2: Insert");
-		flag =  TRUE;
-	
-	}
-	*/
-	/*printf("size = %lu \n", AVLSize(avl1));*/
-	/*
-	if( 11 != AVLSize(avl1) )
-	{
-		
-		puts("Failes in_1: Size");
-		flag =  TRUE;
-	
-	}
-	
-	
-	for(i = 0; i <= 10; ++i)
-	{
-		flag = Compare(AVLFind(avl1, arr + i), arr + i);
-		
-		if( flag )
-		{
-			printf("Failes in_1: Find, i = %lu \n", i);
-			flag =  TRUE;
-		}
-
-	}
-	
-	if( SUCCESS != AVLForEachInOrder(avl1, Compare2, foreach , PRE_ORDER)
-		|| OPERATION_FAIL != AVLForEachInOrder(avl1, Compare2, foreach + 1, PRE_ORDER) )  
-	{
-
-		puts("Failes in_1: ForEachPreOrder");
-		flag =  TRUE;
-	}
-		
-	if( SUCCESS != AVLForEachInOrder(avl1, Compare2, foreach , POST_ORDER)
-		|| OPERATION_FAIL != AVLForEachInOrder(avl1, Compare2, foreach + 1, POST_ORDER) )  
-	{
-		puts("Failes in_2: ForEachPostOrder");
-		flag =  TRUE;
-	}
-		
-	if( SUCCESS != AVLForEachInOrder(avl1, Compare2, foreach , IN_ORDER)
-		|| OPERATION_FAIL != AVLForEachInOrder(avl1, Compare2, foreach + 1, IN_ORDER) )  
-	{
-
-		puts("Failes in_3: ForEachInOrder");
-		flag =  TRUE;
-	}
-	
-	if( 11 != AVLSize(avl1) )
-	{
-		
-		puts("Failes in_3: Size");
-		flag =  TRUE;
-	
-	}
-	
-	
-	AVLRemove(avl1, arr + 9); 
-	
-
-	
-	if( 10 != AVLSize(avl1) )
-	{
-		
-		puts("Failes in_4: Size");
-		flag =  TRUE;
-	
-	}
-	
-	*/
-	
-	/*
-	if( 11 != AVLSize(avl1) )
-	{
-		
-		puts("Failes in_4: Size");
-		flag =  TRUE;
-	
-	}
-	Aux_Pre_Print_Tree_Avl(avl1, 0);
-	
-	AVLRemove(avl1, arr + 1); 
-	
-	if( 10 != AVLSize(avl1) )
-	{
-		
-		puts("Failes in_5: Size");
-		flag =  TRUE;
-	
-	}
-	*/
-	/*
-	if( 11 != AVLSize(avl1) )
-	{
-		
-		puts("Failes in_3: Size");
-		flag =  TRUE;
-	
-	}
-		
-	Aux_Pre_Print_Tree_Avl(avl1, 0);
-	AVLRemove(avl1, arr + 4); 
-	
-	if( 10 != AVLSize(avl1) )
-	{
-		
-		puts("Failes in_4: Size");
-		flag =  TRUE;
-	
-	}
-	*/
-	/*Aux_Pre_Print_Tree_Avl(avl1, 0);*/
-	
-	
-	
-	/*
-	if( avlSize(avl1) != 0 )  
-	{
-		puts("Failes in_1: Size");
-		flag =  TRUE;
-	}
-	*/
-	/*
-	dummy_itr1 = avlBegin(avl1);
-	*/
-	/*
-	if( avlEnd(avl1) != dummy_itr1 )
-	{
-		puts("Failes in_1: Begin || End ");
-		flag =  TRUE;
-	}
-	
-	itr1 = avlInsert(avl1, arr);
-	if( SortingFunc(avlGetData(itr1) ,avlGetData(avlBegin(avl1)))  
-	     || avlSize(avl1) != 1 || avlIsEmpty(avl1) )
-		 
-	{
-		puts("Failes in_1: Insert || Begin || GetData || Size || IsEmpty");
-		flag =  TRUE;
-	}
-	
-	if( itr1 != avlPrev(dummy_itr1) || dummy_itr1 != avlPrev(itr1) )
-	{
-		puts("Failes in_1: Prev");
-		flag =  TRUE;	
-	}
-	
-	if( dummy_itr1 != avlNext(dummy_itr1) || dummy_itr1 != avlNext(itr1) )
-	{
-		puts("Failes in_1: Next");
-		flag =  TRUE;	
-	}
-	
-	if( itr1 != avlFind(avl1, arr) || dummy_itr1 != avlFind(avl1, arr + 1) 
-		|| dummy_itr1 != avlFind(avl1, arr + 2) )
-	{
-		puts("Failes in_1: Find");
-		flag =  TRUE;	
-	}
-	
-	if( TRUE != avlIsIterSame(itr1, itr1) || 
-		FALSE != avlIsIterSame(itr1, dummy_itr1) )
-	{
-		puts("Failes in_1: avlIsIterSame");
-		flag =  TRUE;
-	} 
-	
-	if( SUCCESS != avlForEach(itr1, dummy_itr1, Compare, arr) || 
-		OPERATION_FAIL != avlForEach(itr1, dummy_itr1, Compare, arr + 1) )
-	{
-		puts("Failes in_1: ForEach");
-		flag =  TRUE;
-	
-	} 
-	
-	if( dummy_itr1 != avlRemove(itr1) || avlSize(avl1) != 0 )
-	{
-		puts("Failes in_1: Remove || Size");
-		flag =  TRUE;	
-	}
-	
-	itr1 = avlInsert(avl1, arr);
-	*/  
-
