@@ -143,9 +143,10 @@ static void TestHash(void)
 	size_t i = 0;
 	size_t capacity = 10;
 	int ages[10] = {1, 10, 20, 30, 40 ,50 , 60, 70, 80, 90};
+	int ages2[10] = {100, 110, 120, 130, 140 ,150 , 160, 170, 180, 190};
+
 	capacity = sizeof(ages)/sizeof(ages[0]);
 	/*puts(RED);*/
-
 	table1 = HashTableCreate(HashFunction, Compare, capacity);
 	if ( !table1 )
 	{
@@ -214,6 +215,51 @@ static void TestHash(void)
 		puts("Failes in_3: IsEmpty");
 		flag =  TRUE;
 	}
+
+
+
+	for(i = 0; i < 10; ++i)
+	{
+		flag = HashTableInsert(table1, ages + i);
+		
+		if( flag )
+		{
+			printf("Iteration = %lu \n", i); 
+			puts("Failes in_2: Insert Allocation failed ");
+			flag =  TRUE;
+		}
+		
+		if( (i + 1) != HashTableSize(table1) )
+		{
+		
+			puts("Failes in_4: Size");
+			flag =  TRUE;
+	
+		}
+	}
+
+	for( i = 0; i < 10 ; ++i )
+	{
+		
+		res = HashTableForEach(table1 ,Compare, ages + i);
+		
+		if( 1 != res) 
+		{
+			
+			printf("line: %d, Iteration = %lu \n" , __LINE__, i );
+			puts("Failes in : HashTableForEach");
+		} 
+		
+	}
+	
+	res = HashTableForEach(table1 ,Compare, ages2 );
+		
+	if( 0 != res) 
+	{
+			
+		printf("line: %d \n" , __LINE__ );
+		puts("Failes in : HashTableForEach");
+	} 
 
 	
 
