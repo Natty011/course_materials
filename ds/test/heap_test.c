@@ -138,26 +138,25 @@ int main ()
 }
 
 
+
 /********************  TestAvlOneNode  ****************************/
 static void TestHeap(void)
 {	
 	int flag = FALSE;
-/*110*/
-	int arr[11] = {100, 70, 110, 85, 80, 75 ,
-				65 , 67, 130, 30, 150};
-	/*int arr2[11] = {100, 70, 80, 85, 80, 75 ,65 , 67, 130, 30, 150};*/
+
+	int arr[10] = {16, 10, 13, 8, 5, 9, 3, 2, 1, 4};
 	size_t i = 0;
-	int foreach[2] = {151, 150};
 		
-	avl_t *avl1 = AVLCreate(SortingFunc);
+	/*heap_t *heap1 = HeapCreate(SortingFunc);*/
 
 	/*puts(RED);*/
-
+/*
 	if( !AVLIsEmpty(avl1) ) 
 	{
 		puts("Failes in_1: IsEmpty");
 		flag =  TRUE;
 	}
+
 	
 	for(i = 0; i <= 10; ++i)
 	{
@@ -170,8 +169,6 @@ static void TestHeap(void)
 		}
 
 	}
-	/*Aux_Pre_Print_Tree_Avl(avl1, 0);*/
-	
 	
 	if( 11 != AVLSize(avl1) || 3 != AVLHeight(avl1) )
 	{
@@ -194,139 +191,6 @@ static void TestHeap(void)
 
 	}
 	
-	if( SUCCESS != AVLForEach(avl1, Compare2, foreach , PRE_ORDER)
-		|| OPERATION_FAIL != AVLForEach(avl1, Compare2, foreach + 1, PRE_ORDER) )  
-	{
-
-		puts("Failes in_1: ForEachPreOrder");
-		flag =  TRUE;
-	}
-		
-	if( SUCCESS != AVLForEach(avl1, Compare2, foreach , POST_ORDER)
-		|| OPERATION_FAIL != AVLForEach(avl1, Compare2, foreach + 1, POST_ORDER) )  
-	{
-		puts("Failes in_2: ForEachPostOrder");
-		flag =  TRUE;
-	}
-		
-	if( SUCCESS != AVLForEach(avl1, Compare2, foreach , IN_ORDER)
-		|| OPERATION_FAIL != AVLForEach(avl1, Compare2, foreach + 1, IN_ORDER) )  
-	{
-
-		puts("Failes in_3: ForEachInOrder");
-		flag =  TRUE;
-	}
-	
-	
-	/*30 */
-
-	AVLRemove(avl1, arr + 9); 
-	
-	if( 10 != AVLSize(avl1) || 3 != AVLHeight(avl1))
-	{
-		
-		puts("Failes in_4: Size || Height || Remove"  );
-		flag =  TRUE;
-	
-	}
-
-
-	/*Aux_Pre_Print_Tree_Avl(avl1, 0);*/
-		/*70 */
-
-	AVLRemove(avl1, arr + 1); 
-	
-	if( 9 != AVLSize(avl1) || 3 != AVLHeight(avl1))
-	{
-		
-		puts("Failes in_5: Size || Height || Remove");
-		flag =  TRUE;
-	
-	}
-	
-	/*Aux_Pre_Print_Tree_Avl(avl1, 0);*/
-	/*80 */
-	AVLRemove(avl1, arr + 4); 
-	
-	if( 8 != AVLSize(avl1) || 3 != AVLHeight(avl1))
-	{
-		
-		puts("Failes in_6: Size || Height || Remove");
-		flag =  TRUE;
-	
-	}
-
-	/*100 */
-	AVLRemove(avl1, arr + 0  );
-
-	if( 7 != AVLSize(avl1) || 2 != AVLHeight(avl1))
-	{
-		
-		puts("Failes in_7: Size || Height || Remove");
-		flag =  TRUE;
-	
-	}
-	/*110 */
-
-	AVLRemove(avl1, arr + 2  );
-	
-	if( 6 != AVLSize(avl1) || 2 != AVLHeight(avl1))
-	{
-		
-		puts("Failes in_8: Size || Height || Remove");
-		flag =  TRUE;
-	
-	}
-
-	/*80 */
-	AVLRemove(avl1, arr + 3  );
-
-	if( 5 != AVLSize(avl1) || 2 != AVLHeight(avl1))
-	{
-		
-		puts("Failes in_9: Size || Height || Remove");
-		flag =  TRUE;
-	
-	}
-	/*do not exist  */
-	AVLRemove(avl1, arr + 4  );
-
-	if( 5 != AVLSize(avl1) || 2 != AVLHeight(avl1))
-	{
-		
-		puts("Failes in_10: Size || Height || Remove");
-		flag =  TRUE;
-	
-	}
-	/*150 */
-	AVLRemove(avl1, arr + 10  );
-	if( 4 != AVLSize(avl1) || 2 != AVLHeight(avl1))
-	{
-		
-		puts("Failes in_11: Size || Height || Remove");
-		flag =  TRUE;
-	
-	}
-
-   /*65 */
-  AVLRemove(avl1, arr + 6  );
-  if( 3 != AVLSize(avl1) || 1 != AVLHeight(avl1))
-  {
-	
-	puts("Failes in_12: Size || Height || Remove");
-	flag =  TRUE;
-
-  }
-
-   /*75 */
-   AVLRemove(avl1, arr + 5  );
-   if( 2 != AVLSize(avl1) || 1 != AVLHeight(avl1))
-   {
-	 
-	 puts("Failes in_13: Size || Height || Remove ");
-	 flag =  TRUE;
- 
-   }
 	
 	AVLDestroy(avl1);
 	avl1 = NULL;
@@ -343,6 +207,7 @@ static void TestHeap(void)
 	{
 		puts(BACK_YELLOW"Test: Failure"RESET);	
 	}
+		*/
 	
 }
 	
