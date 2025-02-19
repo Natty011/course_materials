@@ -123,13 +123,13 @@ size_t HashFunction(const void* key)
 /*******************match_function*********************/
 static int match_func(void *check_data, void *user_param )
 {
-	return !strcmp(check_data, user_param);
+	return !strcmp((char*)check_data, (char*)user_param);
 }
 
 /*******************HashFunction2*********************/
 size_t HashFunction2(const void* key)
 {
-  return (	*(int*)key - 'a' );
+  return (	tolower( *(char*)key ) - 'a' );
 }
 
 /* Must not to copy back the new line characther '\n', 
@@ -209,7 +209,7 @@ static void TestHashDictionary(void)
 
 	for( i = 0; i < DICTIONARY_SIZE; ++i)
 	{
-		tmp_word[i] = (char*)malloc( MAX_WORD_SIZE );
+		tmp_word[i] = (char*)calloc(1,  MAX_WORD_SIZE );
 
 		if( NULL == tmp_word[i] )
 		{
@@ -239,12 +239,30 @@ static void TestHashDictionary(void)
 	strncpy(tmp_word[i], tmp_word[i],strlen(tmp_word[i]) + 1 ); 
 	*/
 
-	for( i = 0; )
-		/*if(!fgets(tmp_word[i], MAX_WORD_SIZE, file)){} */
+	for( i = 0; i < DICTIONARY_SIZE; ++i)
+	{
+		if(tmp_word[i])
+        {
+			tmp_word[i][strcspn(tmp_word[i] , "\n")] = '\0';
+
+			if (HashTableInsert( dictionary, tmp_word[i]) )
+			{
+				puts("Failes in_4: Dictionary - HashTableInsert");
+				printf("line: %d, Iteration = %lu \n" , __LINE__, i );
+				fclose(file);
+
+			}
+		}	
+
+	}
+	
+	
+	/*
+	do
+	{
 		if(!fgets(tmp_word[i], MAX_WORD_SIZE, file)){} 
 		RemoveNewLineAddNull(tmp_word[i]);
-	strncpy(tmp_word[i], tmp_word[i],strlen(tmp_word[i]) + 1 ); 
-	if (OPERATION_FAIL == HashTableInsert( dictionary, tmp_word[i]) )
+		if (OPERATION_FAIL == HashTableInsert( dictionary, tmp_word[i]) )
 		{
 			puts("Failes in_4: Dictionary - HashTableInsert");
 			printf("line: %d, Iteration = %lu \n" , __LINE__, i );
@@ -252,7 +270,21 @@ static void TestHashDictionary(void)
 
 		++i;
 		
-	}while (!feof(file));
+	} while (!feof(file));
+	*/
+		/*if(!fgets(tmp_word[i], MAX_WORD_SIZE, file)){} */
+		/*if(!fgets(tmp_word[i], MAX_WORD_SIZE, file)){} */
+	/*	RemoveNewLineAddNull(tmp_word[i]);*/
+	/*strncpy(tmp_word[i], tmp_word[i],strlen(tmp_word[i]) + 1 );*/
+	/*
+	if (OPERATION_FAIL == HashTableInsert( dictionary, tmp_word[i]) )
+		{
+			puts("Failes in_4: Dictionary - HashTableInsert");
+			printf("line: %d, Iteration = %lu \n" , __LINE__, i );
+		}
+
+		++i;
+	*/	
 	
 	if (feof(file)) 
     {
