@@ -182,7 +182,8 @@ static void TestHashDictionary(void)
 	hash_table_t *dictionary = NULL;
 	FILE* file = NULL;
 	size_t i = 0;
-
+	char* word_arr[10] = { "a", "AC", "ASCII", "mod", "coerce", 
+							"got", "half", "impact", "react", "toward"};
 	char *tmp_word[DICTIONARY_SIZE ] = { NULL };
 	/*char **tmp_word = NULL;*/
 	/*char temp_str[MAX_WORD_SIZE] = { 0 };*/
@@ -256,7 +257,16 @@ static void TestHashDictionary(void)
 
 	}
 	
-	
+	res = HashTableForEach(dictionary ,Compare, HashTableFind( dictionary, word_arr ) );
+		
+	if( 0 != res) 
+	{
+			
+		printf("line: %d \n" , __LINE__ );
+		puts("Failes in : HashTableFind");
+	} 
+
+
 	/*
 	do
 	{
