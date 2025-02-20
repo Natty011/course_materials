@@ -66,9 +66,10 @@ struct heap
 /******************************************************************************/
 /************************ ststic functions declartions ************************/
 static int SwapQuick(void* ptr1, void* ptr2, size_t element_size);
+static size_t IsExist(heap_t* heap , match_func_t match_func , void* param );
+
 #ifdef PRINTS
 void PrintArray( heap_t* heap );
-
 									
 #endif
 /*******************End Of Static Functions declartions************************/
@@ -164,16 +165,17 @@ int HeapPush( heap_t* heap , const void* data )
 
 	#ifdef PRINTS
 		/*printf(" HeapPeek(heap)  = %d \n", *(int*)HeapPeek(heap) );*/
+		/*
 			puts("After Push Before Heapify ") ; 
 
 			printf(" VectorGetAccess(heap->vector, i )  = %d , i = %lu \n",
 				 *(int*)VectorGetAccess(heap->vector, i ), i );
 			printf(" VectorGetAccess(heap->vector, parent )  = %d , parent = %lu \n ",
 				 *(int*)VectorGetAccess(heap->vector, parent ), parent );
-
+		*/
 		#endif
 
-		
+
 	/* Heapify up */
 	while ( parent > 0 && 
 		heap->cmp_func( VectorGetAccess( heap->vector, parent),
@@ -182,6 +184,7 @@ int HeapPush( heap_t* heap , const void* data )
 		
 		#ifdef PRINTS
 		/*printf(" HeapPeek(heap)  = %d \n", *(int*)HeapPeek(heap) );*/
+		/*
 			puts("Before heapify Push") ; 
 
 			printf(" VectorGetAccess(heap->vector, i )  = %d , i = %lu \n",
@@ -189,6 +192,7 @@ int HeapPush( heap_t* heap , const void* data )
 			printf(" VectorGetAccess(heap->vector, parent )  = %d , parent = %lu \n ",
 				 *(int*)VectorGetAccess(heap->vector, parent ), parent );
 
+		*/
 		#endif
 		
 		if ( FAIL == SwapQuick( VectorGetAccess( heap->vector, parent),
@@ -200,12 +204,13 @@ int HeapPush( heap_t* heap , const void* data )
 		
 	#ifdef PRINTS
 	/*printf(" HeapPeek(heap)  = %d \n", *(int*)HeapPeek(heap) );*/
+	/*
 	puts("After heapify Push ") ; 
 			printf(" VectorGetAccess(heap->vector, i )  = %d , i = %lu \n",
 				 *(int*)VectorGetAccess(heap->vector, i ), i );
 			printf(" VectorGetAccess(heap->vector, parent )  = %d , parent = %lu \n ",
 				 *(int*)VectorGetAccess(heap->vector, parent ), parent );
-
+		*/
 	#endif
 
 		i = parent;
@@ -217,20 +222,59 @@ int HeapPush( heap_t* heap , const void* data )
 
 	
 	/*printf(" HeapPeek(heap)  = %d \n", *(int*)HeapPeek(heap) );*/
+	/*
 	puts("After Heapify while  push  ") ; 
 	printf(" VectorGetAccess(heap)  = %d , i = %lu \n",
 			 *(int*)VectorGetAccess(heap->vector, i ), i );
 	printf(" VectorGetAccess(heap)  = %d , parent = %lu \n ",
 			 *(int*)VectorGetAccess(heap->vector, parent ), parent );
+	*/
 
-	PrintArray(heap);		 
+	/*PrintArray(heap);	*/	 
 
 	#endif
 
 	return SUCCESS;
 }
+/********************  HeapRemove  ****************************/
+
+void* HeapRemove( heap_t* heap , match_func_t match_func , void* param )
+{
+	size_t parent = 0, i = 0;
+
+	assert(heap);
+
+	if ( HeapIsEmpty( heap ) )
+	{
+		return NULL;
+	}
+	i = IsExist( heap , match_func, param);
+
+	if( FALSE == i)
+
+
+}
+/********************  IsExist  ****************************/
+
+static size_t IsExist(heap_t* heap , match_func_t match_func , void* param )
+{
+	size_t size = 1 ;
+
+	while( size <= HeapSize( heap ) )
+	{
+		if ( match_func(VectorGetAccess(heap->vector, size ) , param ) )
+		{
+			return size;
+		}
+			++size;
+	}
+
+	return FALSE; /* the param isn't in the heap */
+}
+
 
 /*******************Static Functions definition************************/
+
 void PrintArray( heap_t* heap )
 {
 	size_t size = 1 ;
