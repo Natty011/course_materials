@@ -151,7 +151,8 @@ static void TestHeap(void)
 	heap_t *heap1 = NULL;
 	int arr[10] = {16, 10, 13, 8, 5, 9, 3, 2, 1, 4};
 	int param [ 10 ] =  {16, 10, 13, 8, 5, 9, 3, 2, 1, 4};
-	/*size_t i = 0;*/
+	size_t size = sizeof( arr ) / sizeof( arr[0] ) ; 
+	size_t i = 0;
 		
 	heap1 = HeapCreate(param , SortingFunc);
 
@@ -170,6 +171,31 @@ static void TestHeap(void)
 		flag =  TRUE;
 	}
 
+	for(i = 0; i < size ; ++i)
+	{
+		if ( FAIL == HeapPush( heap1, arr + i ))
+		{
+			printf("line: %d , Iteration = %ld \n" , __LINE__ , i );
+			puts("Failes in_1: Push - Allocation");
+			flag =  TRUE;
+
+		}
+		
+		if ( HeapIsEmpty(heap1) || ( i + 1 ) != HeapSize(heap1) )
+		{
+			printf("line: %d , Iteration = %ld \n" , __LINE__ , i );
+			puts("Failes in_2: Push ");
+
+			#ifdef PRINTS
+				printf(" HeapPeek(heap1)  = %d", *(int*)HeapPeek(heap1) );
+			#endif
+			flag =  TRUE;
+
+		}
+		
+	}
+
+/*
 	if ( FAIL == HeapPush( heap1, arr ))
 	{
 		printf("line: %d \n" , __LINE__ );
@@ -185,11 +211,11 @@ static void TestHeap(void)
 
 		#ifdef PRINTS
 			printf(" HeapPeek(heap1)  = %d", *(int*)HeapPeek(heap1) );
-		/*	printf(" VectorGetAccess(heap)  = %d \n", *(int*)VectorGetAccess(heap1->vector, 1 ) );*/
 		#endif
 		flag =  TRUE;
 
 	}
+		*/
 	#ifdef PRINTS
 		/*	printf(" HeapPeek(heap1)  = %d", *(int*)HeapPeek(heap1) ); */
 		/*	printf(" VectorGetAccess(heap)  = %d", *(int*)VectorGetAccess(heap1->vector, 1 ) );*/
