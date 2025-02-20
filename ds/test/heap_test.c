@@ -149,7 +149,7 @@ static void TestHeap(void)
 {	
 	int flag = FALSE;
 	heap_t *heap1 = NULL;
-	int arr[11] = {16, 10, 13, 8, 5, 9, 3, 2, 1, 4, 12 };
+	int arr[12] = {16, 10, 13, 8, 5, 9, 3, 2, 1, 4, 12 , 17};
 	/*int arr[11] = {16, 10, 13, 8, 5, 9, 3, 2, 1, 4, 12};*/
 
 	int param [ 10 ] =  {16, 10, 13, 8, 5, 9, 3, 2, 1, 4};
