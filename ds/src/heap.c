@@ -161,11 +161,33 @@ int HeapPush( heap_t* heap , const void* data )
 	i = HeapSize(heap); /* must to be : size >= 1, if size == 1 is allready sorted */
 	parent = i / 2;
 
+	#ifdef PRINTS
+		/*printf(" HeapPeek(heap)  = %d \n", *(int*)HeapPeek(heap) );*/
+			puts("After Push Before Heapify ") ; 
+
+			printf(" VectorGetAccess(heap)  = %d , i = %lu \n",
+				 *(int*)VectorGetAccess(heap->vector, i ), i );
+			printf(" VectorGetAccess(heap)  = %d , parent = %lu \n ",
+				 *(int*)VectorGetAccess(heap->vector, parent ), parent );
+
+		#endif
+
 	/* Heapify up */
 	while ( parent > 0 && 
 		heap->cmp_func( VectorGetAccess( heap->vector, parent),
 				 VectorGetAccess( heap->vector, i), heap->param ) < 0 )
 	{
+		
+		#ifdef PRINTS
+		/*printf(" HeapPeek(heap)  = %d \n", *(int*)HeapPeek(heap) );*/
+			puts("Before heapify Push") ; 
+
+			printf(" VectorGetAccess(heap)  = %d , i = %lu \n",
+				 *(int*)VectorGetAccess(heap->vector, i ), i );
+			printf(" VectorGetAccess(heap)  = %d , parent = %lu \n ",
+				 *(int*)VectorGetAccess(heap->vector, parent ), parent );
+
+		#endif
 		
 		if ( FAIL == SwapQuick( VectorGetAccess( heap->vector, parent),
  						VectorGetAccess( heap->vector, i), ELEMENT_SIZE) )
@@ -176,8 +198,12 @@ int HeapPush( heap_t* heap , const void* data )
 		
 	#ifdef PRINTS
 	/*printf(" HeapPeek(heap)  = %d \n", *(int*)HeapPeek(heap) );*/
-	printf(" VectorGetAccess(heap)  = %d \n", *(int*)VectorGetAccess(heap->vector, i ) );
-	printf(" VectorGetAccess(heap)  = %d \n ", *(int*)VectorGetAccess(heap->vector, parent ) );
+	puts("After heapify Push ") ; 
+
+	printf(" VectorGetAccess(heap)  = %d , i = %lu \n",
+			 *(int*)VectorGetAccess(heap->vector, i ), i );
+	printf(" VectorGetAccess(heap)  = %d , parent = %lu \n ",
+			 *(int*)VectorGetAccess(heap->vector, parent ), parent );
 
 	#endif
 
@@ -188,10 +214,11 @@ int HeapPush( heap_t* heap , const void* data )
 
 	#ifdef PRINTS
 	/*printf(" HeapPeek(heap)  = %d \n", *(int*)HeapPeek(heap) );*/
-		printf(" VectorGetAccess(heap)  = %d \n",
-			 *(int*)VectorGetAccess(heap->vector, i ) );
-		printf(" VectorGetAccess(heap)  = %d \n ",
-			 *(int*)VectorGetAccess(heap->vector, parent ) );
+	puts("After Heapify while  push  ") ; 
+	printf(" VectorGetAccess(heap)  = %d , i = %lu \n",
+			 *(int*)VectorGetAccess(heap->vector, i ), i );
+	printf(" VectorGetAccess(heap)  = %d , parent = %lu \n ",
+			 *(int*)VectorGetAccess(heap->vector, parent ), parent );
 
 	#endif
 
