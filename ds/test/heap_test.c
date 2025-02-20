@@ -194,6 +194,17 @@ static void TestHeap(void)
 			flag =  TRUE;
 
 		}
+		/* heapify to root 16 -> 17*/
+		if ( i == size - 1)
+		{
+			if( arr[ i ] != *(int*)HeapPeek(heap1) )
+			{
+				printf("line: %d , Iteration = %ld \n" , __LINE__ , i );
+				puts("Failes in_3: Push ");
+				flag =  TRUE;
+			}
+
+		}
 		
 	}
 
