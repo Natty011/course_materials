@@ -39,7 +39,7 @@
 
 #define MIN(a, b)		((a > b ) ? b : a )
 #define MAX(a, b)		((a > b ) ? a : b )
-
+#define UNUSED( var )       ( (void)var )
 /***************struct and enum declaration *******/
 
 
@@ -47,7 +47,7 @@ typedef enum
 {
 	
 	SUCCESS = 0,
-	OPERATION_FAIL = 1
+	FAIL = 1
 	
 }avl_result_t;
 
@@ -88,15 +88,16 @@ static void TestHeap(void);
 /*
 static void TestAvlTwoeNode(void);
 */
-static int SortingFunc(const void* check_data ,const void* new_data);
+static int SortingFunc(const void* check_data ,const void* new_data, void* param);
 
 /***************************End of function declaration******************/
 
 /******************static functions definition**********************/
 		
 /*******************SortingFunc*********************/
-static int SortingFunc(const void* check_data ,const void* new_data)
+static int SortingFunc(const void* check_data ,const void* new_data, void* param)
 {
+	UNUSED(param);
 	return (*(int*)check_data - *(int*)new_data);
 }
 /*******************Compare*********************/
@@ -143,24 +144,32 @@ int main ()
 static void TestHeap(void)
 {	
 	int flag = FALSE;
-
+	heap_t *heap1 = NULL;
 	int arr[10] = {16, 10, 13, 8, 5, 9, 3, 2, 1, 4};
-	size_t i = 0;
+	int param [ 10 ] =  {16, 10, 13, 8, 5, 9, 3, 2, 1, 4};
+	/*size_t i = 0;*/
 		
-	/*heap_t *heap1 = HeapCreate(SortingFunc);*/
+	heap1 = HeapCreate(param , SortingFunc);
 
 	/*puts(RED);*/
-/*
-	if( !AVLIsEmpty(avl1) ) 
+
+	if(! heap1 )
 	{
-		puts("Failes in_1: IsEmpty");
+		printf("line: %d \n" , __LINE__ );
+		puts("Failes in_1: Create - Allocation");
+		flag =  TRUE;
+	}
+	if( !HeapIsEmpty(heap1)||  0 != HeapSize(heap1) ) 
+	{
+		printf("line: %d \n" , __LINE__ );
+		puts("Failes in_1: IsEmpty || Size ");
 		flag =  TRUE;
 	}
 
-	
+	/*
 	for(i = 0; i <= 10; ++i)
 	{
-		flag = AVLInsert(avl1, arr + i);
+		flag = AVLInsert(heap1, arr + i);
 		
 		if( flag )
 		{
@@ -169,7 +178,8 @@ static void TestHeap(void)
 		}
 
 	}
-	
+	*/
+/*
 	if( 11 != AVLSize(avl1) || 3 != AVLHeight(avl1) )
 	{
 		
@@ -191,9 +201,9 @@ static void TestHeap(void)
 
 	}
 	
-	
-	AVLDestroy(avl1);
-	avl1 = NULL;
+	*/
+	HeapDestroy(heap1);
+	heap1 = NULL;
 	
 	
 	if( !flag )
@@ -207,7 +217,7 @@ static void TestHeap(void)
 	{
 		puts(BACK_YELLOW"Test: Failure"RESET);	
 	}
-		*/
+		
 	
 }
 	
