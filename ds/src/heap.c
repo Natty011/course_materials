@@ -27,7 +27,7 @@
 typedef enum
 {
 	SUCCESS = 0,
-	OPERATION_FAIL = 1
+	FAIL = 1
 	
 } result_t;
 
@@ -127,6 +127,12 @@ size_t HeapSize(const heap_t *heap)
 	return VectorSize( heap->vector); 
 }
 
+/********************  HeapPeek  ****************************/
+void* HeapPeek( const heap_t* heap )
+{
+	assert(heap);
+	return VectorGetAccess( heap->vector, 0);
+}
 
 
 #ifdef PRINTS
