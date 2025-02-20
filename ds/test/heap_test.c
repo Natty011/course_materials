@@ -149,7 +149,9 @@ static void TestHeap(void)
 {	
 	int flag = FALSE;
 	heap_t *heap1 = NULL;
-	int arr[10] = {16, 10, 13, 8, 5, 9, 3, 2, 1, 4};
+	int arr[11] = {16, 10, 13, 8, 5, 9, 3, 2, 1, 4, 12 };
+	/*int arr[11] = {16, 10, 13, 8, 5, 9, 3, 2, 1, 4, 12};*/
+
 	int param [ 10 ] =  {16, 10, 13, 8, 5, 9, 3, 2, 1, 4};
 	size_t size = sizeof( arr ) / sizeof( arr[0] ) ; 
 	size_t i = 0;
