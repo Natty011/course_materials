@@ -20,7 +20,7 @@
 
 #define MAX( a , b )		( ( (a) > (b) ) ? (a) : (b) )
 #define UNUSED( var )       ( (void)var )
-
+#define ELEMENT_SIZE		sizeof(size_t)
 
 /***************************** Success / Fail Enum ****************************/
 
@@ -65,13 +65,13 @@ struct heap
 
 /******************************************************************************/
 /************************ ststic functions declartions ************************/
-
+static int SwapQuick(void* ptr1, void* ptr2, size_t element_size);
 #ifdef PRINTS
 
 									
 #endif
+/*******************End Of Static Functions declartions************************/
 
-/*******************End Of Static Functions definition************************/
 
 /********************  HeapCreate  ****************************/
 heap_t *HeapCreate(void* param, expand_cmp_func_t cmp_func)
@@ -87,7 +87,7 @@ heap_t *HeapCreate(void* param, expand_cmp_func_t cmp_func)
 		return NULL;
 	}
 	
-	heap_p->vector =  VectorCreate(capacity,  sizeof(size_t) ); /* cap == 3*/
+	heap_p->vector =  VectorCreate(capacity,  ELEMENT_SIZE ); /* cap == 3*/
 	if ( NULL == heap_p->vector )
 	{
 		free( heap_p);
@@ -158,30 +158,57 @@ int HeapPush( heap_t* heap , const void* data )
 		return FAIL;
 	}
 
-	i = HeapSize(heap);
+	i = HeapSize(heap); /* must to be : size >= 1, if size == 1 is allready sorted */
 	parent = i / 2;
 
-	while ( i > 0 && 
+	while ( parent > 0 && 
 		heap->cmp_func( VectorGetAccess( heap->vector, parent),
 				 VectorGetAccess( heap->vector, i), heap->param ) < 0 )
 	{
-		
-
+		if ( FAIL == SwapQuick( VectorGetAccess( heap->vector, parent),
+ 						VectorGetAccess( heap->vector, i), ELEMENT_SIZE) )
+		{
+			return FAIL;	
+		}
 
 		i = parent;
 		parent = i / 2;
 
-	}	
-	/*parent = ( 0 == i % 2 ) ?  */
+	}
+	
+	return SUCCESS;
+}
 
+/*******************Static Functions definition************************/
 
+/***************************SwapQuick***************************/
+static int SwapQuick(void* ptr1, void* ptr2, size_t element_size)
+{
+	char* temp = NULL;
+	
+	assert( ptr1 );
+	assert ( ptr2 );
+	
+	temp = (char*)malloc( element_size );
+
+	if ( NULL == temp )
+	{
+		return FAIL;
+	}
+	
+	memcpy(temp, ptr1, element_size );
+	memcpy(ptr1, ptr2, element_size );
+	memcpy(ptr2, temp, element_size );
+	
+	free( temp );
+	temp = NULL;
+	
+	return SUCCESS;
 }
 
 
 
-
-
-
+/*******************End Of Static Functions definition************************/
 
 
 #ifdef PRINTS
