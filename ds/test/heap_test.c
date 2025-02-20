@@ -166,6 +166,16 @@ static void TestHeap(void)
 		flag =  TRUE;
 	}
 
+	if ( FAIL == HeapPush( heap1, arr ) )
+	{
+		printf("line: %d \n" , __LINE__ );
+		puts("Failes in_1: Push - Allocation");
+		flag =  TRUE;
+
+	}
+
+	
+
 	/*
 	for(i = 0; i <= 10; ++i)
 	{
