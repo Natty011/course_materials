@@ -173,13 +173,26 @@ int HeapPush( heap_t* heap , const void* data )
 			return FAIL;	
 		}
 
+		
+	#ifdef PRINTS
+	/*printf(" HeapPeek(heap)  = %d \n", *(int*)HeapPeek(heap) );*/
+	printf(" VectorGetAccess(heap)  = %d \n", *(int*)VectorGetAccess(heap->vector, i ) );
+	printf(" VectorGetAccess(heap)  = %d \n ", *(int*)VectorGetAccess(heap->vector, parent ) );
+
+	#endif
+
 		i = parent;
 		parent = i / 2;
 
 	}
 
 	#ifdef PRINTS
-	printf(" HeapPeek(heap)  = %d", *(int*)HeapPeek(heap) );
+	/*printf(" HeapPeek(heap)  = %d \n", *(int*)HeapPeek(heap) );*/
+		printf(" VectorGetAccess(heap)  = %d \n",
+			 *(int*)VectorGetAccess(heap->vector, i ) );
+		printf(" VectorGetAccess(heap)  = %d \n ",
+			 *(int*)VectorGetAccess(heap->vector, parent ) );
+
 	#endif
 
 	return SUCCESS;
