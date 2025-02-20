@@ -13,7 +13,7 @@
 #include <stdlib.h> 	/* malloc, free */
 
 #include <stdio.h> 
-
+#include <string.h> /* memcpy */
 #include "heap.h" 
 #include "vector.h" 
 #include "aux_func.h"
@@ -78,8 +78,8 @@ heap_t *HeapCreate(void* param, expand_cmp_func_t cmp_func)
 {
 	
 	size_t capacity = 16;
-	void* dummy_start = NULL;
-
+	size_t* dummy_start = NULL;
+	size_t dummy = 0;
 	heap_t* heap_p = ( heap_t* )malloc( sizeof(heap_t) );
 
 	if(NULL == heap_p)
@@ -98,8 +98,11 @@ heap_t *HeapCreate(void* param, expand_cmp_func_t cmp_func)
 
 	heap_p->cmp_func = cmp_func;
 	heap_p->param = param;
+	/* to start from index 1 */
 
-	if ( VectorPushBack( heap_p->vector, dummy_start ) ) /* to start from index 1 */
+	dummy_start = &dummy;
+
+	if ( VectorPushBack( heap_p->vector, dummy_start ) ) 
 	{
 		HeapDestroy( heap_p );
 		heap_p->vector = NULL;
@@ -161,6 +164,7 @@ int HeapPush( heap_t* heap , const void* data )
 	i = HeapSize(heap); /* must to be : size >= 1, if size == 1 is allready sorted */
 	parent = i / 2;
 
+	/* Heapify up */
 	while ( parent > 0 && 
 		heap->cmp_func( VectorGetAccess( heap->vector, parent),
 				 VectorGetAccess( heap->vector, i), heap->param ) < 0 )
@@ -175,7 +179,7 @@ int HeapPush( heap_t* heap , const void* data )
 		parent = i / 2;
 
 	}
-	
+
 	return SUCCESS;
 }
 
