@@ -165,9 +165,9 @@ int HeapPush( heap_t* heap , const void* data )
 		/*printf(" HeapPeek(heap)  = %d \n", *(int*)HeapPeek(heap) );*/
 			puts("After Push Before Heapify ") ; 
 
-			printf(" VectorGetAccess(heap)  = %d , i = %lu \n",
+			printf(" VectorGetAccess(heap->vector, i )  = %d , i = %lu \n",
 				 *(int*)VectorGetAccess(heap->vector, i ), i );
-			printf(" VectorGetAccess(heap)  = %d , parent = %lu \n ",
+			printf(" VectorGetAccess(heap->vector, parent )  = %d , parent = %lu \n ",
 				 *(int*)VectorGetAccess(heap->vector, parent ), parent );
 
 		#endif
@@ -181,10 +181,10 @@ int HeapPush( heap_t* heap , const void* data )
 		#ifdef PRINTS
 		/*printf(" HeapPeek(heap)  = %d \n", *(int*)HeapPeek(heap) );*/
 			puts("Before heapify Push") ; 
-
-			printf(" VectorGetAccess(heap)  = %d , i = %lu \n",
+			
+			printf(" VectorGetAccess(heap->vector, i )  = %d , i = %lu \n",
 				 *(int*)VectorGetAccess(heap->vector, i ), i );
-			printf(" VectorGetAccess(heap)  = %d , parent = %lu \n ",
+			printf(" VectorGetAccess(heap->vector, parent )  = %d , parent = %lu \n ",
 				 *(int*)VectorGetAccess(heap->vector, parent ), parent );
 
 		#endif
@@ -199,11 +199,10 @@ int HeapPush( heap_t* heap , const void* data )
 	#ifdef PRINTS
 	/*printf(" HeapPeek(heap)  = %d \n", *(int*)HeapPeek(heap) );*/
 	puts("After heapify Push ") ; 
-
-	printf(" VectorGetAccess(heap)  = %d , i = %lu \n",
-			 *(int*)VectorGetAccess(heap->vector, i ), i );
-	printf(" VectorGetAccess(heap)  = %d , parent = %lu \n ",
-			 *(int*)VectorGetAccess(heap->vector, parent ), parent );
+			printf(" VectorGetAccess(heap->vector, i )  = %d , i = %lu \n",
+				 *(int*)VectorGetAccess(heap->vector, i ), i );
+			printf(" VectorGetAccess(heap->vector, parent )  = %d , parent = %lu \n ",
+				 *(int*)VectorGetAccess(heap->vector, parent ), parent );
 
 	#endif
 
