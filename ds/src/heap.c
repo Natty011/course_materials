@@ -67,6 +67,7 @@ struct heap
 /************************ ststic functions declartions ************************/
 static int SwapQuick(void* ptr1, void* ptr2, size_t element_size);
 #ifdef PRINTS
+void PrintArray( heap_t* heap );
 
 									
 #endif
@@ -181,7 +182,7 @@ int HeapPush( heap_t* heap , const void* data )
 		#ifdef PRINTS
 		/*printf(" HeapPeek(heap)  = %d \n", *(int*)HeapPeek(heap) );*/
 			puts("Before heapify Push") ; 
-			
+
 			printf(" VectorGetAccess(heap->vector, i )  = %d , i = %lu \n",
 				 *(int*)VectorGetAccess(heap->vector, i ), i );
 			printf(" VectorGetAccess(heap->vector, parent )  = %d , parent = %lu \n ",
@@ -212,6 +213,8 @@ int HeapPush( heap_t* heap , const void* data )
 	}
 
 	#ifdef PRINTS
+
+	
 	/*printf(" HeapPeek(heap)  = %d \n", *(int*)HeapPeek(heap) );*/
 	puts("After Heapify while  push  ") ; 
 	printf(" VectorGetAccess(heap)  = %d , i = %lu \n",
@@ -219,13 +222,27 @@ int HeapPush( heap_t* heap , const void* data )
 	printf(" VectorGetAccess(heap)  = %d , parent = %lu \n ",
 			 *(int*)VectorGetAccess(heap->vector, parent ), parent );
 
+	PrintArray(heap);		 
+
 	#endif
 
 	return SUCCESS;
 }
 
 /*******************Static Functions definition************************/
+void PrintArray( heap_t* heap )
+{
+	size_t size = 1 ;
+	
+	printf("HeapArray[] = \n" );
+	while( size <= HeapSize( heap ) )
+	{
+		printf("index = %ld , value = %d \n", size, 
+			 *(int*)VectorGetAccess(heap->vector, size ) );
 
+			++size;
+	}
+}
 /***************************SwapQuick***************************/
 static int SwapQuick(void* ptr1, void* ptr2, size_t element_size)
 {
