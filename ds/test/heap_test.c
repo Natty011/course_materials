@@ -12,6 +12,10 @@
 #include "heap.h" 
 #include "vector.h" 
 
+#ifdef PRINTS
+	#include "vector.h" 
+#endif
+
 #define BLACK        "\x1b[30m"
 #define RED          "\x1b[31m"
 #define GREEN        "\x1b[32m"
@@ -166,7 +170,7 @@ static void TestHeap(void)
 		flag =  TRUE;
 	}
 
-	if ( FAIL == HeapPush( heap1, arr ) )
+	if ( FAIL == HeapPush( heap1, arr ))
 	{
 		printf("line: %d \n" , __LINE__ );
 		puts("Failes in_1: Push - Allocation");
@@ -174,7 +178,42 @@ static void TestHeap(void)
 
 	}
 
-	
+	if ( HeapIsEmpty(heap1) ||  1 != HeapSize(heap1) )
+	{
+		printf("line: %d \n" , __LINE__ );
+		puts("Failes in_2: Push ");
+
+		#ifdef PRINTS
+			printf(" HeapPeek(heap1)  = %d", *(int*)HeapPeek(heap1) );
+		/*	printf(" VectorGetAccess(heap)  = %d \n", *(int*)VectorGetAccess(heap1->vector, 1 ) );*/
+		#endif
+		flag =  TRUE;
+
+	}
+	#ifdef PRINTS
+		/*	printf(" HeapPeek(heap1)  = %d", *(int*)HeapPeek(heap1) ); */
+		/*	printf(" VectorGetAccess(heap)  = %d", *(int*)VectorGetAccess(heap1->vector, 1 ) );*/
+		#endif
+
+
+
+	  
+/*
+	for(i = 0; i < cap ; ++i)
+	{
+		VectorPushBack(v1, arr + i);
+		if(arr[i] != *(double*)VectorGetAccess(v1, i) ) 
+		{
+			puts("Failes in TestDouble: PushBack & GetAccess");
+		}
+		
+		if(VectorSize(v1) != (i + 1))
+		{
+			puts("Failes in TestDouble: Size");
+		}
+		
+	}
+		*/
 
 	/*
 	for(i = 0; i <= 10; ++i)
