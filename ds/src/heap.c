@@ -173,6 +173,7 @@ int HeapPush( heap_t* heap , const void* data )
 
 		#endif
 
+		
 	/* Heapify up */
 	while ( parent > 0 && 
 		heap->cmp_func( VectorGetAccess( heap->vector, parent),
