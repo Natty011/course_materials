@@ -240,7 +240,7 @@ int HeapPush( heap_t* heap , const void* data )
 
 void* HeapRemove( heap_t* heap , match_func_t match_func , void* param )
 {
-	size_t parent = 0, i = 0;
+	size_t last = 0, to_remove = 0;
 
 	assert(heap);
 
@@ -248,10 +248,19 @@ void* HeapRemove( heap_t* heap , match_func_t match_func , void* param )
 	{
 		return NULL;
 	}
-	i = IsExist( heap , match_func, param);
+	to_remove = IsExist( heap , match_func, param);
 
-	if( FALSE == i)
+	if( FALSE == to_remove )
+	{
+		return NULL;
+	}
+	last = HeapSize(heap); /* must to be : size >= 1, if size == 1 is allready sorted */
 
+	if ( FAIL == SwapQuick( VectorGetAccess( heap->vector, last),
+ 						VectorGetAccess( heap->vector, to_remove), ELEMENT_SIZE) )
+	{
+			return NULL;	
+	}
 
 }
 /********************  IsExist  ****************************/
