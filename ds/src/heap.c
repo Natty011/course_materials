@@ -98,10 +98,9 @@ heap_t *HeapCreate(void* param, expand_cmp_func_t cmp_func)
 
 	heap_p->cmp_func = cmp_func;
 	heap_p->param = param;
-	/* to start from index 1 */
 
 	dummy_start = &dummy;
-
+	/* to start from index 1 */
 	if ( VectorPushBack( heap_p->vector, dummy_start ) ) 
 	{
 		HeapDestroy( heap_p );
@@ -109,8 +108,6 @@ heap_t *HeapCreate(void* param, expand_cmp_func_t cmp_func)
 		heap_p = NULL;
 
 		return NULL;
-
-
 	}
 
 	return heap_p;
@@ -169,6 +166,7 @@ int HeapPush( heap_t* heap , const void* data )
 		heap->cmp_func( VectorGetAccess( heap->vector, parent),
 				 VectorGetAccess( heap->vector, i), heap->param ) < 0 )
 	{
+		
 		if ( FAIL == SwapQuick( VectorGetAccess( heap->vector, parent),
  						VectorGetAccess( heap->vector, i), ELEMENT_SIZE) )
 		{
@@ -179,6 +177,10 @@ int HeapPush( heap_t* heap , const void* data )
 		parent = i / 2;
 
 	}
+
+	#ifdef PRINTS
+	printf(" HeapPeek(heap)  = %d", *(int*)HeapPeek(heap) );
+	#endif
 
 	return SUCCESS;
 }
@@ -215,9 +217,7 @@ static int SwapQuick(void* ptr1, void* ptr2, size_t element_size)
 /*******************End Of Static Functions definition************************/
 
 
-#ifdef PRINTS
 
-#endif
 
 
 
