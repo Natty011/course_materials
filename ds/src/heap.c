@@ -13,7 +13,7 @@
 #include <stdlib.h> 	/* malloc, free */
 
 #include <stdio.h> 
-#include <string.h> /* memcpy */
+#include <string.h> /* memcpy, memcmp */
 #include "heap.h" 
 #include "vector.h" 
 #include "aux_func.h"
@@ -67,6 +67,7 @@ struct heap
 /************************ ststic functions declartions ************************/
 static int SwapQuick(void* ptr1, void* ptr2, size_t element_size);
 static size_t IsExist(heap_t* heap , match_func_t match_func , void* param );
+static int MatchFuncPop( void* check_data , void* user_param );
 
 #ifdef PRINTS
 void PrintArray( heap_t* heap );
@@ -308,11 +309,46 @@ void* HeapRemove( heap_t* heap , match_func_t match_func , void* param )
 			break;
 		}
 	}
-	
-		PrintArray(heap);	
 
+	#ifdef PRINTS
+		PrintArray(heap);	
+	#endif
+	
 	return param;
 }
+
+/********************  HeapPop  ****************************/
+void HeapPop( heap_t* heap )
+{
+	void *data = NULL;
+	void *data2 = NULL;
+
+	assert(heap);
+
+	if ( HeapIsEmpty( heap ) )
+	{
+		return;
+	}
+	data = HeapPeek(heap); 
+
+	data2 = HeapRemove(heap, MatchFuncPop, HeapPeek(heap) );
+
+	#ifdef PRINTS
+	printf(" data  = %d \n", *(int*)data );
+	printf(" data2  = %d \n", *(int*)data2 );
+
+	#endif
+}
+
+/********************  MatchFuncPop  ****************************/
+static int MatchFuncPop( void* check_data , void* user_param )
+{
+	return ! memcmp(check_data, user_param, ELEMENT_SIZE );
+}
+
+/*******************Static Functions definition************************/
+
+
 /********************  IsExist  ****************************/
 
 static size_t IsExist(heap_t* heap , match_func_t match_func , void* param )
@@ -330,9 +366,6 @@ static size_t IsExist(heap_t* heap , match_func_t match_func , void* param )
 
 	return FALSE; /* the param isn't in the heap */
 }
-
-
-/*******************Static Functions definition************************/
 
 void PrintArray( heap_t* heap )
 {
