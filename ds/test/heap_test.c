@@ -163,7 +163,7 @@ static void TestHeap(void)
 	/*int arr[11] = {16, 10, 13, 8, 5, 9, 3, 2, 1, 4, 12};*/
 	void *data = NULL;
 
-	int param [ 11 ] =  {16, 12, 13, 8, 10, 9, 3, 2, 1, 4, 5};
+	int param [ 12 ] =  {16, 12, 13, 8, 10, 9, 3, 2, 1, 4, 5};
 	size_t size = sizeof( arr ) / sizeof( arr[0] ) ; 
 	size_t i = 0;
 		
@@ -184,7 +184,7 @@ static void TestHeap(void)
 		flag =  TRUE;
 	}
 
-	for(i = 0; i < size  ; ++i)
+	for(i = 0; i < 1  ; ++i) /* size */
 	{
 		if ( FAIL == HeapPush( heap1, arr + i ))
 		{
@@ -250,8 +250,18 @@ static void TestHeap(void)
 		PrintArray(heap1);	
 
 		/* remove 12 */
-	data = HeapRemove(heap1, match_func, param + 1 );
-	printf(" data  = %d \n", *(int*)data ); 
+	/*data = HeapRemove(heap1, match_func, param + 1 );*/
+	/* remove 17 */
+	/*data = HeapRemove(heap1, match_func, arr + 11 );*/
+
+	/* remove 9 */
+	/*data = HeapRemove(heap1, match_func, arr + 5 );*/
+	/* remove 16 , on member */
+	data = HeapRemove(heap1, match_func, arr  );
+	if( data )
+	{
+		printf(" data  = %d \n", *(int*)data ); 
+	}
 
 	PrintArray(heap1);	
 
