@@ -93,7 +93,7 @@ static void TestHeap(void);
 static void TestAvlTwoeNode(void);
 */
 static int SortingFunc(const void* check_data ,const void* new_data, void* param);
-
+static int match_func(void* check_data , void* new_data);
 /***************************End of function declaration******************/
 
 /******************static functions definition**********************/
@@ -105,14 +105,24 @@ static int SortingFunc(const void* check_data ,const void* new_data, void* param
 	return (*(int*)check_data - *(int*)new_data);
 }
 /*******************Compare*********************/
+/*
 static int Compare(void* check_data , void* new_data)
 {
 	return !(SUCCESS == (*(int*)check_data - *(int*)new_data));
 }
+*/
 /*******************Compare2*********************/
+/*
 static int Compare2(void* check_data , void* new_data)
 {
 	return  ( *(int*)check_data >= *(int*)new_data );
+}
+*/
+/*******************match_func*********************/
+
+static int match_func(void* check_data , void* new_data)
+{
+	return (SUCCESS == (*(int*)check_data - *(int*)new_data));
 }
 
 /******************End of static functions definition**********************/
@@ -151,8 +161,9 @@ static void TestHeap(void)
 	heap_t *heap1 = NULL;
 	int arr[12] = {16, 10, 13, 8, 5, 9, 3, 2, 1, 4, 12 , 17};
 	/*int arr[11] = {16, 10, 13, 8, 5, 9, 3, 2, 1, 4, 12};*/
+	void *data = NULL;
 
-	int param [ 10 ] =  {16, 10, 13, 8, 5, 9, 3, 2, 1, 4};
+	int param [ 11 ] =  {16, 12, 13, 8, 10, 9, 3, 2, 1, 4, 5};
 	size_t size = sizeof( arr ) / sizeof( arr[0] ) ; 
 	size_t i = 0;
 		
@@ -173,7 +184,7 @@ static void TestHeap(void)
 		flag =  TRUE;
 	}
 
-	for(i = 0; i < size ; ++i)
+	for(i = 0; i < size  ; ++i)
 	{
 		if ( FAIL == HeapPush( heap1, arr + i ))
 		{
@@ -208,6 +219,8 @@ static void TestHeap(void)
 		
 	}
 
+
+
 /*
 	if ( FAIL == HeapPush( heap1, arr ))
 	{
@@ -234,62 +247,14 @@ static void TestHeap(void)
 		/*	printf(" VectorGetAccess(heap)  = %d", *(int*)VectorGetAccess(heap1->vector, 1 ) );*/
 		#endif
 
+		PrintArray(heap1);	
 
+		/* remove 12 */
+	data = HeapRemove(heap1, match_func, param + 1 );
+	printf(" data  = %d \n", *(int*)data ); 
 
-	  
-/*
-	for(i = 0; i < cap ; ++i)
-	{
-		VectorPushBack(v1, arr + i);
-		if(arr[i] != *(double*)VectorGetAccess(v1, i) ) 
-		{
-			puts("Failes in TestDouble: PushBack & GetAccess");
-		}
-		
-		if(VectorSize(v1) != (i + 1))
-		{
-			puts("Failes in TestDouble: Size");
-		}
-		
-	}
-		*/
+	PrintArray(heap1);	
 
-	/*
-	for(i = 0; i <= 10; ++i)
-	{
-		flag = AVLInsert(heap1, arr + i);
-		
-		if( flag )
-		{
-			puts("Failes in_1: Insert Allocation failed ");
-			flag =  TRUE;
-		}
-
-	}
-	*/
-/*
-	if( 11 != AVLSize(avl1) || 3 != AVLHeight(avl1) )
-	{
-		
-		puts("Failes in_1: Size || Height");
-		flag =  TRUE;
-	
-	}
-	
-	
-	for(i = 0; i <= 10; ++i)
-	{
-		flag = Compare(AVLFind(avl1, arr + i), arr + i);
-		
-		if( flag )
-		{
-			printf("Failes in_1: Find, i = %lu \n", i);
-			flag =  TRUE;
-		}
-
-	}
-	
-	*/
 	HeapDestroy(heap1);
 	heap1 = NULL;
 	
