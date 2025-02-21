@@ -336,13 +336,14 @@ void* HeapRemove( heap_t* heap , match_func_t match_func , void* param )
 	printf(" param_to_return_paramRemove222 = %d\n", (int*)param_to_return );
 	printf(" param_to_return_paramRemove2222_address = %p \n", param_to_return );
 	printf(" temp_paramRemove1111 = %d \n", *(int*)temp_param );
-	memcpy(  param, &param_to_return, ELEMENT_SIZE);
+	/*memcpy(  param, &param_to_return, ELEMENT_SIZE);*/
 
 	printf(" param  = %d \n", *(int*)param );
 	printf(" paramRemove2_address = %p \n", param );
-
-	/*return (int**)temp_param ;*/
+	
 	return param;
+	/*return (int**)temp_param ;*/
+	/*return param;*/
 }
 
 /********************  HeapPop  ****************************/
@@ -351,20 +352,33 @@ void HeapPop( heap_t* heap )
 	void *data = NULL;
 	void *data2 = NULL;
 
+	void **temp_param = NULL, *param_to_return = NULL;
+	temp_param = &param_to_return;
+
 	assert(heap);
 
 	if ( HeapIsEmpty( heap ) )
 	{
 		return;
 	}
+
+	
+
+
 	#ifdef PRINTS
 		printf(" HeapPeek(heap)  = %d \n", *(int*)HeapPeek(heap) );
 	#endif
-	data = HeapPeek(heap); 
+	data = HeapPeek(heap);
+	memcpy(&param_to_return,  data, ELEMENT_SIZE);
+	temp_param = &param_to_return;
+
 	printf(" dataPop  = %d \n", *(int*)data );
 
-	data2 = HeapRemove(heap, MatchFuncPop, data );
+	data2 = HeapRemove(heap, MatchFuncPop, temp_param );
 	printf(" data2  = %d \n", *(int*)data2 );
+	printf(" param_to_return_paramPop222 = %d\n", (int*)param_to_return );
+	printf(" param_to_return_paramPop2222_address = %p \n", param_to_return );
+	printf(" temp_paramPop1111 = %d \n", *(int*)temp_param );
 
 	#ifdef PRINTS
 		printf(" data  = %d \n", *(int*)data );
