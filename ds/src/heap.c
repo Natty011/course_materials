@@ -240,8 +240,8 @@ int HeapPush( heap_t* heap , const void* data )
 
 void* HeapRemove( heap_t* heap , match_func_t match_func , void* param )
 {
-	size_t parent = 0, to_remove = 0, size = 0;
-
+	size_t parent = 0, to_remove = 0, size = 0, left = 0, right = 0, largest = 0;
+	int swapped_occured = FALSE;
 	assert(heap);
 
 	if ( HeapIsEmpty( heap ) )
@@ -263,11 +263,52 @@ void* HeapRemove( heap_t* heap , match_func_t match_func , void* param )
 	}
 
 	VectorPopBack( heap->vector);
+
 	size = HeapSize(heap);
-	while ( left <= )
 
+	parent = to_remove;
 	
+	/* Heapify down */
+	while ( parent < size   ) /* && largest != parent */
+	{
+		/*largest = parent;*/
+		swapped_occured = FALSE;
+		left = 2 * parent;
+		right = left + 1;
 
+		if( left <= size && heap->cmp_func( VectorGetAccess( heap->vector, parent),
+							VectorGetAccess( heap->vector, left), heap->param ) < 0 )
+		{
+			largest = left;
+
+		}
+
+		if( right <= size && heap->cmp_func( VectorGetAccess( heap->vector, largest),
+							VectorGetAccess( heap->vector, right), heap->param ) < 0 )
+		{
+			largest = right;
+		}		
+
+		if( largest != parent )
+		{
+			if( FAIL == SwapQuick( VectorGetAccess( heap->vector, parent),
+							VectorGetAccess( heap->vector, largest), ELEMENT_SIZE) )
+			{
+				return NULL;	
+			}
+
+			parent = largest;
+			swapped_occured = TRUE;
+
+		}
+
+		if(!swapped_occured)
+		{
+			break;
+		}
+	}
+	
+	return param;
 }
 /********************  IsExist  ****************************/
 
