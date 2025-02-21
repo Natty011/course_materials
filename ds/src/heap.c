@@ -243,7 +243,7 @@ void* HeapRemove( heap_t* heap , match_func_t match_func , void* param )
 {
 	size_t parent = 0, to_remove = 0, size = 0, left = 0, right = 0, largest = 0;
 	int swapped_occured = FALSE;
-	int **temp_param = NULL, *param_to_return = NULL;
+	void **temp_param = NULL, *param_to_return = NULL;
 	temp_param = &param_to_return;
 
 	assert(heap);
@@ -259,6 +259,9 @@ void* HeapRemove( heap_t* heap , match_func_t match_func , void* param )
 
 	printf(" temp_paramRemove1 = %d \n", *(int*)temp_param );
 	printf(" temp_paramRemove1_address = %p \n", temp_param );
+
+	printf(" param_to_return_paramRemove1 = %d\n", (int*)param_to_return );
+	printf(" param_to_return_paramRemove1_address = %p \n", param_to_return );
 
 	to_remove = IsExist( heap , match_func, param);
 	printf(" to_remove  = %d \n", to_remove );
@@ -330,11 +333,15 @@ void* HeapRemove( heap_t* heap , match_func_t match_func , void* param )
 		/*PrintArray(heap);	*/
 	#endif
 
+	printf(" param_to_return_paramRemove222 = %d\n", (int*)param_to_return );
+	printf(" param_to_return_paramRemove2222_address = %p \n", param_to_return );
 	printf(" temp_paramRemove1111 = %d \n", *(int*)temp_param );
+	memcpy(  param, &param_to_return, ELEMENT_SIZE);
 
 	printf(" param  = %d \n", *(int*)param );
 	printf(" paramRemove2_address = %p \n", param );
 
+	/*return (int**)temp_param ;*/
 	return param;
 }
 
