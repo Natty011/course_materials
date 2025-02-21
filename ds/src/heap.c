@@ -271,6 +271,7 @@ void* HeapRemove( heap_t* heap , match_func_t match_func , void* param )
 	/* Heapify down */
 	while ( parent < size   ) /* && largest != parent */
 	{
+		
 		/*largest = parent;*/
 		swapped_occured = FALSE;
 		left = 2 * parent;
