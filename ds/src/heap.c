@@ -243,13 +243,25 @@ void* HeapRemove( heap_t* heap , match_func_t match_func , void* param )
 {
 	size_t parent = 0, to_remove = 0, size = 0, left = 0, right = 0, largest = 0;
 	int swapped_occured = FALSE;
+	int **temp_param = NULL, *param_to_return = NULL;
+	temp_param = &param_to_return;
+
 	assert(heap);
 
 	if ( HeapIsEmpty( heap ) )
 	{
 		return NULL;
 	}
+
+	memcpy(&param_to_return,  param, ELEMENT_SIZE);
+	printf(" paramRemove1 = %d \n", *(int*)param );
+	printf(" paramRemove1_address = %p \n", param );
+
+	printf(" temp_paramRemove1 = %d \n", *(int*)temp_param );
+	printf(" temp_paramRemove1_address = %p \n", temp_param );
+
 	to_remove = IsExist( heap , match_func, param);
+	printf(" to_remove  = %d \n", to_remove );
 
 	if( FALSE == to_remove )
 	{
@@ -268,6 +280,10 @@ void* HeapRemove( heap_t* heap , match_func_t match_func , void* param )
 	size = HeapSize(heap);
 
 	parent = to_remove;
+	printf(" parent  = %d \n", parent );
+	printf(" size  = %d \n", size );
+	printf(" HeapPeek(heap)Remove2  = %d \n", *(int*)HeapPeek(heap) );
+	printf(" paramRemove2 = %d \n", *(int*)param );
 
 	/* Heapify down */
 	while ( parent < size   ) /* && largest != parent */
@@ -311,9 +327,14 @@ void* HeapRemove( heap_t* heap , match_func_t match_func , void* param )
 	}
 
 	#ifdef PRINTS
-		PrintArray(heap);	
+		/*PrintArray(heap);	*/
 	#endif
-	
+
+	printf(" temp_paramRemove1111 = %d \n", *(int*)temp_param );
+
+	printf(" param  = %d \n", *(int*)param );
+	printf(" paramRemove2_address = %p \n", param );
+
 	return param;
 }
 
@@ -329,21 +350,29 @@ void HeapPop( heap_t* heap )
 	{
 		return;
 	}
-	data = HeapPeek(heap); 
-
-	data2 = HeapRemove(heap, MatchFuncPop, HeapPeek(heap) );
-
 	#ifdef PRINTS
-	printf(" data  = %d \n", *(int*)data );
+		printf(" HeapPeek(heap)  = %d \n", *(int*)HeapPeek(heap) );
+	#endif
+	data = HeapPeek(heap); 
+	printf(" dataPop  = %d \n", *(int*)data );
+
+	data2 = HeapRemove(heap, MatchFuncPop, data );
 	printf(" data2  = %d \n", *(int*)data2 );
 
+	#ifdef PRINTS
+		printf(" data  = %d \n", *(int*)data );
+		printf(" data2  = %d \n", *(int*)data2 );
 	#endif
 }
 
 /********************  MatchFuncPop  ****************************/
 static int MatchFuncPop( void* check_data , void* user_param )
 {
-	return ! memcmp(check_data, user_param, ELEMENT_SIZE );
+	int mem = -1 ;
+	mem =  ! memcmp(check_data, user_param, ELEMENT_SIZE );
+	printf(" mem  = %d \n", mem);
+
+	return mem;
 }
 
 /*******************Static Functions definition************************/
@@ -354,12 +383,16 @@ static int MatchFuncPop( void* check_data , void* user_param )
 static size_t IsExist(heap_t* heap , match_func_t match_func , void* param )
 {
 	size_t size = 1 ;
+	printf(" paramIsExist  = %d \n", *(int*)param );
 
 	while( size <= HeapSize( heap ) )
 	{
 		if ( match_func(VectorGetAccess(heap->vector, size ) , param ) )
 		{
+			printf(" size  = %d \n", size);
+
 			return size;
+
 		}
 			++size;
 	}
