@@ -289,7 +289,7 @@ static void TestHeap(void)
 	}
 	PrintArray(heap1);	
 	#ifdef PRINTS
-		/*printf(" HeapPeek(heap1)  = %d \n", *(int*)HeapPeek(heap1) );*/
+		printf(" HeapPeek(heap1)  = %d \n", *(int*)HeapPeek(heap1) );
 	#endif
 
 	/* pop 17  */
@@ -297,7 +297,7 @@ static void TestHeap(void)
 
 	HeapPop(heap1);
 
-	if( HeapIsEmpty(heap1) || size - 1 != HeapSize(heap1) ||
+	if( HeapIsEmpty(heap1) || 11 != HeapSize(heap1) ||
 		arr[0] != *(int*)HeapPeek(heap1) ) 
 	{
 		printf("line: %d \n" , __LINE__ );
@@ -305,41 +305,8 @@ static void TestHeap(void)
 		flag =  TRUE;
 	}
 
-	PrintArray(heap1);
-/*
-	if ( FAIL == HeapPush( heap1, arr ))
-	{
-		printf("line: %d \n" , __LINE__ );
-		puts("Failes in_1: Push - Allocation");
-		flag =  TRUE;
-
-	}
-
-	if ( HeapIsEmpty(heap1) ||  1 != HeapSize(heap1) )
-	{
-		printf("line: %d \n" , __LINE__ );
-		puts("Failes in_2: Push ");
-
-		#ifdef PRINTS
-			printf(" HeapPeek(heap1)  = %d", *(int*)HeapPeek(heap1) );
-		#endif
-		flag =  TRUE;
-
-	}
-		*/
-	#ifdef PRINTS
-		/*	printf(" HeapPeek(heap1)  = %d", *(int*)HeapPeek(heap1) ); */
-		/*	printf(" VectorGetAccess(heap)  = %d", *(int*)VectorGetAccess(heap1->vector, 1 ) );*/
-		#endif
-
-	/*PrintArray(heap1);	*/
-
-		
-	/* remove 17 */
-	/*data = HeapRemove(heap1, match_func, arr + 11 );*/
-
 	/* remove 9 */
-	puts("remove_9");
+	/*puts("remove_9");*/
 	data = HeapRemove(heap1, match_func, arr + 5 );
 	
 	if(  arr[5] != *(int*)data || 10 != HeapSize(heap1) ||
@@ -350,10 +317,9 @@ static void TestHeap(void)
 		
 		/*printf(" data  = %d \n", *(int*)data ); */
 	}
-	PrintArray(heap1);
 	
 	/* remove 16  */
-	puts("remove_16");
+	/*puts("remove_16");*/
 
 	data = HeapRemove(heap1, match_func, arr  );
 
@@ -366,13 +332,9 @@ static void TestHeap(void)
 	
 		/*printf(" data  = %d \n", *(int*)data ); */
 	}
-	
-	PrintArray(heap1);
-
 
 	/* remove 12 */
-	/*data = HeapRemove(heap1, match_func, param + 1 );*/
-	puts("remove_12");
+	/*puts("remove_12");*/
 
 	data = HeapRemove(heap1, match_func, arr + 10  );
 
@@ -386,10 +348,9 @@ static void TestHeap(void)
 		/*printf(" data  = %d \n", *(int*)data ); */
 	}
 	
-	PrintArray(heap1);
+	/*PrintArray(heap1);*/
 
-
-	puts("remove_20_doesnt_exist");
+	/*puts("remove_20_doesnt_exist");*/
 
 	data = HeapRemove(heap1, match_func, param2  );
 
@@ -403,10 +364,10 @@ static void TestHeap(void)
 		/*printf(" data  = %d \n", *(int*)data ); */
 	}
 
-	PrintArray(heap1);
+	/*PrintArray(heap1);*/
 
 	/* pop 13  */
-	puts("pop 13");
+	/*puts("pop 13");*/
 
 	HeapPop(heap1);
 
@@ -417,10 +378,10 @@ static void TestHeap(void)
 		flag =  TRUE;
 	}
 
-	PrintArray(heap1);
+	/*PrintArray(heap1);*/
 
 	/* pop 10  */
-	puts("pop 10");
+	/*puts("pop 10");*/
 
 	HeapPop(heap1);
 
@@ -431,10 +392,10 @@ static void TestHeap(void)
 		flag =  TRUE;
 	}
 
-	PrintArray(heap1);
+	/*PrintArray(heap1);*/
 
 	/* pop 8  */
-	puts("pop 8");
+	/*puts("pop 8");*/
 
 	HeapPop(heap1);
 
@@ -445,11 +406,9 @@ static void TestHeap(void)
 		flag =  TRUE;
 	}
 
-	PrintArray(heap1);
-
-
+	/*PrintArray(heap1);*/
 	/* pop 5  */
-	puts("pop 5");
+	/*puts("pop 5");*/
 
 	HeapPop(heap1);
 
@@ -460,10 +419,10 @@ static void TestHeap(void)
 		flag =  TRUE;
 	}
 
-	PrintArray(heap1);
+	/*PrintArray(heap1);*/
 
 	/* pop 4  */
-	puts("pop 4");
+	/*puts("pop 4");*/
 
 	HeapPop(heap1);
 
@@ -474,11 +433,10 @@ static void TestHeap(void)
 		flag =  TRUE;
 	}
 
-	PrintArray(heap1);
-
+	/*PrintArray(heap1);*/
 
 	/* pop 3  */
-	puts("pop 3");
+	/*puts("pop 3");*/
 
 	HeapPop(heap1);
 
@@ -489,10 +447,10 @@ static void TestHeap(void)
 		flag =  TRUE;
 	}
 
-	PrintArray(heap1);
+	/*PrintArray(heap1);*/
 
 	/* pop 2  */
-	puts("pop 2");
+	/*puts("pop 2");*/
 
 	HeapPop(heap1);
 
@@ -503,15 +461,8 @@ static void TestHeap(void)
 		flag =  TRUE;
 	}
 
-PrintArray(heap1);
-
-
-
 	HeapDestroy(heap1);
 	heap1 = NULL;
-	
-
-
 	
 	if( !flag )
 	{
