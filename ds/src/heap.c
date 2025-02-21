@@ -267,7 +267,7 @@ void* HeapRemove( heap_t* heap , match_func_t match_func , void* param )
 	size = HeapSize(heap);
 
 	parent = to_remove;
-	
+
 	/* Heapify down */
 	while ( parent < size   ) /* && largest != parent */
 	{
@@ -308,6 +308,8 @@ void* HeapRemove( heap_t* heap , match_func_t match_func , void* param )
 		}
 	}
 	
+		PrintArray(heap);	
+
 	return param;
 }
 /********************  IsExist  ****************************/
