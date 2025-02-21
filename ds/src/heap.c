@@ -258,16 +258,12 @@ void* HeapRemove( heap_t* heap , match_func_t match_func , void* param )
 		return NULL;
 	}
 	parent = HeapSize(heap); /* must to be : size >= 1, if size == 1 is allready sorted */
-	printf(" paramRemove1 = %d \n", *(int*)param );
-	printf(" paramRemove1_address = %p \n", param );
-	PrintArray(heap);	
 
 	if( FAIL == SwapQuick( VectorGetAccess( heap->vector, parent),
  						VectorGetAccess( heap->vector, to_remove), ELEMENT_SIZE) )
 	{
 			return NULL;	
 	}
-	PrintArray(heap);	
 
 	VectorPopBack( heap->vector);
 
@@ -275,15 +271,6 @@ void* HeapRemove( heap_t* heap , match_func_t match_func , void* param )
 
 	parent = to_remove;
 	
-
-	printf(" parent  = %d \n", parent );
-	printf(" size  = %d \n", size );
-	printf(" HeapPeek(heap)Remove2  = %d \n", *(int*)HeapPeek(heap) );
-	printf(" paramRemove2 = %d \n", *(int*)param );
-
-	PrintArray(heap);	
-
-
 	/* Heapify down */
 	while ( parent < size   ) 
 	{
@@ -292,25 +279,10 @@ void* HeapRemove( heap_t* heap , match_func_t match_func , void* param )
 		left = 2 * parent;
 		right = left + 1;
 
-		#ifdef PRINTS
-		/*printf(" HeapPeek(heap)  = %d \n", *(int*)HeapPeek(heap) );*/
-		
-			puts("Before heapify remove") ; 
-			printf(" VectorGetAccess(heap->vector, parent )  = %d , parent = %lu \n ",
-				 *(int*)VectorGetAccess(heap->vector, parent ), parent );
-
-			
-			
-			
-
-		
-		#endif
 		if( left <= size && heap->cmp_func( VectorGetAccess( heap->vector, parent),
 							VectorGetAccess( heap->vector, left), heap->param ) < 0 )
 		{
-			
-			printf(" VectorGetAccess(heap->vector, left )  = %d , left = %lu \n",
-				 *(int*)VectorGetAccess(heap->vector, left ), left );
+
 			largest = left;
 
 		}
@@ -318,9 +290,6 @@ void* HeapRemove( heap_t* heap , match_func_t match_func , void* param )
 		if( right <= size && heap->cmp_func( VectorGetAccess( heap->vector, largest),
 							VectorGetAccess( heap->vector, right), heap->param ) < 0 )
 		{
-			
-			printf(" VectorGetAccess(heap->vector, right )  = %d , right = %lu \n ",
-				 *(int*)VectorGetAccess(heap->vector, right ), right );
 			largest = right;
 		}		
 
@@ -331,10 +300,9 @@ void* HeapRemove( heap_t* heap , match_func_t match_func , void* param )
 			{
 				return NULL;	
 			}
-			puts(" swapped_occured ");
+
 			parent = largest;
 			swapped_occured = TRUE;
-
 		}
 
 		if(!swapped_occured)
@@ -344,7 +312,7 @@ void* HeapRemove( heap_t* heap , match_func_t match_func , void* param )
 	}
 
 	#ifdef PRINTS
-		PrintArray(heap);	
+		/*PrintArray(heap);	*/
 	#endif
 
 	return param;
@@ -354,7 +322,7 @@ void* HeapRemove( heap_t* heap , match_func_t match_func , void* param )
 /********************  HeapPop  ****************************/
 void HeapPop( heap_t* heap )
 {
-	void *data1 = NULL, *param_to_return = NULL;
+	void *data = NULL, *param_to_return = NULL;
 
 	assert(heap);
 
@@ -366,11 +334,10 @@ void HeapPop( heap_t* heap )
 	#ifdef PRINTS
 		/*printf(" HeapPeek(heap)  = %d \n", *(int*)HeapPeek(heap) );*/
 	#endif
-	data1 = HeapPeek(heap);
+	data = HeapPeek(heap);
 
-	/*memcpy(&param_to_return,  data, ELEMENT_SIZE);*/
-	HeapRemove(heap, MatchFuncPop, data1 );
-	/*HeapRemove(heap, MatchFuncPop, &param_to_return );*/
+	memcpy(&param_to_return,  data, ELEMENT_SIZE);
+	HeapRemove(heap, MatchFuncPop, &param_to_return );
 
 	#ifdef PRINTS
 		/*printf(" *(int*)&param_to_return   = %d \n", *(int*)&param_to_return );*/
