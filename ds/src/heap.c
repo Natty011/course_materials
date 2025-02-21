@@ -332,12 +332,13 @@ void HeapPop( heap_t* heap )
 	}
 
 	#ifdef PRINTS
-		/*printf(" HeapPeek(heap)  = %d \n", *(int*)HeapPeek(heap) );*/
+		printf(" HeapPeek(heap)  = %d \n", *(int*)HeapPeek(heap) );
 	#endif
 	data = HeapPeek(heap);
 
-	memcpy(&param_to_return,  data, ELEMENT_SIZE);
-	HeapRemove(heap, MatchFuncPop, &param_to_return );
+	/*memcpy(&param_to_return,  data, ELEMENT_SIZE);*/
+	/*HeapRemove(heap, MatchFuncPop, &param_to_return );*/
+	HeapRemove(heap, MatchFuncPop, data );
 
 	#ifdef PRINTS
 		/*printf(" *(int*)&param_to_return   = %d \n", *(int*)&param_to_return );*/
@@ -347,6 +348,9 @@ void HeapPop( heap_t* heap )
 /********************  MatchFuncPop  ****************************/
 static int MatchFuncPop( void* check_data , void* user_param )
 {
+	assert(check_data);
+	assert(user_param);
+
 	return ! memcmp(check_data, user_param, ELEMENT_SIZE );
 }
 
