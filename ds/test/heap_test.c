@@ -184,7 +184,43 @@ static void TestHeap(void)
 		flag =  TRUE;
 	}
 
-	for(i = 0; i < 1  ; ++i) /* size */
+	if ( FAIL == HeapPush( heap1, arr ))
+	{
+		printf("line: %d \n" , __LINE__ );
+		puts("Failes in_1: Push - Allocation");
+		flag =  TRUE;
+
+	}
+
+	if ( HeapIsEmpty(heap1) ||  1 != HeapSize(heap1) || 
+	 			arr[0] != *(int*)HeapPeek(heap1) )
+	{
+		printf("line: %d \n" , __LINE__ );
+		puts("Failes in_2: Push || Peek");
+
+		#ifdef PRINTS
+			printf(" HeapPeek(heap1)  = %d", *(int*)HeapPeek(heap1) );
+		#endif
+		flag =  TRUE;
+	}
+
+	data = HeapRemove(heap1, match_func, arr  );
+
+	/* remove 16 , one member */
+	if( data )
+	{
+		if ( arr[0] != *(int*)data || 0 != HeapSize(heap1) )
+		{
+			printf("line: %d \n" , __LINE__ );
+			puts("Failes in_2: Remove || Size");
+		}
+
+		#ifdef PRINTS
+			printf(" data  = %d \n", *(int*)data );
+		#endif
+	}
+
+	for(i = 0; i < size  ; ++i) /* size */
 	{
 		if ( FAIL == HeapPush( heap1, arr + i ))
 		{
@@ -205,6 +241,7 @@ static void TestHeap(void)
 			flag =  TRUE;
 
 		}
+
 		/* heapify to root 16 -> 17*/
 		if ( i == size - 1)
 		{
@@ -256,13 +293,14 @@ static void TestHeap(void)
 
 	/* remove 9 */
 	/*data = HeapRemove(heap1, match_func, arr + 5 );*/
-	/* remove 16 , on member */
+	/* remove 16 , one member */
+	/*
 	data = HeapRemove(heap1, match_func, arr  );
 	if( data )
 	{
 		printf(" data  = %d \n", *(int*)data ); 
 	}
-
+	*/
 	PrintArray(heap1);	
 
 	HeapDestroy(heap1);
