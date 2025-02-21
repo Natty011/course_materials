@@ -375,6 +375,8 @@ void HeapPop( heap_t* heap )
 	printf(" dataPop  = %d \n", *(int*)data );
 
 	data2 = HeapRemove(heap, MatchFuncPop, temp_param );
+	/*memcpy(data, &param_to_return,  ELEMENT_SIZE);*/
+
 	printf(" data2  = %d \n", *(int*)data2 );
 	printf(" param_to_return_paramPop222 = %d\n", (int*)param_to_return );
 	printf(" param_to_return_paramPop2222_address = %p \n", param_to_return );
