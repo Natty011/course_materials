@@ -69,6 +69,7 @@ int main ()
 
 	puts(BLUE"====================================================="RESET);
 	printf("%sTEST: %s "RESET" \n", background,  mode);
+	puts(BACK_GREEN"'HeapPqTest()'"RESET);
 	puts(BACK_BLUE"'TestString()'"RESET);
     TestString();
 	puts(BLUE"====================================================="RESET);
@@ -87,7 +88,7 @@ static void TestString(void)
 
 	heap_pq_t* pqueue1 = HeapPQueueCreate(priority_func);
 	
-	puts(RED);
+	/*puts(RED);*/
 	
 	if(HeapPQueueSize(pqueue1) != 0 || !HeapPQueueIsEmpty(pqueue1))
 	{
@@ -150,7 +151,7 @@ static void TestString(void)
 	{
 		printf("line: %d \n" , __LINE__ );
 		flag =  TRUE;
-		puts("Failes in TestString_1: PQueueErase & Size & Peek");
+		puts("Failes in TestString_1: HeapPQueueErase & Size & Peek");
 	}
 
 	HeapPQueueErase(pqueue1, match_func, HeapPQueuePeek(pqueue1) );
@@ -161,7 +162,7 @@ static void TestString(void)
 	{
 		printf("line: %d \n" , __LINE__ );
 		flag =  TRUE;
-		puts("Failes in TestString_2: PQueueErase & Size & Peek");
+		puts("Failes in TestString_2: HeapPQueueErase & Size & Peek");
 	}
 	
 	HeapPQueueErase(pqueue1, match_func, HeapPQueuePeek(pqueue1) );
@@ -172,7 +173,7 @@ static void TestString(void)
 	{
 		printf("line: %d \n" , __LINE__ );
 		flag =  TRUE;
-		puts("Failes in TestString_3: PQueueErase & Size & Peek");
+		puts("Failes in TestString_3: HeapPQueueErase & Size & Peek");
 	}
 
 	HeapPQueueClear(pqueue1);
@@ -181,8 +182,67 @@ static void TestString(void)
 	{
 		printf("line: %d \n" , __LINE__ );
 		flag =  TRUE;
-		puts("Failes in TestString: PQueueClear");
+		puts("Failes in TestString: HeapPQueueClear");
 	}
+
+	for(i = 0; i <= 4; ++i)
+	{
+        res = HeapPQueueEnqueue(pqueue1, arr[i]);
+	
+        if((i != 4) && (HeapPQueueIsEmpty(pqueue1)  ||
+		HeapPQueueSize(pqueue1) != (i+1) || res ||
+			match_func((char*)HeapPQueuePeek(pqueue1), (char*)arr[i]) != TRUE ) )
+		{
+			printf("line: %d \n" , __LINE__ );
+			flag =  TRUE;
+			puts("Failes in TestString_1: IsEmpty & Size & Peek & Enqueue");
+		}
+		
+		if( (i == 4) && (HeapPQueueIsEmpty(pqueue1)  ||
+			HeapPQueueSize(pqueue1) != (i+1) || res ||
+			match_func((char*)HeapPQueuePeek(pqueue1), (char*)arr[i-1]) != TRUE ) )
+		{
+			printf("line: %d \n" , __LINE__ );
+			flag =  TRUE;
+			puts("Failes in TestString_2: IsEmpty & Size & Peek & Enqueue");
+		}
+		
+	}
+
+	HeapPQueueClear(pqueue1);
+	
+	if(HeapPQueueSize(pqueue1) != 0 || !HeapPQueueIsEmpty(pqueue1))
+	{
+		printf("line: %d \n" , __LINE__ );
+		flag =  TRUE;
+		puts("Failes in TestString: HeapPQueueClear");
+	}
+
+	for(i = 0; i <= 4; ++i)
+	{
+        res = HeapPQueueEnqueue(pqueue1, arr[i]);
+	
+        if((i != 4) && (HeapPQueueIsEmpty(pqueue1)  ||
+		HeapPQueueSize(pqueue1) != (i+1) || res ||
+			match_func((char*)HeapPQueuePeek(pqueue1), (char*)arr[i]) != TRUE ) )
+		{
+			printf("line: %d \n" , __LINE__ );
+			flag =  TRUE;
+			puts("Failes in TestString_1: IsEmpty & Size & Peek & Enqueue");
+		}
+		
+		if( (i == 4) && (HeapPQueueIsEmpty(pqueue1)  ||
+			HeapPQueueSize(pqueue1) != (i+1) || res ||
+			match_func((char*)HeapPQueuePeek(pqueue1), (char*)arr[i-1]) != TRUE ) )
+		{
+			printf("line: %d \n" , __LINE__ );
+			flag =  TRUE;
+			puts("Failes in TestString_2: IsEmpty & Size & Peek & Enqueue");
+		}
+		
+	}
+
+	
 	
 	HeapPQueueDestroy(pqueue1);	
 	pqueue1 = NULL;
