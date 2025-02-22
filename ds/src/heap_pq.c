@@ -74,6 +74,7 @@ void HeapPQueueDestroy(heap_pq_t *pqueue)
 	pqueue = NULL;
 }
 
+
 /********************  SortlistIsEmpty  ****************************/
 int HeapPQueueIsEmpty(const heap_pq_t *pqueue)
 {
