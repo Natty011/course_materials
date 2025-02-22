@@ -11,7 +11,7 @@
 #include <assert.h> 	/* assert */
 #include <stdlib.h> 	/* malloc, free */
 
-#include "pqueue.h" 
+#include "heap_pq.h" 
 #include "heap.h" 
 
 #include "aux_func.h"
@@ -19,7 +19,7 @@
 
 /****************struct and enum declaration*********************/
 
-struct pqueue
+struct heap_pq
 {
 	heap_t *heap; 	
 };
@@ -35,10 +35,10 @@ typedef enum
 /***************End of struct and enum declaration *******/
 
 /********************  PQueueCreate  ****************************/
-pqueue_t *PQueueCreate(priority_func_t priority)
+heap_pq_t *HeapPQueueCreate(priority_func_t priority)
 {
 	void* param = NULL;
-	pqueue_t* ptr_pqueue = (pqueue_t*)malloc(sizeof(pqueue_t));
+	heap_pq_t* ptr_pqueue = (heap_pq_t*)malloc(sizeof(heap_pq_t));
 	
 	assert(priority);
 	
@@ -59,7 +59,7 @@ pqueue_t *PQueueCreate(priority_func_t priority)
 }
 
 /********************  PQueueDestroy  ****************************/
-void PQueueDestroy(pqueue_t *pqueue)
+void HeapPQueueDestroy(heap_pq_t *pqueue)
 {
 	assert(pqueue);
 	
@@ -75,14 +75,14 @@ void PQueueDestroy(pqueue_t *pqueue)
 }
 
 /********************  SortlistIsEmpty  ****************************/
-int PQueueIsEmpty(const pqueue_t *pqueue)
+int HeapPQueueIsEmpty(const heap_pq_t *pqueue)
 {
 	 assert(pqueue);	
 	 return HeapIsEmpty(pqueue->heap);
 }
 
 /********************  PQueueSize  ****************************/
-size_t PQueueSize(const pqueue_t *pqueue)
+size_t HeapPQueueSize(const heap_pq_t *pqueue)
 {
 	
 	assert(pqueue);			
@@ -90,14 +90,14 @@ size_t PQueueSize(const pqueue_t *pqueue)
 
 }
 /********************  PQueuePeek  ****************************/
-void *PQueuePeek(const pqueue_t *pqueue)
+void *HeapPQueuePeek(const heap_pq_t *pqueue)
 {
 	assert(pqueue);
 	return HeapPeek(pqueue->heap);	
 }
 
 /********************  PQueueEnqueue  ****************************/
-int PQueueEnqueue(pqueue_t *pqueue, const void *data)
+int HeapPQueueEnqueue(heap_pq_t *pqueue, const void *data)
 {	
 	assert(pqueue);
 	assert(pqueue->heap);
@@ -106,7 +106,7 @@ int PQueueEnqueue(pqueue_t *pqueue, const void *data)
 }
 
 /********************  PQueueEnqueue  ****************************/
-void *PQueueDequeue(pqueue_t *pqueue)
+void *HeapPQueueDequeue(heap_pq_t *pqueue)
 {
 	void* deta = NULL;
 	assert(pqueue);
@@ -119,7 +119,7 @@ void *PQueueDequeue(pqueue_t *pqueue)
 }
 
 /********************  PQueueClear  ****************************/
-void PQueueClear(pqueue_t* pqueue)
+void HeapPQueueClear(heap_pq_t* pqueue)
 {	
 	assert(pqueue);
 	assert(pqueue->heap);
@@ -131,7 +131,7 @@ void PQueueClear(pqueue_t* pqueue)
 }
 
 /********************  PQueueErase  ****************************/
-void* PQueueErase(pqueue_t* pqueue, match_func_t match_func,
+void* HeapPQueueErase(heap_pq_t* pqueue, match_func_t match_func,
 				 const void* user_param)
 {		
 	void* data = NULL;
