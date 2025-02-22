@@ -130,13 +130,16 @@ size_t HeapSize(const heap_t *heap)
 void* HeapPeek( const heap_t* heap )
 {
 	assert(heap);
-	return VectorGetAccess( heap->vector, 1);
+	/*changed because of PQueueDequeue, need to check if thare is an affect
+	after the change. if not, remove this commant */
+	/*return  VectorGetAccess( heap->vector, 1);*/
+	return  (! HeapIsEmpty(heap) ) ? VectorGetAccess( heap->vector, 1) : NULL; 
 }
 /********************  HeapPush  ****************************/
 int HeapPush( heap_t* heap , const void* data )
 {
 	
-	size_t size = 0;
+	size_t size = 0, res = 0 ;
 	assert( heap);
 	
 	if ( VectorPushBack( heap->vector, data) )
@@ -146,7 +149,18 @@ int HeapPush( heap_t* heap , const void* data )
 	/* must to be : size >= 1, if size == 1 is allready sorted */
 	size = HeapSize(heap); 
 
-	return HeapifyUp(heap, size/2, size );
+	#ifdef PRINTS
+			printf("afterpush_before_heapify_up \n");
+			PrintArray( heap );
+	#endif
+	res = HeapifyUp(heap, size/2, size );
+
+	#ifdef PRINTS
+			printf("afterpush_after_heapify_up \n");
+			PrintArray( heap );
+	#endif
+	return res;
+	/*return HeapifyUp(heap, size/2, size );*/
 
 }
 /********************  HeapRemove  ****************************/
@@ -292,7 +306,11 @@ static size_t IsExist(heap_t* heap , match_func_t match_func , void* param )
 	{
 		if ( match_func(VectorGetAccess(heap->vector, size ) , param ) )
 		{
-			return size;
+			#ifdef PRINTS
+				printf("size_isExist = %lu \n", size);
+				PrintArray( heap );
+			#endif
+				return size;
 		}
 			++size;
 	}
@@ -303,12 +321,11 @@ static size_t IsExist(heap_t* heap , match_func_t match_func , void* param )
 void PrintArray( heap_t* heap )
 {
 	size_t size = 1 ;
-	
 	printf("HeapArray[] = \n" );
 	while( size <= HeapSize( heap ) )
 	{
-		printf("index = %ld , value = %d \n", size, 
-			 *(int*)VectorGetAccess(heap->vector, size ) );
+		printf("index = %ld , value = %c \n", size, 
+			 *(char*)VectorGetAccess(heap->vector, size ) );
 
 			++size;
 	}
