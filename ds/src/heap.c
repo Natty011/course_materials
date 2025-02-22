@@ -1,25 +1,22 @@
 /***************************************
 * Author : Natty
-* Reviewer : 
+* Reviewer : Rawan
 * Date : 19 / 02 / 2025
-* Last update: 19 / 02 / 2025
+* Last update: 22 / 02 / 2025
 *****************************************/
 #ifdef PRINTS
 	#include <stdio.h> 
-	#include <math.h> 	
 #endif
 
 #include <assert.h> 	/* assert */
 #include <stdlib.h> 	/* malloc, free */
 
-#include <stdio.h> 
-#include <string.h> /* memcpy, memcmp */
+#include <string.h> /* memcpy */
+
 #include "heap.h" 
 #include "vector.h" 
 #include "aux_func.h"
 
-#define MAX( a , b )		( ( (a) > (b) ) ? (a) : (b) )
-#define UNUSED( var )       ( (void)var )
 #define ELEMENT_SIZE		sizeof(size_t)
 
 /***************************** Success / Fail Enum ****************************/
@@ -28,7 +25,7 @@ typedef enum
 {
 	SUCCESS = 0,
 	FAIL = 1
-	
+
 } result_t;
 
 /******************************************************************************/
@@ -49,12 +46,13 @@ struct heap
 	expand_cmp_func_t cmp_func;	
 };
 
-
 /******************************************************************************/
 /************************ ststic functions declartions ************************/
 static int SwapQuick(void* ptr1, void* ptr2, size_t element_size);
 static size_t IsExist(heap_t* heap , match_func_t match_func , void* param );
 static int MatchFuncPop( void* check_data , void* user_param );
+static int HeapifyDown(heap_t* heap, size_t parent, size_t size );
+static int HeapifyUp(heap_t* heap, size_t parent, size_t size );
 
 #ifdef PRINTS
 void PrintArray( heap_t* heap );							
@@ -66,7 +64,6 @@ void PrintArray( heap_t* heap );
 /********************  HeapCreate  ****************************/
 heap_t *HeapCreate(void* param, expand_cmp_func_t cmp_func)
 {
-	
 	size_t capacity = 16;
 	size_t* dummy_start = NULL;
 	size_t dummy = 0;
@@ -77,7 +74,7 @@ heap_t *HeapCreate(void* param, expand_cmp_func_t cmp_func)
 		return NULL;
 	}
 	
-	heap_p->vector =  VectorCreate(capacity,  ELEMENT_SIZE ); /* cap == 3*/
+	heap_p->vector =  VectorCreate(capacity,  ELEMENT_SIZE ); 
 	if ( NULL == heap_p->vector )
 	{
 		free( heap_p);
@@ -138,41 +135,25 @@ void* HeapPeek( const heap_t* heap )
 /********************  HeapPush  ****************************/
 int HeapPush( heap_t* heap , const void* data )
 {
-	size_t parent = 0, i = 0;
+	
+	size_t size = 0;
 	assert( heap);
 	
 	if ( VectorPushBack( heap->vector, data) )
 	{
 		return FAIL;
 	}
+	/* must to be : size >= 1, if size == 1 is allready sorted */
+	size = HeapSize(heap); 
 
-	i = HeapSize(heap); /* must to be : size >= 1, if size == 1 is allready sorted */
-	parent = i / 2;
+	return HeapifyUp(heap, size/2, size );
 
-	/* Heapify up */
-	while ( parent > 0 && 
-		heap->cmp_func( VectorGetAccess( heap->vector, parent),
-				 VectorGetAccess( heap->vector, i), heap->param ) < 0 )
-	{
-		
-		if ( FAIL == SwapQuick( VectorGetAccess( heap->vector, parent),
- 						VectorGetAccess( heap->vector, i), ELEMENT_SIZE) )
-		{
-			return FAIL;	
-		}
-
-		i = parent;
-		parent = i / 2;
-	}
-
-	return SUCCESS;
 }
 /********************  HeapRemove  ****************************/
 
 void* HeapRemove( heap_t* heap , match_func_t match_func , void* param )
 {
-	size_t parent = 0, to_remove = 0, size = 0, left = 0, right = 0, largest = 0;
-	int swapped_occured = FALSE;
+	size_t parent = 0, to_remove = 0, size = 0;
 
 	assert(heap);
 
@@ -188,7 +169,8 @@ void* HeapRemove( heap_t* heap , match_func_t match_func , void* param )
 		return NULL;
 	}
 
-	parent = HeapSize(heap); /* must to be : size >= 1, if size == 1 is allready sorted */
+	/* must to be : size >= 1, if size == 1 is allready sorted */
+	parent = HeapSize(heap); 
 
 	if( FAIL == SwapQuick( VectorGetAccess( heap->vector, parent),
  						VectorGetAccess( heap->vector, to_remove), ELEMENT_SIZE) )
@@ -196,53 +178,11 @@ void* HeapRemove( heap_t* heap , match_func_t match_func , void* param )
 			return NULL;	
 	}
 
-	VectorPopBack( heap->vector);
+	VectorPopBack( heap->vector );
 	size = HeapSize(heap);
 	parent = to_remove;
-	
-	/* Heapify down */
-	while ( parent < size   ) 
-	{
-		largest = parent;
-		swapped_occured = FALSE;
-		left = 2 * parent;
-		right = left + 1;
 
-		if( left <= size && heap->cmp_func( VectorGetAccess( heap->vector, parent),
-							VectorGetAccess( heap->vector, left), heap->param ) < 0 )
-		{
-			largest = left;
-		}
-
-		if( right <= size && heap->cmp_func( VectorGetAccess( heap->vector, largest),
-							VectorGetAccess( heap->vector, right), heap->param ) < 0 )
-		{
-			largest = right;
-		}		
-
-		if( largest != parent )
-		{
-			if( FAIL == SwapQuick( VectorGetAccess( heap->vector, parent),
-							VectorGetAccess( heap->vector, largest), ELEMENT_SIZE) )
-			{
-				return NULL;	
-			}
-
-			parent = largest;
-			swapped_occured = TRUE;
-		}
-
-		if(!swapped_occured)
-		{
-			break;
-		}
-	}
-
-	#ifdef PRINTS
-		/*PrintArray(heap);	*/
-	#endif
-
-	return param;
+	return ( SUCCESS == HeapifyDown(heap, parent, size) ) ? param : NULL;
 }
 
 /********************  HeapPop  ****************************/
@@ -273,6 +213,74 @@ static int MatchFuncPop( void* check_data , void* user_param )
 
 /*******************Static Functions definition************************/
 
+/********************  MatchFuncPop  ****************************/
+
+static int HeapifyDown(heap_t* heap, size_t parent, size_t size )
+{
+	size_t left = 0, right = 0, largest = 0;
+	int swapped_occured = FALSE;
+	
+	while ( parent < size   ) 
+	{
+		largest = parent;
+		swapped_occured = FALSE;
+		left = 2 * parent;
+		right = left + 1;
+
+		if( left <= size && heap->cmp_func( VectorGetAccess( heap->vector, parent),
+							VectorGetAccess( heap->vector, left), heap->param ) < 0 )
+		{
+			largest = left;
+		}
+
+		if( right <= size && heap->cmp_func( VectorGetAccess( heap->vector, largest),
+							VectorGetAccess( heap->vector, right), heap->param ) < 0 )
+		{
+			largest = right;
+		}		
+
+		if( largest != parent )
+		{
+			if( FAIL == SwapQuick( VectorGetAccess( heap->vector, parent),
+							VectorGetAccess( heap->vector, largest), ELEMENT_SIZE) )
+			{
+				return FAIL;	
+			}
+
+			parent = largest;
+			swapped_occured = TRUE;
+		}
+
+		if(!swapped_occured)
+		{
+			break;
+		}
+	}
+
+	return SUCCESS;
+}
+
+/********************  HeapifyUp  ****************************/
+
+static int HeapifyUp(heap_t* heap, size_t parent, size_t size )
+{
+	while ( parent > 0 && 
+		heap->cmp_func( VectorGetAccess( heap->vector, parent),
+				VectorGetAccess( heap->vector, size), heap->param ) < 0 )
+	{
+		
+		if ( FAIL == SwapQuick( VectorGetAccess( heap->vector, parent),
+						VectorGetAccess( heap->vector, size), ELEMENT_SIZE) )
+		{
+			return FAIL;	
+		}
+
+		size = parent;
+		parent = size / 2;
+	}
+
+	return SUCCESS;
+}
 
 /********************  IsExist  ****************************/
 
