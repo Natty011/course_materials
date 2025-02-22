@@ -9,7 +9,7 @@
 #include "heap.h"
 #include "aux_func.h"
 
-typedef struct pqueue pqueue_t;
+typedef struct heap_pq heap_pq_t;
 
 /******************************************************************************
 * 
@@ -20,7 +20,7 @@ typedef struct pqueue pqueue_t;
 *               * =0 - 'check_data' has the same priority as 'user_param'
 *               * <0 - 'check_data' has higher priority over 'user_param'
 *
-*/	typedef cmp_func_t priority_func_t;
+*/	typedef expand_cmp_func_t priority_func_t;
 /* 
 ******************************************************************************/
 
@@ -31,7 +31,7 @@ typedef struct pqueue pqueue_t;
 *       Complexity: Dependant on system complexity
 *       Return: A new empty priority queue, returns NULL on failure
 *
-*/      pqueue_t *PQueueCreate(priority_func_t priority);
+*/      heap_pq_t *HeapPQueueCreate(priority_func_t priority);
 /*
 ******************************************************************************/
 
@@ -43,7 +43,7 @@ typedef struct pqueue pqueue_t;
 *       Return: N\A
 *       Notes: If 'pqueue' is NULL, no operations will be performed
 * 
-*/      void PQueueDestroy(pqueue_t *pqueue);
+*/      void HeapPQueueDestroy(heap_pq_t *pqueue);
 /*
 ******************************************************************************/
 
@@ -55,7 +55,7 @@ typedef struct pqueue pqueue_t;
 *       Return: Returns success (0), on failure, returns (1)
 *       Notes: Undefined behaviour If 'pqueue' is NULL
 * 
-*/      int PQueueEnqueue(pqueue_t* pqueue, const void* data);
+*/      int HeapPQueueEnqueue(heap_pq_t* pqueue, const void* data);
 /*
 ******************************************************************************/
 
@@ -67,7 +67,7 @@ typedef struct pqueue pqueue_t;
 *       Return: The data from the dequeued element
 *       Notes: Undefined behaviour If 'pqueue' is NULL
 * 
-*/      void* PQueueDequeue(pqueue_t* pqueue);
+*/      void* HeapPQueueDequeue(heap_pq_t* pqueue);
 /*
 ******************************************************************************/
 
@@ -79,7 +79,7 @@ typedef struct pqueue pqueue_t;
 *       Return: The data of the highest priority element
 *       Notes: Undefined behaviour If 'pqueue' is NULL
 * 
-*/      void* PQueuePeek(const pqueue_t* pqueue);
+*/      void* HeapPQueuePeek(const heap_pq_t* pqueue);
 /*
 ******************************************************************************/
 
@@ -91,7 +91,7 @@ typedef struct pqueue pqueue_t;
 *       Return: Returns 'TRUE' (1) if empty, else returns 'FALSE' (0)
 *       Notes: Undefined behaviour If 'pqueue' is NULL
 * 
-*/      int PQueueIsEmpty(const pqueue_t* pqueue);
+*/      int HeapPQueueIsEmpty(const heap_pq_t* pqueue);
 /*
 ******************************************************************************/
 
@@ -103,7 +103,7 @@ typedef struct pqueue pqueue_t;
 *       Return: Returns the number of elements in the priority queue
 *       Notes: Undefined behaviour If 'pqueue' is NULL
 * 
-*/      size_t PQueueSize(const pqueue_t* pqueue);
+*/      size_t HeapPQueueSize(const heap_pq_t* pqueue);
 /*
 ******************************************************************************/
 
@@ -116,7 +116,7 @@ typedef struct pqueue pqueue_t;
 *       Notes: Undefined behaviour If 'pqueue' is NULL
 *              Undefined behaviour If 'match_func' is NULL
 * 
-*/      void* PQueueErase(pqueue_t* pqueue, 
+*/      void* HeapPQueueErase(heap_pq_t* pqueue, 
                          match_func_t match_func, const void* user_param);
 /*
 ******************************************************************************/
@@ -129,7 +129,7 @@ typedef struct pqueue pqueue_t;
 *       Return: N\A
 *       Notes: Undefined behaviour If 'pqueue' is NULL
 * 
-*/      void PQueueClear(pqueue_t* pqueue);
+*/      void HeapPQueueClear(heap_pq_t* pqueue);
 /*
 ******************************************************************************/
 
