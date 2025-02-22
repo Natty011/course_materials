@@ -110,7 +110,7 @@ void *PQueueDequeue(pqueue_t *pqueue)
 {
 	void* deta = NULL;
 	assert(pqueue);
-	
+
 	deta = HeapPeek( pqueue->heap ) ;
 	HeapPop(pqueue->heap);	
 
@@ -120,43 +120,26 @@ void *PQueueDequeue(pqueue_t *pqueue)
 
 /********************  PQueueClear  ****************************/
 void PQueueClear(pqueue_t* pqueue)
-{
-	sort_list_iter_t sort_itr = {0};
-	
+{	
 	assert(pqueue);
-	assert(pqueue->pq_list);
-	
-	sort_itr = SortlistBegin(pqueue->pq_list);	
-			
-	while(!SortlistIterIsEqual(SortlistEnd(pqueue->pq_list), sort_itr ) )
+	assert(pqueue->heap);
+				
+	while(! HeapIsEmpty( pqueue->heap) )
 	{
-		sort_itr = SortlistRemove(sort_itr);
+		HeapPop(pqueue->heap);	
 	}
 }
 
 /********************  PQueueErase  ****************************/
 void* PQueueErase(pqueue_t* pqueue, match_func_t match_func,
 				 const void* user_param)
-{
-	sort_list_iter_t sort_itr = {0};
-		
+{		
 	void* data = NULL;
 		
 	assert(pqueue);	
 	assert(match_func);
 
-	sort_itr = SortlistBegin(pqueue->pq_list);
-		
-	if( PQueueIsEmpty(pqueue) )
-	{
-		return NULL;
-	}
-	
-	sort_itr = SortlistFindIf(sort_itr, SortlistEnd(pqueue->pq_list),
-								match_func, (void*)user_param);
-	
-	data = SortlistGetData(sort_itr);	
-	SortlistRemove(sort_itr);
+	data = HeapRemove(pqueue->heap, match_func, (void*)user_param );	
 	
 	return data;
 		
