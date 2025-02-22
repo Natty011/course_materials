@@ -10,7 +10,7 @@
 
 #include <assert.h> 	/* assert */
 #include <stdlib.h> 	/* malloc, free */
-#include <string.h> 	/* memcmp */
+/*#include <string.h> 	*//* memcmp */
 #include "hash_table.h" 
 #include "dlist.h" 
 #include "aux_func.h"           /* match_func_t          */
@@ -110,20 +110,23 @@ hash_table_t *HashTableCreate(hash_func_t hash_func, match_func_t match_func,
 /********************  HashTableDestroy  ****************************/  
 void HashTableDestroy(hash_table_t *table)
 {
-	size_t i = 0;
+	size_t i = 0, capacity = 0 ;
+	dlist_t **hash_array = NULL; 
 	if( NULL == table )
 	{
 		return;
 	}
+	capacity = table->capacity;
+	hash_array = table->hash_array; 
 
-	for( i = 0; i < table->capacity ; ++i )
+	for( i = 0; i < capacity ; ++i )
 	{
-		DListDestroy( *( (table->hash_array) + i  ) );
- 	 	*( (table->hash_array) + i ) = NULL;
+		DListDestroy( *( (hash_array) + i  ) );
+ 	 	*( (hash_array) + i ) = NULL;
 	}
 	
-	free( table->hash_array );
- 	table->hash_array = NULL;
+	free( hash_array );
+	hash_array = NULL;
  	 		
  	free(table);
  	table = NULL;
@@ -165,12 +168,17 @@ void HashTableRemove(hash_table_t *table, void *value)
 
 size_t HashTableSize(const hash_table_t *table)
 {
-	size_t i = 0, sum = 0;
-	assert(table);
+	size_t i = 0, sum = 0, capacity = 0;
+	dlist_t **hash_array = NULL; 
 
-	for( i = 0; i < table->capacity ; ++i )
+	assert(table);
+	
+	capacity = table->capacity;
+	hash_array = table->hash_array;
+	
+	for( i = 0; i < capacity ; ++i )
 	{
-		sum += DListCount( *(table->hash_array + i ) );
+		sum += DListCount( *(hash_array + i ) );
 	}
 	return sum;
 }
@@ -226,13 +234,8 @@ int HashTableInsert(hash_table_t *table, void *value)
 	index = table->hash_func( value );
 	index %= table->capacity;
 	dlst_indx = *(table->hash_array + index );
-	/*printf("index = %d \n ", index);*/
-	start = DListPushBack( dlst_indx, value);
 
-	#ifdef PRINTS
-	/*puts("(char*)DListGetData(start)");*/
-	/*printf("Insert=  DListGetData(start) =%d \n", *(int*)DListGetData(start) );*/
-	#endif
+	start = DListPushBack( dlst_indx, value);
 
 	if( ! DListIterIsEqual( start, DListEnd(dlst_indx) ) )
 	{
@@ -240,7 +243,6 @@ int HashTableInsert(hash_table_t *table, void *value)
 	}
 
 	return OPERATION_FAIL;
-	
 }
 
 /********************  HashTableForEach  ****************************/ 
@@ -250,14 +252,14 @@ int HashTableForEach(hash_table_t *table, operation_func_t op_func,
 {
 	size_t i = 0;
 
-	dlist_t* dlst_indx = NULL;
+	dlist_t *dlst_indx = NULL, **hash_array = NULL;
 	dlist_iter_t start = NULL_ITER, end = NULL_ITER;
 
 	assert(table);
-
+	hash_array = table->hash_array;
 	for( i = 0; i < table->capacity ; ++i )
 	{
-		dlst_indx = *(table->hash_array + i );
+		dlst_indx = *(hash_array + i );
 		start = DListBegin(dlst_indx);
 		end = DListEnd(dlst_indx);
 
