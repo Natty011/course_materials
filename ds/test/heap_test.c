@@ -202,7 +202,6 @@ static void TestHeap(void)
 		flag =  TRUE;
 	}
 
-
 	/*PrintArray(heap1);	*/
 	/* pop 16 , one member */
 	HeapPop(heap1);
@@ -235,7 +234,7 @@ static void TestHeap(void)
 		flag =  TRUE;
 	}
 	/* remove 16 , one member */
-	PrintArray(heap1);	
+	/*PrintArray(heap1);*/
 
 	data = HeapRemove(heap1, match_func, arr  );
 
@@ -273,7 +272,6 @@ static void TestHeap(void)
 			flag =  TRUE;
 
 		}
-
 		/* heapify to root 16 -> 17*/
 		if ( i == size - 1)
 		{
@@ -283,20 +281,15 @@ static void TestHeap(void)
 				puts("Failes in_3: Push ");
 				flag =  TRUE;
 			}
-
 		}
-		
 	}
-	PrintArray(heap1);	
-	#ifdef PRINTS
-		printf(" HeapPeek(heap1)  = %d \n", *(int*)HeapPeek(heap1) );
-	#endif
+	/*PrintArray(heap1);*/
 
 	/* pop 17  */
-	puts("pop 17");
+	/*puts("pop 17");*/
 
-	/*HeapPop(heap1);*/
-/*
+	HeapPop(heap1);
+
 	if( HeapIsEmpty(heap1) || 11 != HeapSize(heap1) ||
 		arr[0] != *(int*)HeapPeek(heap1) ) 
 	{
@@ -304,7 +297,8 @@ static void TestHeap(void)
 		puts("Failes in_3: Pop ");
 		flag =  TRUE;
 	}
-*/
+	/*PrintArray(heap1);*/
+
 	/* remove 9 */
 	/*puts("remove_9");*/
 	data = HeapRemove(heap1, match_func, arr + 5 );
@@ -317,7 +311,8 @@ static void TestHeap(void)
 		
 		/*printf(" data  = %d \n", *(int*)data ); */
 	}
-	
+	/*PrintArray(heap1);*/	
+
 	/* remove 16  */
 	/*puts("remove_16");*/
 
@@ -332,6 +327,7 @@ static void TestHeap(void)
 	
 		/*printf(" data  = %d \n", *(int*)data ); */
 	}
+	/*PrintArray(heap1);*/	
 
 	/* remove 12 */
 	/*puts("remove_12");*/
@@ -369,7 +365,7 @@ static void TestHeap(void)
 	/* pop 13  */
 	/*puts("pop 13");*/
 
-	/*HeapPop(heap1);*/
+	HeapPop(heap1);
 
 	if( 7 != HeapSize(heap1) || arr[1] != *(int*)HeapPeek(heap1) ) 
 	{
@@ -383,7 +379,7 @@ static void TestHeap(void)
 	/* pop 10  */
 	/*puts("pop 10");*/
 
-	/*HeapPop(heap1);*/
+	HeapPop(heap1);
 
 	if( 6 != HeapSize(heap1) || arr[3] != *(int*)HeapPeek(heap1) ) 
 	{
@@ -397,7 +393,7 @@ static void TestHeap(void)
 	/* pop 8  */
 	/*puts("pop 8");*/
 
-	/*HeapPop(heap1);*/
+	HeapPop(heap1);
 
 	if( 5 != HeapSize(heap1) || arr[4] != *(int*)HeapPeek(heap1) ) 
 	{
@@ -410,7 +406,7 @@ static void TestHeap(void)
 	/* pop 5  */
 	/*puts("pop 5");*/
 
-	/*HeapPop(heap1);*/
+	HeapPop(heap1);
 
 	if( 4 != HeapSize(heap1) || arr[9] != *(int*)HeapPeek(heap1) ) 
 	{
@@ -424,7 +420,7 @@ static void TestHeap(void)
 	/* pop 4  */
 	/*puts("pop 4");*/
 
-	/*HeapPop(heap1);*/
+	HeapPop(heap1);
 
 	if( 3 != HeapSize(heap1) || arr[6] != *(int*)HeapPeek(heap1) ) 
 	{
@@ -438,7 +434,7 @@ static void TestHeap(void)
 	/* pop 3  */
 	/*puts("pop 3");*/
 
-	/*HeapPop(heap1);*/
+	HeapPop(heap1);
 
 	if( 2 != HeapSize(heap1) || arr[7] != *(int*)HeapPeek(heap1) ) 
 	{
@@ -452,8 +448,7 @@ static void TestHeap(void)
 	/* pop 2  */
 	/*puts("pop 2");*/
 
-	/*HeapPop(heap1);*/
-
+	HeapPop(heap1);
 	if( 1 != HeapSize(heap1) || arr[8] != *(int*)HeapPeek(heap1) ) 
 	{
 		printf("line: %d \n" , __LINE__ );
