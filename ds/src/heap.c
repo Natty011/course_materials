@@ -199,13 +199,13 @@ void* HeapRemove( heap_t* heap , match_func_t match_func , void* param )
 	VectorPopBack( heap->vector );
 	size = HeapSize(heap);
 	parent = to_remove;
-	printf("parent1 = %ld \n", parent);
+	/*printf("parent1 = %ld \n", parent);*/
 	res = HeapifyDown(heap, parent, size);
 	/* ( SUCCESS == HeapifyDown(heap, parent, size) ) ? param : NULL*/
 	/*res = HeapifyUp(heap, size/2, size );*/
-	printf("parent2 = %ld \n", parent);
-	parent = parent / 2;
-	res = HeapifyUp(heap, parent, size );
+	/*printf("parent2 = %ld \n", parent);*/
+	/*parent = parent / 2;*/
+	res = HeapifyUp(heap, parent / 2, size );
 
 	return SUCCESS == res ? param : NULL ;
 
