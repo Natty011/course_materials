@@ -64,7 +64,7 @@ void PrintArray( heap_t* heap );
 /********************  HeapCreate  ****************************/
 heap_t *HeapCreate(void* param, expand_cmp_func_t cmp_func)
 {
-	size_t capacity = 16;
+	size_t capacity = 32;
 	size_t* dummy_start = NULL;
 	size_t dummy = 0;
 	heap_t* heap_p = ( heap_t* )malloc( sizeof(heap_t) );
@@ -132,8 +132,8 @@ void* HeapPeek( const heap_t* heap )
 	assert(heap);
 	/*changed because of PQueueDequeue, need to check if thare is an affect
 	after the change. if not, remove this commant */
-	return  VectorGetAccess( heap->vector, 1);
-	/*return  (! HeapIsEmpty(heap) ) ? VectorGetAccess( heap->vector, 1) : NULL; */
+	/*return  VectorGetAccess( heap->vector, 1);*/
+	return  (! HeapIsEmpty(heap) ) ? VectorGetAccess( heap->vector, 1) : NULL; 
 }
 /********************  HeapPush  ****************************/
 int HeapPush( heap_t* heap , const void* data )
