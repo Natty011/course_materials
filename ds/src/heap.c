@@ -132,8 +132,8 @@ void* HeapPeek( const heap_t* heap )
 	assert(heap);
 	/*changed because of PQueueDequeue, need to check if thare is an affect
 	after the change. if not, remove this commant */
-	/*return  VectorGetAccess( heap->vector, 1);*/
-	return  (! HeapIsEmpty(heap) ) ? VectorGetAccess( heap->vector, 1) : NULL; 
+	return  VectorGetAccess( heap->vector, 1);
+	/*return  (! HeapIsEmpty(heap) ) ? VectorGetAccess( heap->vector, 1) : NULL; */
 }
 /********************  HeapPush  ****************************/
 int HeapPush( heap_t* heap , const void* data )
@@ -150,14 +150,18 @@ int HeapPush( heap_t* heap , const void* data )
 	size = HeapSize(heap); 
 
 	#ifdef PRINTS
+	/*
 			printf("afterpush_before_heapify_up \n");
 			PrintArray( heap );
+	*/		
 	#endif
 	res = HeapifyUp(heap, size/2, size );
 
 	#ifdef PRINTS
+	/*
 			printf("afterpush_after_heapify_up \n");
 			PrintArray( heap );
+	*/		
 	#endif
 	return res;
 	/*return HeapifyUp(heap, size/2, size );*/
@@ -168,7 +172,7 @@ int HeapPush( heap_t* heap , const void* data )
 void* HeapRemove( heap_t* heap , match_func_t match_func , void* param )
 {
 	size_t parent = 0, to_remove = 0, size = 0;
-
+	int res = 0;
 	assert(heap);
 
 	if ( HeapIsEmpty( heap ) )
@@ -195,8 +199,16 @@ void* HeapRemove( heap_t* heap , match_func_t match_func , void* param )
 	VectorPopBack( heap->vector );
 	size = HeapSize(heap);
 	parent = to_remove;
+	printf("parent1 = %ld \n", parent);
+	res = HeapifyDown(heap, parent, size);
+	/* ( SUCCESS == HeapifyDown(heap, parent, size) ) ? param : NULL*/
+	/*res = HeapifyUp(heap, size/2, size );*/
+	printf("parent2 = %ld \n", parent);
+	parent = parent / 2;
+	res = HeapifyUp(heap, parent, size );
 
-	return ( SUCCESS == HeapifyDown(heap, parent, size) ) ? param : NULL;
+	return SUCCESS == res ? param : NULL ;
+
 }
 
 /********************  HeapPop  ****************************/
@@ -307,8 +319,10 @@ static size_t IsExist(heap_t* heap , match_func_t match_func , void* param )
 		if ( match_func(VectorGetAccess(heap->vector, size ) , param ) )
 		{
 			#ifdef PRINTS
+			/*
 				printf("size_isExist = %lu \n", size);
 				PrintArray( heap );
+			*/	
 			#endif
 				return size;
 		}
@@ -324,8 +338,8 @@ void PrintArray( heap_t* heap )
 	printf("HeapArray[] = \n" );
 	while( size <= HeapSize( heap ) )
 	{
-		printf("index = %ld , value = %c \n", size, 
-			 *(char*)VectorGetAccess(heap->vector, size ) );
+		printf("index = %ld , value = %d \n", size, 
+			 *(int*)VectorGetAccess(heap->vector, size ) );
 
 			++size;
 	}
