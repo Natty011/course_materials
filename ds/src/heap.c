@@ -186,7 +186,12 @@ void* HeapRemove( heap_t* heap , match_func_t match_func , void* param )
 	{
 		return NULL;
 	}
-
+	#ifdef PRINTS
+	/*
+		printf("remove_before_heapify \n");
+		PrintArray( heap );
+	*/	
+	#endif
 	/* must to be : size >= 1, if size == 1 is allready sorted */
 	parent = HeapSize(heap); 
 
@@ -206,7 +211,12 @@ void* HeapRemove( heap_t* heap , match_func_t match_func , void* param )
 	/*printf("parent2 = %ld \n", parent);*/
 	/*parent = parent / 2;*/
 	res = HeapifyUp(heap, parent / 2, size );
-
+	#ifdef PRINTS
+	/*
+		printf("remove_after_heapify \n");
+		PrintArray( heap );
+	*/	
+	#endif
 	return SUCCESS == res ? param : NULL ;
 
 }
@@ -338,7 +348,7 @@ void PrintArray( heap_t* heap )
 	printf("HeapArray[] = \n" );
 	while( size <= HeapSize( heap ) )
 	{
-		printf("index = %ld , value = %d \n", size, 
+		printf("index = %ld , value = %c \n", size, 
 			 *(int*)VectorGetAccess(heap->vector, size ) );
 
 			++size;
