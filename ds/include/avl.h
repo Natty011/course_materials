@@ -100,7 +100,7 @@ enum avl_traversal_order
 *       Return: Height of the tree
 *       Complexity: O(1)
 * 
-*/      int AVLHeight(const avl_t* tree);
+*/      size_t AVLHeight(const avl_t* tree);
 /*
 ******************************************************************************/
 
