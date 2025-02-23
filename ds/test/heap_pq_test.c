@@ -50,7 +50,7 @@ typedef enum
 
 static int match_func (void *check_data, void *user_param);
 static int
- priority_func(const void *check_data,const void *new_data, void* user_param);
+ priority_func(void *check_data,void *new_data, void* user_param);
 
 /***************************function declaration**************************/
 static void TestString(void);
@@ -270,7 +270,7 @@ static int match_func(void *check_data, void *user_param )
 
 /*******************priority_func*********************/
 
-static int priority_func(const void *check_data,const void *new_data, void* user_param)
+static int priority_func(void *check_data,void *new_data, void* user_param)
 {
 	int res = 0;
 	UNUSED(user_param);
