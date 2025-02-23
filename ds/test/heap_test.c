@@ -93,14 +93,14 @@ static void TestHeap2(void);
 /*
 static void TestAvlTwoeNode(void);
 */
-static int SortingFunc(const void* check_data ,const void* new_data, void* param);
+static int SortingFunc(void* check_data ,void* new_data, void* param);
 static int match_func(void* check_data , void* new_data);
 /***************************End of function declaration******************/
 
 /******************static functions definition**********************/
 		
 /*******************SortingFunc*********************/
-static int SortingFunc(const void* check_data ,const void* new_data, void* param)
+static int SortingFunc(void* check_data ,void* new_data, void* param)
 {
 	UNUSED(param);
 	return (*(int*)check_data - *(int*)new_data);
