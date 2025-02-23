@@ -2,17 +2,15 @@
 * Author : Natty
 * Reviewer : Rawan
 * Date : 10 / 02 / 2025
-* Last update: 15 / 02 / 2025
+* Last update: 22 / 02 / 2025       during review ver- 1.0
 *****************************************/
 #ifdef PRINTS
-	#include <stdio.h> 
-	#include <math.h> 	
+	#include <stdio.h> /* printf, puts */
+	#include <math.h> 	/* pow */
 #endif
 
 #include <assert.h> 	/* assert */
 #include <stdlib.h> 	/* malloc, free */
-
-#include <stdio.h> 
 
 #include "avl.h" 
 
@@ -71,13 +69,16 @@ struct avl
 struct avl_node 
 {
 	void* data;
-	int height;
+	size_t height;
 	struct avl_node *child[NUMBER_OF_CHILDRENS];
 };
 
 /******************************************************************************/
 /************************ ststic functions declartions ************************/
 
+static void PrintSpace( size_t n );
+
+static void _PrintTree( avl_node_t* root , size_t h);
 
 static avl_node_t*
 RecAVLInsert(avl_node_t* root ,avl_node_t *new_node , cmp_func_t func);
@@ -146,16 +147,15 @@ int AVLIsEmpty(const avl_t* tree)
 
 /********************  AVLHeight  ****************************/
 
-int AVLHeight(const avl_t* tree)
+size_t AVLHeight(const avl_t* tree) 
 {
 	assert( tree );
-	
-	return AVLIsEmpty( tree ) ? -1 : tree->root->height ; 
+	return AVLIsEmpty( tree ) ? 0 : tree->root->height ;
 }
 
 /********************  AVLDestroy  ****************************/
 
-static void RecAVLDestroy(avl_node_t* node)
+static void RecAVLDestroy(avl_node_t* node) /*יפההה*/
 {
 	if ( NULL == node )
 	{
@@ -202,7 +202,7 @@ int AVLInsert( avl_t* tree, void* data )
 
 	assert(tree);
 	
-	new_node = (avl_node_t*)malloc(sizeof(avl_node_t) );
+	new_node = (avl_node_t*)malloc(sizeof(avl_node_t) ); 
 	
 	if(NULL == new_node)
 	{
@@ -218,6 +218,7 @@ int AVLInsert( avl_t* tree, void* data )
 	return SUCCESS; 
 				 
 }
+/********************  RecAVLInsert  ****************************/
 static avl_node_t*
 RecAVLInsert(avl_node_t* root , avl_node_t *new_node , cmp_func_t func)
 {	
@@ -230,7 +231,7 @@ RecAVLInsert(avl_node_t* root , avl_node_t *new_node , cmp_func_t func)
 	}
 	
 	res = func( root->data , new_node->data );
-	pose_to_move = res < 0; /* ... */
+	pose_to_move = res < 0; /* if res < 0 is true --> right, else left */
 	
 	root->child[pose_to_move] = 
 	RecAVLInsert( root->child[pose_to_move] , new_node , func );
@@ -243,8 +244,8 @@ RecAVLInsert(avl_node_t* root , avl_node_t *new_node , cmp_func_t func)
 	{
 		return root;
 	}
-	
-	child_balance_factor = BalancedFactor(root->child[(-2 == balance_factor)]);
+	/* if the balance_factor is -2 so it is right child, else( 2 ) left */ 
+	child_balance_factor = BalancedFactor(root->child[(-2 == balance_factor)]); 
 	
 	return HandleRebalance( root , balance_factor , child_balance_factor );	
 }
@@ -319,21 +320,28 @@ RecAVLRemove(avl_node_t* root , void *data , cmp_func_t func , void** data_ptr)
 		return NULL;
 	}
 	
-	
+	/* data_ptr: in case of 2 child of node that sould be remove
+		 is The pointer of the data of the node inorder to copy the data
+		 of the NEXT node of it, and remove the NEXT node */
 	if ( NULL == data_ptr )
 	{
 		res = func( root->data , data );
 		
-		
+		/* while the node to remove doesn't found -> res != 0*/
 		if ( res != 0 )
 		{
-			pose_to_move = res < 0; /* ... */
+			pose_to_move = res < 0; /*if res < 0 is true -->right, else left */
 			
 			root->child[pose_to_move] = 
 			RecAVLRemove( root->child[pose_to_move] , data , func , NULL );
 		}
+		
+		/* the node to remove founds -> res == 0, 
+			handle the node in case it has less then 2 childs */
 		else if ( FindNumChilds( root ) < 2 )
 		{
+			/*check what child it has, and return the child to
+				to connect it with his grandfather */
 			node_to_return = root->child[root->child[RIGHT] != NULL];
 			
 			root->child[LEFT] = root->child[RIGHT] = NULL;
@@ -342,19 +350,33 @@ RecAVLRemove(avl_node_t* root , void *data , cmp_func_t func , void** data_ptr)
 			
 			return node_to_return;	
 		}
+		
+		/* the node to remove founds -> res == 0, 
+			handle the node in case it has 2 childs */
 		else
 		{
+			/* want to copy to the node that should remove
+				the data of his NEXT node (Right and than strong turn 
+				to Left, and then to remove the NEXT node and return his
+				Right child if it exist, and connect the child to
+				his grandfather. so i send the pointer of the data of 
+				the node inorder to copy */
 			root->child[RIGHT] = 
 			RecAVLRemove( root->child[RIGHT] , data , func , &root->data );
 		}
 	}
+	
+	/* 	 NULL != data_ptr  */
 	else
 	{
+		/* Strong turn to Left */
 		if ( NULL != root->child[LEFT] )
 		{
 			root->child[LEFT] = 
 			RecAVLRemove( root->child[LEFT] , data , func , data_ptr );
 		}
+		
+		/* copy the data and free the NEXT node*/
 		else
 		{
 			*data_ptr = root->data;
@@ -367,9 +389,10 @@ RecAVLRemove(avl_node_t* root , void *data , cmp_func_t func , void** data_ptr)
 			return node_to_return;
 		}
 	}
-	
+	/* update height after removing */
 	SetHeight( root );
 	
+	/* check and handle balancing if neccesery */
 	balance_factor = BalancedFactor( root );
 	
 	if ( balance_factor > -2 && balance_factor < 2 )
@@ -391,19 +414,22 @@ static size_t FindNumChilds(avl_node_t* node)
 
 }
 
-/* Find the height of an AVL node recursively */
 /********************  SetHeight  ****************************/
 
-static void SetHeight( avl_node_t* node ) 
+static void SetHeight( avl_node_t* node ) /*יפהה*/
 {
-	int height_left = 0;
-	int height_right = 0;
-	assert(node);
+	long height_left = 0;
+	long height_right = 0;
+
+	if( NULL == node )
+	{
+		return;	
+	}
 	
-	height_left = node->child[LEFT] ? node->child[LEFT]->height : -1;
-	height_right = node->child[RIGHT] ? node->child[RIGHT]->height : -1;
+	height_left = node->child[LEFT] ? (long)node->child[LEFT]->height : -1;
+	height_right = node->child[RIGHT] ? (long)node->child[RIGHT]->height : -1;
 	
-	node->height = MAX( height_left , height_right ) + 1;
+	node->height = (size_t)(MAX( height_left , height_right ) + 1);
 }
 
 /********************  RecAVLSize  ****************************/
@@ -421,7 +447,7 @@ static void RecAVLSize(avl_node_t *node, size_t *size)
 /********************  HandleRebalance  ****************************/	
 
 static avl_node_t*
-HandleRebalance(avl_node_t *root ,int balance_factor ,int child_balance_factor)
+HandleRebalance(avl_node_t *root ,int balance_factor ,int child_balance_factor) /*יפהה*/
 {	
 	avl_node_t *new_root = NULL;
 	
@@ -454,7 +480,7 @@ HandleRebalance(avl_node_t *root ,int balance_factor ,int child_balance_factor)
 }
 
 /********************  RightRotate  ****************************/	
-static avl_node_t *RightRotate( avl_node_t *node )
+static avl_node_t *RightRotate( avl_node_t *node ) /*יפהה*/
 {
 	avl_node_t *new_root = NULL, *tmp = NULL;
 	assert( node );
@@ -491,24 +517,24 @@ static avl_node_t *LeftRotate( avl_node_t *node )
 /********************  BalancedFactor  ****************************/	
 static int BalancedFactor( avl_node_t *node )
 {
-	int height_left = 0;
-	int height_right = 0;
-	assert(node);
+	long height_left = 0;
+	long height_right = 0;
+	/* for the debug mode it helps in complicated code like recursion*/
+	assert(node); /*כנל לא צריך assert */ 
 	
-	height_left = node->child[LEFT] ? node->child[LEFT]->height : -1;
-	height_right = node->child[RIGHT] ? node->child[RIGHT]->height : -1;
+	/*this is just two lines that appear twise, so in that case a function
+	 sometimes costs more in term of time complexity */
+	height_left = node->child[LEFT] ? (long)node->child[LEFT]->height : -1;
+	height_right = node->child[RIGHT] ? (long)node->child[RIGHT]->height : -1;
 	
 	return height_left - height_right; 
 }
 
 /********************  RecAVLFind  ****************************/
 static avl_node_t* RecAVLFind(avl_t *tree, avl_node_t *node,
-								  	const void *data_to_find )
+								  	const void *data_to_find ) /*יפההה*/
 {
 	int what_child = LEFT, res = 0;
-	
-	assert(tree);
-	assert(node);
 	
 	if( NULL == node )
 	{
@@ -531,18 +557,26 @@ static void RecAVLForEachPreOrder(avl_node_t *node, op_func_t op_func,
 								 void *user_param, int *res_op)
 {
 	assert( op_func);
-
+															/* ולדעתי זה SUCCESS == *res_op מיותר*/
+	/* the condition SUCCESS == *res_op helps not to repeat the recursion 
+		if the operation failed allready, it will do less recursions and the 
+		time compexity will be lesser. */
 	if( NULL != node )
 	{
-		if(SUCCESS == *res_op && OPERATION_FAIL == op_func(node->data, user_param) )
+		if(SUCCESS == *res_op && 
+				OPERATION_FAIL == op_func(node->data, user_param) ) 
+
+		 
 		{
 			*res_op =  OPERATION_FAIL;	
 		}
 
 		else if ( SUCCESS == *res_op )
 		{
-			RecAVLForEachPreOrder( node->child[LEFT], op_func, user_param, res_op);
-			RecAVLForEachPreOrder( node->child[RIGHT], op_func, user_param, res_op);
+			RecAVLForEachPreOrder( node->child[LEFT], op_func,
+									 user_param, res_op);  
+			RecAVLForEachPreOrder( node->child[RIGHT], op_func,
+									 user_param, res_op);  
 		}
 	}
 }								 
@@ -557,10 +591,13 @@ static void RecAVLForEachPostOrder(avl_node_t *node, op_func_t op_func,
 	{
 		if ( SUCCESS == *res_op )
 		{
-			RecAVLForEachPostOrder( node->child[LEFT], op_func, user_param, res_op);
-			RecAVLForEachPostOrder( node->child[RIGHT], op_func, user_param, res_op);
+			RecAVLForEachPostOrder( node->child[LEFT], op_func,
+										 user_param, res_op);
+			RecAVLForEachPostOrder( node->child[RIGHT], op_func,
+										 user_param, res_op);
 			
-			if(SUCCESS == *res_op &&  OPERATION_FAIL == op_func(node->data, user_param) )
+			if(SUCCESS == *res_op &&  
+					OPERATION_FAIL == op_func(node->data, user_param) )
 			{
 				*res_op =  OPERATION_FAIL;
 			}
@@ -578,14 +615,17 @@ static void RecAVLForEachInOrder(avl_node_t *node, op_func_t op_func,
 	{
 		if ( SUCCESS == *res_op )
 		{
-			RecAVLForEachInOrder( node->child[LEFT], op_func, user_param, res_op);
+			RecAVLForEachInOrder( node->child[LEFT], op_func,
+									 user_param, res_op);
 			
-			if(SUCCESS == *res_op && OPERATION_FAIL == op_func(node->data, user_param) )
+			if(SUCCESS == *res_op && 
+					OPERATION_FAIL == op_func(node->data, user_param) )
 			{
 				*res_op =  OPERATION_FAIL;	
 			}
 	
-			RecAVLForEachInOrder( node->child[RIGHT], op_func, user_param, res_op);
+			RecAVLForEachInOrder( node->child[RIGHT],
+					 op_func, user_param, res_op);
 		}
 	}
 }	
@@ -595,8 +635,7 @@ static void RecAVLForEachInOrder(avl_node_t *node, op_func_t op_func,
 /********************  AvlGetData  ****************************/
 void *AvlGetData(avl_node_t *node)
 {
-	/*assert( node );*/
-	
+
 	if(NULL == node )
 	{
 		return NULL;
@@ -607,21 +646,18 @@ void *AvlGetData(avl_node_t *node)
 /********************  AvlPrintData  ****************************/
 void AvlPrintData(avl_node_t *node)
 {
-	/*assert( node );*/
-	
+
 	if(NULL == node )
 	{
 		printf("%p\n",  AvlGetData(node ) );
 		return ;
 	}
 	
-	/*printf("%d(h=%lu)\n",  *(int*)AvlGetData(node ), node->height );*/
 }
 /********************  Pre_Print_Tree_Avl  ****************************/
 void Pre_Print_Tree_Avl(avl_node_t* root, avl_t *avl, int level)
 {
 	int i = 0;
-	/*AvlPrintData( root );*/
 
 	if(NULL != root ) 
 	{
@@ -632,7 +668,6 @@ void Pre_Print_Tree_Avl(avl_node_t* root, avl_t *avl, int level)
 		}
 		AvlPrintData( root );
 		
-		/*printf("%d\n",  *(int*)BstGetData(NodeToIter(root) ) );*/
 		Pre_Print_Tree_Avl(root->child[LEFT], avl, level + 1 );
 		Pre_Print_Tree_Avl(root->child[RIGHT], avl, level + 1);
 	
@@ -650,4 +685,33 @@ void Aux_Pre_Print_Tree_Avl(avl_t *avl, int level)
 
 
 
+
+static void PrintSpace( size_t n )
+{
+	size_t i = 0;
+	
+	for ( i = 0 ; i < n ; ++i )
+	{
+		putchar(' ');
+	}
+}
+
+static void _PrintTree( avl_node_t* root , size_t h)
+{
+	if ( NULL == root )
+	{
+		return;
+	}
+	
+	_PrintTree( root->child[RIGHT] , h + 1 );
+	PrintSpace( 4*h );
+	printf("%3d\n" , *(int*)root->data );
+	_PrintTree( root->child[LEFT] , h + 1 );
+}
+
+void PrintTree( avl_t *tree )
+{
+	/*avl_node_t* root = tree->root;*/
+	_PrintTree( tree->root , 2);
+}
 
