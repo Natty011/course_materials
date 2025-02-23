@@ -39,7 +39,9 @@ typedef struct heap heap_t;
 *		* Undefined behaviour if comparison return 0;
 */
 typedef int
-(*expand_cmp_func_t)(const void* check_data ,const void* new_data, void* param);
+(*expand_cmp_func_t)(void* check_data ,void* new_data, void* param);
+/*(*expand_cmp_func_t)(const void* check_data ,const void* new_data, void* param);*/
+
 /* 
 ******************************************************************************/
 /******************************************************************************
@@ -249,3 +251,7 @@ typedef int
 ******************************************************************************/
 
 #endif                  /* __HEAP_H__      */
+
+#ifdef PRINTS
+    void PrintArray( heap_t* heap );
+#endif
