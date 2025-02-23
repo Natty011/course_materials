@@ -242,8 +242,6 @@ static void TestString(void)
 		
 	}
 
-	
-	
 	HeapPQueueDestroy(pqueue1);	
 	pqueue1 = NULL;
 
