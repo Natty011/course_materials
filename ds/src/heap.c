@@ -4,7 +4,7 @@
 * Date : 19 / 02 / 2025
 * Last update: 22 / 02 / 2025
 *****************************************/
-#define PRINTS
+/*#define PRINTS*/
 #ifdef PRINTS
 	#include <stdio.h> 
 #endif
@@ -48,11 +48,11 @@ struct heap
 
 /******************************************************************************/
 /************************ ststic functions declartions ************************/
-static void SwapQuick(void** ptr1, void** ptr2);
+static void Swap(void** ptr1, void** ptr2);
 static size_t IsExist(heap_t* heap , match_func_t match_func , void* param );
 static int MatchFuncPop( void* check_data , void* user_param );
-static int HeapifyDown(heap_t* heap, size_t parent, size_t size );
-static int HeapifyUp(heap_t* heap, size_t index );
+static void HeapifyDown(heap_t* heap, size_t parent );
+static void HeapifyUp(heap_t* heap, size_t index );
 
 #ifdef PRINTS
 void PrintArray( heap_t* heap );							
@@ -64,7 +64,7 @@ void PrintArray( heap_t* heap );
 /********************  HeapCreate  ****************************/
 heap_t *HeapCreate(void* param, expand_cmp_func_t cmp_func)
 {
-	size_t capacity = 32;
+	size_t capacity = 16;
 	heap_t* heap_p = ( heap_t* )malloc( sizeof(heap_t) );
 
 	if(NULL == heap_p)
@@ -138,7 +138,7 @@ void* HeapPeek( const heap_t* heap )
 int HeapPush( heap_t* heap , const void* data )
 {
 	
-	size_t size = 0, res = 0 ;
+	size_t size = 0;
 	assert( heap);
 	
 	if ( VectorPushBack( heap->vector, &data) )
@@ -148,20 +148,18 @@ int HeapPush( heap_t* heap , const void* data )
 	/* must to be : size >= 1, if size == 1 is allready sorted */
 	size = HeapSize(heap); 
 
-	res = HeapifyUp(heap, size );
+	HeapifyUp(heap, size );
 
-	return res;
+	return SUCCESS;
 
 }
 /********************  HeapRemove  ****************************/
 
 void* HeapRemove( heap_t* heap , match_func_t match_func , void* match_param )
 {
-	size_t last_element_index = 0, to_remove = 0, size = 0;
-	void **to_remove_ptr = NULL;
-	void **last_element_ptr = NULL;
+	size_t last_element_index = 0, to_remove = 0;
+	void **to_remove_ptr = NULL, **last_element_ptr = NULL;
 
-	int res = 0;
 	assert(heap);
 
 	if ( HeapIsEmpty( heap ) )
@@ -181,20 +179,18 @@ void* HeapRemove( heap_t* heap , match_func_t match_func , void* match_param )
 
 	to_remove_ptr = VectorGetAccess( heap->vector, to_remove);
 	last_element_ptr = VectorGetAccess( heap->vector, last_element_index);
-	SwapQuick( last_element_ptr, to_remove_ptr);
+
+	Swap( last_element_ptr, to_remove_ptr);
 	VectorPopBack( heap->vector );
 	
-	size = HeapSize(heap);
-
-	if(0 !=  HeapSize(heap) && last_element_index != to_remove)
+	if( (1 <  HeapSize(heap) ) && ( last_element_index != to_remove ))
 	{
-		res = HeapifyDown(heap, to_remove, size);
-		res = HeapifyUp(heap, to_remove );
+		HeapifyDown(heap, to_remove);
+		HeapifyUp(heap, to_remove );
 	
 	}
 	
-	return SUCCESS == res ? match_param : NULL ;
-
+	return match_param ;
 }
 
 /********************  HeapPop  ****************************/
@@ -226,18 +222,19 @@ static int MatchFuncPop( void* check_data , void* user_param )
 
 /********************  MatchFuncPop  ****************************/
 
-static int HeapifyDown(heap_t* heap, size_t parent_index, size_t size )
+static void HeapifyDown(heap_t* heap, size_t parent_index )
 {
 	void *param = *(void**)VectorGetAccess( heap->vector, 0);
 	void **largest = NULL, **parent = NULL , **right = NULL;
-	size_t max_index =0;
+	size_t max_index = 0, size = HeapSize(heap);
+
 	while ( parent_index < size   ) 
 	{
 		parent = (void**)VectorGetAccess( heap->vector, parent_index);
 
 		if ( parent_index*2 > size )
 		{
-			return SUCCESS;
+			return ;
 		}
 	
 		largest = (void**)VectorGetAccess( heap->vector, 2 * parent_index);
@@ -255,7 +252,7 @@ static int HeapifyDown(heap_t* heap, size_t parent_index, size_t size )
 
 		if ( heap->cmp_func(*parent , *largest , param) < 0 )
 		{
-			SwapQuick( parent , largest );
+			Swap( parent , largest );
 			parent_index = max_index;
 		}
 		else
@@ -263,13 +260,11 @@ static int HeapifyDown(heap_t* heap, size_t parent_index, size_t size )
 			break;
 		}
 	}
-
-	return SUCCESS;
 }
 
 /********************  HeapifyUp  ****************************/
 
-static int HeapifyUp(heap_t* heap, size_t index )
+static void HeapifyUp(heap_t* heap, size_t index )
 {
 	
 	vector_t *vector = heap->vector;
@@ -280,15 +275,14 @@ static int HeapifyUp(heap_t* heap, size_t index )
 
 	while ( parent_index > 0 && heap->cmp_func(*parent , *element_to_heapify_up , param) < 0 )
 	{
-		SwapQuick( parent , element_to_heapify_up );
+		Swap( parent , element_to_heapify_up );
 
 		index = parent_index ;
 		parent_index /= 2; 
 
 		parent = (void**)VectorGetAccess( vector, parent_index);
 		element_to_heapify_up = (void**)VectorGetAccess( vector, index);
-
-	return SUCCESS;
+	}
 }
 
 /********************  IsExist  ****************************/
@@ -307,6 +301,20 @@ static size_t IsExist(heap_t* heap , match_func_t match_func , void* param )
 
 	return FALSE; /* the param isn't in the heap */
 }
+
+/***************************Swap***************************/
+static void Swap(void** ptr1, void** ptr2)
+{
+	void* temp = NULL;
+	
+	assert( ptr1 );
+	assert ( ptr2 );
+	
+	temp = *ptr1;
+	*ptr1 = *ptr2;
+	*ptr2 = temp;
+}
+
 
 #ifdef PRINTS
 void PrintArray( heap_t* heap )
@@ -339,18 +347,6 @@ void *GetVectorIndex(heap_t *h, size_t index)
 }
 #endif
 
-/***************************SwapQuick***************************/
-static void SwapQuick(void** ptr1, void** ptr2)
-{
-	void* temp = NULL;
-	
-	assert( ptr1 );
-	assert ( ptr2 );
-	
-	temp = *ptr1;
-	*ptr1 = *ptr2;
-	*ptr2 = temp;
-}
 
 
 /*******************End Of Static Functions definition************************/
