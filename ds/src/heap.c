@@ -280,6 +280,7 @@ static int HeapifyUp(heap_t* heap, size_t index )
 	void **parent = (void**)VectorGetAccess( vector, parent_index);
 	void* param = *(void**)VectorGetAccess( vector, 0);
 */
+
 	vector_t *vector = NULL;
 	void **element_to_heapify_up = NULL;
 	size_t parent_index = 0;
