@@ -183,6 +183,7 @@ void* HeapRemove( heap_t* heap , match_func_t match_func , void* match_param )
 
 
 	VectorPopBack( heap->vector );
+	
 	size = HeapSize(heap);
 
 
@@ -264,7 +265,8 @@ static int HeapifyDown(heap_t* heap, size_t parent_index, size_t size )
 		}
 		else
 		{
-			return  parent_index;
+			break;
+			/*return  parent_index;*/
 		}
 	}
 
@@ -280,14 +282,53 @@ static int HeapifyUp(heap_t* heap, size_t parent_index, size_t size )
 	void* param = *(void**)VectorGetAccess( vector, 0);
 	void **last_element = (void**)VectorGetAccess( vector, size);
  /* parent*/
+
 	while ( parent_index > 0 && heap->cmp_func(*parent , *last_element , param) < 0 )
 	{
-		
-		SwapQuick( parent , last_element );
+		puts("before_swap");
 
-		last_element = (void**)VectorGetAccess( vector, parent_index);
-		parent = (void**)VectorGetAccess( vector, size / 2);
+		printf("parent_index = %3d \n", **(int **)VectorGetAccess(vector, parent_index));
+		printf("size_index = %3d \n ", **(int **)VectorGetAccess(vector, size));
+        printf("parent_index_value = %lu \n",  parent_index);
+        printf("size = %lu \n",  size);
+
+		SwapQuick( parent , last_element );
+		puts("after_swap");
+		printf("parent_index = %3d \n", **(int **)VectorGetAccess(vector, parent_index));
+		printf("size_index = %3d \n ", **(int **)VectorGetAccess(vector, size));
+        printf("parent_index_value = %lu \n",  parent_index);
+        printf("size = %lu \n",  size);
+
+		
+		size = parent_index ;
+		parent_index /= 2; 
+		/*parent_index = size / 2;*/
+		
+		/*parent_index = parent_index / 2;*/
+		puts("after_update_swap");
+
+		printf("parent_index_value/2 = %lu \n",  parent_index);
+        printf("size = %lu \n",  size);
+
+		parent = (void**)VectorGetAccess( vector, parent_index);
+		last_element = (void**)VectorGetAccess( vector, size);
+
+		printf("last_element = %3d \n", **(int **)last_element);
+		printf("parent = %3d \n ", **(int **)parent);
+
+		/*
+
+		last_element = (void**)VectorGetAccess( vector, size);
+		parent = (void**)VectorGetAccess( vector, size);
+*/
+		/*parent = (void**)VectorGetAccess( vector, parent_index / 2);*/
+		/*parent = (void**)VectorGetAccess( vector, size / 2);*/
+		/*
+		size = parent_index;
+		parent_index = size / 2;
+		*/
 	}
+	/*printf("parent_index_value = %lu \n",  parent_index);*/
 
 	return SUCCESS;
 }
