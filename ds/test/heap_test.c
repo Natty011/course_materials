@@ -144,14 +144,14 @@ int main ()
    	puts(BACK_BLUE"'TestHeap()'"RESET);
     TestHeap();
 
-	/*puts(BLUE"====================================================="RESET);
+	puts(BLUE"====================================================="RESET);
 
 	printf("%sTEST: %s "RESET" \n", background,  mode);
    	puts(BACK_BLUE"'TestHeap2()'"RESET);
     TestHeap2();
 
 	puts(BLUE"====================================================="RESET);
-*/
+
 	return 0;
 }
 
@@ -169,7 +169,7 @@ static void TestHeap(void)
 	void *data = NULL;
 	int param [ 1 ] =  {16};
 
-	int param2 [ 1 ] =  {20};
+	int param2 [ 1 ] =  {25};
 	size_t size = sizeof( arr ) / sizeof( arr[0] ) ; 
 	size_t i = 0;
 	UNUSED(param2);	
@@ -199,7 +199,7 @@ static void TestHeap(void)
 
 	}
 
-	PrintArray(heap1);
+	/*PrintArray(heap1);*/
 	/*arr[0] = 24;*/
 	/*PrintArray(heap1);*/
 	if ( HeapIsEmpty(heap1) ||  1 != HeapSize(heap1) || 
@@ -218,9 +218,9 @@ static void TestHeap(void)
 	/* pop 16 , one member */
 	/*puts("pop 16");*/
 	HeapPop(heap1);
-	PrintArray(heap1);
+	/*PrintArray(heap1);*/
 	/*printf(" data  = %p \n",data ); */
-	printf(" HeapSize(heap1)  = %d \n",HeapSize(heap1)); 
+	/*printf(" HeapSize(heap1)  = %ld \n",HeapSize(heap1)); */
 	if( !HeapIsEmpty(heap1)||  0 != HeapSize(heap1) ) 
 	{
 		printf("line: %d \n" , __LINE__ );
@@ -238,11 +238,10 @@ static void TestHeap(void)
 
 	}
 		
-	PrintArray(heap1);
-
-	/* arr[0] != *(int*)HeapPeek(heap1) */
-	/*
-	if ( HeapIsEmpty(heap1) ||  1 != HeapSize(heap1) )
+	/*PrintArray(heap1);*/
+	
+	if ( HeapIsEmpty(heap1) ||  1 != HeapSize(heap1)
+		||  arr[0] != *(int*)HeapPeek(heap1)   )
 	{
 		printf("line: %d \n" , __LINE__ );
 		puts("Failes in_3: Push || Peek");
@@ -250,14 +249,13 @@ static void TestHeap(void)
 	
 		flag =  TRUE;
 	}
-		*/
+	
 	/* remove 16 , one member */
 
 	/*PrintArray(heap1);*/
-	puts("remove 16");
+	/*puts("remove 16");*/
 	
 	data = HeapRemove(heap1, match_func, arr  );
-	printf(" data  = %d \n",*(int*)data ); 
 
 	if( data )
 	{
@@ -266,11 +264,10 @@ static void TestHeap(void)
 			printf("line: %d \n" , __LINE__ );
 			puts("Failes in_2: Remove || Size");
 		}
-
 	
 	}
 	
-	
+
 	for(i = 0; i < size  ; ++i) 
 	{
 		/*PrintArray(heap1);*/
@@ -282,24 +279,16 @@ static void TestHeap(void)
 			flag =  TRUE;
 
 		}
-	}
-	PrintArray(heap1);
 	
-		/*
 		if ( HeapIsEmpty(heap1) || ( i + 1 ) != HeapSize(heap1) )
 		{
 			printf("line: %d , Iteration = %ld \n" , __LINE__ , i );
 			puts("Failes in_2: Push ");
 
-			#ifdef PRINTS
-				printf(" HeapPeek(heap1)  = %d", *(int*)HeapPeek(heap1) );
-			#endif
 			flag =  TRUE;
 
 		}
-		*/
-		/* heapify to root 16 -> 17*/
-		/*
+
 		if ( i == size - 1)
 		{
 			if( arr[ i ] != *(int*)HeapPeek(heap1) )
@@ -309,82 +298,78 @@ static void TestHeap(void)
 				flag =  TRUE;
 			}
 		}
-			*/
+	}
+	/*PrintArray(heap1);*/
 	
+	/* pop 25  */
 	/*PrintArray(heap1);*/
 
-	/* pop 17  */
-	/*puts("pop 17");*/
-/*
 	HeapPop(heap1);
-
-	if( HeapIsEmpty(heap1) || 11 != HeapSize(heap1) ||
-		arr[0] != *(int*)HeapPeek(heap1) ) 
+	
+	
+	if( HeapIsEmpty(heap1) || 11 != HeapSize(heap1) 
+		|| arr[1] != *(int*)HeapPeek(heap1)  ) 
 	{
 		printf("line: %d \n" , __LINE__ );
 		puts("Failes in_3: Pop ");
 		flag =  TRUE;
 	}
-		*/
-	/*PrintArray(heap1);*/
-
+		
+	
 	/* remove 9 */
 	/*puts("remove_9");*/
 	
-	/*data = HeapRemove(heap1, match_func, arr + 5 );*/
-	/*
+	data = HeapRemove(heap1, match_func, arr + 5 );
+	
 	if(  arr[5] != *(int*)data || 10 != HeapSize(heap1) ||
-		arr[0] != *(int*)HeapPeek(heap1)  )
+		arr[1] != *(int*)HeapPeek(heap1)  )
 	{
 			printf("line: %d \n" , __LINE__ );
 			puts("Failes in_4: Remove ");
 		
-		printf(" data  = %d \n", *(int*)data ); 
+		printf(" data_to_remove  = %d \n", *(int*)data ); 
 	}
-		*/
+		
 	/*PrintArray(heap1);*/	
 
 	/* remove 16  */
 	/*puts("remove_16");*/
 
-	/*data = HeapRemove(heap1, match_func, arr  );*/
-/*	arr[2] != *(int*)HeapPeek(heap1) */
-/*
-	if(  arr[0] != *(int*)data || 9 != HeapSize(heap1)  )
+	data = HeapRemove(heap1, match_func, arr  );
+
+	if(  arr[0] != *(int*)data || 9 != HeapSize(heap1)
+		|| arr[1] != *(int*)HeapPeek(heap1)  )
 	{
 
 			printf("line: %d \n" , __LINE__ );
 			puts("Failes in_5: Remove ");
 	
-		printf(" data  = %d \n", *(int*)data ); 
+		printf(" data_to_remove  = %d \n", *(int*)data ); 
 	}
-		*/
+		
 	/*PrintArray(heap1);*/
 
 	/* remove 12 */
 	/*puts("remove_12");*/
 
-	/*data = HeapRemove(heap1, match_func, arr + 10  );*/
-	/*|| arr[2] != *(int*)HeapPeek(heap1)*/
-	/*
-	if(  arr[10] != *(int*)data || 8 != HeapSize(heap1)  )
+	data = HeapRemove(heap1, match_func, arr + 10  );
+
+	if(  arr[10] != *(int*)data || 8 != HeapSize(heap1)  
+		|| arr[1] != *(int*)HeapPeek(heap1))
 	{
 
 			printf("line: %d \n" , __LINE__ );
 			puts("Failes in_6: Remove ");
 	
 	}
-	*/
+	
 	/*PrintArray(heap1);*/
+	/*puts("remove_25_doesnt_exist");*/
 
-	/*puts("remove_20_doesnt_exist");*/
-/*
 	data = HeapRemove(heap1, match_func, param2  );
-		printf(" data  = %p \n",data ); 
-		printf(" HeapSize(heap1)  = %d \n",HeapSize(heap1)); 
 
 	if(  NULL != data || 8 != HeapSize(heap1) ||
-			arr[2] != *(int*)HeapPeek(heap1)  )
+			arr[1] != *(int*)HeapPeek(heap1)  )
 	{
 
 			printf("line: %d \n" , __LINE__ );
@@ -392,103 +377,117 @@ static void TestHeap(void)
 	
 		printf(" data  = %d \n", *(int*)data ); 
 	}
-*/
+
+	/*PrintArray(heap1);*/
+
+	/* pop 20  */
+	/*puts("pop 20");*/
+
+	HeapPop(heap1);
+
+	if( 7 != HeapSize(heap1) || arr[2] != *(int*)HeapPeek(heap1) ) 
+	{
+		printf("line: %d \n" , __LINE__ );
+		puts("Failes in_5: Pop ");
+		printf(" data_to_pop  = %d \n", arr[1] ); 
+
+		flag =  TRUE;
+	}
+
 	/*PrintArray(heap1);*/
 
 	/* pop 13  */
 	/*puts("pop 13");*/
-/*
+
 	HeapPop(heap1);
 
-	if( 7 != HeapSize(heap1) || arr[1] != *(int*)HeapPeek(heap1) ) 
-	{
-		printf("line: %d \n" , __LINE__ );
-		puts("Failes in_5: Pop ");
-		flag =  TRUE;
-	}
-*/
-	/*PrintArray(heap1);*/
-
-	/* pop 10  */
-	/*puts("pop 10");*/
-
-	/*HeapPop(heap1);*/
-/*
 	if( 6 != HeapSize(heap1) || arr[3] != *(int*)HeapPeek(heap1) ) 
 	{
 		printf("line: %d \n" , __LINE__ );
 		puts("Failes in_6: Pop ");
+		printf(" data_to_pop  = %d \n", arr[2] ); 
+
 		flag =  TRUE;
 	}
-*/
+
 	/*PrintArray(heap1);*/
 
 	/* pop 8  */
 	/*puts("pop 8");*/
-/*
+
 	HeapPop(heap1);
 
 	if( 5 != HeapSize(heap1) || arr[4] != *(int*)HeapPeek(heap1) ) 
 	{
 		printf("line: %d \n" , __LINE__ );
 		puts("Failes in_7: Pop ");
+		printf(" data_to_pop  = %d \n", arr[3] ); 
+
 		flag =  TRUE;
 	}
-*/
+
 	/*PrintArray(heap1);*/
 	/* pop 5  */
 	/*puts("pop 5");*/
-/*
+
 	HeapPop(heap1);
 
 	if( 4 != HeapSize(heap1) || arr[9] != *(int*)HeapPeek(heap1) ) 
 	{
 		printf("line: %d \n" , __LINE__ );
-		puts("Failes in_7: Pop ");
+		puts("Failes in_8: Pop ");
+		printf(" data_to_pop  = %d \n", arr[4] ); 
+
 		flag =  TRUE;
 	}
-*/
+
 	/*PrintArray(heap1);*/
 
 	/* pop 4  */
 	/*puts("pop 4");*/
-/*
+
 	HeapPop(heap1);
 
 	if( 3 != HeapSize(heap1) || arr[6] != *(int*)HeapPeek(heap1) ) 
 	{
 		printf("line: %d \n" , __LINE__ );
 		puts("Failes in_8: Pop ");
+		printf(" data_to_pop  = %d \n", arr[9] ); 
+
 		flag =  TRUE;
 	}
-*/
+
 	/*PrintArray(heap1);*/
 
 	/* pop 3  */
 	/*puts("pop 3");*/
-/*
+
 	HeapPop(heap1);
 
 	if( 2 != HeapSize(heap1) || arr[7] != *(int*)HeapPeek(heap1) ) 
 	{
 		printf("line: %d \n" , __LINE__ );
 		puts("Failes in_9: Pop ");
+		printf(" data_to_pop  = %d \n", arr[6] ); 
 		flag =  TRUE;
 	}
-*/
+
 	/*PrintArray(heap1);*/
 
 	/* pop 2  */
 	/*puts("pop 2");*/
-/*
+
 	HeapPop(heap1);
+	
 	if( 1 != HeapSize(heap1) || arr[8] != *(int*)HeapPeek(heap1) ) 
 	{
 		printf("line: %d \n" , __LINE__ );
 		puts("Failes in_10: Pop ");
+		printf(" data_to_pop  = %d \n", arr[7] ); 
+
 		flag =  TRUE;
 	}
-*/
+
 	HeapDestroy(heap1);
 	heap1 = NULL;
 	
@@ -732,12 +731,12 @@ static void TestHeap2(void)
 	
 	/*PrintArray(heap2);*/	
 
+
+
 	HeapDestroy(heap2);
 
-	heap1 = NULL;
+	heap2 = NULL;
 
-
-	
 	if( !flag )
 	{
 		puts(RESET);		
