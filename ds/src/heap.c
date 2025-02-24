@@ -219,7 +219,6 @@ static int MatchFuncPop( void* check_data , void* user_param )
 {
 	assert(check_data);
 	assert(user_param);
-/* *(void**) ,  *(void**) */
 	return check_data == user_param;
 }
 
@@ -262,7 +261,6 @@ static int HeapifyDown(heap_t* heap, size_t parent_index, size_t size )
 		else
 		{
 			break;
-			/*return  parent_index;*/
 		}
 	}
 
@@ -273,82 +271,22 @@ static int HeapifyDown(heap_t* heap, size_t parent_index, size_t size )
 
 static int HeapifyUp(heap_t* heap, size_t index )
 {
-	/*
+	
 	vector_t *vector = heap->vector;
 	void **element_to_heapify_up = (void**)VectorGetAccess( vector, index);
 	size_t parent_index = index/2;
 	void **parent = (void**)VectorGetAccess( vector, parent_index);
 	void* param = *(void**)VectorGetAccess( vector, 0);
-*/
-
-	vector_t *vector = NULL;
-	void **element_to_heapify_up = NULL;
-	size_t parent_index = 0;
-	void **parent = NULL;
-	void* param = NULL;
-/*
-	if( index )
-	{
-		index 
-	}
-		*/
-	vector = heap->vector;
-	element_to_heapify_up = (void**)VectorGetAccess( vector, index);
-	parent_index = index/2;
-	parent = (void**)VectorGetAccess( vector, parent_index);
-	param = *(void**)VectorGetAccess( vector, 0);
-	
- /* parent*/
 
 	while ( parent_index > 0 && heap->cmp_func(*parent , *element_to_heapify_up , param) < 0 )
 	{
-		/*
-		puts("before_swap");
-
-		printf("parent_index = %3d \n", **(int **)VectorGetAccess(vector, parent_index));
-		printf("size_index = %3d \n ", **(int **)VectorGetAccess(vector, size));
-        printf("parent_index_value = %lu \n",  parent_index);
-        printf("size = %lu \n",  size);
-		*/
 		SwapQuick( parent , element_to_heapify_up );
-		/*
-		puts("after_swap");
-		printf("parent_index = %3d \n", **(int **)VectorGetAccess(vector, parent_index));
-		printf("size_index = %3d \n ", **(int **)VectorGetAccess(vector, size));
-        printf("parent_index_value = %lu \n",  parent_index);
-        printf("size = %lu \n",  size);
-		*/
-		
+
 		index = parent_index ;
 		parent_index /= 2; 
-		/*parent_index = size / 2;*/
-		
-		/*parent_index = parent_index / 2;*/
-		/*
-		puts("after_update_swap");
 
-		printf("parent_index_value/2 = %lu \n",  parent_index);
-        printf("size = %lu \n",  size);
-*/
 		parent = (void**)VectorGetAccess( vector, parent_index);
 		element_to_heapify_up = (void**)VectorGetAccess( vector, index);
-		/*
-		printf("last_element = %3d \n", **(int **)last_element);
-		printf("parent = %3d \n ", **(int **)parent);
-		*/
-		/*
-
-		last_element = (void**)VectorGetAccess( vector, size);
-		parent = (void**)VectorGetAccess( vector, size);
-*/
-		/*parent = (void**)VectorGetAccess( vector, parent_index / 2);*/
-		/*parent = (void**)VectorGetAccess( vector, size / 2);*/
-		/*
-		size = parent_index;
-		parent_index = size / 2;
-		*/
-	}
-	/*printf("parent_index_value = %lu \n",  parent_index);*/
 
 	return SUCCESS;
 }
