@@ -186,6 +186,10 @@ void* HeapRemove( heap_t* heap , match_func_t match_func , void* match_param )
 	
 	size = HeapSize(heap);
 
+	if ( 0 == size )
+	{
+		return last_element_ptr;
+	}
 	res = HeapifyDown(heap, to_remove, size);
 	res = HeapifyUp(heap, to_remove );
 
@@ -274,6 +278,14 @@ static int HeapifyUp(heap_t* heap, size_t index )
 	size_t parent_index = index/2;
 	void **parent = (void**)VectorGetAccess( vector, parent_index);
 	void* param = *(void**)VectorGetAccess( vector, 0);
+
+
+/*
+	element_to_heapify_up = (void**)VectorGetAccess( vector, index);
+	parent_index = index/2;
+	parent = (void**)VectorGetAccess( vector, parent_index);
+	param = *(void**)VectorGetAccess( vector, 0);
+	*/
  /* parent*/
 
 	while ( parent_index > 0 && heap->cmp_func(*parent , *element_to_heapify_up , param) < 0 )
