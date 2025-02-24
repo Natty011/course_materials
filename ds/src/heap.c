@@ -2,7 +2,7 @@
 * Author : Natty
 * Reviewer : Rawan
 * Date : 19 / 02 / 2025
-* Last update: 22 / 02 / 2025
+* Last update: 24 / 02 / 2025
 *****************************************/
 /*#define PRINTS*/
 #ifdef PRINTS
@@ -10,8 +10,6 @@
 #endif
 #include <assert.h> 	/* assert */
 #include <stdlib.h> 	/* malloc, free */
-
-#include <string.h> /* memcpy */
 
 #include "heap.h" 
 #include "vector.h" 
