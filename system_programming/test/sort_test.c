@@ -1,8 +1,8 @@
 /***************************************
 * Author : Natty
-* Reviewer : Natan
+* Reviewer : Natan / gilad( HeapSort )
 * Date : 22 / 01 / 2025
-* Last update: 10 / 02 / 2025
+* Last update: 25 / 02 / 2025
 *****************************************/
 
 #include <stdio.h> 		/* printf, puts, qsort  */
@@ -72,13 +72,15 @@ typedef struct sort_time_req
 /***************************function declaration**************************/
 static void TestSort(void);
 static void TestSort2(void);
+static void TestSort3(void);
+
 static void GenRandArr(int* arr, size_t len, size_t min, size_t max);
 int ArrIsSorted(int* arr, size_t len);
 static int TestBinarySearchIterative(void);
 static int TestBinarySearchRecursive(void);
 static int TestMergeSort(void);
 static int TestQuickSort(void);
-
+static int TestHeapSort(void);
 /*static void PrintArr(int* arr, size_t len);*/
 /***************************End of function declaration******************/
 
@@ -110,7 +112,7 @@ int ArrIsSorted(int* arr, size_t len)
 	
 	for(i = 0; i < len - 1; i++)
 	{
-		/*
+		/*	
 		printf("arr[i] = %d , i = %lu \n", arr[i], i);
 		printf("arr[i + 1] = %d , i + 1 = %lu \n", arr[i + 1], i + 1);	
 		*/
@@ -162,7 +164,7 @@ int main ()
 		mode = DEBUG;
 		background =  BACK_YELLOW;
 	#endif
-
+/*
 	puts(BLUE"====================================================="RESET);
 	printf("%sTEST: %s "RESET" \n", background,  mode);
 	
@@ -173,6 +175,11 @@ int main ()
 	  
     puts(BACK_BLUE"'TestSort2()'"RESET);
     TestSort2();
+    
+	puts(BLUE"====================================================="RESET);
+*/
+	puts(BACK_BLUE"'TestSort3()'"RESET);
+    TestSort3();
     
 	puts(BLUE"====================================================="RESET);
 
@@ -213,6 +220,65 @@ static void TestSort2(void)
 	}
 		
 }
+
+/*************************************************************/	
+/*************************TestSort3***************************/	
+/*************************************************************/
+
+static void TestSort3(void)
+{	
+	int flag = FALSE;
+
+	puts("'TestHeapSort()'");
+    flag = TestHeapSort();
+    puts("====================================================="); 
+	
+	if( !flag ) 
+	{
+		puts(RESET);		
+		puts(BACK_BLUE"Test: Success"RESET);
+	}
+	
+	else
+	{
+		puts(BACK_YELLOW"Test: Failure"RESET);	
+	}
+
+
+}	
+
+
+/*************************************************************/	
+/*************************TestHeapSort************************/	
+/*************************************************************/
+static int TestHeapSort(void)
+{
+	int arr[6] = {45 ,14 ,61 ,37, 56, 22};
+	int arr1[6] = {-7 ,5 ,2 , 1, -5, 7};
+	size_t size = sizeof(arr)/sizeof(arr[0])  ;
+	int flag = FALSE , flag1 = FALSE;
+	
+	HeapSort(arr, size );
+	HeapSort(arr1, size );
+	
+	flag = ArrIsSorted( arr, size );
+	flag1 = ArrIsSorted( arr1, size );
+	
+	if ( !flag && !flag1 )
+	{
+		puts(BACK_BLUE"TestQuickSort Successed"RESET);		
+	}
+	
+	else
+	{
+		puts("TestQuickSort Failed");		
+	}
+	
+	return flag;
+
+}
+
+
 
 /******************  TestBinarySearchIterative  ***********************/
 static int TestBinarySearchIterative(void)
@@ -330,7 +396,7 @@ static int TestMergeSort(void)
 	return flag;		
 }
 
-/******************  TestMergeSort  ***********************/
+/******************  TestQuickSort  ***********************/
 static int TestQuickSort(void)
 {
 	int arr[6] = {45 ,14 ,61 ,37, 56, 22};
