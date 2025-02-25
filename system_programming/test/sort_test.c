@@ -164,7 +164,7 @@ int main ()
 		mode = DEBUG;
 		background =  BACK_YELLOW;
 	#endif
-/*
+
 	puts(BLUE"====================================================="RESET);
 	printf("%sTEST: %s "RESET" \n", background,  mode);
 	
@@ -177,7 +177,7 @@ int main ()
     TestSort2();
     
 	puts(BLUE"====================================================="RESET);
-*/
+
 	puts(BACK_BLUE"'TestSort3()'"RESET);
     TestSort3();
     
