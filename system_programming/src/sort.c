@@ -1,13 +1,18 @@
 /***************************************
 * Author : Natty
-* Reviewer : Natan
+* Reviewer : Natan / gilad( HeapSort )
 * Date : 22 / 01 / 2025
-* Last update: 10 / 02 / 2025
+* Last update: 25 / 02 / 2025
 *****************************************/
 #include <assert.h> 	/* assert */
 #include <stdlib.h> 	/* malloc, calloc, free, srand/rand */
 #include <string.h> 	/* memcpy */
 #include "sort.h"
+
+#include "../include/heap.h" 
+#include "../include/vector.h" 
+#include "aux_func.h"
+
 
 #define MIN(a, b)		((a > b ) ? b : a )
 #define MAX(a, b)		((a > b ) ? a : b )
@@ -43,6 +48,9 @@ static void	AuxMergeSort(int *arr, size_t size, int* helper_array );
 static void	Merge( int* arr_left, int left, int* arr_right,
 					 int right, int* helper_array);
 static int SwapQuick(void* ptr1, void* ptr2, size_t element_size);
+
+static void BuildHeap( int* arr, size_t size );
+static void Heapify(int *arr, size_t size, size_t index );
 /*static size_t Random( size_t count );		*/			 
 /***************************End of function declaration******************/
 
@@ -519,7 +527,64 @@ void QuickSort(void *arr, size_t count, size_t elem,
 	QuickSort(arr_ptr + (elem * (tail + 1)) , count - tail - 1, elem, cmp_func );	
 }                       
 
+/*************************************************************/	
+/*************************HeapSort***************************/	
+/*************************************************************/
+
+void HeapSort(int *arr, size_t size)
+{
+	size_t index = 0;
+	BuildHeap(arr, size );
+
+	for(index = size - 1; index > 0 ; --index )
+	{
+		swap( arr + index, arr );
+		Heapify(arr, index, 0);
+	}
+
+}
+
+/*************************************************************/	
+/*************************BuildHeap***************************/	
+/*************************************************************/
+static void BuildHeap( int* arr, size_t size )
+{
+	size_t i = 0;
+	for( i = size / 2 - 1 ; i >= 0; --i )
+	{
+		Heapify( arr, size, i );
+	}
 
 
 
+}
+/*************************************************************/	
+/*************************Heapify***************************/	
+/*************************************************************/
+
+static void Heapify(int *arr, size_t size, size_t index )
+{
+	size_t left = 0, right = 0, largest = 0;
+	
+	largest = index;
+	left = 2 * index + 1;
+	right = left + 1;
+
+	if(left < size &&  arr[left] > arr[ largest]  )
+	{
+		largest = left;
+	}
+
+	if(right < size &&  arr[right] > arr[ largest]  )
+	{
+		largest = right;
+	}
+
+	if( largest != index )
+	{
+		swap( arr + largest, arr + index );
+		Heapify(arr, size, largest );
+	}
+
+}
 
