@@ -9,10 +9,6 @@
 #include <string.h> 	/* memcpy */
 #include "sort.h"
 
-#include "../include/heap.h" 
-#include "../include/vector.h" 
-#include "aux_func.h"
-
 
 #define MIN(a, b)		((a > b ) ? b : a )
 #define MAX(a, b)		((a > b ) ? a : b )
@@ -549,13 +545,14 @@ void HeapSort(int *arr, size_t size)
 /*************************************************************/
 static void BuildHeap( int* arr, size_t size )
 {
-	size_t i = 0;
-	for( i = size / 2 - 1 ; i >= 0; --i )
+	int i = (int)size / 2 - 1;
+	/*for( i = size / 2 - 1 ; i >= 0; --i )*/
+	while(i >= 0 )
 	{
 		Heapify( arr, size, i );
+
+		--i;
 	}
-
-
 
 }
 /*************************************************************/	
