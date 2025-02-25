@@ -2,11 +2,11 @@
 * Author : Natty
 * Reviewer : Rawan
 * Date : 19 / 02 / 2025
-* Last update: 24 / 02 / 2025
+* Last update: 25 / 02 / 2025
 *****************************************/
 /*#define PRINTS*/
 #ifdef PRINTS
-	#include <stdio.h> 
+	#include <stdio.h> /* printf */
 #endif
 #include <assert.h> 	/* assert */
 #include <stdlib.h> 	/* malloc, free */
@@ -16,6 +16,7 @@
 #include "aux_func.h"
 
 #define ELEMENT_SIZE		sizeof(size_t)
+#define CAPACITY 			16
 
 /***************************** Success / Fail Enum ****************************/
 
@@ -62,16 +63,17 @@ void PrintArray( heap_t* heap );
 /********************  HeapCreate  ****************************/
 heap_t *HeapCreate(void* param, expand_cmp_func_t cmp_func)
 {
-	size_t capacity = 16;
 	heap_t* heap_p = ( heap_t* )malloc( sizeof(heap_t) );
+	vector_t *vector = NULL;
 
 	if(NULL == heap_p)
 	{
 		return NULL;
 	}
-	
-	heap_p->vector =  VectorCreate(capacity,  ELEMENT_SIZE ); 
-	if ( NULL == heap_p->vector )
+
+	vector = VectorCreate(CAPACITY,  ELEMENT_SIZE ); 
+
+	if ( NULL == vector )
 	{
 		free( heap_p);
 		heap_p = NULL;
@@ -80,11 +82,12 @@ heap_t *HeapCreate(void* param, expand_cmp_func_t cmp_func)
 	}
 
 	heap_p->cmp_func = cmp_func;
+	heap_p->vector = vector;
 
 	if ( VectorPushBack( heap_p->vector, &param ) ) 
 	{
-		heap_p->vector = NULL;
 		HeapDestroy( heap_p );
+		heap_p->vector = NULL;
 		heap_p = NULL;
 
 		return NULL;
@@ -145,9 +148,10 @@ int HeapPush( heap_t* heap , const void* data )
 	}
 	/* must to be : size >= 1, if size == 1 is allready sorted */
 	size = HeapSize(heap); 
-
-	HeapifyUp(heap, size );
-
+	if ( 1 < size )
+	{
+		HeapifyUp(heap, size );
+	}
 	return SUCCESS;
 
 }
@@ -271,7 +275,8 @@ static void HeapifyUp(heap_t* heap, size_t index )
 	void **parent = (void**)VectorGetAccess( vector, parent_index);
 	void* param = *(void**)VectorGetAccess( vector, 0);
 
-	while ( parent_index > 0 && heap->cmp_func(*parent , *element_to_heapify_up , param) < 0 )
+	while ( parent_index > 0 && heap->cmp_func(*parent ,
+				 *element_to_heapify_up , param) < 0 )
 	{
 		Swap( parent , element_to_heapify_up );
 
@@ -287,14 +292,14 @@ static void HeapifyUp(heap_t* heap, size_t index )
 
 static size_t IsExist(heap_t* heap , match_func_t match_func , void* param )
 {
-	size_t size = 1 ;
-	while( size <= HeapSize( heap ) )
+	size_t index = 1 ;
+	while( index <= HeapSize( heap ) )
 	{
-		if ( match_func(*(void**)VectorGetAccess(heap->vector, size ) , param ) )
+		if ( match_func(*(void**)VectorGetAccess(heap->vector, index ) , param ) )
 		{
-				return size;
+				return index;
 		}
-			++size;
+			++index;
 	}
 
 	return FALSE; /* the param isn't in the heap */
