@@ -530,6 +530,7 @@ void QuickSort(void *arr, size_t count, size_t elem,
 void HeapSort(int *arr, size_t size)
 {
 	size_t index = 0;
+	assert( arr);
 	BuildHeap(arr, size );
 
 	for(index = size - 1; index > 0 ; --index )
