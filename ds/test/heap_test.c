@@ -200,7 +200,7 @@ static void TestHeap(void)
 	}
 
 	/*PrintArray(heap1);*/
-	/*arr[0] = 24;*/
+	/*arr[0] = 30;*/
 	/*PrintArray(heap1);*/
 	if ( HeapIsEmpty(heap1) ||  1 != HeapSize(heap1) || 
 	 			arr[0] != *(int*)HeapPeek(heap1) )
@@ -565,7 +565,7 @@ static void TestHeap2(void)
 	}
 
 	/*PrintArray(heap1);	*/
-	/* pop 16 , one member */
+	/* pop 20 , one member */
 	HeapPop(heap1);
 	/*PrintArray(heap1);	*/
 
@@ -595,7 +595,7 @@ static void TestHeap2(void)
 		#endif
 		flag =  TRUE;
 	}
-	/* remove 16 , one member */
+	/* remove 20 , one member */
 	/*PrintArray(heap1);*/
 
 	data = HeapRemove(heap1, match_func, arr  );
@@ -645,11 +645,11 @@ static void TestHeap2(void)
 			}
 		}
 	}
-	/*PrintArray(heap1);*/
+	PrintArray(heap1);
 
 	/* remove 4 */
 	
-	/*puts("remove_4");*/
+	puts("remove_4");
 	
 	data = HeapRemove(heap1, match_func, arr + 4 );
 	
@@ -662,7 +662,7 @@ static void TestHeap2(void)
 		printf(" data  = %d \n", *(int*)data ); 
 	}
 	
-	/*PrintArray(heap1);	*/
+	PrintArray(heap1);	
 
 	HeapDestroy(heap1);
 
@@ -713,11 +713,11 @@ static void TestHeap2(void)
 			}
 	}
 	
-	/*PrintArray(heap2);*/
+	PrintArray(heap2);
 
 	/* remove 5 */
 	
-	/*puts("remove 5");*/
+	puts("remove 5");
 	
 	data = HeapRemove(heap2, match_func, arr2 + 1 );
 	
@@ -730,7 +730,7 @@ static void TestHeap2(void)
 		printf(" data  = %d \n", *(int*)data ); 
 	}
 	
-	/*PrintArray(heap2);*/	
+	PrintArray(heap2);
 
 
 
