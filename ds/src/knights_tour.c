@@ -73,7 +73,9 @@ static int
 SortingFunc(void* check_data ,void* new_data, void* param);
 
 #ifdef PRINTS
-	/*void PrintArray( heap_t* heap );	*/						
+	/*void PrintArray( heap_t* heap );	*/	
+	PrintBoard(position_t *ret_path);
+					
 #endif
 
 /******************************************************************************/
@@ -107,6 +109,16 @@ int KnightsTour(uint8_t x_begin, uint8_t y_begin,
 
 	res = RecKnightsTour(board, ret_path, x_begin,
 		 y_begin, path_length, heap_pq_min);
+
+	 if (res)
+	 {
+		printf("Solution found!\n");
+		PrintBoard(ret_path);
+	 }
+	else
+	{
+		printf("No solution found!\n");
+	}
 
 	HeapPQueueDestroy(heap_pq_min);
 	heap_pq_min = NULL;	
@@ -165,6 +177,7 @@ static bool_t RecKnightsTour(bit_arr_t board,position_t *ret_path,
 	}
 
 	BitArrSetOff(board, ( x_begin * COLUMN_SIZE + y_begin ) % BOARD_SIZE ) ;
+
 	return FALSE;
 
 }	
@@ -191,7 +204,8 @@ bool_t InBoard( uint8_t x, uint8_t y )
 bool_t IsLegal(uint8_t x, uint8_t y, bit_arr_t board)
 {
 	return InBoard(x, y) &&
-		 ( UN_VISITED == BitArrGetVal( board, (x * COLUMN_SIZE + y )% BOARD_LIMIT) );
+		 ( UN_VISITED == BitArrGetVal( board,
+					 (x * COLUMN_SIZE + y )% BOARD_LIMIT) );
 }
 
 /************************************************************/
@@ -212,7 +226,6 @@ uint8_t Degree( uint8_t x_begin, uint8_t y_begin,
 		if( IsLegal(next_x, next_y, board) ) 
 		{
 			++degree ;
-
 		} 
 	}
 	
@@ -230,36 +243,22 @@ static int SortingFunc(void* check_data ,void* new_data, void* param)
 
 
 #ifdef PRINTS
-/*
-void PrintArray( heap_t* heap )
+
+void PrintBoard(position_t *ret_path)
 {
-	size_t size = 1 ;
-	int* element = NULL;
-	printf("HeapArray[] = \n" );
-	while( size <= HeapSize( heap ) )
+	size_t index = 0 ;
+
+	printf("return_path[] = \n" );
+
+	while( index <= BOARD_LIMIT )
 	{
 		element = *(void**)VectorGetAccess(heap->vector, size );
-		printf("index = %ld , value = %d \n", size, *element );
-			++size;
+		printf("index = %ld \n", index);
+		printf("x = %ld, y = %ld \n", ret_path->x, ret_path->y );
+			++index;
 	}
 }
-void PrintVector(heap_t *h)
-{
-    vector_t *v = h->vector;
-    size_t len = VectorSize(v), i = 0;
 
-    for (i = 0; i < len; ++i)
-    {
-        printf("%3d", **(int **)VectorGetAccess(v, i+1));
-    }
-    putchar('\n');
-}
-
-void *GetVectorIndex(heap_t *h, size_t index)
-{
-    return *(void **)VectorGetAccess(h->vector, index);
-}
-*/
 #endif
 
 /************************************************************/
@@ -300,7 +299,36 @@ void *GetVectorIndex(heap_t *h, size_t index)
 
 
 	 
+/*
+void PrintArray( heap_t* heap )
+{
+	size_t size = 1 ;
+	int* element = NULL;
+	printf("HeapArray[] = \n" );
+	while( size <= HeapSize( heap ) )
+	{
+		element = *(void**)VectorGetAccess(heap->vector, size );
+		printf("index = %ld , value = %d \n", size, *element );
+			++size;
+	}
+}
+void PrintVector(heap_t *h)
+{
+    vector_t *v = h->vector;
+    size_t len = VectorSize(v), i = 0;
 
+    for (i = 0; i < len; ++i)
+    {
+        printf("%3d", **(int **)VectorGetAccess(v, i+1));
+    }
+    putchar('\n');
+}
+
+void *GetVectorIndex(heap_t *h, size_t index)
+{
+    return *(void **)VectorGetAccess(h->vector, index);
+}
+*/
 
 
 
