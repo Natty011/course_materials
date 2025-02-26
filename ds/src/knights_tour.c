@@ -1,0 +1,105 @@
+/***************************************
+* Author : Natty
+* Reviewer : 
+* Date : 26 / 02 / 2025
+* Last update: 26 / 02 / 2025
+*****************************************/
+/*#define PRINTS*/
+#ifdef PRINTS
+	#include <stdio.h> /* printf */
+#endif
+#include <assert.h> 	/* assert */
+#include <stdlib.h> 	/* malloc, free */
+
+#include "knights_tour.h" 
+#include "bit_array.h" 
+
+#define ELEMENT_SIZE		sizeof(size_t)
+#define CAPACITY 			16
+
+/***************************** Success / Fail Enum ****************************/
+
+typedef enum
+{
+	SUCCESS = 0,
+	FAIL = 1
+
+} result_t;
+
+/******************************************************************************/
+/******************************* True / False Enum ****************************/
+
+typedef enum
+{
+	FALSE = 0,
+	TRUE = 1
+} bool_t;
+
+/******************************************************************************/
+/***************************** Management struct ******************************/
+
+
+/******************************************************************************/
+/************************ ststic functions declartions ************************/
+
+
+#ifdef PRINTS
+#endif
+/*******************End Of Static Functions declartions************************/
+/******************************************************************************/
+
+/******************************************************************************/
+
+/************************************************************/
+/********************  KnightsTour  *************************/
+/************************************************************/
+
+int KnightsTour(uint8_t x, uint8_t y, position_t *ret_path)
+{
+	return TRUE;
+}
+
+#ifdef PRINTS
+/*
+void PrintArray( heap_t* heap )
+{
+	size_t size = 1 ;
+	int* element = NULL;
+	printf("HeapArray[] = \n" );
+	while( size <= HeapSize( heap ) )
+	{
+		element = *(void**)VectorGetAccess(heap->vector, size );
+		printf("index = %ld , value = %d \n", size, *element );
+			++size;
+	}
+}
+void PrintVector(heap_t *h)
+{
+    vector_t *v = h->vector;
+    size_t len = VectorSize(v), i = 0;
+
+    for (i = 0; i < len; ++i)
+    {
+        printf("%3d", **(int **)VectorGetAccess(v, i+1));
+    }
+    putchar('\n');
+}
+
+void *GetVectorIndex(heap_t *h, size_t index)
+{
+    return *(void **)VectorGetAccess(h->vector, index);
+}
+*/
+#endif
+
+
+
+/*******************End Of Static Functions definition************************/
+
+
+
+
+
+
+
+
