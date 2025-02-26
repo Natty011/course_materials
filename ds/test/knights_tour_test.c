@@ -8,6 +8,7 @@
 #include <stdio.h> 		/* printf, puts, qsort  */
 #include <assert.h>
 #include <string.h> 	/* strcpy, strcmp */
+#include <stdlib.h> 	/* calloc, free */
 
 #include "knights_tour.h" 
 #include "bit_array.h" 
@@ -40,6 +41,7 @@
 
 #define DEBUG		"DEBUG MODE"
 #define RELEASE		"RELEASE MODE"
+#define STEP_LANGTH 	64
 
 #define MIN(a, b)		((a > b ) ? b : a )
 #define MAX(a, b)		((a > b ) ? a : b )
@@ -53,7 +55,7 @@ typedef enum
 	SUCCESS = 0,
 	FAIL = 1
 	
-}avl_result_t;
+}knights_result_t;
 
 typedef enum
 {
@@ -63,22 +65,6 @@ typedef enum
 	
 }func_result_t;
 
-typedef enum
-{
-	
-	LEFT = 0,
-	RIGHT = 1
-	
-}child_pose_t;
-
-typedef enum
-{
-	
-	NO_CHILDS = 0,
-	ONE_CHILD = 1,
-	TWO_CHILDS = 2
-	
-}nume_of_childs_t;
 
 /*
 	#ifdef PRINTS
@@ -123,14 +109,24 @@ int main ()
 static void TestKnightsTour(void)
 {	
 	int flag = FALSE;
+	position_t *ret_path = NULL;
+	uint8_t x_begin = 0, y_begin = 0;
+	ret_path = (position_t*)calloc(STEP_LANGTH, sizeof(position_t) );
 
-	/*
-		printf("line: %d \n" , __LINE__ );
-		puts("Failes in_1: IsEmpty || Size ");
+	if (NULL == ret_path )
+	 {
+		printf("line: %d \n" , __LINE__ );	
+		printf("Memory allocation failed!\n");
 		flag =  TRUE;
+		return;
+	 }
 	
-	*/
+	 /*KnightsTour(x_begin, y_begin, ret_path);*/
+	
+	
 
+	free( ret_path );
+	ret_path = NULL;
 	if( !flag )
 	{
 		puts(RESET);		
@@ -144,3 +140,10 @@ static void TestKnightsTour(void)
 	}
 
 }
+
+/*
+		printf("line: %d \n" , __LINE__ );
+		puts("Failes in_1: IsEmpty || Size ");
+		flag =  TRUE;
+	
+	*/
