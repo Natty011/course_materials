@@ -130,14 +130,18 @@ static op_result_t RecKnightsTour(bit_arr_t board,position_t *ret_path,
 	 uint8_t x_begin,uint8_t y_begin,
 	  uint8_t path_length, heap_pq_t* heap_pq_min )
 {
-	uint8_t x_next = 0, y_next = 0, move_index = 0, 
-	 		temp_length = path_length + 1 ;
+	uint8_t x_next = 0, y_next = 0, move_index = 0, move_index2 = 0,
+	 			temp_length = path_length + 1 ;
 	 /*mx_next = 0, my_next = 0, count = 0,  move_index2 = 0,*/
 	int degree = 0;
 	op_result_t result = FALSE;
 
-	BitArrSetOn(board, ( x_begin * COLUMN_SIZE + y_begin ) % BOARD_SIZE ) ;
+	printf("temp_length = %u, ",temp_length );
+	printf("x_begin = %d, y_begin = %d \n", x_begin, y_begin );
+	printf("board_before = %lu \n", board);
 
+	BitArrSetOn(board, ( x_begin * COLUMN_SIZE + y_begin ) % BOARD_SIZE ) ;
+	printf("board_after = %lu \n", board);
 	/*
 	HeapPQueueDestroy(heap_pq_degrees);
 	heap_pq_degrees = NULL;
@@ -149,10 +153,14 @@ static op_result_t RecKnightsTour(bit_arr_t board,position_t *ret_path,
 	}
 
 	
-		/*Check all possible moves */ 
+	for(move_index2 = 0; move_index2 < KNIGHT_MOVE_NUM; ++move_index2 )
+	{
+	/*Check all possible moves */ 
 		for(move_index = 0; move_index < KNIGHT_MOVE_NUM; ++move_index)
 		{
 			/* Next moves */
+			printf("move_index = %u, ",move_index );
+
 			x_next = x_begin + lut_knight_moves[move_index][0];
 			y_next = y_begin + lut_knight_moves[move_index][1];
 				
@@ -168,25 +176,32 @@ static op_result_t RecKnightsTour(bit_arr_t board,position_t *ret_path,
 				printf("degree = %d \n ", degree);
 				HeapPQueueEnqueue(heap_pq_min, &degree);
 			}
+		}
 
-			if(! HeapPQueueIsEmpty(heap_pq_min ) )
+		if(! HeapPQueueIsEmpty(heap_pq_min ) )
 			{
-				printf("move_index = %u, ",move_index );
-				printf("x = %d, y = %d \n", ret_path->x, ret_path->y );
+				printf("move_index2 = %u, ",move_index2 );
+				printf("ret_path->x = %d, ret_path->y = %d \n", \
+						 ret_path->x, ret_path->y );
+				/*BitArrSetOn(board, ( x_begin * COLUMN_SIZE + y_begin ) % BOARD_SIZE ) ;*/
+				printf("board_after_loop1 = %lu \n", board);
+
 				result = RecKnightsTour(board, ret_path + 1,
 					ret_path->x, ret_path->y, path_length + 1, heap_pq_min );
-			
+					
 				if(TRUE == result )
 				{
 					return TRUE;
 				}			 
 				else if(! HeapPQueueIsEmpty(heap_pq_min ) ) /* result == FAIL */
 				{
+					puts("HeapPQueueDequeue");
 					HeapPQueueDequeue(heap_pq_min);
 				}
 
 			}
-		}
+
+	}	
 
 	BitArrSetOff(board, ( x_begin * COLUMN_SIZE + y_begin ) % BOARD_SIZE ) ;
 
