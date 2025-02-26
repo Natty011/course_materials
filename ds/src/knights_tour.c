@@ -17,6 +17,7 @@
 #define KNIGHT_MOVE_NUM		8
 #define BOARD_LIMIT 		63
 #define COLUMN_SIZE        	8
+#define BOARD_SIZE 			BOARD_LIMIT + 1	
 #define UN_VISITED          0
 
 /************************************************************/
@@ -59,7 +60,11 @@ typedef enum
 /******************************************************************************/
 bool_t InBoard( uint8_t x, uint8_t y );
 bool_t IsLegal(uint8_t x, uint8_t y, bit_arr_t board);
-uint8_t Degree( uint8_t x_begin, uint8_t y_begin, bit_arr_t board );
+uint8_t Degree( uint8_t x_begin, uint8_t y_begin,
+		 bit_arr_t board, position_t *ret_path );
+static bool_t
+ RecKnightsTour(bit_arr_t board,position_t *ret_path,
+		uint8_t x_begin,uint8_t y_begin, uint8_t path_length);
 #ifdef PRINTS
 	/*void PrintArray( heap_t* heap );	*/						
 #endif
@@ -74,13 +79,34 @@ uint8_t Degree( uint8_t x_begin, uint8_t y_begin, bit_arr_t board );
 /********************  KnightsTour  *************************/
 /************************************************************/
 
-int KnightsTour(uint8_t x, uint8_t y, position_t *ret_path)
+int KnightsTour(uint8_t x_begin, uint8_t y_begin, position_t *ret_path)
 {
-	
-	
-	return TRUE;
+	bit_arr_t board = 0;
+	uint8_t path_length = 0; 
+	bool_t res = FALSE;
+
+	res = RecKnightsTour(board, ret_path, x_begin, y_begin, path_length);
+
+	return res;
 }
 
+static bool_t RecKnightsTour(bit_arr_t board,position_t *ret_path,
+	 uint8_t x_begin,uint8_t y_begin, uint8_t path_length)
+{
+	uint8_t move_id = 0, temp_length = path_length + 1;
+
+	ret_path->x = x_begin % BOARD_SIZE;
+	ret_path->y = y_begin % BOARD_SIZE;
+
+	BitArrSetOn(board, ( x_begin * COLUMN_SIZE + y_begin ) % BOARD_SIZE ) ;
+
+	if(BOARD_SIZE == temp_length)
+	{
+		return TRUE;
+	}
+
+	for(move_id = 0; )
+}	 
 
 /************************************************************/
 /*************  Static Functions definition  ****************/
@@ -111,7 +137,8 @@ bool_t IsLegal(uint8_t x, uint8_t y, bit_arr_t board)
 /********************  IsLegal**********************/
 /************************************************************/
 
-uint8_t Degree( uint8_t x_begin, uint8_t y_begin, bit_arr_t board )
+uint8_t Degree( uint8_t x_begin, uint8_t y_begin,
+			 bit_arr_t board, position_t *ret_path )
 {
 	uint8_t degree = 0, move_index = 0;
 	uint8_t next_x = 0, next_y = 0;
@@ -127,6 +154,7 @@ uint8_t Degree( uint8_t x_begin, uint8_t y_begin, bit_arr_t board )
 
 		} 
 	}
+	
 	return degree;
 }
 #ifdef PRINTS
