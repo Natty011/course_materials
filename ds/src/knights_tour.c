@@ -13,6 +13,7 @@
 
 #include "knights_tour.h" 
 #include "bit_array.h" 
+#include "heap_pq.h" 
 
 #define KNIGHT_MOVE_NUM		8
 #define BOARD_LIMIT 		63
@@ -93,11 +94,10 @@ int KnightsTour(uint8_t x_begin, uint8_t y_begin, position_t *ret_path)
 static bool_t RecKnightsTour(bit_arr_t board,position_t *ret_path,
 	 uint8_t x_begin,uint8_t y_begin, uint8_t path_length)
 {
-	uint8_t x_next = 0, y_next = 0, move_index = 0, temp_length = path_length + 1;
+	uint8_t x_next = 0, y_next = 0, move_index = 0, move_index2 = 0,
+	 temp_length = path_length + 1, mx_next = 0, my_next = 0, count = 0;
 	int degree = 9;
-	ret_path->x = x_begin % BOARD_SIZE;
-	ret_path->y = y_begin % BOARD_SIZE;
-
+	
 	BitArrSetOn(board, ( x_begin * COLUMN_SIZE + y_begin ) % BOARD_SIZE ) ;
 
 	if(BOARD_SIZE == temp_length)
@@ -105,20 +105,34 @@ static bool_t RecKnightsTour(bit_arr_t board,position_t *ret_path,
 		return TRUE;
 	}
 
+	
+    // Check all possible moves
 	for(move_index = 0; move_index < KNIGHT_MOVE_NUM; ++move_index)
 	{
-		/*for(count = )*/
+		
+      	// Next moves
+	 	x_next = x_begin + lut_knight_moves[move_index][0];
+		y_next = y_begin + lut_knight_moves[move_index][1];
 			
 		if( !IsLegal(x_next, y_next, board) )
 		{
 			continue;
 
 		}
+        // Check all possible neighbors
+		for(move_index2 = 0; move_index2 < KNIGHT_MOVE_NUM ; ++move_index2)
+		{
+			mx_next = x_next + lut_knight_moves[move_index2][0];
+		    my_next = y_next + lut_knight_moves[move_index2][1];
 
-		x_next = x_begin + lut_knight_moves[move_index][0];
-		y_next = y_begin + lut_knight_moves[move_index][1];
+			if( !IsLegal(mx_next, my_next, board) )
+			{
+				continue;
+			}
+			degree = Degree(mx_next, my_next, board );
 
-		degree = Degree(x_next, y_next, board );
+		}
+			
 
 
 
