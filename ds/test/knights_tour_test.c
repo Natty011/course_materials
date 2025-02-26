@@ -111,8 +111,9 @@ static void TestKnightsTour(void)
 	int flag = FALSE;
 	position_t *ret_path = NULL;
 	uint8_t x_begin = 0, y_begin = 0;
-	ret_path = (position_t*)calloc(STEP_LANGTH, sizeof(position_t) );
 	int result = FALSE; 
+
+	ret_path = (position_t*)calloc(STEP_LANGTH, sizeof(position_t) );
 
 	if (NULL == ret_path )
 	 {
