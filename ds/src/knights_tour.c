@@ -10,10 +10,11 @@
 #endif
 #include <assert.h> 	/* assert */
 #include <stdlib.h> 	/* malloc, free */
+#include "heap_pq.h" 
 
 #include "knights_tour.h" 
 #include "bit_array.h" 
-#include "heap_pq.h" 
+#include "heap.h" 
 
 #define KNIGHT_MOVE_NUM		8
 #define BOARD_LIMIT 		63
@@ -65,7 +66,12 @@ uint8_t Degree( uint8_t x_begin, uint8_t y_begin,
 		 bit_arr_t board); /* , position_t *ret_path  */
 static bool_t
  RecKnightsTour(bit_arr_t board,position_t *ret_path,
-		uint8_t x_begin,uint8_t y_begin, uint8_t path_length);
+		uint8_t x_begin,uint8_t y_begin,
+			 uint8_t path_length, heap_pq_t* heap_pq_min);
+
+static int
+SortingFunc(void* check_data ,void* new_data, void* param);
+
 #ifdef PRINTS
 	/*void PrintArray( heap_t* heap );	*/						
 #endif
@@ -80,36 +86,57 @@ static bool_t
 /********************  KnightsTour  *************************/
 /************************************************************/
 
-int KnightsTour(uint8_t x_begin, uint8_t y_begin, position_t *ret_path)
+int KnightsTour(uint8_t x_begin, uint8_t y_begin,
+				 position_t *ret_path)
 {
 	bit_arr_t board = 0;
 	uint8_t path_length = 0; 
 	bool_t res = FALSE;
+	void *dummy = NULL;
+	
+	heap_pq_t *heap_pq_min = NULL;
 
-	res = RecKnightsTour(board, ret_path, x_begin, y_begin, path_length);
+	heap_pq_min = HeapCreate(&dummy, SortingFunc);
+
+	if(! heap_pq_min )
+	{
+		printf("line: %d \n" , __LINE__ );
+		puts("Failes in_1: Create - Allocation");
+		return FALSE;
+	}
+
+	res = RecKnightsTour(board, ret_path, x_begin,
+		 y_begin, path_length, heap_pq_min);
+
+	HeapPQueueDestroy(heap_pq_min);
+	heap_pq_min = NULL;	
 
 	return res;
 }
 
 static bool_t RecKnightsTour(bit_arr_t board,position_t *ret_path,
-	 uint8_t x_begin,uint8_t y_begin, uint8_t path_length)
+	 uint8_t x_begin,uint8_t y_begin,
+	  uint8_t path_length, heap_pq_t* heap_pq_min )
 {
 	uint8_t x_next = 0, y_next = 0, move_index = 0, move_index2 = 0,
 	 temp_length = path_length + 1, mx_next = 0, my_next = 0, count = 0;
-	int degree = 9;
-	
+	int degree = 0;
+	bool_t result = FALSE;
 	BitArrSetOn(board, ( x_begin * COLUMN_SIZE + y_begin ) % BOARD_SIZE ) ;
+
+	/*
+	HeapPQueueDestroy(heap_pq_degrees);
+	heap_pq_degrees = NULL;
+	*/
 
 	if(BOARD_SIZE == temp_length)
 	{
 		return TRUE;
 	}
 
-	
     // Check all possible moves
 	for(move_index = 0; move_index < KNIGHT_MOVE_NUM; ++move_index)
 	{
-		
       	// Next moves
 	 	x_next = x_begin + lut_knight_moves[move_index][0];
 		y_next = y_begin + lut_knight_moves[move_index][1];
@@ -117,29 +144,31 @@ static bool_t RecKnightsTour(bit_arr_t board,position_t *ret_path,
 		if( !IsLegal(x_next, y_next, board) )
 		{
 			continue;
-
 		}
-        // Check all possible neighbors
-		for(move_index2 = 0; move_index2 < KNIGHT_MOVE_NUM ; ++move_index2)
+
+		degree = Degree(x_next, y_next, board );
+
+		if( 0 != degree )
 		{
-			mx_next = x_next + lut_knight_moves[move_index2][0];
-		    my_next = y_next + lut_knight_moves[move_index2][1];
-
-			if( !IsLegal(mx_next, my_next, board) )
-			{
-				continue;
-			}
-			degree = Degree(mx_next, my_next, board );
-
+			HeapPQueueEnqueue(heap_pq_min, &degree);
 		}
-			
+	}
 
+	if(! HeapPQueueIsEmpty(heap_pq_min ) )
+	{
+		ret_path->x = x_next % BOARD_SIZE;
+		ret_path->y = y_next % BOARD_SIZE;
 
-
+		result = RecKnightsTour(board, ret_path + 1,
+					 x_next, y_next, path_length + 1, heap_pq_min );
 
 	}
-}	 
 
+	BitArrSetOff(board, ( x_begin * COLUMN_SIZE + y_begin ) % BOARD_SIZE ) ;
+	return FALSE;
+
+}	
+	
 /************************************************************/
 /*************  Static Functions definition  ****************/
 /************************************************************/
@@ -189,6 +218,17 @@ uint8_t Degree( uint8_t x_begin, uint8_t y_begin,
 	
 	return degree;
 }
+
+/************************************************************/
+/********************  SortingFunc**********************/
+/************************************************************/
+static int SortingFunc(void* check_data ,void* new_data, void* param)
+{
+	UNUSED(param);
+	return (-1) * (*(int*)check_data - *(int*)new_data);
+}
+
+
 #ifdef PRINTS
 /*
 void PrintArray( heap_t* heap )
@@ -227,8 +267,39 @@ void *GetVectorIndex(heap_t *h, size_t index)
 /************************************************************/
 
 
+// Check all possible neighbors
+		/*
+		for(move_index2 = 0; move_index2 < KNIGHT_MOVE_NUM ; ++move_index2)
+		{
+			mx_next = x_next + lut_knight_moves[move_index2][0];
+		    my_next = y_next + lut_knight_moves[move_index2][1];
+
+			if( !IsLegal(mx_next, my_next, board) )
+			{
+				continue;
+			}
+			
+        	
+			degree = Degree(x_next, y_next, board );
+
+			if( 0 != degree )
+			{
+				HeapPQueueEnqueue(heap_pq_min, &degree);
+			}
+		}
+		*/	
+
+/*
+		ret_path->x = x_begin % BOARD_SIZE;
+		ret_path->y = y_begin % BOARD_SIZE;
+
+	*/		
 
 
+
+
+
+	 
 
 
 
