@@ -14,8 +14,9 @@
 #include "knights_tour.h" 
 #include "bit_array.h" 
 
-#define ELEMENT_SIZE		sizeof(size_t)
-#define CAPACITY 			16
+#define KNIGHT_MOVE_NUM		8
+#define BOARD_LIMIT 		63
+#define COLUMN_SIZE        	8
 
 
 /************************************************************/
@@ -83,6 +84,24 @@ int KnightsTour(uint8_t x, uint8_t y, position_t *ret_path)
 /************************************************************/
 
 
+/************************************************************/
+/********************  IsLegal**********************/
+/************************************************************/
+bool_t InBoard( uint8_t x, uint8_t y )
+{
+	return  0 <= x * COLUMN_SIZE + y &&
+				x * COLUMN_SIZE + y <= BOARD_LIMIT ;
+}
+
+/************************************************************/
+/********************  IsLegal**********************/
+/************************************************************/
+
+
+bool_t IsLegal(uint8_t x, uint8_t y, bit_arr_t board)
+{
+	return InBoard()
+} 
 #ifdef PRINTS
 /*
 void PrintArray( heap_t* heap )
