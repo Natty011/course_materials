@@ -112,6 +112,7 @@ static void TestKnightsTour(void)
 	position_t *ret_path = NULL;
 	uint8_t x_begin = 0, y_begin = 0;
 	ret_path = (position_t*)calloc(STEP_LANGTH, sizeof(position_t) );
+	int result = FALSE; 
 
 	if (NULL == ret_path )
 	 {
@@ -121,8 +122,17 @@ static void TestKnightsTour(void)
 		return;
 	 }
 	
-	 /*KnightsTour(x_begin, y_begin, ret_path);*/
+	 result = KnightsTour(x_begin, y_begin, ret_path);
 	
+	 if (result)
+	 {
+		printf("KnightsTour_Solution found!\n");
+		/*PrintBoard(ret_path);*/
+	 }
+	else
+	{
+		printf("KnightsTour_No solution found!\n");
+	}
 	
 
 	free( ret_path );
