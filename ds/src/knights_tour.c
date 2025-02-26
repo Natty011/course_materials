@@ -17,7 +17,7 @@
 #define KNIGHT_MOVE_NUM		8
 #define BOARD_LIMIT 		63
 #define COLUMN_SIZE        	8
-
+#define UN_VISITED          0
 
 /************************************************************/
 /********************  lut_knight_moves**********************/
@@ -57,8 +57,9 @@ typedef enum
 /******************************************************************************/
 /************************ static functions declartions ************************/
 /******************************************************************************/
-
-
+bool_t InBoard( uint8_t x, uint8_t y );
+bool_t IsLegal(uint8_t x, uint8_t y, bit_arr_t board);
+uint8_t Degree( uint8_t x_begin, uint8_t y_begin, bit_arr_t board );
 #ifdef PRINTS
 	/*void PrintArray( heap_t* heap );	*/						
 #endif
@@ -75,6 +76,8 @@ typedef enum
 
 int KnightsTour(uint8_t x, uint8_t y, position_t *ret_path)
 {
+	
+	
 	return TRUE;
 }
 
@@ -85,7 +88,7 @@ int KnightsTour(uint8_t x, uint8_t y, position_t *ret_path)
 
 
 /************************************************************/
-/********************  IsLegal**********************/
+/*************************  InBoard**************************/
 /************************************************************/
 bool_t InBoard( uint8_t x, uint8_t y )
 {
@@ -100,8 +103,32 @@ bool_t InBoard( uint8_t x, uint8_t y )
 
 bool_t IsLegal(uint8_t x, uint8_t y, bit_arr_t board)
 {
-	return InBoard()
-} 
+	return InBoard(x, y) &&
+		 ( UN_VISITED == BitArrGetVal( board, x * COLUMN_SIZE + y ) );
+}
+
+/************************************************************/
+/********************  IsLegal**********************/
+/************************************************************/
+
+uint8_t Degree( uint8_t x_begin, uint8_t y_begin, bit_arr_t board )
+{
+	uint8_t degree = 0, move_index = 0;
+	uint8_t next_x = 0, next_y = 0;
+
+	for(move_index = 0; move_index < KNIGHT_MOVE_NUM; ++move_index)
+	{
+		next_x = x_begin + lut_knight_moves[move_index][0];
+		next_y = y_begin + lut_knight_moves[move_index][1];
+ 
+		if( IsLegal(next_x, next_y, board) ) 
+		{
+			++degree ;
+
+		} 
+	}
+	return degree;
+}
 #ifdef PRINTS
 /*
 void PrintArray( heap_t* heap )
