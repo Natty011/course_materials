@@ -95,7 +95,6 @@ int KnightsTour(uint8_t x_begin, uint8_t y_begin,
 	bit_arr_t board = 0;
 	uint8_t path_length = 0; 
 	op_result_t res = FALSE;
-	void *dummy = NULL;
 	
 	heap_pq_t *heap_pq_min = NULL;
 
@@ -131,10 +130,12 @@ static op_result_t RecKnightsTour(bit_arr_t board,position_t *ret_path,
 	 uint8_t x_begin,uint8_t y_begin,
 	  uint8_t path_length, heap_pq_t* heap_pq_min )
 {
-	uint8_t x_next = 0, y_next = 0, move_index = 0, move_index2 = 0,
-	 temp_length = path_length + 1, mx_next = 0, my_next = 0, count = 0;
+	uint8_t x_next = 0, y_next = 0, move_index = 0, 
+	 		temp_length = path_length + 1 ;
+	 /*mx_next = 0, my_next = 0, count = 0,  move_index2 = 0,*/
 	int degree = 0;
 	op_result_t result = FALSE;
+
 	BitArrSetOn(board, ( x_begin * COLUMN_SIZE + y_begin ) % BOARD_SIZE ) ;
 
 	/*
@@ -264,7 +265,7 @@ void PrintBoard(position_t *ret_path)
 	while( index <= BOARD_LIMIT )
 	{
 		printf("index = %ld \n", index);
-		printf("x = %ld, y = %ld \n", ret_path->x, ret_path->y );
+		printf("x = %d, y = %d \n", ret_path->x, ret_path->y );
 		++index;
 	}
 }
