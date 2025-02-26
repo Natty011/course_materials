@@ -113,7 +113,7 @@ int KnightsTour(uint8_t x_begin, uint8_t y_begin,
 	 if (res)
 	 {
 		printf("Solution found!\n");
-		PrintBoard(ret_path);
+		/*PrintBoard(ret_path);*/
 	 }
 	else
 	{
@@ -165,11 +165,14 @@ static op_result_t RecKnightsTour(bit_arr_t board,position_t *ret_path,
 
 			if( 0 != degree )
 			{
+				printf("degree = %d \n ", degree);
 				HeapPQueueEnqueue(heap_pq_min, &degree);
 			}
 
 			if(! HeapPQueueIsEmpty(heap_pq_min ) )
 			{
+				printf("move_index = %u, ",move_index );
+				printf("x = %d, y = %d \n", ret_path->x, ret_path->y );
 				result = RecKnightsTour(board, ret_path + 1,
 					ret_path->x, ret_path->y, path_length + 1, heap_pq_min );
 			
