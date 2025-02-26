@@ -132,16 +132,20 @@ static op_result_t RecKnightsTour(bit_arr_t board,position_t *ret_path,
 {
 	uint8_t x_next = 0, y_next = 0, move_index = 0, move_index2 = 0,
 	 			temp_length = path_length + 1 ;
+	bit_arr_t bit_set_on = 0;			
 	 /*mx_next = 0, my_next = 0, count = 0,  move_index2 = 0,*/
 	int degree = 0;
 	op_result_t result = FALSE;
 
 	printf("temp_length = %u, ",temp_length );
 	printf("x_begin = %d, y_begin = %d \n", x_begin, y_begin );
-	printf("board_before = %lu \n", board);
 
-	BitArrSetOn(board, ( x_begin * COLUMN_SIZE + y_begin ) % BOARD_SIZE ) ;
-	printf("board_after = %lu \n", board);
+	printf(" board_before_SetOn = %#lx \n", board);
+
+	bit_set_on = BitArrSetOn(board, ( x_begin * COLUMN_SIZE + y_begin ) % BOARD_SIZE ) ;
+	printf(" BitArrSetOn = %#lx \n", bit_set_on);
+
+	/*printf("board_after = %lu \n", board);*/
 	/*
 	HeapPQueueDestroy(heap_pq_degrees);
 	heap_pq_degrees = NULL;
