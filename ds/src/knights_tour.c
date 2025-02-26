@@ -73,9 +73,7 @@ static int
 SortingFunc(void* check_data ,void* new_data, void* param);
 
 #ifdef PRINTS
-	/*void PrintArray( heap_t* heap );	*/	
-	PrintBoard(position_t *ret_path);
-					
+	void PrintBoard(position_t *ret_path)
 #endif
 
 /******************************************************************************/
@@ -252,10 +250,9 @@ void PrintBoard(position_t *ret_path)
 
 	while( index <= BOARD_LIMIT )
 	{
-		element = *(void**)VectorGetAccess(heap->vector, size );
 		printf("index = %ld \n", index);
 		printf("x = %ld, y = %ld \n", ret_path->x, ret_path->y );
-			++index;
+		++index;
 	}
 }
 
