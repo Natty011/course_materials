@@ -61,7 +61,7 @@ typedef enum
 bool_t InBoard( uint8_t x, uint8_t y );
 bool_t IsLegal(uint8_t x, uint8_t y, bit_arr_t board);
 uint8_t Degree( uint8_t x_begin, uint8_t y_begin,
-		 bit_arr_t board, position_t *ret_path );
+		 bit_arr_t board); /* , position_t *ret_path  */
 static bool_t
  RecKnightsTour(bit_arr_t board,position_t *ret_path,
 		uint8_t x_begin,uint8_t y_begin, uint8_t path_length);
@@ -93,8 +93,8 @@ int KnightsTour(uint8_t x_begin, uint8_t y_begin, position_t *ret_path)
 static bool_t RecKnightsTour(bit_arr_t board,position_t *ret_path,
 	 uint8_t x_begin,uint8_t y_begin, uint8_t path_length)
 {
-	uint8_t move_id = 0, temp_length = path_length + 1;
-
+	uint8_t x_next = 0, y_next = 0, move_index = 0, temp_length = path_length + 1;
+	int degree = 9;
 	ret_path->x = x_begin % BOARD_SIZE;
 	ret_path->y = y_begin % BOARD_SIZE;
 
@@ -105,7 +105,25 @@ static bool_t RecKnightsTour(bit_arr_t board,position_t *ret_path,
 		return TRUE;
 	}
 
-	for(move_id = 0; )
+	for(move_index = 0; move_index < KNIGHT_MOVE_NUM; ++move_index)
+	{
+		/*for(count = )*/
+			
+		if( !IsLegal(x_next, y_next, board) )
+		{
+			continue;
+
+		}
+
+		x_next = x_begin + lut_knight_moves[move_index][0];
+		y_next = y_begin + lut_knight_moves[move_index][1];
+
+		degree = Degree(x_next, y_next, board );
+
+
+
+
+	}
 }	 
 
 /************************************************************/
@@ -130,7 +148,7 @@ bool_t InBoard( uint8_t x, uint8_t y )
 bool_t IsLegal(uint8_t x, uint8_t y, bit_arr_t board)
 {
 	return InBoard(x, y) &&
-		 ( UN_VISITED == BitArrGetVal( board, x * COLUMN_SIZE + y ) );
+		 ( UN_VISITED == BitArrGetVal( board, (x * COLUMN_SIZE + y )% BOARD_LIMIT) );
 }
 
 /************************************************************/
@@ -138,7 +156,7 @@ bool_t IsLegal(uint8_t x, uint8_t y, bit_arr_t board)
 /************************************************************/
 
 uint8_t Degree( uint8_t x_begin, uint8_t y_begin,
-			 bit_arr_t board, position_t *ret_path )
+			 bit_arr_t board ) /* , position_t *ret_path*/
 {
 	uint8_t degree = 0, move_index = 0;
 	uint8_t next_x = 0, next_y = 0;
