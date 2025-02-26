@@ -63,7 +63,7 @@ typedef enum
 bool_t InBoard( uint8_t x, uint8_t y );
 bool_t IsLegal(uint8_t x, uint8_t y, bit_arr_t board);
 uint8_t Degree( uint8_t x_begin, uint8_t y_begin,
-		 bit_arr_t board); /* , position_t *ret_path  */
+		 bit_arr_t board,  position_t *ret_path); /* , position_t *ret_path  */
 static bool_t
  RecKnightsTour(bit_arr_t board,position_t *ret_path,
 		uint8_t x_begin,uint8_t y_begin,
@@ -144,35 +144,45 @@ static bool_t RecKnightsTour(bit_arr_t board,position_t *ret_path,
 		return TRUE;
 	}
 
-    // Check all possible moves
-	for(move_index = 0; move_index < KNIGHT_MOVE_NUM; ++move_index)
-	{
-      	// Next moves
-	 	x_next = x_begin + lut_knight_moves[move_index][0];
-		y_next = y_begin + lut_knight_moves[move_index][1];
+	
+		// Check all possible moves
+		for(move_index = 0; move_index < KNIGHT_MOVE_NUM; ++move_index)
+		{
+			// Next moves
+			x_next = x_begin + lut_knight_moves[move_index][0];
+			y_next = y_begin + lut_knight_moves[move_index][1];
+				
+			if( !IsLegal(x_next, y_next, board) )
+			{
+				continue;
+			}
+
+			degree = Degree(x_next, y_next, board, ret_path );
+
+			if( 0 != degree )
+			{
+				HeapPQueueEnqueue(heap_pq_min, &degree);
+			}
+
+			if(! HeapPQueueIsEmpty(heap_pq_min ) )
+			{
+				ret_path->x = x_next % BOARD_SIZE;
+				ret_path->y = y_next % BOARD_SIZE;
+
+				result = RecKnightsTour(board, ret_path + 1,
+							x_next, y_next, path_length + 1, heap_pq_min );
 			
-		if( !IsLegal(x_next, y_next, board) )
-		{
-			continue;
+				if(TRUE == result )
+				{
+					return TRUE;
+				}			 
+				else if(! HeapPQueueIsEmpty(heap_pq_min ) ) /* result == FAIL */
+				{
+					HeapPQueueDequeue(heap_pq_min);
+				}
+
+			}
 		}
-
-		degree = Degree(x_next, y_next, board );
-
-		if( 0 != degree )
-		{
-			HeapPQueueEnqueue(heap_pq_min, &degree);
-		}
-	}
-
-	if(! HeapPQueueIsEmpty(heap_pq_min ) )
-	{
-		ret_path->x = x_next % BOARD_SIZE;
-		ret_path->y = y_next % BOARD_SIZE;
-
-		result = RecKnightsTour(board, ret_path + 1,
-					 x_next, y_next, path_length + 1, heap_pq_min );
-
-	}
 
 	BitArrSetOff(board, ( x_begin * COLUMN_SIZE + y_begin ) % BOARD_SIZE ) ;
 
@@ -211,7 +221,7 @@ bool_t IsLegal(uint8_t x, uint8_t y, bit_arr_t board)
 /************************************************************/
 
 uint8_t Degree( uint8_t x_begin, uint8_t y_begin,
-			 bit_arr_t board ) /* , position_t *ret_path*/
+			 bit_arr_t board, position_t *ret_path ) /* , position_t *ret_path*/
 {
 	uint8_t degree = 0, move_index = 0;
 	uint8_t next_x = 0, next_y = 0;
@@ -226,6 +236,9 @@ uint8_t Degree( uint8_t x_begin, uint8_t y_begin,
 			++degree ;
 		} 
 	}
+
+	ret_path->x = x_begin;
+	ret_path->y = y_begin;
 	
 	return degree;
 }
