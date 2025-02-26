@@ -166,11 +166,8 @@ static bool_t RecKnightsTour(bit_arr_t board,position_t *ret_path,
 
 			if(! HeapPQueueIsEmpty(heap_pq_min ) )
 			{
-				ret_path->x = x_next % BOARD_SIZE;
-				ret_path->y = y_next % BOARD_SIZE;
-
 				result = RecKnightsTour(board, ret_path + 1,
-							x_next, y_next, path_length + 1, heap_pq_min );
+					ret_path->x, ret_path->y, path_length + 1, heap_pq_min );
 			
 				if(TRUE == result )
 				{
@@ -237,8 +234,8 @@ uint8_t Degree( uint8_t x_begin, uint8_t y_begin,
 		} 
 	}
 
-	ret_path->x = x_begin;
-	ret_path->y = y_begin;
+	ret_path->x = x_begin % BOARD_SIZE;
+	ret_path->y = y_begin % BOARD_SIZE;
 	
 	return degree;
 }
@@ -301,6 +298,9 @@ void PrintBoard(position_t *ret_path)
 /*
 		ret_path->x = x_begin % BOARD_SIZE;
 		ret_path->y = y_begin % BOARD_SIZE;
+
+		ret_path->x = x_next % BOARD_SIZE;
+		ret_path->y = y_next % BOARD_SIZE;
 
 	*/		
 
