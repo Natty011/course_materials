@@ -178,8 +178,11 @@ static op_result_t RecKnightsTour(bit_arr_t board,position_t *ret_path,
 	
 			if( !IsLegal(x_next, y_next, board) )
 			{
+			printf("NOT_LEGAL = { x_next , y_next } = {%d, %d} \n", x_next, y_next );
+
 				continue;
 			}
+			printf("LEGAL = { x_next , y_next } = {%d, %d} \n", x_next, y_next );
 
 			degree = Degree(x_next, y_next, board, ret_path );
 
