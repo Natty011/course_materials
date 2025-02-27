@@ -22,7 +22,7 @@
 #define KNIGHT_MOVE_NUM		8
 #define BOARD_LIMIT 		63
 #define COLUMN_SIZE        	8
-#define BOARD_SIZE 			BOARD_LIMIT + 1	
+#define BOARD_SIZE 			 64 
 #define UN_VISITED          0
 
 /************************************************************/
@@ -106,7 +106,7 @@ int KnightsTour(uint8_t x_begin, uint8_t y_begin,
 		puts("Failes in_1: Create - Allocation");
 		return FALSE;
 	}
-
+	board = BitArrResetAll(board);
 	res = RecKnightsTour(board, ret_path, x_begin,
 		 y_begin, path_length, heap_pq_min);
 
@@ -131,29 +131,33 @@ static op_result_t RecKnightsTour(bit_arr_t board,position_t *ret_path,
 	  uint8_t path_length, heap_pq_t* heap_pq_min )
 {
 	uint8_t x_next = 0, y_next = 0, move_index = 0, move_index2 = 0,
-	 			temp_length = path_length + 1 ;
+	 			temp_length = path_length + 1 ,colum_size =  COLUMN_SIZE;
 	bit_arr_t bit_set_on = 0, bit_set_off = 0;			
 	 /*mx_next = 0, my_next = 0, count = 0,  move_index2 = 0,*/
 	int degree = 0;
 	op_result_t result = FALSE;
 
-	printf("temp_length = %u, ",temp_length );
-	printf("x_begin = %d, y_begin = %d \n", x_begin, y_begin );
+	printf("temp_length = %u, \n",temp_length );
+	printf("{ x_begin , y_begin } = {%d, %d} \n", x_begin, y_begin );
 
 	printf(" board_before_SetOn = %#lx \n", board);
+	printf(" x_begin * COLUMN_SIZE + y_begin = %d \n",
+		  (x_begin * COLUMN_SIZE + y_begin) );
 
-	bit_set_on = BitArrSetOn(board, ( x_begin * COLUMN_SIZE + y_begin ) % BOARD_SIZE ) ;
+	printf(" (x_begin * COLUMN_SIZE + y_begin) mode BOARD_SIZE = %ld \n", (size_t)(x_begin * colum_size + y_begin) % BOARD_SIZE);
+
+	bit_set_on = BitArrSetOn(board, 
+			( x_begin * COLUMN_SIZE + y_begin ) % BOARD_SIZE) ;
 	board = bit_set_on;
 	printf(" BitArrSetOn = %#lx \n", bit_set_on);
 	printf(" BitArrSetOn_board = %#lx \n", board);
 
-	/*printf("board_after = %lu \n", board);*/
 	/*
 	HeapPQueueDestroy(heap_pq_degrees);
 	heap_pq_degrees = NULL;
 	*/
 
-	if(BOARD_SIZE == temp_length)
+	if(2 == temp_length ) /* BOARD_SIZE == temp_length */
 	{
 		return TRUE;
 	}
@@ -161,15 +165,17 @@ static op_result_t RecKnightsTour(bit_arr_t board,position_t *ret_path,
 	
 	for(move_index2 = 0; move_index2 < KNIGHT_MOVE_NUM; ++move_index2 )
 	{
-	/*Check all possible moves */ 
+		printf("move_index2 = %u \n",move_index2 );
+		/*Check all possible moves */ 
 		for(move_index = 0; move_index < KNIGHT_MOVE_NUM; ++move_index)
 		{
 			/* Next moves */
-			printf("move_index = %u, ",move_index );
+			printf("move_index = %u \n",move_index );
 
 			x_next = x_begin + lut_knight_moves[move_index][0];
 			y_next = y_begin + lut_knight_moves[move_index][1];
-				
+			printf("{ x_next , y_next } = {%d, %d} \n", x_next, y_next );
+	
 			if( !IsLegal(x_next, y_next, board) )
 			{
 				continue;
@@ -186,9 +192,9 @@ static op_result_t RecKnightsTour(bit_arr_t board,position_t *ret_path,
 
 		if(! HeapPQueueIsEmpty(heap_pq_min ) )
 			{
-				printf("move_index2 = %u, ",move_index2 );
-				printf("ret_path->x = %d, ret_path->y = %d \n", \
+				printf("{ ret_path->x , ret_path->y } = {%d, %d} \n", \
 						 ret_path->x, ret_path->y );
+
 				/*BitArrSetOn(board, ( x_begin * COLUMN_SIZE + y_begin ) % BOARD_SIZE ) ;*/
 				printf("board_after_loop1 = %lu \n", board);
 
@@ -228,8 +234,8 @@ static op_result_t RecKnightsTour(bit_arr_t board,position_t *ret_path,
 /************************************************************/
 op_result_t InBoard( uint8_t x, uint8_t y )
 {
-	return  0 <= x * COLUMN_SIZE + y &&
-				x * COLUMN_SIZE + y <= BOARD_LIMIT ;
+	return  0 <= (x * COLUMN_SIZE + y )&&
+				(x * COLUMN_SIZE + y) < BOARD_SIZE ;
 }
 
 /************************************************************/
@@ -241,7 +247,7 @@ op_result_t IsLegal(uint8_t x, uint8_t y, bit_arr_t board)
 {
 	return InBoard(x, y) &&
 		 ( UN_VISITED == BitArrGetVal( board,
-					 (x * COLUMN_SIZE + y )% BOARD_LIMIT) );
+					 (x * COLUMN_SIZE + y )% BOARD_SIZE) );
 }
 
 /************************************************************/
@@ -289,7 +295,7 @@ void PrintBoard(position_t *ret_path)
 
 	printf("return_path[] = \n" );
 
-	while( index <= BOARD_LIMIT )
+	while( index < BOARD_SIZE )
 	{
 		printf("index = %ld \n", index);
 		printf("x = %d, y = %d \n", ret_path->x, ret_path->y );
