@@ -79,7 +79,7 @@ static op_result_t
  RecKnightsTour(bit_arr_t board,position_t *ret_path,
 				uint8_t x_begin,uint8_t y_begin,
 			 		uint8_t path_length, heap_pq_t* heap_pq_min,
-			 			  	 position_t *adjacent_ret_path);
+					 position_degree_t *adjacent_ret_path);
 
 static int
 SortingFunc(void* check_data ,void* new_data, void* param);
@@ -108,7 +108,7 @@ int KnightsTour(uint8_t x_begin, uint8_t y_begin,
 
 	heap_pq_t *heap_pq_min = NULL;
 	
-	heap_pq_t *heap_pq_min = HeapPQueueCreate(SortingFunc);
+	heap_pq_min = HeapPQueueCreate(SortingFunc);
 	
 	if(! heap_pq_min )
 	{
@@ -168,7 +168,7 @@ static op_result_t RecKnightsTour(bit_arr_t board,position_t *ret_path,
 	 			temp_length = path_length + 1 ;
 	bit_arr_t bit_set_on = 0, bit_set_off = 0;			
 	 /*mx_next = 0, my_next = 0, count = 0,  move_index2 = 0,*/
-	int degree = 0, min = 9;
+	int degree = 0; /* , min = 9 */
 	op_result_t result = FALSE;
 
 	printf("temp_length = %u, \n",temp_length );
@@ -223,11 +223,31 @@ static op_result_t RecKnightsTour(bit_arr_t board,position_t *ret_path,
 
 			if( 0 != degree )
 			{
-				adjacent_ret_path->degree_pos = degree;
-				adjacent_ret_path->move_next = move_index;
+				
+				(adjacent_ret_path + move_index)->degree_pos = degree;
+				(adjacent_ret_path + move_index)->move_next = move_index;
 				
 				printf("degree = %d \n ", degree);
-				HeapPQueueEnqueue(heap_pq_min, &degree);
+				HeapPQueueEnqueue(heap_pq_min, adjacent_ret_path + move_index);
+
+				printf("HeapPQueueSize(heap_pq_min) = %lu \n",
+					HeapPQueueSize(heap_pq_min) );
+		  		printf("(adjacent_ret_path + move_index)->degree_pos = %d \n",  \
+					(adjacent_ret_path + move_index)->degree_pos);
+
+				printf("(adjacent_ret_path + move_index)->move_next  = %d \n",  \
+					(adjacent_ret_path + move_index)->move_next = move_index);
+				/*	
+					printf("{ temp_mange_tour->ret_path->x , \
+					 temp_mange_tour->ret_path->y } = {%d, %d} \n", \
+					mange_tour.ret_path->x, mange_tour.ret_path->y );
+				*/
+					
+					/*
+					printf("{ mange_tour->ret_path->x , \
+					   mange_tour->ret_path->y } = {%d, %d} \n", \
+					  mange_tour.ret_path->x, mange_tour.ret_path->y );
+					  */		
 			}
 		}
 
@@ -329,9 +349,13 @@ uint8_t Degree( uint8_t x_begin, uint8_t y_begin,
 static int SortingFunc(void* check_data ,void* new_data, void* param)
 {
 	UNUSED(param);
-	return (-1) * (*(int*)check_data - *(int*)new_data);
+	return (-1) * ((( (position_degree_t*)check_data)->degree_pos) -
+							 (((position_degree_t*)new_data)->degree_pos) );
 }
 
+
+						
+/* return (-1) * (*(int*)check_data - *(int*)new_data); */							 
 
 #ifdef PRINTS
 
