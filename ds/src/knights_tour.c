@@ -73,14 +73,14 @@ typedef struct position_degree
 /******************************************************************************/
 /************************ static functions declartions ************************/
 /******************************************************************************/
-op_result_t InBoard( uint8_t x, uint8_t y );
-op_result_t IsLegal(uint8_t x, uint8_t y,  int board_mat[8][8]);
-uint8_t Degree( uint8_t x_begin, uint8_t y_begin,
+op_result_t InBoard( int x, int y );
+op_result_t IsLegal(int x, int y,  int board_mat[8][8]);
+uint8_t Degree( int x_begin, int y_begin,
 					int board_mat[8][8]); 
 static op_result_t
  RecKnightsTour(bit_arr_t board,position_t *ret_path,
-				uint8_t x_begin,uint8_t y_begin,
-			 		uint8_t path_length, heap_pq_t* heap_pq_min,
+					int x_begin,int y_begin,
+					int path_length, heap_pq_t* heap_pq_min,
 					 position_degree_t *adjacent_ret_path, int board_mat[8][8]);
 
 static int
@@ -101,11 +101,11 @@ SortingFunc(void* check_data ,void* new_data, void* param);
 /********************  KnightsTour  *************************/
 /************************************************************/
 
-int KnightsTour(uint8_t x_begin, uint8_t y_begin,
+int KnightsTour(int x_begin, int y_begin,
 				 position_t *ret_path)
 {
 	bit_arr_t board = 0;
-	uint8_t path_length = 0; 
+	int path_length = 0; 
 	op_result_t res = FALSE;
 	position_degree_t *adjacent_ret_path = NULL;
 
@@ -173,20 +173,19 @@ int KnightsTour(uint8_t x_begin, uint8_t y_begin,
 /************************************************************/
 
 static op_result_t RecKnightsTour(bit_arr_t board, position_t *ret_path_handler,
-			 uint8_t x_begin,uint8_t y_begin, uint8_t path_length,
+			 int x_begin,int y_begin, int path_length,
 		 	 heap_pq_t* heap_pq_min, position_degree_t *adjacent_ret_path,
 			  int board_mat[8][8] )
 {
-	uint8_t x_next = 0, y_next = 0, move_index = 0, move_index2 = 0,
-	 			temp_length = path_length + 1 ;
-	bit_arr_t bit_set_on = 0, bit_set_off = 0;			
+	uint8_t x_next = 0, y_next = 0, move_index = 0;
+	/*bit_arr_t bit_set_on = 0, bit_set_off = 0;	*/		
 
-	int degree = 0; 
+	/*int degree = 0; */
 	op_result_t result = FALSE;
-	position_degree_t *neighbor = NULL;	
-	board_mat[x_begin][y_begin] = temp_length;
+	/*position_degree_t *neighbor = NULL;	*/
+	board_mat[x_begin][y_begin] = path_length + 1;
 	
-	printf("temp_length = %u, \n",temp_length );
+	printf("path_length + 1 = %u, \n",path_length + 1 );
 	
 	printf("{ x_begin , y_begin } = {%d, %d} \n", x_begin, y_begin );
 /*
@@ -198,24 +197,19 @@ static op_result_t RecKnightsTour(bit_arr_t board, position_t *ret_path_handler,
 		(x_begin +( COLUMN_SIZE * y_begin ) ) % BOARD_SIZE);
 	*/
 
-	if(BOARD_SIZE == temp_length ) /* BOARD_SIZE == temp_length */
+	if( ( 45 )== board_mat[x_begin][y_begin] ) 
 	{
-		
 		return TRUE;
 	}
 
-	for(move_index2 = 0; move_index2 < LIMIT_NUM; ++move_index2 )
-	{
-		HeapPQueueClear(heap_pq_min);
-		printf("move_index2 = %u \n",move_index2 );
 		/*Check all possible moves */ 
 		for(move_index = 0; move_index < LIMIT_NUM; ++move_index)
 		{
 			/* Next moves */
 			printf("move_index = %u \n",move_index );
 
-			x_next = (x_begin + lut_knight_moves[move_index][0]) % LIMIT_NUM;
-			y_next = (y_begin + lut_knight_moves[move_index][1] )% LIMIT_NUM;
+			x_next = (x_begin + lut_knight_moves[move_index][0]) ;
+			y_next = (y_begin + lut_knight_moves[move_index][1] );
 	
 			if( !IsLegal(x_next, y_next, board_mat) )
 			{
@@ -225,75 +219,20 @@ static op_result_t RecKnightsTour(bit_arr_t board, position_t *ret_path_handler,
 			}
 			printf("LEGAL = { x_next , y_next } = {%d, %d} \n", x_next, y_next );
 
-			degree = Degree(x_next, y_next, board_mat );
-
-			if( 0 != degree )
+			result = RecKnightsTour(board, ret_path_handler + 1,
+				x_next, y_next, path_length + 1,
+						 heap_pq_min, adjacent_ret_path, board_mat );
+				
+			if(TRUE == result )
 			{
-				
-				(adjacent_ret_path + move_index)->degree_pos = degree;
-				(adjacent_ret_path + move_index)->move_next = move_index;
-
-				HeapPQueueEnqueue(heap_pq_min, adjacent_ret_path + move_index);
-
-				
-				printf("degree = %d \n ", degree);
-
-				printf("HeapPQueueSize(heap_pq_min) = %lu \n",
-					HeapPQueueSize(heap_pq_min) );
-		  		printf("(adjacent_ret_path + move_index)->degree_pos = %d \n",  \
-					(adjacent_ret_path + move_index)->degree_pos);
-
-				printf("(adjacent_ret_path + move_index)->move_next  = %d \n",  \
-					(adjacent_ret_path + move_index)->move_next);
-
-				
-			
+				return TRUE;
 			}
+
+			/*board_mat[x_next][y_next] = 0;*/
+
+		
 		}
 
-			if(! HeapPQueueIsEmpty(heap_pq_min ) )
-			{
-				
-			 neighbor = HeapPQueueDequeue(heap_pq_min);
-
-			 x_next = (x_begin + lut_knight_moves[neighbor->move_next][0]) % LIMIT_NUM;
-			 y_next = (y_begin + lut_knight_moves[neighbor->move_next][1]) % LIMIT_NUM;
-			 			 
-			 printf("{ x_next_not_empty , y_next_not_empty } = \
-					{%d, %d} \n", x_next, y_next );
-
-				
-				printf("board_after_loop1 = %lx \n", board);
-
-				result = RecKnightsTour(board, ret_path_handler + 1,
-					x_next, y_next, path_length + 1,
-							 heap_pq_min, adjacent_ret_path, board_mat );
-					
-				if(TRUE == result )
-				{
-					return TRUE;
-				}
-				/*
-				board = BitArrSetOff(board, ( x_next + ( COLUMN_SIZE * y_next ) ) % BOARD_SIZE) ;
-				*/
-				/*
-				else if(! HeapPQueueIsEmpty(heap_pq_min ) )
-				{
-					puts("HeapPQueueDequeue");
-					HeapPQueueDequeue(heap_pq_min);
-				}
-				*/
-
-			}
-	}	
-/*
-	bit_set_off = BitArrSetOff(board, ( x_begin + ( COLUMN_SIZE * y_begin ) ) % BOARD_SIZE) ;
-	board = bit_set_off;
-*/
-/*
-	printf(" BitArrSetOff = %#lx \n", bit_set_off);
-	printf(" BitArrSetOff_board = %#lx \n", board);
-*/
 	board_mat[x_begin][y_begin] = 0;
 
 	return FALSE;
@@ -308,7 +247,7 @@ static op_result_t RecKnightsTour(bit_arr_t board, position_t *ret_path_handler,
 /************************************************************/
 /*************************  InBoard**************************/
 /************************************************************/
-op_result_t InBoard( uint8_t x, uint8_t y )
+op_result_t InBoard( int x, int y )
 {
 	return  (0 <= x && x< LIMIT_NUM ) &&
 				(0 <= y && y < LIMIT_NUM ) ;
@@ -319,7 +258,7 @@ op_result_t InBoard( uint8_t x, uint8_t y )
 /************************************************************/
 
 
-op_result_t IsLegal(uint8_t x, uint8_t y, int board_mat[8][8])
+op_result_t IsLegal(int x, int y, int board_mat[8][8])
 {
 	return InBoard(x, y) &&
 		 ( UN_VISITED == board_mat[x][ y ] ) ;
@@ -328,11 +267,11 @@ op_result_t IsLegal(uint8_t x, uint8_t y, int board_mat[8][8])
 /********************  IsLegal**********************/
 /************************************************************/
 
-uint8_t Degree( uint8_t x_begin, uint8_t y_begin,
+uint8_t Degree( int x_begin, int y_begin,
 						 int board_mat[8][8]) 
 {
-	uint8_t degree = 0, move_index = 0;
-	uint8_t next_x = 0, next_y = 0;
+	int degree = 0, move_index = 0;
+	int next_x = 0, next_y = 0;
 
 	for(move_index = 0; move_index < KNIGHT_MOVE_NUM; ++move_index)
 	{
@@ -380,14 +319,14 @@ void PrintBoard(position_t *ret_path)
 
 void PrintBoardMat( int board_mat[8][8])
 {
-	size_t i = 0 ;
-	size_t j = 0;
+	int i = 0 ;
+	int j = 0;
 
 	for(i = 0; i < KNIGHT_MOVE_NUM ; ++i)
 	{
 		for(j = 0; j < KNIGHT_MOVE_NUM; ++j)
 		{
-			printf("%d ", board_mat[i][j]);
+			printf("%5d ", board_mat[i][j]);
 		}
 
 		printf("\n");
