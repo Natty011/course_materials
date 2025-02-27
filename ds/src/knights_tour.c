@@ -198,7 +198,7 @@ static op_result_t RecKnightsTour(bit_arr_t board, position_t *ret_path_handler,
 		(x_begin +( COLUMN_SIZE * y_begin ) ) % BOARD_SIZE);
 	*/
 
-	if( ( 46 )== board_mat[x_begin][y_begin] ) 
+	if( ( 50 )== board_mat[x_begin][y_begin] ) 
 	{
 		return TRUE;
 	}
