@@ -107,7 +107,8 @@ int KnightsTour(uint8_t x_begin, uint8_t y_begin,
 	position_degree_t *adjacent_ret_path = NULL;
 
 	heap_pq_t *heap_pq_min = NULL;
-	
+	position_t *ret_path_handler = ret_path;
+
 	heap_pq_min = HeapPQueueCreate(SortingFunc);
 	
 	if(! heap_pq_min )
@@ -138,7 +139,7 @@ int KnightsTour(uint8_t x_begin, uint8_t y_begin,
 	ret_path->y = x_begin;
 	*/
 	printf("{ x_begin , x_begin } = {%d, %d} \n", x_begin, x_begin );
-	res = RecKnightsTour(board, ret_path, x_begin,
+	res = RecKnightsTour(board, ret_path_handler, x_begin,
 		 y_begin, path_length, heap_pq_min, adjacent_ret_path);
 
 	 if (res)
@@ -164,7 +165,7 @@ int KnightsTour(uint8_t x_begin, uint8_t y_begin,
 /********************  RecKnightsTour  *************************/
 /************************************************************/
 
-static op_result_t RecKnightsTour(bit_arr_t board, position_t *ret_path,
+static op_result_t RecKnightsTour(bit_arr_t board, position_t *ret_path_handler,
 			 uint8_t x_begin,uint8_t y_begin, uint8_t path_length,
 		 	 heap_pq_t* heap_pq_min, position_degree_t *adjacent_ret_path )
 {
@@ -175,7 +176,6 @@ static op_result_t RecKnightsTour(bit_arr_t board, position_t *ret_path,
 	int degree = 0; /* , min = 9 */
 	op_result_t result = FALSE;
 	position_degree_t *neighbor = NULL;	
-	/*position_t *ret_path_handler = NULL;*/
 
 	printf("temp_length = %u, \n",temp_length );
 	printf("{ x_begin , y_begin } = {%d, %d} \n", x_begin, y_begin );
@@ -198,17 +198,16 @@ static op_result_t RecKnightsTour(bit_arr_t board, position_t *ret_path,
 	HeapPQueueDestroy(heap_pq_degrees);
 	heap_pq_degrees = NULL;
 	*/
-	/*	
-	ret_path->x = x_begin;
-	ret_path->y = y_begin;
-	*/
-	printf("{ ret_path->x , ret_path->y } = {%d, %d} \n", \
-						 ret_path->x, ret_path->y );
+	
+	ret_path_handler->x = x_begin;
+	ret_path_handler->y = y_begin;
+	
+	printf("{ ret_path_handler->x , ret_path_handler->y } = {%d, %d} \n", \
+		ret_path_handler->x, ret_path_handler->y );
 						 
-	if(25 == temp_length ) /* BOARD_SIZE == temp_length */
+	if(2 == temp_length ) /* BOARD_SIZE == temp_length */
 	{
-		ret_path->x = x_begin;
-		ret_path->y = y_begin;
+		
 		return TRUE;
 	}
 
@@ -274,10 +273,7 @@ static op_result_t RecKnightsTour(bit_arr_t board, position_t *ret_path,
 
 			 x_next = x_begin + lut_knight_moves[neighbor->move_next][0];
 			 y_next = y_begin + lut_knight_moves[neighbor->move_next][1];
-			 /*
-			 ret_path->x = x_begin;
-			 ret_path->y = y_begin;
-			 */
+			 			 
 			 printf("{ x_next , y_next } = {%d, %d} \n", x_next, y_next );
 
 				
@@ -285,15 +281,13 @@ static op_result_t RecKnightsTour(bit_arr_t board, position_t *ret_path,
 				/*BitArrSetOn(board, ( x_begin * COLUMN_SIZE + y_begin ) % BOARD_SIZE ) ;*/
 				printf("board_after_loop1 = %lx \n", board);
 
-				result = RecKnightsTour(board, ret_path + 1,
+				result = RecKnightsTour(board, ret_path_handler + 2,
 					x_next, y_next, path_length + 1,
 							 heap_pq_min, adjacent_ret_path );
 					
 				if(TRUE == result )
 				{
-					ret_path->x = x_next;
-					ret_path->y = y_next;
-					/*ret_path  -= 2;*/
+		
 					return TRUE;
 				}
 				/*
