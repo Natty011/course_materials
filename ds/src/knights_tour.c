@@ -132,7 +132,7 @@ static op_result_t RecKnightsTour(bit_arr_t board,position_t *ret_path,
 {
 	uint8_t x_next = 0, y_next = 0, move_index = 0, move_index2 = 0,
 	 			temp_length = path_length + 1 ;
-	bit_arr_t bit_set_on = 0;			
+	bit_arr_t bit_set_on = 0, bit_set_off = 0;			
 	 /*mx_next = 0, my_next = 0, count = 0,  move_index2 = 0,*/
 	int degree = 0;
 	op_result_t result = FALSE;
@@ -143,7 +143,9 @@ static op_result_t RecKnightsTour(bit_arr_t board,position_t *ret_path,
 	printf(" board_before_SetOn = %#lx \n", board);
 
 	bit_set_on = BitArrSetOn(board, ( x_begin * COLUMN_SIZE + y_begin ) % BOARD_SIZE ) ;
+	board = bit_set_on;
 	printf(" BitArrSetOn = %#lx \n", bit_set_on);
+	printf(" BitArrSetOn_board = %#lx \n", board);
 
 	/*printf("board_after = %lu \n", board);*/
 	/*
@@ -207,8 +209,11 @@ static op_result_t RecKnightsTour(bit_arr_t board,position_t *ret_path,
 
 	}	
 
-	BitArrSetOff(board, ( x_begin * COLUMN_SIZE + y_begin ) % BOARD_SIZE ) ;
+	bit_set_off = BitArrSetOff(board, ( x_begin * COLUMN_SIZE + y_begin ) % BOARD_SIZE ) ;
+	board = bit_set_off;
 
+	printf(" BitArrSetOff = %#lx \n", bit_set_off);
+	printf(" BitArrSetOff_board = %#lx \n", board);
 	return FALSE;
 
 }	
