@@ -79,13 +79,14 @@ static op_result_t
  RecKnightsTour(bit_arr_t board,position_t *ret_path,
 				uint8_t x_begin,uint8_t y_begin,
 			 		uint8_t path_length, heap_pq_t* heap_pq_min,
-					 position_degree_t *adjacent_ret_path);
+					 position_degree_t *adjacent_ret_path, int board_mat[8][8]);
 
 static int
 SortingFunc(void* check_data ,void* new_data, void* param);
 
 #ifdef PRINTS
 	void PrintBoard(position_t *ret_path);
+	void PrintBoardMat( int board_mat[8][8]);
 #endif
 
 /******************************************************************************/
@@ -108,6 +109,8 @@ int KnightsTour(uint8_t x_begin, uint8_t y_begin,
 
 	heap_pq_t *heap_pq_min = NULL;
 	position_t *ret_path_handler = ret_path;
+
+	int board_mat[8][8] = { 0 };
 
 	heap_pq_min = HeapPQueueCreate(SortingFunc);
 	
@@ -139,13 +142,15 @@ int KnightsTour(uint8_t x_begin, uint8_t y_begin,
 	ret_path->y = x_begin;
 	*/
 	printf("{ x_begin , x_begin } = {%d, %d} \n", x_begin, x_begin );
+
 	res = RecKnightsTour(board, ret_path_handler, x_begin,
-		 y_begin, path_length, heap_pq_min, adjacent_ret_path);
+		 y_begin, path_length, heap_pq_min, adjacent_ret_path,
+		 	 board_mat );
 
 	 if (res)
 	 {
 		printf("Solution found!\n");
-		/*PrintBoard(ret_path);*/
+		PrintBoardMat(board_mat);
 	 }
 	else
 	{
@@ -167,7 +172,8 @@ int KnightsTour(uint8_t x_begin, uint8_t y_begin,
 
 static op_result_t RecKnightsTour(bit_arr_t board, position_t *ret_path_handler,
 			 uint8_t x_begin,uint8_t y_begin, uint8_t path_length,
-		 	 heap_pq_t* heap_pq_min, position_degree_t *adjacent_ret_path )
+		 	 heap_pq_t* heap_pq_min, position_degree_t *adjacent_ret_path,
+			  int board_mat[8][8] )
 {
 	uint8_t x_next = 0, y_next = 0, move_index = 0, move_index2 = 0,
 	 			temp_length = path_length + 1 ;
@@ -176,7 +182,7 @@ static op_result_t RecKnightsTour(bit_arr_t board, position_t *ret_path_handler,
 	int degree = 0; /* , min = 9 */
 	op_result_t result = FALSE;
 	position_degree_t *neighbor = NULL;	
-
+	board_mat[x_begin][y_begin] = temp_length;
 	printf("temp_length = %u, \n",temp_length );
 	printf("{ x_begin , y_begin } = {%d, %d} \n", x_begin, y_begin );
 
@@ -201,10 +207,10 @@ static op_result_t RecKnightsTour(bit_arr_t board, position_t *ret_path_handler,
 	
 	ret_path_handler->x = x_begin;
 	ret_path_handler->y = y_begin;
-	
+	/*
 	printf("{ ret_path_handler->x , ret_path_handler->y } = {%d, %d} \n", \
 		ret_path_handler->x, ret_path_handler->y );
-						 
+	*/					 
 	if(2 == temp_length ) /* BOARD_SIZE == temp_length */
 	{
 		
@@ -214,6 +220,7 @@ static op_result_t RecKnightsTour(bit_arr_t board, position_t *ret_path_handler,
 	
 	for(move_index2 = 0; move_index2 < KNIGHT_MOVE_NUM; ++move_index2 )
 	{
+		/*HeapPQueueClear(heap_pq_min);*/
 		printf("move_index2 = %u \n",move_index2 );
 		/*Check all possible moves */ 
 		for(move_index = 0; move_index < KNIGHT_MOVE_NUM; ++move_index)
@@ -266,7 +273,7 @@ static op_result_t RecKnightsTour(bit_arr_t board, position_t *ret_path_handler,
 			}
 		}
 
-		if(! HeapPQueueIsEmpty(heap_pq_min ) )
+			while(! HeapPQueueIsEmpty(heap_pq_min ) )
 			{
 				
 			 neighbor = HeapPQueueDequeue(heap_pq_min);
@@ -283,7 +290,7 @@ static op_result_t RecKnightsTour(bit_arr_t board, position_t *ret_path_handler,
 
 				result = RecKnightsTour(board, ret_path_handler + 2,
 					x_next, y_next, path_length + 1,
-							 heap_pq_min, adjacent_ret_path );
+							 heap_pq_min, adjacent_ret_path, board_mat );
 					
 				if(TRUE == result )
 				{
@@ -303,12 +310,15 @@ static op_result_t RecKnightsTour(bit_arr_t board, position_t *ret_path_handler,
 
 			}
 	}	
-
+/*
 	bit_set_off = BitArrSetOff(board, ( x_begin + ( COLUMN_SIZE * y_begin ) ) % BOARD_SIZE) ;
 	board = bit_set_off;
-
+*/
 	printf(" BitArrSetOff = %#lx \n", bit_set_off);
 	printf(" BitArrSetOff_board = %#lx \n", board);
+
+	board_mat[x_begin][y_begin] = 0;
+
 	return FALSE;
 
 }	
@@ -390,6 +400,23 @@ void PrintBoard(position_t *ret_path)
 		printf("index = %ld \n", index);
 		printf("x = %d, y = %d \n", ret_path->x, ret_path->y );
 		++index;
+	}
+}
+
+void PrintBoardMat( int board_mat[8][8])
+{
+	size_t i = 0 ;
+	size_t j = 0;
+
+	for(i = 0; i < KNIGHT_MOVE_NUM ; ++i)
+	{
+		for(j = 0; j < KNIGHT_MOVE_NUM; ++j)
+		{
+			printf("%d ", board_mat[i][j]);
+		}
+
+		printf("\n");
+
 	}
 }
 
