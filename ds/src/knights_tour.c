@@ -170,6 +170,7 @@ static op_result_t RecKnightsTour(bit_arr_t board,position_t *ret_path,
 	 /*mx_next = 0, my_next = 0, count = 0,  move_index2 = 0,*/
 	int degree = 0; /* , min = 9 */
 	op_result_t result = FALSE;
+	position_degree_t *neighbor = NULL;	
 
 	printf("temp_length = %u, \n",temp_length );
 	printf("{ x_begin , y_begin } = {%d, %d} \n", x_begin, y_begin );
@@ -237,6 +238,8 @@ static op_result_t RecKnightsTour(bit_arr_t board,position_t *ret_path,
 
 				printf("(adjacent_ret_path + move_index)->move_next  = %d \n",  \
 					(adjacent_ret_path + move_index)->move_next = move_index);
+
+
 				/*	
 					printf("{ temp_mange_tour->ret_path->x , \
 					 temp_mange_tour->ret_path->y } = {%d, %d} \n", \
@@ -253,6 +256,12 @@ static op_result_t RecKnightsTour(bit_arr_t board,position_t *ret_path,
 
 		if(! HeapPQueueIsEmpty(heap_pq_min ) )
 			{
+				
+			 neighbor = HeapPQueueDequeue(heap_pq_min);
+
+			 ret_path->x = x_begin + lut_knight_moves[neighbor->move_next][0];
+			 ret_path->y = y_begin + lut_knight_moves[neighbor->move_next][1];
+
 				printf("{ ret_path->x , ret_path->y } = {%d, %d} \n", \
 						 ret_path->x, ret_path->y );
 
@@ -266,7 +275,8 @@ static op_result_t RecKnightsTour(bit_arr_t board,position_t *ret_path,
 				if(TRUE == result )
 				{
 					return TRUE;
-				}			 
+				}
+
 				else if(! HeapPQueueIsEmpty(heap_pq_min ) ) /* result == FAIL */
 				{
 					puts("HeapPQueueDequeue");
@@ -274,7 +284,6 @@ static op_result_t RecKnightsTour(bit_arr_t board,position_t *ret_path,
 				}
 
 			}
-
 	}	
 
 	bit_set_off = BitArrSetOff(board, ( x_begin + ( COLUMN_SIZE * y_begin ) ) % BOARD_SIZE) ;
