@@ -56,6 +56,14 @@ typedef enum
 	TRUE = 1
 } op_result_t;
 
+typedef struct position_degree
+{
+	int degree_pos;
+
+	uint8_t move_next;
+
+}position_degree_t;
+
 /******************************************************************************/
 /***************************** Management struct ******************************/
 
@@ -69,8 +77,9 @@ uint8_t Degree( uint8_t x_begin, uint8_t y_begin,
 		 bit_arr_t board,  position_t *ret_path); /* , position_t *ret_path  */
 static op_result_t
  RecKnightsTour(bit_arr_t board,position_t *ret_path,
-		uint8_t x_begin,uint8_t y_begin,
-			 uint8_t path_length, heap_pq_t* heap_pq_min);
+				uint8_t x_begin,uint8_t y_begin,
+			 		uint8_t path_length, heap_pq_t* heap_pq_min,
+			 			  	 position_t *adjacent_ret_path);
 
 static int
 SortingFunc(void* check_data ,void* new_data, void* param);
@@ -95,12 +104,12 @@ int KnightsTour(uint8_t x_begin, uint8_t y_begin,
 	bit_arr_t board = 0;
 	uint8_t path_length = 0; 
 	op_result_t res = FALSE;
-	position_t *adjacent_ret_path = NULL;
+	position_degree_t *adjacent_ret_path = NULL;
 
 	heap_pq_t *heap_pq_min = NULL;
-
-	heap_pq_min = HeapPQueueCreate(SortingFunc);
-
+	
+	heap_pq_t *heap_pq_min = HeapPQueueCreate(SortingFunc);
+	
 	if(! heap_pq_min )
 	{
 		printf("line: %d \n" , __LINE__ );
@@ -108,7 +117,8 @@ int KnightsTour(uint8_t x_begin, uint8_t y_begin,
 		return FALSE;
 	}
 
-	adjacent_ret_path = (position_t*)calloc(KNIGHT_MOVE_NUM, sizeof(position_t) );
+	adjacent_ret_path = 
+		(position_degree_t*)calloc(KNIGHT_MOVE_NUM, sizeof(position_degree_t) );
 
 	if (NULL == adjacent_ret_path )
 	 {
@@ -125,7 +135,7 @@ int KnightsTour(uint8_t x_begin, uint8_t y_begin,
 	board = BitArrResetAll(board);
 
 	res = RecKnightsTour(board, ret_path, x_begin,
-		 y_begin, path_length, heap_pq_min);
+		 y_begin, path_length, heap_pq_min, adjacent_ret_path);
 
 	 if (res)
 	 {
@@ -151,14 +161,14 @@ int KnightsTour(uint8_t x_begin, uint8_t y_begin,
 /************************************************************/
 
 static op_result_t RecKnightsTour(bit_arr_t board,position_t *ret_path,
-	 uint8_t x_begin,uint8_t y_begin,
-	  uint8_t path_length, heap_pq_t* heap_pq_min )
+			 uint8_t x_begin,uint8_t y_begin, uint8_t path_length,
+		 	 heap_pq_t* heap_pq_min, position_degree_t *adjacent_ret_path )
 {
 	uint8_t x_next = 0, y_next = 0, move_index = 0, move_index2 = 0,
 	 			temp_length = path_length + 1 ;
 	bit_arr_t bit_set_on = 0, bit_set_off = 0;			
 	 /*mx_next = 0, my_next = 0, count = 0,  move_index2 = 0,*/
-	int degree = 0;
+	int degree = 0, min = 9;
 	op_result_t result = FALSE;
 
 	printf("temp_length = %u, \n",temp_length );
@@ -213,6 +223,9 @@ static op_result_t RecKnightsTour(bit_arr_t board,position_t *ret_path,
 
 			if( 0 != degree )
 			{
+				adjacent_ret_path->degree_pos = degree;
+				adjacent_ret_path->move_next = move_index;
+				
 				printf("degree = %d \n ", degree);
 				HeapPQueueEnqueue(heap_pq_min, &degree);
 			}
@@ -227,7 +240,8 @@ static op_result_t RecKnightsTour(bit_arr_t board,position_t *ret_path,
 				printf("board_after_loop1 = %lu \n", board);
 
 				result = RecKnightsTour(board, ret_path + 1,
-					ret_path->x, ret_path->y, path_length + 1, heap_pq_min );
+					ret_path->x, ret_path->y, path_length + 1,
+							 heap_pq_min, adjacent_ret_path );
 					
 				if(TRUE == result )
 				{
