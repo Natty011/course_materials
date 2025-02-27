@@ -58,6 +58,13 @@ typedef enum
 
 /******************************************************************************/
 /***************************** Management struct ******************************/
+typedef struct knights_tour
+{
+	position_t *ret_path[8];
+	int degree;
+	uint8_t current_move;
+	
+}knights_tour_t;
 
 
 /******************************************************************************/
@@ -95,7 +102,6 @@ int KnightsTour(uint8_t x_begin, uint8_t y_begin,
 	bit_arr_t board = 0;
 	uint8_t path_length = 0; 
 	op_result_t res = FALSE;
-	
 	heap_pq_t *heap_pq_min = NULL;
 
 	heap_pq_min = HeapPQueueCreate(SortingFunc);
@@ -103,10 +109,26 @@ int KnightsTour(uint8_t x_begin, uint8_t y_begin,
 	if(! heap_pq_min )
 	{
 		printf("line: %d \n" , __LINE__ );
+
 		puts("Failes in_1: Create - Allocation");
 		return FALSE;
 	}
+/*
+	mange_tour = 
+		(knights_tour_t*)calloc(KNIGHT_MOVE_NUM, sizeof(knights_tour_t) );
+
+		if(! mange_tour )
+		{
+			HeapPQueueDestroy(heap_pq_min);
+			heap_pq_min = NULL;	
+
+			printf("line: %d \n" , __LINE__ );
+			puts("Failes in_2: Create - Allocation");
+			return FALSE;
+		}
+*/
 	board = BitArrResetAll(board);
+
 	res = RecKnightsTour(board, ret_path, x_begin,
 		 y_begin, path_length, heap_pq_min);
 
@@ -135,7 +157,11 @@ static op_result_t RecKnightsTour(bit_arr_t board,position_t *ret_path,
 	bit_arr_t bit_set_on = 0, bit_set_off = 0;			
 	 /*mx_next = 0, my_next = 0, count = 0,  move_index2 = 0,*/
 	int degree = 0;
+	knights_tour_t mange_tour = { 0 };
+	knights_tour_t *temp_mange_tour = NULL;
+	
 	op_result_t result = FALSE;
+	/*temp_mange_tour = &mange_tour;*/
 
 	printf("temp_length = %u, \n",temp_length );
 	printf("{ x_begin , y_begin } = {%d, %d} \n", x_begin, y_begin );
@@ -185,36 +211,71 @@ static op_result_t RecKnightsTour(bit_arr_t board,position_t *ret_path,
 			}
 			printf("LEGAL = { x_next , y_next } = {%d, %d} \n", x_next, y_next );
 
-			degree = Degree(x_next, y_next, board, ret_path );
+			/*degree = Degree(x_next, y_next, board, ret_path );*/
+			degree = Degree(x_next, y_next, board, mange_tour.ret_path[move_index]);
 
 			if( 0 != degree )
 			{
 				printf("degree = %d \n ", degree);
-				HeapPQueueEnqueue(heap_pq_min, &degree);
+
+				mange_tour.degree = degree;
+				mange_tour.current_move = move_index2;
+				mange_tour.ret_path[move_index]; /*  = ret_path */		 
+
+				puts("1\n");
+				HeapPQueueEnqueue(heap_pq_min, &mange_tour); /* &degree*/
+				puts("2\n");
+
+				
+				printf("HeapPQueueSize(heap_pq_min) = %lu \n",
+						 HeapPQueueSize(heap_pq_min) );
+				printf("mange_tour.ret_path = %p \n",  \
+						 (void*)(mange_tour.ret_path[move_index]));
+
+						 /*
+						 printf("{ mange_tour->ret_path->x , \
+							mange_tour->ret_path->y } = {%d, %d} \n", \
+						   mange_tour.ret_path->x, mange_tour.ret_path->y );
+						   */		 
+						 
 			}
+
+			puts("3\n");
+
 		}
+		puts("4\n");
 
 		if(! HeapPQueueIsEmpty(heap_pq_min ) )
 			{
-				printf("{ ret_path->x , ret_path->y } = {%d, %d} \n", \
-						 ret_path->x, ret_path->y );
+				puts("5\n");
 
+				temp_mange_tour = (knights_tour_t*)HeapPQueueDequeue(heap_pq_min);
+				/*printf("{ temp_mange_tour->ret_path->x , \
+					 temp_mange_tour->ret_path->y } = {%d, %d} \n", \
+					mange_tour.ret_path->x, mange_tour.ret_path->y );*/
+					puts("6\n");
+
+					/*
+					ret_path->x = temp_mange_tour->ret_path->x;
+					ret_path->y = temp_mange_tour->ret_path->y;
+					*/
 				/*BitArrSetOn(board, ( x_begin * COLUMN_SIZE + y_begin ) % BOARD_SIZE ) ;*/
 				printf("board_after_loop1 = %lu \n", board);
 
 				result = RecKnightsTour(board, ret_path + 1,
 					ret_path->x, ret_path->y, path_length + 1, heap_pq_min );
-					
+					puts("7\n");
+
 				if(TRUE == result )
 				{
 					return TRUE;
-				}			 
-				else if(! HeapPQueueIsEmpty(heap_pq_min ) ) /* result == FAIL */
+				}/*			 
+				else if(! HeapPQueueIsEmpty(heap_pq_min ) ) 
 				{
 					puts("HeapPQueueDequeue");
 					HeapPQueueDequeue(heap_pq_min);
 				}
-
+				*/
 			}
 
 	}	
@@ -275,21 +336,33 @@ uint8_t Degree( uint8_t x_begin, uint8_t y_begin,
 		} 
 	}
 
-	ret_path->x = x_begin % BOARD_SIZE;
-	ret_path->y = y_begin % BOARD_SIZE;
-	
+	if( 0 != degree )
+	{
+		ret_path->x = x_begin % BOARD_SIZE;
+		ret_path->y = y_begin % BOARD_SIZE;
+
+		 /*
+			printf("{ ret_path->x , \
+			ret_path->y } = {%d, %d} \n", \
+			ret_path->x, ret_path->y );
+		*/	
+			
+	}
 	return degree;
 }
 
 /************************************************************/
 /********************  SortingFunc**********************/
 /************************************************************/
+/*
 static int SortingFunc(void* check_data ,void* new_data, void* param)
 {
 	UNUSED(param);
-	return (-1) * (*(int*)check_data - *(int*)new_data);
+	return (-1) * ((( (knights_tour_t*)check_data)->degree) -
+							 (((knights_tour_t*)new_data)->degree) );
 }
-
+ */
+/* *(int*) */
 
 #ifdef PRINTS
 
