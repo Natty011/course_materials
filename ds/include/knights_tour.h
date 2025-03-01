@@ -7,11 +7,13 @@
 #define __KNIGHTS_TOUR_H__		/* __KNIGHTS_TOUR_H__      */
 
 #include <stdint.h>             /* uint8_t                 */
+#include "pqueue.h"
 
 typedef struct position
 {
     uint8_t x;
     uint8_t y;
+
 } position_t;
 
 /******************************************************************************
@@ -31,3 +33,10 @@ typedef struct position
 ******************************************************************************/
 
 #endif                          /* __KNIGHTS_TOUR_H__      */
+
+/*
+#ifdef PRINTS
+    void PrintBoard(uint8_t board[8][8],  position_t *ret_path);
+
+#endif
+*/
