@@ -9,7 +9,7 @@
 #include <assert.h>
 #include <string.h> 	/* strcpy, strcmp */
 #include <stdlib.h> 	/* calloc, free */
-
+#include <time.h> /* clock */
 #include "knights_tour.h" 
 #include "bit_array.h" 
 
@@ -42,7 +42,7 @@
 #define DEBUG		"DEBUG MODE"
 #define RELEASE		"RELEASE MODE"
 #define STEP_LANGTH 	64
-
+#define BOARD_SIZE 		8
 #define MIN(a, b)		((a > b ) ? b : a )
 #define MAX(a, b)		((a > b ) ? a : b )
 #define UNUSED( var )       ( (void)var )
@@ -108,53 +108,61 @@ int main ()
 /************************************************************/
 static void TestKnightsTour(void)
 {	
-	int flag = FALSE;
-	position_t *ret_path = NULL;
-	uint8_t x_begin = 0, y_begin = 0;
+	position_t ret_path[STEP_LANGTH] = { 0 };
+    uint8_t x = 0, y = 0;
+
+	uint8_t x_begin = 4, y_begin = 5;
 	int result = FALSE; 
+	clock_t start_time_knight = clock();
+	float t_knight = 0.0;
+	uint8_t not_solvable_count = 0;
 
-	ret_path = (position_t*)calloc(STEP_LANGTH, sizeof(position_t) );
+	
+	srand((unsigned int)time(NULL));
+    x_begin = (uint8_t)(rand() % BOARD_SIZE);
+    y_begin = (uint8_t)(rand() % BOARD_SIZE);
+	
+    printf("Starting Knight's Tour at (%d, %d)\n", x_begin, y_begin);
+    
+    start_time_knight = clock();
+	
+	result = KnightsTour(x_begin, y_begin, ret_path);
+	 start_time_knight = clock() - start_time_knight;
 
-	if (NULL == ret_path )
-	 {
-		printf("line: %d \n" , __LINE__ );	
-		printf("Memory allocation failed!\n");
-		flag =  TRUE;
-		return;
-	 }
+	 t_knight = (float)start_time_knight / CLOCKS_PER_SEC;
+
+	 printf("KnightsTour : "BACK_GREEN" %f "RESET" seconds  \n", t_knight);
+
 	
-	 result = KnightsTour(x_begin, y_begin, ret_path);
+    printf("Checking solvability for all positions...\n");
+
+    for (x = 0; x < BOARD_SIZE; x++) {
+        for (y = 0; y < BOARD_SIZE; y++) {
+            if (KnightsTour(x, y, ret_path) != 0) {
+                printf("No solution starting at (%d, %d)\n", x, y);
+                not_solvable_count++;
+            }
+        }
+    }
+
+    if (not_solvable_count == 0) {
+        printf("All positions are solvable.\n");
+    } else {
+        printf("%d positions are not solvable.\n", not_solvable_count);
+    }
 	
-	 if (result)
-	 {
-		printf("KnightsTour_Solution found!\n");
-		/*PrintBoard(ret_path);*/
-	 }
-	else
-	{
-		printf("KnightsTour_No solution found!\n");
-	}
 	
 
-	free( ret_path );
-	ret_path = NULL;
-	if( !flag )
+	if( !result && !not_solvable_count )
 	{
 		puts(RESET);		
 		puts(BACK_BLUE"Test: Success"RESET);
 
 	}
-	
+
 	else
 	{
 		puts(BACK_YELLOW"Test: Failure"RESET);	
 	}
 
 }
-
-/*
-		printf("line: %d \n" , __LINE__ );
-		puts("Failes in_1: IsEmpty || Size ");
-		flag =  TRUE;
-	
-	*/
