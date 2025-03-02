@@ -76,7 +76,7 @@ static op_result_t
  RecKnightsTour(uint8_t x_begin, uint8_t y_begin,
 	uint8_t path_length, bit_arr_t visited, position_t *ret_path, pqueue_t *pq);
 
-static int SortingFunc(void* check_data ,void* new_data);
+static int SortingFuncDegree(void* check_data ,void* new_data);
 /*void
  PrintBoard(uint8_t board[COLUMN_SIZE][COLUMN_SIZE],  position_t *ret_path);*/
 
@@ -101,16 +101,20 @@ int KnightsTour(uint8_t x_begin, uint8_t y_begin,
 	bit_arr_t visited = 0;
 	uint8_t path_length = 0; 
 	op_result_t res = FALSE;
-	pqueue_t *pq = PQueueCreate(SortingFunc);
+	pqueue_t *pq = PQueueCreate(SortingFuncDegree);
     uint8_t board[COLUMN_SIZE][COLUMN_SIZE] = { 0 };
 
 	visited = BitArrResetAll(visited);
 	res = RecKnightsTour( x_begin, y_begin, path_length, visited, ret_path, pq);
+	#ifdef PRINTS
 
 	 if (res)
 	 {
-		/*printf("Solution found!\n");*/
-		/*PrintBoard(board, ret_path);*/
+		/*
+		printf("Solution found!\n");
+
+		PrintBoard(board, ret_path);
+		*/
 		
 	 }
 
@@ -118,6 +122,8 @@ int KnightsTour(uint8_t x_begin, uint8_t y_begin,
 	{
 		printf("No solution found!\n");
 	}
+	#endif
+
 	PQueueDestroy(pq);
 	pq = NULL;
 	return !res;
@@ -257,7 +263,7 @@ op_result_t IsLegalMove(uint8_t x, uint8_t y, bit_arr_t board)
 /************************************************************/
 /********************  IsLegal**********************/
 /************************************************************/
-
+/* Sorting the minimum degree from each point */
 uint8_t Degree( uint8_t x_begin, uint8_t y_begin, bit_arr_t board ) 
 {
 	uint8_t degree = 0, move_index = 0;
@@ -280,7 +286,7 @@ uint8_t Degree( uint8_t x_begin, uint8_t y_begin, bit_arr_t board )
 /************************************************************/
 /********************  SortingFunc**********************/
 /************************************************************/
-static int SortingFunc(void* check_data ,void* new_data)
+static int SortingFuncDegree(void* check_data ,void* new_data)
 {
 	
 
@@ -316,7 +322,7 @@ void PrintBoard(uint8_t board[COLUMN_SIZE][COLUMN_SIZE],  position_t *ret_path)
 		{
 			puts("Failure");
 		}
-		/*printf("sum = %lu \n", sum);*/
+		printf("sum = %lu \n", sum);
 
 
 
