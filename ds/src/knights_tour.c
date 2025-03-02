@@ -1,8 +1,8 @@
 /***************************************
 * Author : Natty
-* Reviewer : 
+* Reviewer : Matan
 * Date : 26 / 02 / 2025
-* Last update: 26 / 02 / 2025
+* Last update: 02 / 03 / 2025
 *****************************************/
 /*#define PRINTS*/
 #ifdef PRINTS
@@ -14,11 +14,8 @@
 
 #include "pqueue.h"
 
-#include "heap_pq.h" 
-
 #include "knights_tour.h" 
 #include "bit_array.h" 
-#include "heap.h" 
 
 #define UNUSED( var )       ( (void)var )
 
@@ -137,13 +134,13 @@ static op_result_t
 	op_result_t result = FALSE;
 	position_degree_t next_move[8] = { 0 };
 
-
 	ret_path[path_length].x = x_begin;
     ret_path[path_length].y = y_begin;
 	
 	visited = BitArrSetOn(visited, ( x_begin * COLUMN_SIZE )  +  y_begin ) ;
 
 	PQueueClear(pq);
+
 	if( BOARD_LIMIT == path_length ) 
 	{
 		return TRUE;
@@ -151,7 +148,6 @@ static op_result_t
 
 		for(move_index = 0; move_index < KNIGHT_MOVE_NUM; ++move_index)
 		{
-
 			x_next = x_begin + lut_knight_moves[move_index][0];
 			y_next = y_begin + lut_knight_moves[move_index][1];
 
@@ -159,20 +155,20 @@ static op_result_t
 			{
 				continue;
 			}
-
-			if( 62 == path_length)
+			/* if there is a move from step 62 so this is the last
+				point that valid, with 0 degree */
+			if( BOARD_LIMIT - 1 == path_length)
 			{
 				next_move[move_index].neibour.x =  x_next;
-			next_move[move_index].neibour.y =  y_next;
-			next_move[move_index].degree = Degree(x_next, y_next, visited );
-				result = RecKnightsTour( x_next,
-					y_next, path_length + 1,
-						 visited, ret_path, pq);
+				next_move[move_index].neibour.y =  y_next;
+				next_move[move_index].degree = Degree(x_next, y_next, visited );
+				result = RecKnightsTour( x_next, y_next, path_length + 1,
+										 visited, ret_path, pq);
 				
 				if(TRUE == result )
 				{
 					return TRUE;
-				 }		 
+				}		 
 			}
 
 			temp_degree = Degree(x_next, y_next, visited );
@@ -180,52 +176,54 @@ static op_result_t
 			if( 0 != temp_degree )
 			{
 				
-			next_move[move_index].degree = Degree(x_next, y_next, visited );
-			next_move[move_index].neibour.x =  x_next;
-			next_move[move_index].neibour.y =  y_next;
-			next_move[move_index].move_index = move_index;	
+				next_move[move_index].degree = Degree(x_next, y_next, visited );
+				next_move[move_index].neibour.x =  x_next;
+				next_move[move_index].neibour.y =  y_next;
+				next_move[move_index].move_index = move_index;	
 
 				PQueueEnqueue(pq, next_move + move_index);
 
 				++size;
 			}
-		
 		}
 		
 		while ( size ) 
-			{
-				position_degree_t *next_move_p = NULL;
-				
-				next_move_p = (position_degree_t *)PQueuePeek(pq);
-				min = next_move_p->move_index;
-				
-				result = RecKnightsTour( next_move_p->neibour.x,
-					 next_move_p->neibour.y, path_length + 1,
-					 	 visited, ret_path, pq);
-	 
-				if(TRUE == result )
-				{
-					return TRUE;
-				}
-				visited = BitArrSetOff(visited, ( next_move_p->neibour.x * COLUMN_SIZE )
-							  +   next_move_p->neibour.y) ;
-				--size;
-				PQueueClear(pq);
-
-				if(size > 0 )
-				{
-					for(move_index = 0; move_index < 8; ++move_index)
-					{
-						if( ( min != move_index)  && 0 != next_move[move_index].degree )
-						{
-							PQueueEnqueue(pq, next_move + move_index);
-						}
-					}
-				}	
-				
-			}
-		
+		{
+			position_degree_t *next_move_p = NULL;
 			
+			next_move_p = (position_degree_t *)PQueuePeek(pq);
+			min = next_move_p->move_index;
+			
+			result = RecKnightsTour( next_move_p->neibour.x, 
+									next_move_p->neibour.y, path_length + 1,
+								    visited, ret_path, pq);
+	
+			if(TRUE == result )
+			{
+				return TRUE;
+			}
+
+			visited = BitArrSetOff(visited,( next_move_p->neibour.x * COLUMN_SIZE )
+									+ next_move_p->neibour.y) ;
+			--size;
+			PQueueClear(pq);
+
+			next_move[min].degree = 0; /* not valid point/dead-end, so mark 
+										 the degree as zero  */
+
+			if(size > 0 )
+			{
+				for(move_index = 0; move_index < 8; ++move_index)
+				{
+					if( ( min != move_index) && 0 != next_move[move_index].degree )
+					{
+						PQueueEnqueue(pq, next_move + move_index);
+					}
+				}
+			}	
+			
+		}
+		
 	visited = BitArrSetOff(visited, ( x_begin * COLUMN_SIZE )  +  y_begin) ;
 
 	return FALSE;
@@ -249,7 +247,6 @@ op_result_t IsInBoard( uint8_t x, uint8_t y )
 /************************************************************/
 /********************  IsLegal**********************/
 /************************************************************/
-
 
 op_result_t IsLegalMove(uint8_t x, uint8_t y, bit_arr_t board)
 {
