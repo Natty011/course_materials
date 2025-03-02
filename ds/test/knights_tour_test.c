@@ -75,7 +75,7 @@ typedef enum
 
 /***************************function declaration**************************/
 static void TestKnightsTour(void);
-
+void PrintBoard(uint8_t board[BOARD_SIZE][BOARD_SIZE],  position_t *ret_path);
 /***************************End of function declaration******************/
 
 /******************static functions definition**********************/
@@ -116,6 +116,7 @@ static void TestKnightsTour(void)
 	clock_t start_time_knight = clock();
 	float t_knight = 0.0;
 	uint8_t not_solvable_count = 0;
+	uint8_t board[BOARD_SIZE][BOARD_SIZE] = { 0 };
 
 	srand((unsigned int)time(NULL));
     x_begin = (uint8_t)(rand() % BOARD_SIZE);
@@ -141,6 +142,8 @@ static void TestKnightsTour(void)
                 printf("No solution starting at (%d, %d)\n", x, y);
                 not_solvable_count++;
             }
+
+			/*PrintBoard(board, ret_path);*/
         }
     }
 
@@ -165,3 +168,38 @@ static void TestKnightsTour(void)
 	}
 
 }
+
+/*
+void PrintBoard(uint8_t board[BOARD_SIZE][BOARD_SIZE],  position_t *ret_path)
+	{
+		int i = 0, j = 0;
+		size_t sum = 0; total sum 2016
+
+		for (i = 0; i < BOARD_SIZE ; i++)
+		{
+         
+			board[ret_path[i].x][ret_path[i].y] = i;
+			printf(" ret_path[i].x, ret_path[i].y = { %u,%u } \n"
+				,ret_path[i].x, ret_path[i].y );
+
+        }
+        
+        for (i = 0; i < BOARD_SIZE; i++) 
+		{
+            for (j = 0; j < BOARD_SIZE; j++) 
+			{
+                printf("%2d ", board[i][j]);
+				sum += board[i][j];
+
+            }
+            printf("\n");
+        }
+
+		if(2016 != sum)
+		{
+			puts("Failure");
+		}
+		printf("sum = %lu \n", sum);
+	}
+
+	*/
