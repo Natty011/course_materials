@@ -117,7 +117,6 @@ static void TestKnightsTour(void)
 	float t_knight = 0.0;
 	uint8_t not_solvable_count = 0;
 
-	
 	srand((unsigned int)time(NULL));
     x_begin = (uint8_t)(rand() % BOARD_SIZE);
     y_begin = (uint8_t)(rand() % BOARD_SIZE);
