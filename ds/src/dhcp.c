@@ -30,7 +30,12 @@ typedef uint8_t ip_addrs_t[4];
 /******************************************************************************/
 
 
+typedef enum
+{
+	ZERO_CHAR = 48,
+	ONE_CHAR = 49
 
+} result_t;
 
 typedef enum
 {
@@ -126,6 +131,7 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 	root->child[LEFT] = root->child[RIGHT] = NULL;
 	root->is_occupied = FALSE;
 	root->parent = NULL;
+	root->is_occupied = FALSE;
 
 	dhcp_ptr->root = root; 
 	dhcp_ptr->bits_num_in_subnet = bits_num_in_subnet;
@@ -141,6 +147,19 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 	return dhcp_ptr;
 }						   
 
+
+
+/************************************************************/
+/********************  DHCPDestroy  *************************/
+/************************************************************/
+
+void DHCPDestroy(dhcp_t* dhcp)
+{
+	if( NULL != dhcp )
+	{
+		
+	}
+}
 
 	
 /************************************************************/
