@@ -11,10 +11,11 @@
 #include <stdint.h>
 #include <assert.h> 	/* assert */
 #include <stdlib.h> 	/* malloc, free */
-
+#include <string.h> 	/* strcat */
+#include <ctype.h>      /* tolower*/
 #include "dhcp.h"
 
-#include "bit_array.h" 
+/* #include "bit_array.h" */
 
 #define UNUSED( var )       ( (void)var )
 
@@ -79,6 +80,13 @@ struct dhcp
 /************************ static functions declartions ************************/
 /******************************************************************************/
 
+static int AtoiUpTo36Base(const char *str, int base);
+static char* ItoaUpTo36Base(int n, char* str, int base);
+static const char* WhiteSpacesSkip(const char *nptr);
+static void ReverseStr(char* str);
+static int Atoi10Base(const char *nptr);
+static char* Itoa10Base(int n, char* str);
+
 #ifdef PRINTS
 #endif
 
@@ -91,11 +99,13 @@ struct dhcp
 /************************************************************/
 /********************  DHCPCreate  *************************/
 /************************************************************/
-dhcp_t *DHCPCreate(const unsigned char [BYTES_IN_IP],
+dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
                            size_t bits_num_in_subnet)
 {
 	dhcp_t *dhcp_ptr = NULL;
 	dhcp_node_t *root = NULL;
+	char *ip_temp = NULL, *ip_temp2 = NULL;
+	int i = 0;
 
 	dhcp_ptr = (dhcp_t*)malloc( sizeof(dhcp_t) );
 
@@ -104,10 +114,31 @@ dhcp_t *DHCPCreate(const unsigned char [BYTES_IN_IP],
 		return NULL;
 	}
 
-	root  = 
+	root = (dhcp_node_t*)malloc( sizeof( dhcp_node_t) );
 
+	if( NULL == root )
+	{
+		free( dhcp_ptr );
+		dhcp_ptr = NULL;
+		return NULL;
+	}
 
+	root->child[LEFT] = root->child[RIGHT] = NULL;
+	root->is_occupied = FALSE;
+	root->parent = NULL;
 
+	dhcp_ptr->root = root; 
+	dhcp_ptr->bits_num_in_subnet = bits_num_in_subnet;
+
+	for( i = 0; i < BYTES_IN_IP; ++i )
+	{
+		ip_temp = ItoaUpTo36Base(subnet_ip[i], ip_temp, 2); 
+		ip_temp2 = strcat(ip_temp2, ip_temp);
+	}
+
+	dhcp_ptr->ip = strncat(dhcp_ptr->ip, ip_temp2, bits_num_in_subnet );
+
+	return dhcp_ptr;
 }						   
 
 	
@@ -117,24 +148,274 @@ dhcp_t *DHCPCreate(const unsigned char [BYTES_IN_IP],
 
 
 /************************************************************/
-/*************************  IsInBoard **************************/
+/************** ItoaUpTo36Base function definition *********/
 /************************************************************/
+/* 
+   DESCRIPTION: Converts an integer value to a null-terminated string
+                using the specified base and stores the result in the
+                array given by str parameter.
+
+   RETURN VALUE: A pointer to the resulting null-terminated string,
+                  same as parameter str.
+                  
+    NOTE: 1) If base is 10 and value is negative, the resulting string is
+            preceded with a minus sign (-). With any other base,
+            value is always considered unsigned.   
+         
+          2) Numerical base used to represent the value as a string,
+             between 2 and 36, where 10 means decimal base,
+             16 hexadecimal, 8 octal, and 2 binary.
+
+*/
 
 
 /************************************************************/
-/********************  IsLegal**********************/
+/********************  ItoaUpTo36Base ***********************/
 /************************************************************/
+
+static char* ItoaUpTo36Base(int n, char* str, int base)
+{
+
+	int remainder = 0;
+	char* pstr = str;
+	
+	if(NULL == str )
+	{
+		puts("str is a null pointer");
+		exit(EXIT_FAILURE);
+	}
+	
+	if (  (base > 36) || (base < 2) )
+	{
+	   puts("Invalid base value");
+	   return str;
+	}
+	
+	if( n <= 0 )
+	{
+		if ( n == 0)
+		{
+			*str++ = '0';
+			*str = '\0';
+			return str; 
+		}
+		else if ((n < 0) && ( base == 10) )
+		{
+			return Itoa10Base( n, str);
+		}
+		
+		else
+		{
+			n = -n;
+		}
+	}
+	/* The base isn't negative decimal */
+	while( n )
+	{
+		remainder = n % base;
+		*str++ = (remainder > 9) ? (remainder - 10) + 'a' : remainder + '0';
+		n = n / base;
+	}
+	
+	*str = '\0'; 
+	ReverseStr(pstr);
+	return pstr;	
+}
 
 
 
 /************************************************************/
-/********************  IsLegal**********************/
+/*********** AtoiUpTo36Base function definition *************/
 /************************************************************/
+/* 
+   DESCRIPTION: The AtoiUpTo36Base() function converts the initial 
+                part of the string in str to an integer value
+                 according to the given base, which must be between
+                 2 and 36 inclusive.
+       
+   RETURN VALUE:  The  AtoiUpTo36Base() function returns the result
+                  of the conversion in decimal integer, unless the
+                  value would underflow or overflow. 
+        
+    NOTE: 1) If base is 10 and value is negative, the resulting string is
+            preceded with a minus sign (-). With any other base,
+            value is always considered unsigned.   
+          2) errno  is  not set on error so there is no way to distinguish
+             between 0 as an error and as the converted value. 
+             
+          3) No checks for overflow or underflow are done.
+   
+*/
+
+static int AtoiUpTo36Base(const char *str, int base)
+{
+	int dig = 0;
+	int num = 0;
+
+	if(NULL == str )
+	{
+		puts("str is a null pointer");
+		exit(EXIT_FAILURE);
+	}
+	
+	if (  (base > 36) || (base < 2) )
+	{
+	   puts("Invalid base value");
+	   return 0;
+	}
+	
+	str = WhiteSpacesSkip(str);
+	if ( ( base == 10) )
+		{
+			return Atoi10Base( str );
+		}
+		
+	while( (('0' <= *str ) && ( *str <='9' ) )||
+	       (('a' <= *str ) && ( *str <='z' ) ) ||
+	       (('A' <= *str ) && ( *str <='Z' )  ) )
+	{      
+		dig = ( *str > '9' ) ? tolower(*str) - 'a' +10 : *str - '0'; 
+		num = num*base + dig ;
+		++str;
+	}
+	
+	return num;
+}
+
+
 
 /************************************************************/
-/********************  SortingFunc**********************/
+/********************  WhiteSpacesSkip**********************/
+/***********************************************************/
+
+/*  An auxilary function that skipping intial portion 
+    of the white spaces */
+static const char* WhiteSpacesSkip(const char *nptr)
+{
+	while(( *nptr == 32) || ((*nptr >= 9) && (*nptr <=13 )))
+	{
+		++nptr;
+	} 
+	return nptr;
+}
+
+/************************************************************/
+/*************************  ReverseStr***********************/
+/************************************************************/
+/* An auxilary function to reverse a string*/
+
+static void ReverseStr(char* str)
+{
+
+	char temp = 0;
+	int low = 0;
+	int high = strlen(str) - 1 ;
+
+	while( low < high )
+	{
+		temp = str[low];
+		str[low] = str[high];
+		str[high] = temp;
+		low++;
+		high--;
+	}
+	
+}
+
+/************************************************************/
+/**************** Atoi function definition ******************/
 /************************************************************/
 
+/* 
+
+   DESCRIPTION: The  Atoi() function  converts the initial portion
+                 of the string pointed to by nptr to int.
+                 
+   RETURN VALUE: The converted value or 0 on error.
+ 
+   NOTE: 1) errno  is  not set on error so there is no way to distinguish
+            between 0 as an error and as the converted value. 
+         2) No checks for overflow or underflow are done.
+            Only base-10 input can be converted.
+*/
+
+static int Atoi10Base(const char *nptr)
+{
+	int num = 0;
+	int sign = 1;
+	
+	nptr = WhiteSpacesSkip(nptr);
+	if( *nptr == '-')
+	{
+		sign = -1;
+		++nptr;
+	}
+
+	while( ('0' <= *nptr ) && ( *nptr <='9' ))
+	{
+		num = num*10 + *nptr - '0';
+		++nptr;
+	}
+
+	return ( sign * num );
+
+}
+
+/************************************************************/
+/************* Itoa10Base function definition ***************/
+/************************************************************/
+/* 
+   DESCRIPTION: Converts an integer value of base 10 to a null-terminated 
+                string and stores the result in the array
+                given by str parameter.
+                 
+   RETURN VALUE: A pointer to the resulting null-terminated string,
+                  same as parameter str.
+  
+*/
+static char* Itoa10Base(int n, char* str)
+{
+
+	int sign = 1;
+	char* pstr = str;
+	if(NULL == str )
+	{
+		puts("str is a null pointer");
+		exit(EXIT_FAILURE);
+	}
+	
+	if( n <= 0 )
+	{
+		if ( n == 0)
+		{
+			*str++ = '0';
+			*str = '\0';
+			return str; 
+		}
+		else
+		{
+			n = -n;
+			sign = -1;
+		}
+	}
+	
+	while( n )
+	{
+		*str++ = n % 10 + '0';
+		n = n / 10;
+	}
+	
+	if(sign == -1 )
+	{
+		*str++ = '-';
+	}
+	
+	*str = '\0'; 
+
+	ReverseStr(pstr);
+
+	return pstr;
+}
 
 /************************************************************/
 /********** End Of Static Functions definition  *************/
