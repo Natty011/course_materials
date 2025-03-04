@@ -109,7 +109,6 @@ int main ()
 static void TestDhcp(void)
 {	
 
-
 	int result = FALSE; 
 
 
