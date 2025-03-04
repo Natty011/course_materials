@@ -153,13 +153,33 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 /********************  DHCPDestroy  *************************/
 /************************************************************/
 
+static void RecDHCPDestroy(dhcp_node_t *root)
+{
+	if( NULL == root )
+	{
+		return;
+	}
+
+		RecDHCPDestroy(root->child[LEFT]);
+		RecDHCPDestroy(root->child[RIGHT]);
+
+		root->child[LEFT] = root->child[RIGHT] = NULL;
+
+		free( root );
+		
+	}
+
+	free()
+}
+
 void DHCPDestroy(dhcp_t* dhcp)
 {
 	if( NULL != dhcp )
 	{
-		
+		RecDHCPDestroy(dhcp->root)
 	}
 }
+
 
 	
 /************************************************************/
