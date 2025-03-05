@@ -114,7 +114,7 @@ static void TestDhcp(void)
 
 	int result = FALSE; 
 	dhcp_t *dhcp1 = NULL;
-	ip_addrs_t ip = {192, 168, 2, 5};
+	ip_addrs_t ip = {192, 168, 2, 0};
 	size_t bits_num_in_subnet1 = 18;
 
 	dhcp1 = DHCPCreate(ip, bits_num_in_subnet1);
