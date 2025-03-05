@@ -18,7 +18,7 @@
 /* #include "bit_array.h" */
 
 #define UNUSED( var )       ( (void)var )
-
+#define BYTE_SIZE			( 8 )
 
 /************************************************************/
 /********************  lut_knight_moves**********************/
@@ -113,8 +113,8 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 	dhcp_t *dhcp_ptr = NULL;
 	dhcp_node_t *root = NULL;
 	char *ip_temp = NULL;
-	uint8_t i = 0;
-	/*ip_addrs_t ip = {192, 168, 2, 5};*/
+	uint8_t i = 0, quotient = 0;
+	/*ip_addrs_t ip1 = {192, 168, 3, 5};*/
 	char* ip_temp2[4] = {"", "", "", ""};
 	char *prefix1 = (char*)malloc( sizeof(char*) * 50 );
 	/*
@@ -147,6 +147,8 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 	dhcp_ptr->root = root; 
 	dhcp_ptr->bits_num_in_subnet = bits_num_in_subnet;
 
+	dhcp_ptr->ip = prefix1;
+
 	for( i = 0; i < BYTES_IN_IP; ++i )
 	{
 		/*char prefix[9] = { 0 };*/
@@ -160,28 +162,42 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 
 		/*ip_temp2[i] = strcat(ip_temp2, ip_temp2[i]);*/
 	}
+	puts("+++++++++++++++++++++++++++++++++++++++");
 
-	puts(prefix1 + 27);
-	dhcp_ptr->ip = prefix1;
-/*
-	for( i = 0; i < BYTES_IN_IP - 3; ++i )
+	for( i = 0; i < BYTES_IN_IP ; ++i )
 	{
-		dhcp_ptr->ip = strncat(dhcp_ptr->ip, prefix1 +(i*7 );
+		puts(ip_temp2[i]);
+		/*ip_temp2[i] = ItoaUpTo36Base(subnet_ip[i], prefix , 2); */
+	}
+	puts(prefix1 + 27);
+	puts("+++++++++++++++++++++++++++++++++++++++");
 
-		
+	for( i = 0; i < bits_num_in_subnet / BYTE_SIZE ; ++i )
+	{
+		prefix1 = memcpy(prefix1 + i * BYTE_SIZE, ip_temp2[i], BYTE_SIZE);
+		puts("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
+			/* + i * BYTE_SIZE*/
+				 puts(ip_temp2[i]);
+				 puts(prefix1);
+				 puts(prefix1 + i * (BYTE_SIZE + 1));
+
+
+			/*
 		dhcp_ptr->ip = strncat(dhcp_ptr->ip, ip_temp2[i],
 				 7 );
 
+				 */
 				 
 		
 	}
+	/*
 	for( i = 0; i < BYTES_IN_IP; ++i )
 	{
 		dhcp_ptr->ip = strncat(dhcp_ptr->ip, ip_temp2[i],
 				 bits_num_in_subnet );
 	}	
-				 
-	*/
+	*/				 
+	
 
 /*
 	str = strncat(str, "000000000", 8 - count); 
@@ -197,6 +213,7 @@ puts("--------------------------------------------");
 		/*ip_temp2[i] = ItoaUpTo36Base(subnet_ip[i], prefix , 2); */
 	}
 	/*free(prefix1);*/
+
 	return dhcp_ptr;
 }						   
 
@@ -330,7 +347,7 @@ static char* ItoaUpTo36Base(int n, char* str, int base)
 	{
 		/*puts("?????????????");*/
 
-		str = strncat(str, "000000000", 8 - count); /*8 - count */
+		str = strncat(str, "00000000", 8 - count); /*8 - count */
 		/*
 		puts(str);
 		puts(str - count );
