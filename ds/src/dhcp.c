@@ -165,12 +165,15 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 	}
 	puts("+++++++++++++++++++++++++++++++++++++++");
 
+	puts(prefix1);
+
+	puts("+++++++++++++++++++++++++++++++++++++++");
+
 	for( i = 0; i < BYTES_IN_IP ; ++i )
 	{
 		puts(ip_temp2[i]);
 		/*ip_temp2[i] = ItoaUpTo36Base(subnet_ip[i], prefix , 2); */
 	}
-	puts(prefix1 + 27);
 	puts("+++++++++++++++++++++++++++++++++++++++");
 
 	for( i = 0; i < bits_num_in_subnet / BYTE_SIZE ; ++i )
