@@ -116,7 +116,7 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 	uint8_t i = 0;
 	char* ip_temp2[4] = {"", "", "", ""};
 	/*ip_addrs_t ip = {192, 168, 2, 5};*/
-	char *prefix1 = (char*)malloc( sizeof(char*) * 40 );
+	char *prefix1 = (char*)malloc( sizeof(char*) * 50 );
 	/*
 	 prefix[0] = "            ";
 	 prefix[1] = "            ";
@@ -155,7 +155,7 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 		printf("subnet_ip[%u] = { %u } \n " ,i, subnet_ip[i] );
 
 		ip_temp2[i] = ItoaUpTo36Base(subnet_ip[i], prefix , 2); 
-		/*puts(prefix);*/
+		puts(prefix);
 		puts(ip_temp2[i]);
 
 		/*ip_temp2[i] = strcat(ip_temp2, ip_temp2[i]);*/
@@ -254,7 +254,7 @@ static char* ItoaUpTo36Base(int n, char* str, int base)
 
 	int remainder = 0;
 	char* pstr = str;
-	size_t count = 0;
+	size_t count = 0, i = 0;
 
 	if(NULL == str )
 	{
@@ -272,8 +272,11 @@ static char* ItoaUpTo36Base(int n, char* str, int base)
 	{
 		if ( n == 0)
 		{
-			str = "00000000";
-			/**str = '\0';*/
+			for(i = 0; i < 8 ; ++i)
+			{
+				*( str+i )= '0';
+			}
+			*(str +i) = '\0';
 			return str; 
 		}
 		else if ((n < 0) && ( base == 10) )
