@@ -153,12 +153,13 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 	{
 		/*char prefix[9] = { 0 };*/
 		char* prefix = NULL;
-		prefix = prefix1 +(i*9);
+		/*prefix = prefix1 +(i*9);*/
 		printf("subnet_ip[%u] = { %u } \n " ,i, subnet_ip[i] );
 
-		ip_temp2[i] = ItoaUpTo36Base(subnet_ip[i], prefix , 2); 
-		puts(prefix);
-		puts(ip_temp2[i]);
+		ip_temp2[i] = ItoaUpTo36Base(subnet_ip[i],
+			 prefix1 +(i*8) , 2); 
+		/*puts(prefix);
+		puts(ip_temp2[i]);*/
 
 		/*ip_temp2[i] = strcat(ip_temp2, ip_temp2[i]);*/
 	}
@@ -177,9 +178,9 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 		 memcpy(prefix1 + i * BYTE_SIZE, ip_temp2[i], BYTE_SIZE);
 		puts("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
 			/* + i * BYTE_SIZE*/
-				 puts(ip_temp2[i]);
+				/* puts(ip_temp2[i]);
 				 puts(prefix1);
-				 puts(prefix1 + i * (BYTE_SIZE ));
+				 puts(prefix1 + i * (BYTE_SIZE ));*/
 
 
 			/*
