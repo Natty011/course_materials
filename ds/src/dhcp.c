@@ -174,12 +174,12 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 
 	for( i = 0; i < bits_num_in_subnet / BYTE_SIZE ; ++i )
 	{
-		prefix1 = memcpy(prefix1 + i * BYTE_SIZE, ip_temp2[i], BYTE_SIZE);
+		 memcpy(prefix1 + i * BYTE_SIZE, ip_temp2[i], BYTE_SIZE);
 		puts("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
 			/* + i * BYTE_SIZE*/
 				 puts(ip_temp2[i]);
 				 puts(prefix1);
-				 puts(prefix1 + i * (BYTE_SIZE + 1));
+				 puts(prefix1 + i * (BYTE_SIZE ));
 
 
 			/*
