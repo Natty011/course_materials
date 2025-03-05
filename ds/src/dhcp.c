@@ -90,6 +90,7 @@ struct dhcp
 /******************************************************************************/
 
 static void RecDHCPDestroy(dhcp_node_t *root);
+static dhcp_node_t *CreateNode(dhcp_node_t *parent );
 
 
 static int AtoiUpTo36Base(const char *str, int base);
@@ -119,7 +120,7 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 	dhcp_t *dhcp_ptr = NULL;
 	dhcp_node_t *root = NULL;
 	char *prefix_ip = NULL;
-	uint8_t i = 0;
+	/*uint8_t i = 0;*/
 	/*uint32_t *ptr = NULL;*/
 	/*const uint8_t *test = NULL;*/
 	/*ip_addrs_t ip1 = {192, 168, 3, 5};*/
@@ -548,7 +549,27 @@ uint8_t i = 0;
 
 return dest;
 
-}	
+}
+
+/************************************************************/
+/******************* CreateNode *************************/
+/************************************************************/
+static dhcp_node_t *CreateNode(dhcp_node_t *parent )
+{
+	dhcp_node_t *new_node = NULL;
+	new_node = (dhcp_node_t*)malloc( sizeof( dhcp_node_t) );
+	
+	if( NULL == new_node )
+	{
+		return NULL;
+	}
+
+	new_node->child[LEFT] = new_node->child[RIGHT] = NULL;
+	new_node->is_occupied = FALSE;
+	new_node->parent = parent;
+
+	return new_node;
+}
 
 
 
