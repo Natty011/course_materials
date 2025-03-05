@@ -116,7 +116,7 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 	dhcp_t *dhcp_ptr = NULL;
 	dhcp_node_t *root = NULL;
 	char *prefix_ip = NULL;
-	uint8_t i = 0, quotient = 0;
+	uint8_t i = 0;
 	/*ip_addrs_t ip1 = {192, 168, 3, 5};*/
 
 	dhcp_ptr = (dhcp_t*)malloc( sizeof(dhcp_t) );
@@ -137,45 +137,39 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 
 	prefix_ip = (char*)malloc( sizeof(char*) * MAX_SIZE );
 
+	if( NULL == prefix_ip )
+	{
+		free( root );
+		root = NULL;
+		
+		free( dhcp_ptr );
+		dhcp_ptr = NULL;
 
+		return NULL;
+	}
 
 	root->child[LEFT] = root->child[RIGHT] = NULL;
 	root->is_occupied = FALSE;
 	root->parent = NULL;
 
-
 	dhcp_ptr->root = root; 
 	dhcp_ptr->bits_num_in_subnet = bits_num_in_subnet;
-
-
 
 	for( i = 0; i < BYTES_IN_IP; ++i )
 	{
 
-		ItoaUpTo36Base(subnet_ip[i],prefix_ip + (i * BYTE_SIZE) , BASE); 
+		ItoaUpTo36Base(subnet_ip[i],
+			prefix_ip + (i * BYTE_SIZE) , BASE); 
 
 	}
 
-	puts("+++++++++++++++++++++++++++++++++++++++");
-
-	puts(prefix_ip);
-
-	puts("+++++++++++++++++++++++++++++++++++++++");
 	*(prefix_ip + bits_num_in_subnet) = '\0';
 
-	puts("+++++++++++++66666666666666++++++++++++++++");
-
-	puts(prefix_ip);
-
-	puts("++++++++++++++66666666666666+++++++++++++");
+	
 
 	dhcp_ptr->ip = prefix_ip;
 
-	puts("+++++++++++++66666666666666++++++++++++++++");
-
-	puts(dhcp_ptr->ip);
-
-	puts("++++++++++++++66666666666666+++++++++++++");
+	/*puts(dhcp_ptr->ip);*/
 
 	return dhcp_ptr;
 }						   
