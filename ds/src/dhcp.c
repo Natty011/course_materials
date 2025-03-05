@@ -130,6 +130,7 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 	dhcp_t *dhcp_ptr = NULL;
 	dhcp_node_t *root = NULL;
 	char *prefix_ip = NULL;
+	char word[MAX_SIZE] = { 0 };
 
 	/*uint32_t *ptr = NULL;*/
 	/*const uint8_t *test = NULL;*/
@@ -177,11 +178,14 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 	dhcp_ptr->root = root; 
 	dhcp_ptr->bits_num_in_subnet = bits_num_in_subnet;
 
-	ItoaTo2Base(dhcp_ptr, prefix_ip, subnet_ip, INIT_IP)	;
+	ItoaTo2Base(dhcp_ptr, prefix_ip, subnet_ip, INIT_IP) ;
 
 	dhcp_ptr->ip = prefix_ip;
 
 	puts(dhcp_ptr->ip);
+
+	ItoaTo2Base(dhcp_ptr, word, subnet_ip, PORTION_IP) ;
+	puts( word +  bits_num_in_subnet) ;
 
 	return dhcp_ptr;
 }						   
@@ -526,36 +530,6 @@ static void RecDHCPDestroy(dhcp_node_t *root)
 }
 
 
-
-
-/************************************************************/
-/***************** ItoaTo2BasePortion ***********************/
-/************************************************************/
-/*
-static char *ItoaTo2BasePortion(dhcp_t* dhcp, char *dest, 
-	const ip_addrs_t requested_ip )
-{
-uint8_t i = 0;
-
-	for( i = 0; i < BYTES_IN_IP; ++i )
-	{
-
-	ItoaUpTo36Base(requested_ip[i],
-	dest + (i * BYTE_SIZE) , BASE); 
-
-	
-	*(dest + MAX_SIZE) = '\0';
-
-
-return dest + ( WORD_SIZE - dhcp->bits_num_in_subnet ) ;
-
-}
-
-*/
-
-
-
-
 /************************************************************/
 /******************* ItoaTo2Base *************************/
 /************************************************************/
@@ -563,25 +537,25 @@ return dest + ( WORD_SIZE - dhcp->bits_num_in_subnet ) ;
 static char *ItoaTo2Base(dhcp_t* dhcp, char *dest, 
 	const ip_addrs_t requested_ip, state_convert_t state )
 {
-uint8_t i = 0;
-
+	uint8_t i = 0;
+	
 	for( i = 0; i < BYTES_IN_IP; ++i )
 	{
 
 	ItoaUpTo36Base(requested_ip[i],
-	dest + (i * BYTE_SIZE) , BASE); 
+		dest + (i * BYTE_SIZE) , BASE); 
 
 	}
 
-	
+
 	if( PORTION_IP == state)
 	{
 		*(dest + MAX_SIZE) = '\0';
 
-		return dest + ( WORD_SIZE - dhcp->bits_num_in_subnet ) ;
+		return dest ;
 
 	}
-	
+
 	*(dest + dhcp->bits_num_in_subnet) = '\0';
 
 	return dest;
