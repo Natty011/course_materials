@@ -9,8 +9,10 @@
 #include <assert.h>
 #include <string.h> 	/* strcpy, strcmp */
 #include <stdlib.h> 	/* calloc, free */
-#include <time.h> /* clock */
-#include "knights_tour.h" 
+#include <time.h> 		/* clock */
+#include <stdint.h> 	/* uint8_t*/
+
+#include "dhcp.h" 
 #include "bit_array.h" 
 
 #ifdef PRINTS
@@ -65,6 +67,7 @@ typedef enum
 	
 }func_result_t;
 
+typedef uint8_t ip_addrs_t[4];
 
 /*
 	#ifdef PRINTS
@@ -110,7 +113,15 @@ static void TestDhcp(void)
 {	
 
 	int result = FALSE; 
+	dhcp_t *dhcp1 = NULL;
+	ip_addrs_t ip = {192, 168, 2, 5};
+	size_t bits_num_in_subnet1 = 18;
 
+	dhcp1 = DHCPCreate(ip, bits_num_in_subnet1);
+	
+
+	DHCPDestroy(dhcp1);
+	dhcp1 = NULL;
 
 	if( !result  )
 	{
