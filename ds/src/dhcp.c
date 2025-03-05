@@ -21,6 +21,7 @@
 #define BYTE_SIZE			( 8 )
 #define BASE				( 2 )
 #define MAX_SIZE			( 33 )
+#define WORD_SIZE			( 32 )
 
 
 /************************************************************/
@@ -65,6 +66,15 @@ typedef enum
 	num_of_childs
 } child_t;
 
+typedef enum
+{
+	INIT_IP = 0,
+	PORTION_IP = 1
+
+} state_convert_t;
+
+
+
 /******************************************************************************/
 /***************************** Management struct ******************************/
 
@@ -100,7 +110,7 @@ static void ReverseStr(char* str);
 static int Atoi10Base(const char *nptr);
 static char* Itoa10Base(int n, char* str);
 static char *ItoaTo2Base(dhcp_t* dhcp, char *dest, 
-					const ip_addrs_t requested_ip );
+	       const ip_addrs_t requested_ip, state_convert_t state );
 
 #ifdef PRINTS
 #endif
@@ -120,7 +130,7 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 	dhcp_t *dhcp_ptr = NULL;
 	dhcp_node_t *root = NULL;
 	char *prefix_ip = NULL;
-	/*uint8_t i = 0;*/
+
 	/*uint32_t *ptr = NULL;*/
 	/*const uint8_t *test = NULL;*/
 	/*ip_addrs_t ip1 = {192, 168, 3, 5};*/
@@ -167,20 +177,7 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 	dhcp_ptr->root = root; 
 	dhcp_ptr->bits_num_in_subnet = bits_num_in_subnet;
 
-	ItoaTo2Base(dhcp_ptr, prefix_ip, subnet_ip)	;
-	/*
-	for( i = 0; i < BYTES_IN_IP; ++i )
-	{
-
-		ItoaUpTo36Base(subnet_ip[i],
-			prefix_ip + (i * BYTE_SIZE) , BASE); 
-
-	}
-
-	*(prefix_ip + bits_num_in_subnet) = '\0';
-
-	*/
-	
+	ItoaTo2Base(dhcp_ptr, prefix_ip, subnet_ip, INIT_IP)	;
 
 	dhcp_ptr->ip = prefix_ip;
 
@@ -528,12 +525,43 @@ static void RecDHCPDestroy(dhcp_node_t *root)
 		
 }
 
+
+
+
+/************************************************************/
+/***************** ItoaTo2BasePortion ***********************/
+/************************************************************/
+/*
+static char *ItoaTo2BasePortion(dhcp_t* dhcp, char *dest, 
+	const ip_addrs_t requested_ip )
+{
+uint8_t i = 0;
+
+	for( i = 0; i < BYTES_IN_IP; ++i )
+	{
+
+	ItoaUpTo36Base(requested_ip[i],
+	dest + (i * BYTE_SIZE) , BASE); 
+
+	
+	*(dest + MAX_SIZE) = '\0';
+
+
+return dest + ( WORD_SIZE - dhcp->bits_num_in_subnet ) ;
+
+}
+
+*/
+
+
+
+
 /************************************************************/
 /******************* ItoaTo2Base *************************/
 /************************************************************/
 
 static char *ItoaTo2Base(dhcp_t* dhcp, char *dest, 
-	const ip_addrs_t requested_ip )
+	const ip_addrs_t requested_ip, state_convert_t state )
 {
 uint8_t i = 0;
 
@@ -545,9 +573,18 @@ uint8_t i = 0;
 
 	}
 
+	
+	if( PORTION_IP == state)
+	{
+		*(dest + MAX_SIZE) = '\0';
+
+		return dest + ( WORD_SIZE - dhcp->bits_num_in_subnet ) ;
+
+	}
+	
 	*(dest + dhcp->bits_num_in_subnet) = '\0';
 
-return dest;
+	return dest;
 
 }
 
