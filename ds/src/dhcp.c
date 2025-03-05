@@ -115,14 +115,8 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 	char *ip_temp = NULL;
 	uint8_t i = 0, quotient = 0;
 	/*ip_addrs_t ip1 = {192, 168, 3, 5};*/
-	char* ip_temp2[4] = {"", "", "", ""};
-	char *prefix1 = (char*)malloc( sizeof(char*) * 50 );
-	/*
-	 prefix[0] = "            ";
-	 prefix[1] = "            ";
-	 prefix[2] = "";
-	 prefix[3] = "";
-*/
+	char *prefix1 = (char*)malloc( sizeof(char*) * 33 );
+
 	dhcp_ptr = (dhcp_t*)malloc( sizeof(dhcp_t) );
 
 	if( NULL == dhcp_ptr )
@@ -151,34 +145,38 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 
 	for( i = 0; i < BYTES_IN_IP; ++i )
 	{
-		/*char prefix[9] = { 0 };*/
-		char* prefix = NULL;
-		/*prefix = prefix1 +(i*9);*/
-		printf("subnet_ip[%u] = { %u } \n " ,i, subnet_ip[i] );
-
-		ip_temp2[i] = ItoaUpTo36Base(subnet_ip[i],
-			 prefix1 +(i*8) , 2); 
+		/*printf("subnet_ip[%u] = { %u } \n " ,i, subnet_ip[i] );*/
+			/* ip_temp2[i] =  */
+		ItoaUpTo36Base(subnet_ip[i],
+			 prefix1 +(i*BYTE_SIZE) , 2); 
 		/*puts(prefix);
 		puts(ip_temp2[i]);*/
 
 		/*ip_temp2[i] = strcat(ip_temp2, ip_temp2[i]);*/
 	}
+
 	puts("+++++++++++++++++++++++++++++++++++++++");
 
 	puts(prefix1);
 
 	puts("+++++++++++++++++++++++++++++++++++++++");
+	*(prefix1 + bits_num_in_subnet) = '\0';
 
+	puts("+++++++++++++66666666666666++++++++++++++++");
+
+	puts(prefix1);
+
+	puts("++++++++++++++66666666666666+++++++++++++");
 	for( i = 0; i < BYTES_IN_IP ; ++i )
 	{
-		puts(ip_temp2[i]);
+		/*puts(ip_temp2[i]);*/
 		/*ip_temp2[i] = ItoaUpTo36Base(subnet_ip[i], prefix , 2); */
 	}
 	puts("+++++++++++++++++++++++++++++++++++++++");
 
 	for( i = 0; i < bits_num_in_subnet / BYTE_SIZE ; ++i )
 	{
-		 memcpy(prefix1 + i * BYTE_SIZE, ip_temp2[i], BYTE_SIZE);
+		/* memcpy(prefix1 + i * BYTE_SIZE, ip_temp2[i], BYTE_SIZE);*/
 		puts("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
 			/* + i * BYTE_SIZE*/
 				/* puts(ip_temp2[i]);
@@ -209,15 +207,12 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 	puts(str - count );
 
 	*/
-puts("--------------------------------------------");
-
+	/*
 	for( i = 0; i < BYTES_IN_IP ; ++i )
 	{
 		puts(ip_temp2[i]);
-		/*ip_temp2[i] = ItoaUpTo36Base(subnet_ip[i], prefix , 2); */
 	}
-	/*free(prefix1);*/
-
+*/
 	return dhcp_ptr;
 }						   
 
