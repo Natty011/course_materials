@@ -35,7 +35,7 @@ typedef enum
 	ZERO_CHAR = 48,
 	ONE_CHAR = 49
 
-} result_t;
+} char_represents_t;
 
 typedef enum
 {
@@ -85,6 +85,9 @@ struct dhcp
 /************************ static functions declartions ************************/
 /******************************************************************************/
 
+static void RecDHCPDestroy(dhcp_node_t *root);
+
+
 static int AtoiUpTo36Base(const char *str, int base);
 static char* ItoaUpTo36Base(int n, char* str, int base);
 static const char* WhiteSpacesSkip(const char *nptr);
@@ -109,9 +112,17 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 {
 	dhcp_t *dhcp_ptr = NULL;
 	dhcp_node_t *root = NULL;
-	char *ip_temp = NULL, *ip_temp2 = NULL;
-	int i = 0;
-
+	char *ip_temp = NULL;
+	uint8_t i = 0;
+	char* ip_temp2[4] = {"", "", "", ""};
+	/*ip_addrs_t ip = {192, 168, 2, 5};*/
+	char *prefix1 = (char*)malloc( sizeof(char*) * 40 );
+	/*
+	 prefix[0] = "            ";
+	 prefix[1] = "            ";
+	 prefix[2] = "";
+	 prefix[3] = "";
+*/
 	dhcp_ptr = (dhcp_t*)malloc( sizeof(dhcp_t) );
 
 	if( NULL == dhcp_ptr )
@@ -138,12 +149,31 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 
 	for( i = 0; i < BYTES_IN_IP; ++i )
 	{
-		ip_temp = ItoaUpTo36Base(subnet_ip[i], ip_temp, 2); 
-		ip_temp2 = strcat(ip_temp2, ip_temp);
+		/*char prefix[9] = { 0 };*/
+		char* prefix = NULL;
+		prefix = prefix1 +(i*9);
+		printf("subnet_ip[%u] = { %u } \n " ,i, subnet_ip[i] );
+
+		ip_temp2[i] = ItoaUpTo36Base(subnet_ip[i], prefix , 2); 
+		puts(prefix);
+		puts(ip_temp2[i]);
+
+		/*ip_temp2[i] = strcat(ip_temp2, ip_temp2[i]);*/
 	}
+/*
+	for( i = 0; i < BYTES_IN_IP; ++i )
+	{
+		dhcp_ptr->ip = strncat(dhcp_ptr->ip, ip_temp2[i],
+				 bits_num_in_subnet );
+*/
+puts("--------------------------------------------");
 
-	dhcp_ptr->ip = strncat(dhcp_ptr->ip, ip_temp2, bits_num_in_subnet );
-
+	for( i = 0; i < BYTES_IN_IP ; ++i )
+	{
+		puts(ip_temp2[i]);
+		/*ip_temp2[i] = ItoaUpTo36Base(subnet_ip[i], prefix , 2); */
+	}
+	free(prefix1);
 	return dhcp_ptr;
 }						   
 
@@ -160,23 +190,27 @@ static void RecDHCPDestroy(dhcp_node_t *root)
 		return;
 	}
 
-		RecDHCPDestroy(root->child[LEFT]);
-		RecDHCPDestroy(root->child[RIGHT]);
+	RecDHCPDestroy(root->child[LEFT]);
+	RecDHCPDestroy(root->child[RIGHT]);
 
-		root->child[LEFT] = root->child[RIGHT] = NULL;
+	root->child[LEFT] = root->child[RIGHT] = NULL;
 
-		free( root );
+	free( root );
+
+	root = NULL;
 		
-	}
-
-	free()
 }
+
+
 
 void DHCPDestroy(dhcp_t* dhcp)
 {
 	if( NULL != dhcp )
 	{
-		RecDHCPDestroy(dhcp->root)
+		RecDHCPDestroy(dhcp->root);
+		dhcp->root = NULL;
+		free(dhcp);
+		dhcp = NULL;
 	}
 }
 
@@ -218,7 +252,8 @@ static char* ItoaUpTo36Base(int n, char* str, int base)
 
 	int remainder = 0;
 	char* pstr = str;
-	
+	size_t count = 0;
+
 	if(NULL == str )
 	{
 		puts("str is a null pointer");
@@ -235,8 +270,8 @@ static char* ItoaUpTo36Base(int n, char* str, int base)
 	{
 		if ( n == 0)
 		{
-			*str++ = '0';
-			*str = '\0';
+			str = "00000000";
+			/**str = '\0';*/
 			return str; 
 		}
 		else if ((n < 0) && ( base == 10) )
@@ -255,10 +290,25 @@ static char* ItoaUpTo36Base(int n, char* str, int base)
 		remainder = n % base;
 		*str++ = (remainder > 9) ? (remainder - 10) + 'a' : remainder + '0';
 		n = n / base;
+		++count;
+	}
+	*str = '\0'; 
+	/*puts("!!!!!!!!!!!");*/
+	/*puts(str);*/
+	if( 8 - count != 0)
+	{
+		/*puts("?????????????");*/
+
+		str = strncat(str, "000000000", 8 - count); /*8 - count */
+		/*puts(str);
+		puts(str - count );*/
 	}
 	
-	*str = '\0'; 
+
+	/**str = '\0'; */
 	ReverseStr(pstr);
+	/*puts(pstr);*/
+
 	return pstr;	
 }
 
