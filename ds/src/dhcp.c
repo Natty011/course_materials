@@ -95,6 +95,10 @@ struct dhcp
 
 };
 
+static char *reserved_network[MAX_SIZE] = { 0 };
+static char *reserved_server[MAX_SIZE] = { 0 };
+static char *reserved_broadcast[MAX_SIZE]= { 0 };
+
 /******************************************************************************/
 /************************ static functions declartions ************************/
 /******************************************************************************/
@@ -131,10 +135,30 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 	dhcp_node_t *root = NULL;
 	char *prefix_ip = NULL;
 	char word[MAX_SIZE] = { 0 };
+	char word2[MAX_SIZE] = { 0 };
+	/*ip_addrs_t subnet_mask = {255, 255, 255, 0};*/
 
+	/*uint32_t subnet_mask = 0xffffff00;*/
 	/*uint32_t *ptr = NULL;*/
 	/*const uint8_t *test = NULL;*/
 	/*ip_addrs_t ip1 = {192, 168, 3, 5};*/
+	/*ip_addrs_t *ip2  = (ip_addrs_t*)subnet_ip; *//* (ip_addrs_t*)*/
+	/*ip_addrs_t ip2  = (ip_addrs_t)subnet_ip ;*/ /* (ip_addrs_t*)*/
+	/*ip2[2] = ip2[2] & subnet_mask[2];*/
+	/*printf("%u\n", (uint8_t)(ip2 + 2));*/
+   /* printf("%u.%u.%u.%u", ip2[0], ip2[1], ip2[2], ip2[3]);*/
+
+	/*
+	printf(" %u \n ", *((uint8_t*)ip2 + 1 ));
+	printf(" %u \n ", (*ip2 & 0xffffff00) );
+
+	printf(" %u \n ", *(ip2 + 1) );
+	*/
+	/*
+	uint32_t network_ip = subnet_ip & (*(uint32_t*)subnet_mask);
+	uint32_t server_ip = subnet_ip & (*(uint32_t*)subnet_mask) ;
+	uint32_t broadcast_ip = subnet_ip & (*(uint32_t*)subnet_mask );
+*/
 	/*test = (const uint8_t*)ip1;*/
 	/*puts((char*)test );*/
 	/*ptr = (uint32_t*)ip1;*/
@@ -185,11 +209,29 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 	puts(dhcp_ptr->ip);
 
 	ItoaTo2Base(dhcp_ptr, word, subnet_ip, PORTION_IP) ;
-	puts( word +  bits_num_in_subnet) ;
+	puts(word +  bits_num_in_subnet) ;
+
+	memset(reserved_network, '0', WORD_SIZE - bits_num_in_subnet);
+	reserved_network = 	ItoaTo2Base(dhcp_ptr, word, subnet_ip, PORTION_IP) ;
+
+
+/*
+	*ip2 = (*ip2 & 0xffffff00);
+*/
+	/*ItoaTo2Base(dhcp_ptr, word2, *(ip_addrs_t*)ip2, PORTION_IP) ;*/
+	/*ItoaTo2Base(dhcp_ptr, word2, &ip2, PORTION_IP) ;*/
+	/*puts( word2 +  bits_num_in_subnet) ;*/
+	
+	
+	/*
+	static char *reserved_network;
+	static char *reserved_server;
+	static char *reserved_broadcast;
+	*/
 
 	return dhcp_ptr;
 }						   
-/*
+
 int DHCPAllocateIP(dhcp_t* dhcp,
 	const unsigned char requested_ip[BYTES_IN_IP],
 	unsigned char ret_allocated_ip[BYTES_IN_IP])
@@ -197,7 +239,7 @@ int DHCPAllocateIP(dhcp_t* dhcp,
 
 
 }
-*/
+
 
 /************************************************************/
 /********************  DHCPDestroy  *************************/
