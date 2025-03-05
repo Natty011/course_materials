@@ -155,7 +155,7 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 		printf("subnet_ip[%u] = { %u } \n " ,i, subnet_ip[i] );
 
 		ip_temp2[i] = ItoaUpTo36Base(subnet_ip[i], prefix , 2); 
-		puts(prefix);
+		/*puts(prefix);*/
 		puts(ip_temp2[i]);
 
 		/*ip_temp2[i] = strcat(ip_temp2, ip_temp2[i]);*/
@@ -165,7 +165,9 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 	{
 		dhcp_ptr->ip = strncat(dhcp_ptr->ip, ip_temp2[i],
 				 bits_num_in_subnet );
-*/
+		}	
+				 
+	*/	
 puts("--------------------------------------------");
 
 	for( i = 0; i < BYTES_IN_IP ; ++i )
