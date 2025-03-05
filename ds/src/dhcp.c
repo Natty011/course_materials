@@ -43,7 +43,8 @@ typedef enum
 typedef enum
 {
 	SUCCESS = 0,
-	FAIL = 1
+	FAIL = 1,
+	REQUEST_NOT_MET = 2
 
 } result_t;
 
@@ -97,6 +98,8 @@ static const char* WhiteSpacesSkip(const char *nptr);
 static void ReverseStr(char* str);
 static int Atoi10Base(const char *nptr);
 static char* Itoa10Base(int n, char* str);
+static char *ItoaTo2Base(dhcp_t* dhcp, char *dest, 
+					const ip_addrs_t requested_ip );
 
 #ifdef PRINTS
 #endif
@@ -117,15 +120,15 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 	dhcp_node_t *root = NULL;
 	char *prefix_ip = NULL;
 	uint8_t i = 0;
-	uint32_t *ptr = NULL;
-	const uint8_t *test = NULL;
-	ip_addrs_t ip1 = {192, 168, 3, 5};
-	test = (const uint8_t*)ip1;
+	/*uint32_t *ptr = NULL;*/
+	/*const uint8_t *test = NULL;*/
+	/*ip_addrs_t ip1 = {192, 168, 3, 5};*/
+	/*test = (const uint8_t*)ip1;*/
 	/*puts((char*)test );*/
-	ptr = (uint32_t*)ip1;
+	/*ptr = (uint32_t*)ip1;*/
 	/*puts((char*)ptr + 1);*/
-	printf(" %u \n ", *((uint8_t*)ptr + 1 ));
-	printf(" %u \n ", *(test + 2) );
+	/*printf(" %u \n ", *((uint8_t*)ptr + 1 ));*/
+	/*printf(" %u \n ", *(test + 2) );*/
 
 	dhcp_ptr = (dhcp_t*)malloc( sizeof(dhcp_t) );
 
@@ -163,6 +166,8 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 	dhcp_ptr->root = root; 
 	dhcp_ptr->bits_num_in_subnet = bits_num_in_subnet;
 
+	ItoaTo2Base(dhcp_ptr, prefix_ip, subnet_ip)	;
+	/*
 	for( i = 0; i < BYTES_IN_IP; ++i )
 	{
 
@@ -173,16 +178,24 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 
 	*(prefix_ip + bits_num_in_subnet) = '\0';
 
+	*/
 	
 
 	dhcp_ptr->ip = prefix_ip;
 
-	/*puts(dhcp_ptr->ip);*/
+	puts(dhcp_ptr->ip);
 
 	return dhcp_ptr;
 }						   
+/*
+int DHCPAllocateIP(dhcp_t* dhcp,
+	const unsigned char requested_ip[BYTES_IN_IP],
+	unsigned char ret_allocated_ip[BYTES_IN_IP])
+{
 
 
+}
+*/
 
 /************************************************************/
 /********************  DHCPDestroy  *************************/
@@ -513,6 +526,30 @@ static void RecDHCPDestroy(dhcp_node_t *root)
 	root = NULL;
 		
 }
+
+/************************************************************/
+/******************* ItoaTo2Base *************************/
+/************************************************************/
+
+static char *ItoaTo2Base(dhcp_t* dhcp, char *dest, 
+	const ip_addrs_t requested_ip )
+{
+uint8_t i = 0;
+
+	for( i = 0; i < BYTES_IN_IP; ++i )
+	{
+
+	ItoaUpTo36Base(requested_ip[i],
+	dest + (i * BYTE_SIZE) , BASE); 
+
+	}
+
+	*(dest + dhcp->bits_num_in_subnet) = '\0';
+
+return dest;
+
+}	
+
 
 
 /************************************************************/
