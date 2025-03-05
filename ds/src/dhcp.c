@@ -267,6 +267,8 @@ static char* ItoaUpTo36Base(int n, char* str, int base)
 	   puts("Invalid base value");
 	   return str;
 	}
+
+	
 	
 	if( n <= 0 )
 	{
