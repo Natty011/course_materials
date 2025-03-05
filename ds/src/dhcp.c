@@ -117,7 +117,15 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 	dhcp_node_t *root = NULL;
 	char *prefix_ip = NULL;
 	uint8_t i = 0;
-	/*ip_addrs_t ip1 = {192, 168, 3, 5};*/
+	uint32_t *ptr = NULL;
+	const uint8_t *test = NULL;
+	ip_addrs_t ip1 = {192, 168, 3, 5};
+	test = (const uint8_t*)ip1;
+	/*puts((char*)test );*/
+	ptr = (uint32_t*)ip1;
+	/*puts((char*)ptr + 1);*/
+	printf(" %u \n ", *((uint8_t*)ptr + 1 ));
+	printf(" %u \n ", *(test + 2) );
 
 	dhcp_ptr = (dhcp_t*)malloc( sizeof(dhcp_t) );
 
@@ -179,26 +187,6 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 /************************************************************/
 /********************  DHCPDestroy  *************************/
 /************************************************************/
-
-static void RecDHCPDestroy(dhcp_node_t *root)
-{
-	if( NULL == root )
-	{
-		return;
-	}
-
-	RecDHCPDestroy(root->child[LEFT]);
-	RecDHCPDestroy(root->child[RIGHT]);
-
-	root->child[LEFT] = root->child[RIGHT] = NULL;
-
-	free( root );
-
-	root = NULL;
-		
-}
-
-
 
 void DHCPDestroy(dhcp_t* dhcp)
 {
@@ -298,23 +286,14 @@ static char* ItoaUpTo36Base(int n, char* str, int base)
 		++count;
 	}
 	*str = '\0'; 
-	/*puts("!!!!!!!!!!!");*/
-	/*puts(str);*/
-	if( 8 - count != 0)
-	{
-		/*puts("?????????????");*/
 
-		str = strncat(str, "00000000", 8 - count); /*8 - count */
-		/*
-		puts(str);
-		puts(str - count );
-		*/
+	if( BYTE_SIZE - count != 0)
+	{
+		str = strncat(str, "00000000", BYTE_SIZE - count); /*8 - count */
 	}
 	
 
-	/**str = '\0'; */
 	ReverseStr(pstr);
-	/*puts(pstr);*/
 
 	return pstr;	
 }
@@ -513,6 +492,28 @@ static char* Itoa10Base(int n, char* str)
 
 	return pstr;
 }
+
+/************************************************************/
+/******************* RecDHCPDestroy *************************/
+/************************************************************/
+static void RecDHCPDestroy(dhcp_node_t *root)
+{
+	if( NULL == root )
+	{
+		return;
+	}
+
+	RecDHCPDestroy(root->child[LEFT]);
+	RecDHCPDestroy(root->child[RIGHT]);
+
+	root->child[LEFT] = root->child[RIGHT] = NULL;
+
+	free( root );
+
+	root = NULL;
+		
+}
+
 
 /************************************************************/
 /********** End Of Static Functions definition  *************/
