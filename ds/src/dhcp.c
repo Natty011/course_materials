@@ -164,7 +164,7 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 */
 	
 	total = total - 3;
-	printf("total = { %u} \n", total );
+	/*printf("total = { %u} \n", total );*/
 
 
 	dhcp_ptr = (dhcp_t*)malloc( sizeof(dhcp_t) );
@@ -207,7 +207,7 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 
 	dhcp_ptr->ip = prefix_ip;
 
-	puts(dhcp_ptr->ip);
+	/*puts(dhcp_ptr->ip);*/
 
 	ItoaTo2Base(dhcp_ptr, word, subnet_ip, PORTION_IP) ;
 	/*puts(word +  bits_num_in_subnet) ;*/
@@ -221,102 +221,17 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 	memset(reserved_server, '1', host_size);
 	reserved_server[host_size - 1] = ZERO_CHAR;
 	reserved_server[host_size] = BACK_SLASH_NULL;
-
+/*
 	puts(reserved_network);
 	puts(reserved_server);
 	puts(reserved_broadcast);
-
+*/
 
 	res = TryToAllocExactHostIp( dhcp_ptr->root,reserved_network, host_size );
 	res = TryToAllocExactHostIp( dhcp_ptr->root,reserved_server, host_size);
 	res = TryToAllocExactHostIp( dhcp_ptr->root,reserved_broadcast, host_size );
 	UNUSED(res);
 
-
-/*
-	puts("++++++++++++++++++++network_ip++++++++++++++++++");
-	strcpy(prefix_ip_copy, prefix_ip);
-
-	host_network_ip = strcat(prefix_ip_copy, reserved_network);
-	puts(host_network_ip);
-	StrHostIpToUint(host_network_ip, network_ip);
-  			 printf("{%u, %u, %u, %u}\n", network_ip[0], network_ip[1],
-				network_ip[2], network_ip[3]);
-
-	puts("++++++++++++++++++++network_ip+++++++++++++++++");
-
-
-	printf("res = { %d }\n", res);
-
-	puts("++++++++++++++++++++server_ip++++++++++++++++++");
-
-	strcpy(prefix_ip_copy, prefix_ip);
-
-	host_server_ip = strcat(prefix_ip_copy, reserved_server);
-	puts(host_server_ip);
-	StrHostIpToUint(host_server_ip, server_ip);
-  			 printf("{%u, %u, %u, %u}\n", server_ip[0], server_ip[1],
-				server_ip[2], server_ip[3]);
-
-	puts("++++++++++++++++++++server_ip+++++++++++++++++");
-
-	printf("res = { %d }\n", res);
-
-	puts("++++++++++++++++++++broadcast_ip++++++++++++++++");
-	strcpy(prefix_ip_copy, prefix_ip);
-	puts(prefix_ip_copy);
-	
-	host_broadcast_ip = strcat(prefix_ip_copy, reserved_broadcast);
-	puts(host_broadcast_ip);
-
-	StrHostIpToUint(host_broadcast_ip, broadcast_ip);
-  			 printf("{%u, %u, %u, %u}\n", broadcast_ip[0], broadcast_ip[1],
-				broadcast_ip[2], broadcast_ip[3]);
-				
-	puts("++++++++++++++++++++broadcast_ip++++++++++++++++++");
-
-
-	res = TryToAllocExactHostIp( dhcp_ptr->root,reserved_network, host_size );
-
-
-	printf("res = { %d }\n", res);
-	*/
-
-	/*
-	if(IS_FULL != res)
-	{
-		
-		if(host_size != res )
-		{
-			strcpy(word2, reserved_network );
-			res_candidate = AtoiUpTo36Base(word2, BASE);
-			puts(word2);
-
-
-			printf("res_candidate = { %u} \n", res_candidate );
-			res_candidate += 1U;
-			printf("res_candidate = { %u} \n", res_candidate );
-
-			ItoaUpTo36Base(res_candidate, word2, BASE);
-			puts(word2);
-
-			res = TryToAllocExactHostIp( dhcp_ptr->root,word2, host_size );
-
-			printf("res = { %d }\n", res);
-
-			host_ip_to_allocate =	strcat(dhcp_ptr->ip, word2);
-			puts(host_ip_to_allocate);
-
-			StrHostIpToUint(host_ip_to_allocate, ret_allocated_ip);
-  			 printf("{%u, %u, %u, %u}\n", ret_allocated_ip[0], ret_allocated_ip[1],
-					ret_allocated_ip[2], ret_allocated_ip[3]);
-
-
-
-		}
-		*/
-
-	
 	return dhcp_ptr;
 }
 
@@ -346,12 +261,12 @@ int DHCPAllocateIP(dhcp_t* dhcp,
 
 	ItoaTo2Base(dhcp, word, requested_ip, PORTION_IP) ;
 	host_ip_to_allocate = word +  subnet_size_bits;
-	puts(host_ip_to_allocate) ;
+	/*puts(host_ip_to_allocate) ;*/
 
 	res = TryToAllocExactHostIp( root,
 				host_ip_to_allocate, host_size );
 
-	printf("res = { %d }\n", res);
+	/*printf("res = { %d }\n", res);*/
 
 	if(IS_FULL != res)
 	{
@@ -371,31 +286,31 @@ int DHCPAllocateIP(dhcp_t* dhcp,
 		{
 			/*strcpy(word2, reserved_network );*/
 			res_candidate = AtoiUpTo36Base(host_ip_to_allocate, BASE);
-			puts(host_ip_to_allocate);
+			/*puts(host_ip_to_allocate);*/
 
 			if(res_candidate >= total )
 			{
 				return FAIL;
 			}
 
-			printf("res_candidate = { %u} \n", res_candidate );
+			/*printf("res_candidate = { %u} \n", res_candidate );*/
 			res_candidate += 1U;
-			printf("res_candidate = { %u} \n", res_candidate );
+			/*printf("res_candidate = { %u} \n", res_candidate );*/
 
 			ItoaUpTo36Base(res_candidate, host_ip_to_allocate, BASE);
-			puts(host_ip_to_allocate);
+			/*puts(host_ip_to_allocate);*/
 
 			res = TryToAllocExactHostIp( root,
 				host_ip_to_allocate, host_size );
 
-			printf("res = { %d }\n", res);
+			/*printf("res = { %d }\n", res);*/
 
 			
 
 		}
 
 		host_ip_to_allocate = strcat(prefix_ip_copy, host_ip_to_allocate);
-			puts(host_ip_to_allocate);
+			/*puts(host_ip_to_allocate);*/
 
 			StrHostIpToUint(host_ip_to_allocate, ret_allocated_ip);
   			 printf("ret_allocated_ip = {%u, %u, %u, %u} \n", ret_allocated_ip[0],
@@ -990,6 +905,92 @@ puts("++++++++++++++++++++network_ip+++++++++++++++++");
 
 }
 */
+
+
+/*
+puts("++++++++++++++++++++network_ip++++++++++++++++++");
+strcpy(prefix_ip_copy, prefix_ip);
+
+host_network_ip = strcat(prefix_ip_copy, reserved_network);
+puts(host_network_ip);
+StrHostIpToUint(host_network_ip, network_ip);
+			printf("{%u, %u, %u, %u}\n", network_ip[0], network_ip[1],
+			network_ip[2], network_ip[3]);
+
+puts("++++++++++++++++++++network_ip+++++++++++++++++");
+
+
+printf("res = { %d }\n", res);
+
+puts("++++++++++++++++++++server_ip++++++++++++++++++");
+
+strcpy(prefix_ip_copy, prefix_ip);
+
+host_server_ip = strcat(prefix_ip_copy, reserved_server);
+puts(host_server_ip);
+StrHostIpToUint(host_server_ip, server_ip);
+			printf("{%u, %u, %u, %u}\n", server_ip[0], server_ip[1],
+			server_ip[2], server_ip[3]);
+
+puts("++++++++++++++++++++server_ip+++++++++++++++++");
+
+printf("res = { %d }\n", res);
+
+puts("++++++++++++++++++++broadcast_ip++++++++++++++++");
+strcpy(prefix_ip_copy, prefix_ip);
+puts(prefix_ip_copy);
+
+host_broadcast_ip = strcat(prefix_ip_copy, reserved_broadcast);
+puts(host_broadcast_ip);
+
+StrHostIpToUint(host_broadcast_ip, broadcast_ip);
+			printf("{%u, %u, %u, %u}\n", broadcast_ip[0], broadcast_ip[1],
+			broadcast_ip[2], broadcast_ip[3]);
+			
+puts("++++++++++++++++++++broadcast_ip++++++++++++++++++");
+
+
+res = TryToAllocExactHostIp( dhcp_ptr->root,reserved_network, host_size );
+
+
+printf("res = { %d }\n", res);
+*/
+
+/*
+if(IS_FULL != res)
+{
+	
+	if(host_size != res )
+	{
+		strcpy(word2, reserved_network );
+		res_candidate = AtoiUpTo36Base(word2, BASE);
+		puts(word2);
+
+
+		printf("res_candidate = { %u} \n", res_candidate );
+		res_candidate += 1U;
+		printf("res_candidate = { %u} \n", res_candidate );
+
+		ItoaUpTo36Base(res_candidate, word2, BASE);
+		puts(word2);
+
+		res = TryToAllocExactHostIp( dhcp_ptr->root,word2, host_size );
+
+		printf("res = { %d }\n", res);
+
+		host_ip_to_allocate =	strcat(dhcp_ptr->ip, word2);
+		puts(host_ip_to_allocate);
+
+		StrHostIpToUint(host_ip_to_allocate, ret_allocated_ip);
+			printf("{%u, %u, %u, %u}\n", ret_allocated_ip[0], ret_allocated_ip[1],
+				ret_allocated_ip[2], ret_allocated_ip[3]);
+
+
+
+	}
+	*/
+
+
 /************************************************************/
 /********** End Of Static Functions definition  *************/
 /************************************************************/
