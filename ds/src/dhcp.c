@@ -183,6 +183,7 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 		return NULL;
 	}
 
+	
 	prefix_ip = (char*)malloc( sizeof(char*) * MAX_SIZE );
 
 	if( NULL == prefix_ip )
