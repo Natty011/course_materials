@@ -149,7 +149,7 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 	uint32_t total = 1U<<host_size, res_candidate = 0;
 	total = total - 1;
 	printf("total = { %u} \n", total );
-
+	unsigned char ret_allocated_ip[BYTES_IN_IP] = { 0 };
 	/*ip_addrs_t subnet_mask = {255, 255, 255, 0};*/
 
 	/*uint32_t subnet_mask = 0xffffff00;*/
@@ -259,6 +259,7 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 
 	if(IS_FULL != res)
 	{
+		
 		if(host_size != res )
 		{
 			strcpy(word2, reserved_network );
@@ -277,11 +278,10 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 
 			printf("res = { %d }\n", res);
 
-			if( 0 == word2[res] )
-			{
+			host_ip_to_allocate =	strcat(dhcp_ptr->ip, word2);
+			puts(host_ip_to_allocate);
 
-			}
-			/*host_ip_to_allocate = */
+
 		}
 
 	}
@@ -315,7 +315,25 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 	*/
 
 	return dhcp_ptr;
-}						   
+}
+static void StrHostIpToUint(char *host_ip, ip_addrs_t ret_allocated_ip)
+{
+	uint8_t i = 0;
+	
+	for( i = 0; i < BYTES_IN_IP; ++i )
+	{
+		 = (uint8_t)Atoi10Base(host_ip + (i * BYTE_SIZE) );
+
+
+		 
+	ItoaUpTo36Base(requested_ip[i],
+		dest + (i * BYTE_SIZE) , BASE); 
+
+	}
+
+
+}
+
 
 int DHCPAllocateIP(dhcp_t* dhcp,
 	const unsigned char requested_ip[BYTES_IN_IP],
