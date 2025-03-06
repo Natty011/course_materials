@@ -145,21 +145,23 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 	dhcp_t *dhcp_ptr = NULL;
 	dhcp_node_t *root = NULL;
 	char *prefix_ip = NULL;
-	char prefix_ip_copy[MAX_SIZE] = { 0 };
+	/*char prefix_ip_copy[MAX_SIZE] = { 0 };*/
 
 	char word[MAX_SIZE] = { 0 };
-	char word2[MAX_SIZE] = { 0 };
+	/*char word2[MAX_SIZE] = { 0 };*/
 	uint8_t host_size = WORD_SIZE - bits_num_in_subnet;
 	int res = 0;
+	/*
 	char *host_network_ip = NULL;
 	char *host_broadcast_ip = NULL;
 	char *host_server_ip = NULL;
-
-	uint32_t total = 1U<<host_size, res_candidate = 0;
+*/
+	uint32_t total = 1U<<host_size; /*, res_candidate = 0*/
+	/*
 	ip_addrs_t network_ip = { 0 };
 	ip_addrs_t broadcast_ip = { 0 };
 	ip_addrs_t server_ip = { 0 };
-
+*/
 	
 	total = total - 3;
 	printf("total = { %u} \n", total );
@@ -226,8 +228,12 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 
 
 	res = TryToAllocExactHostIp( dhcp_ptr->root,reserved_network, host_size );
-	printf("res = { %d }\n", res);
+	res = TryToAllocExactHostIp( dhcp_ptr->root,reserved_server, host_size);
+	res = TryToAllocExactHostIp( dhcp_ptr->root,reserved_broadcast, host_size );
+	UNUSED(res);
 
+
+/*
 	puts("++++++++++++++++++++network_ip++++++++++++++++++");
 	strcpy(prefix_ip_copy, prefix_ip);
 
@@ -239,7 +245,6 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 
 	puts("++++++++++++++++++++network_ip+++++++++++++++++");
 
-	res = TryToAllocExactHostIp( dhcp_ptr->root,reserved_server, host_size);
 
 	printf("res = { %d }\n", res);
 
@@ -255,7 +260,6 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 
 	puts("++++++++++++++++++++server_ip+++++++++++++++++");
 
-	res = TryToAllocExactHostIp( dhcp_ptr->root,reserved_broadcast, host_size );
 	printf("res = { %d }\n", res);
 
 	puts("++++++++++++++++++++broadcast_ip++++++++++++++++");
@@ -271,12 +275,13 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 				
 	puts("++++++++++++++++++++broadcast_ip++++++++++++++++++");
 
-/*
+
 	res = TryToAllocExactHostIp( dhcp_ptr->root,reserved_network, host_size );
 
 
 	printf("res = { %d }\n", res);
 	*/
+
 	/*
 	if(IS_FULL != res)
 	{
@@ -323,10 +328,10 @@ int DHCPAllocateIP(dhcp_t* dhcp,
 {
 	
 	char word[MAX_SIZE] = { 0 };
-	char *candidate = NULL;
+	/*char *candidate = NULL;*/
 	dhcp_node_t *root = dhcp->root;
 	size_t subnet_size_bits = dhcp->bits_num_in_subnet;
-	char word2[MAX_SIZE] = { 0 };
+	/*char word2[MAX_SIZE] = { 0 };*/
 	uint8_t host_size = WORD_SIZE - subnet_size_bits;
 	int res = 0;
 	char *host_ip_to_allocate = NULL;
@@ -876,7 +881,63 @@ static void UpdadePathToIsAllocated( dhcp_node_t *node)
 	}
 }
 
+/*static PrintDataIp()
+{
 
+dhcp_t *dhcp_ptr = NULL;
+	dhcp_node_t *root = NULL;
+	char *prefix_ip = NULL;
+	char prefix_ip_copy[MAX_SIZE] = { 0 };
+
+	char word[MAX_SIZE] = { 0 };
+	char word2[MAX_SIZE] = { 0 };
+	uint8_t host_size = WORD_SIZE - bits_num_in_subnet;
+	int res = 0;
+	char *host_network_ip = NULL;
+	char *host_broadcast_ip = NULL;
+	char *host_server_ip = NULL;
+
+	uint32_t total = 1U<<host_size, res_candidate = 0;
+	ip_addrs_t network_ip = { 0 };
+	ip_addrs_t broadcast_ip = { 0 };
+	ip_addrs_t server_ip = { 0 };
+
+puts("++++++++++++++++++++network_ip+++++++++++++++++");
+
+	res = TryToAllocExactHostIp( dhcp_ptr->root,reserved_server, host_size);
+
+	printf("res = { %d }\n", res);
+
+	puts("++++++++++++++++++++server_ip++++++++++++++++++");
+
+	strcpy(prefix_ip_copy, prefix_ip);
+
+	host_server_ip = strcat(prefix_ip_copy, reserved_server);
+	puts(host_server_ip);
+	StrHostIpToUint(host_server_ip, server_ip);
+  			 printf("{%u, %u, %u, %u}\n", server_ip[0], server_ip[1],
+				server_ip[2], server_ip[3]);
+
+	puts("++++++++++++++++++++server_ip+++++++++++++++++");
+
+	res = TryToAllocExactHostIp( dhcp_ptr->root,reserved_broadcast, host_size );
+	printf("res = { %d }\n", res);
+
+	puts("++++++++++++++++++++broadcast_ip++++++++++++++++");
+	strcpy(prefix_ip_copy, prefix_ip);
+	puts(prefix_ip_copy);
+	
+	host_broadcast_ip = strcat(prefix_ip_copy, reserved_broadcast);
+	puts(host_broadcast_ip);
+
+	StrHostIpToUint(host_broadcast_ip, broadcast_ip);
+  			 printf("{%u, %u, %u, %u}\n", broadcast_ip[0], broadcast_ip[1],
+				broadcast_ip[2], broadcast_ip[3]);
+				
+	puts("++++++++++++++++++++broadcast_ip++++++++++++++++++");
+
+}
+*/
 /************************************************************/
 /********** End Of Static Functions definition  *************/
 /************************************************************/
