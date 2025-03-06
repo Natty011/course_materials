@@ -123,6 +123,10 @@ static void UpdadePathToIsAllocated( dhcp_node_t *node );
 static int
 		 TryToAllocExactHostIp(dhcp_node_t *root, char *host_ip,
 								 size_t host_bits);
+
+static void
+ 	   StrHostIpToUint(char *host_ip, ip_addrs_t ret_allocated_ip);
+	   
 #ifdef PRINTS
 #endif
 
@@ -147,9 +151,10 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 	int res = 0;
 	char *host_ip_to_allocate = NULL;
 	uint32_t total = 1U<<host_size, res_candidate = 0;
+	unsigned char ret_allocated_ip[BYTES_IN_IP] = { 0 };
+
 	total = total - 1;
 	printf("total = { %u} \n", total );
-	unsigned char ret_allocated_ip[BYTES_IN_IP] = { 0 };
 	/*ip_addrs_t subnet_mask = {255, 255, 255, 0};*/
 
 	/*uint32_t subnet_mask = 0xffffff00;*/
@@ -281,6 +286,11 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 			host_ip_to_allocate =	strcat(dhcp_ptr->ip, word2);
 			puts(host_ip_to_allocate);
 
+			StrHostIpToUint(host_ip_to_allocate, ret_allocated_ip);
+  			 printf("{%u, %u, %u, %u}", ret_allocated_ip[0], ret_allocated_ip[1],
+					ret_allocated_ip[2], ret_allocated_ip[3]);
+
+
 
 		}
 
@@ -319,18 +329,16 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 static void StrHostIpToUint(char *host_ip, ip_addrs_t ret_allocated_ip)
 {
 	uint8_t i = 0;
-	
+
+	char one_bye[9] = { 0 };
+	one_bye[8] = BACK_SLASH_NULL;	
+
 	for( i = 0; i < BYTES_IN_IP; ++i )
 	{
-		 = (uint8_t)Atoi10Base(host_ip + (i * BYTE_SIZE) );
-
-
-		 
-	ItoaUpTo36Base(requested_ip[i],
-		dest + (i * BYTE_SIZE) , BASE); 
-
+		strncpy(one_bye,host_ip + (i * BYTE_SIZE), BYTE_SIZE );
+		ret_allocated_ip[i] =
+			 (uint8_t)AtoiUpTo36Base(one_bye , BASE);
 	}
-
 
 }
 
