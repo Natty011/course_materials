@@ -145,6 +145,7 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 	dhcp_t *dhcp_ptr = NULL;
 	dhcp_node_t *root = NULL;
 	char *prefix_ip = NULL;
+	char prefix_ip_copy[MAX_SIZE] = { 0 };
 
 	char word[MAX_SIZE] = { 0 };
 	char word2[MAX_SIZE] = { 0 };
@@ -228,13 +229,14 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 	printf("res = { %d }\n", res);
 
 	puts("++++++++++++++++++++network_ip++++++++++++++++++");
-/*
-	host_network_ip = strcat(prefix_ip, reserved_network);
+	strcpy(prefix_ip_copy, prefix_ip);
+
+	host_network_ip = strcat(prefix_ip_copy, reserved_network);
 	puts(host_network_ip);
 	StrHostIpToUint(host_network_ip, network_ip);
   			 printf("{%u, %u, %u, %u}\n", network_ip[0], network_ip[1],
 				network_ip[2], network_ip[3]);
-*/
+
 	puts("++++++++++++++++++++network_ip+++++++++++++++++");
 
 	res = TryToAllocExactHostIp( dhcp_ptr->root,reserved_server, host_size);
@@ -243,7 +245,9 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 
 	puts("++++++++++++++++++++server_ip++++++++++++++++++");
 
-	host_server_ip = strcat(prefix_ip, reserved_server);
+	strcpy(prefix_ip_copy, prefix_ip);
+
+	host_server_ip = strcat(prefix_ip_copy, reserved_server);
 	puts(host_server_ip);
 	StrHostIpToUint(host_server_ip, server_ip);
   			 printf("{%u, %u, %u, %u}\n", server_ip[0], server_ip[1],
@@ -255,14 +259,16 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 	printf("res = { %d }\n", res);
 
 	puts("++++++++++++++++++++broadcast_ip++++++++++++++++");
-	/*
-	host_broadcast_ip = strcat(prefix_ip, reserved_broadcast);
+	strcpy(prefix_ip_copy, prefix_ip);
+	puts(prefix_ip_copy);
+	
+	host_broadcast_ip = strcat(prefix_ip_copy, reserved_broadcast);
 	puts(host_broadcast_ip);
 
 	StrHostIpToUint(host_broadcast_ip, broadcast_ip);
   			 printf("{%u, %u, %u, %u}\n", broadcast_ip[0], broadcast_ip[1],
 				broadcast_ip[2], broadcast_ip[3]);
-	*/			
+				
 	puts("++++++++++++++++++++broadcast_ip++++++++++++++++++");
 
 /*
