@@ -153,7 +153,7 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 	uint32_t total = 1U<<host_size, res_candidate = 0;
 	unsigned char ret_allocated_ip[BYTES_IN_IP] = { 0 };
 
-	total = total - 1;
+	total = total - 3;
 	printf("total = { %u} \n", total );
 
 
@@ -232,7 +232,7 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 
 
 	printf("res = { %d }\n", res);
-
+	/*
 	if(IS_FULL != res)
 	{
 		
@@ -258,16 +258,17 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 			puts(host_ip_to_allocate);
 
 			StrHostIpToUint(host_ip_to_allocate, ret_allocated_ip);
-  			 printf("{%u, %u, %u, %u}", ret_allocated_ip[0], ret_allocated_ip[1],
+  			 printf("{%u, %u, %u, %u}\n", ret_allocated_ip[0], ret_allocated_ip[1],
 					ret_allocated_ip[2], ret_allocated_ip[3]);
 
 
 
 		}
+		*/
 
 		
 
-	}
+	
 	
 
 	return dhcp_ptr;
@@ -345,7 +346,7 @@ int DHCPAllocateIP(dhcp_t* dhcp,
 			puts(host_ip_to_allocate);
 
 			StrHostIpToUint(host_ip_to_allocate, ret_allocated_ip);
-  			 printf("{%u, %u, %u, %u}", ret_allocated_ip[0], ret_allocated_ip[1],
+  			 printf("{%u, %u, %u, %u} \n", ret_allocated_ip[0], ret_allocated_ip[1],
 					ret_allocated_ip[2], ret_allocated_ip[3]);
 
 		return 	REQUEST_NOT_MET;		
