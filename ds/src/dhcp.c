@@ -145,7 +145,7 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 	char word2[MAX_SIZE] = { 0 };
 	uint8_t host_size = WORD_SIZE - bits_num_in_subnet;
 	int res = 0;
-
+	char *host_ip_to_allocate = NULL;
 
 	/*ip_addrs_t subnet_mask = {255, 255, 255, 0};*/
 
@@ -220,7 +220,7 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 	puts(dhcp_ptr->ip);
 
 	ItoaTo2Base(dhcp_ptr, word, subnet_ip, PORTION_IP) ;
-	puts(word +  bits_num_in_subnet) ;
+	/*puts(word +  bits_num_in_subnet) ;*/
 
 	memset(reserved_network, '0', host_size);
 	reserved_network[host_size] = BACK_SLASH_NULL;
@@ -232,13 +232,50 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 	reserved_server[host_size - 1] = ZERO_CHAR;
 	reserved_server[host_size] = BACK_SLASH_NULL;
 
+	puts(reserved_network);
+	puts(reserved_server);
+	puts(reserved_broadcast);
+
+
+	res = TryToAllocExactHostIp( dhcp_ptr->root,reserved_network, host_size );
+	printf("res = { %d }\n", res);
+
+	res = TryToAllocExactHostIp( dhcp_ptr->root,reserved_server, host_size);
+
+	printf("res = { %d }\n", res);
+
+	res = TryToAllocExactHostIp( dhcp_ptr->root,reserved_broadcast, host_size );
+	printf("res = { %d }\n", res);
+
 
 	res = TryToAllocExactHostIp( dhcp_ptr->root,reserved_network, host_size );
 
 	printf("res = { %d }\n", res);
-	puts(reserved_network);
-	puts(reserved_server);
-	puts(reserved_broadcast);
+
+	if(IS_FULL != res)
+	{
+		if(host_size != res )
+		{
+			strcpy(word2, reserved_network );
+			puts(word2);
+
+			if( 0 == word2[res])
+
+			/*host_ip_to_allocate = */
+		}
+
+	}
+	
+	
+
+
+
+	/*
+	res = TryToAllocExactHostIp( dhcp_ptr->root,reserved_network, host_size );
+
+	printf("res = { %d }\n", res);
+*/
+
 
 	/*reserved_network = 	ItoaTo2Base(dhcp_ptr, word, subnet_ip, PORTION_IP) ;*/
 
