@@ -214,14 +214,14 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 	puts(word +  bits_num_in_subnet) ;
 
 	memset(reserved_network, '0', host_size);
-	reserved_network[host_size + 1] = BACK_SLASH_NULL;
+	reserved_network[host_size] = BACK_SLASH_NULL;
 
 	memset(reserved_broadcast, '1', host_size);
-	reserved_broadcast[host_size + 1] = BACK_SLASH_NULL;
+	reserved_broadcast[host_size] = BACK_SLASH_NULL;
 
 	memset(reserved_server, '1', host_size);
-	reserved_server[host_size] = ZERO_CHAR;
-	reserved_server[host_size + 1] = BACK_SLASH_NULL;
+	reserved_server[host_size - 1] = ZERO_CHAR;
+	reserved_server[host_size] = BACK_SLASH_NULL;
 
 	
 
@@ -253,8 +253,30 @@ int DHCPAllocateIP(dhcp_t* dhcp,
 	const unsigned char requested_ip[BYTES_IN_IP],
 	unsigned char ret_allocated_ip[BYTES_IN_IP])
 {
+	
+	char word[MAX_SIZE] = { 0 };
+	char *candidate = NULL;
+	dhcp_node_t *root = dhcp->root;
 
 
+
+	
+	
+
+}
+
+
+static void UpdadePathToIsAllocated( dhcp_node_t *node)
+{
+	dhcp_node_t *parent = NULL;
+	int
+	assert(node);
+	parent = node->parent;
+
+	while(parent)
+	{
+
+	}
 }
 
 
