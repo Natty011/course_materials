@@ -152,11 +152,14 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 	int res = 0;
 	char *host_network_ip = NULL;
 	char *host_broadcast_ip = NULL;
+	char *host_server_ip = NULL;
 
 	uint32_t total = 1U<<host_size, res_candidate = 0;
 	ip_addrs_t network_ip = { 0 };
 	ip_addrs_t broadcast_ip = { 0 };
+	ip_addrs_t server_ip = { 0 };
 
+	
 	total = total - 3;
 	printf("total = { %u} \n", total );
 
@@ -224,24 +227,34 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 	res = TryToAllocExactHostIp( dhcp_ptr->root,reserved_network, host_size );
 	printf("res = { %d }\n", res);
 
-	puts("++++++++++++++++++++network_ip++++++++++++++++++++++++++");
-
+	puts("++++++++++++++++++++network_ip++++++++++++++++++");
+/*
 	host_network_ip = strcat(prefix_ip, reserved_network);
 	puts(host_network_ip);
 	StrHostIpToUint(host_network_ip, network_ip);
   			 printf("{%u, %u, %u, %u}\n", network_ip[0], network_ip[1],
 				network_ip[2], network_ip[3]);
-
-	puts("++++++++++++++++++++network_ip++++++++++++++++++++++++++");
+*/
+	puts("++++++++++++++++++++network_ip+++++++++++++++++");
 
 	res = TryToAllocExactHostIp( dhcp_ptr->root,reserved_server, host_size);
 
 	printf("res = { %d }\n", res);
 
+	puts("++++++++++++++++++++server_ip++++++++++++++++++");
+
+	host_server_ip = strcat(prefix_ip, reserved_server);
+	puts(host_server_ip);
+	StrHostIpToUint(host_server_ip, server_ip);
+  			 printf("{%u, %u, %u, %u}\n", server_ip[0], server_ip[1],
+				server_ip[2], server_ip[3]);
+
+	puts("++++++++++++++++++++server_ip+++++++++++++++++");
+
 	res = TryToAllocExactHostIp( dhcp_ptr->root,reserved_broadcast, host_size );
 	printf("res = { %d }\n", res);
 
-	puts("++++++++++++++++++++broadcast_ip++++++++++++++++++++++++++");
+	puts("++++++++++++++++++++broadcast_ip++++++++++++++++");
 	/*
 	host_broadcast_ip = strcat(prefix_ip, reserved_broadcast);
 	puts(host_broadcast_ip);
@@ -250,7 +263,7 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
   			 printf("{%u, %u, %u, %u}\n", broadcast_ip[0], broadcast_ip[1],
 				broadcast_ip[2], broadcast_ip[3]);
 	*/			
-	puts("++++++++++++++++++++broadcast_ip++++++++++++++++++++++++++");
+	puts("++++++++++++++++++++broadcast_ip++++++++++++++++++");
 
 /*
 	res = TryToAllocExactHostIp( dhcp_ptr->root,reserved_network, host_size );
