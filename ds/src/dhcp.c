@@ -36,6 +36,7 @@ typedef uint8_t ip_addrs_t[4];
 
 typedef enum
 {
+	BACK_SLASH_NULL = '\0',
 	ZERO_CHAR = 48,
 	ONE_CHAR = 49
 
@@ -95,9 +96,9 @@ struct dhcp
 
 };
 
-static char *reserved_network[MAX_SIZE] = { 0 };
-static char *reserved_server[MAX_SIZE] = { 0 };
-static char *reserved_broadcast[MAX_SIZE]= { 0 };
+static char reserved_network[MAX_SIZE] = { 0 };
+static char reserved_server[MAX_SIZE] = { 0 };
+static char reserved_broadcast[MAX_SIZE]= { 0 };
 
 /******************************************************************************/
 /************************ static functions declartions ************************/
@@ -136,6 +137,7 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 	char *prefix_ip = NULL;
 	char word[MAX_SIZE] = { 0 };
 	char word2[MAX_SIZE] = { 0 };
+	uint8_t host_size = WORD_SIZE - bits_num_in_subnet;
 	/*ip_addrs_t subnet_mask = {255, 255, 255, 0};*/
 
 	/*uint32_t subnet_mask = 0xffffff00;*/
@@ -211,8 +213,23 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 	ItoaTo2Base(dhcp_ptr, word, subnet_ip, PORTION_IP) ;
 	puts(word +  bits_num_in_subnet) ;
 
-	memset(reserved_network, '0', WORD_SIZE - bits_num_in_subnet);
-	reserved_network = 	ItoaTo2Base(dhcp_ptr, word, subnet_ip, PORTION_IP) ;
+	memset(reserved_network, '0', host_size);
+	reserved_network[host_size + 1] = BACK_SLASH_NULL;
+
+	memset(reserved_broadcast, '1', host_size);
+	reserved_broadcast[host_size + 1] = BACK_SLASH_NULL;
+
+	memset(reserved_server, '1', host_size);
+	reserved_server[host_size] = ZERO_CHAR;
+	reserved_server[host_size + 1] = BACK_SLASH_NULL;
+
+	
+
+	puts(reserved_network);
+	puts(reserved_server);
+	puts(reserved_broadcast);
+
+	/*reserved_network = 	ItoaTo2Base(dhcp_ptr, word, subnet_ip, PORTION_IP) ;*/
 
 
 /*
