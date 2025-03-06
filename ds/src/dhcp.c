@@ -334,9 +334,15 @@ int DHCPAllocateIP(dhcp_t* dhcp,
 	/*char word2[MAX_SIZE] = { 0 };*/
 	uint8_t host_size = WORD_SIZE - subnet_size_bits;
 	int res = 0;
+	char prefix_ip_copy[MAX_SIZE] = { 0 };
 	char *host_ip_to_allocate = NULL;
 	uint32_t total = 1U<<host_size, res_candidate = 0;
 	total = total - 3; /* 253 */
+
+	strcpy(prefix_ip_copy, dhcp->ip);
+
+	printf("requested_ip = {%u, %u, %u, %u} \n", requested_ip[0], requested_ip[1],
+							requested_ip[2], requested_ip[3]);
 
 	ItoaTo2Base(dhcp, word, requested_ip, PORTION_IP) ;
 	host_ip_to_allocate = word +  subnet_size_bits;
@@ -388,12 +394,12 @@ int DHCPAllocateIP(dhcp_t* dhcp,
 
 		}
 
-		host_ip_to_allocate = strcat(dhcp->ip, host_ip_to_allocate);
+		host_ip_to_allocate = strcat(prefix_ip_copy, host_ip_to_allocate);
 			puts(host_ip_to_allocate);
 
 			StrHostIpToUint(host_ip_to_allocate, ret_allocated_ip);
-  			 printf("{%u, %u, %u, %u} \n", ret_allocated_ip[0], ret_allocated_ip[1],
-					ret_allocated_ip[2], ret_allocated_ip[3]);
+  			 printf("ret_allocated_ip = {%u, %u, %u, %u} \n", ret_allocated_ip[0],
+				 ret_allocated_ip[1], ret_allocated_ip[2], ret_allocated_ip[3]);
 
 		return 	REQUEST_NOT_MET;		
 	}
@@ -935,6 +941,52 @@ puts("++++++++++++++++++++network_ip+++++++++++++++++");
 				broadcast_ip[2], broadcast_ip[3]);
 				
 	puts("++++++++++++++++++++broadcast_ip++++++++++++++++++");
+
+	puts("++++++++++++++++++++*************++++++++++++++++++");
+	*/
+
+	/*
+	puts("++++++++++++++++++++network_ip++++++++++++++++++");
+	strcpy(prefix_ip_copy, prefix_ip);
+
+	host_network_ip = strcat(prefix_ip_copy, reserved_network);
+	puts(host_network_ip);
+	StrHostIpToUint(host_network_ip, network_ip);
+  			 printf("{%u, %u, %u, %u}\n", network_ip[0], network_ip[1],
+				network_ip[2], network_ip[3]);
+
+	puts("++++++++++++++++++++network_ip+++++++++++++++++");
+
+
+	printf("res = { %d }\n", res);
+
+	puts("++++++++++++++++++++server_ip++++++++++++++++++");
+
+	strcpy(prefix_ip_copy, prefix_ip);
+
+	host_server_ip = strcat(prefix_ip_copy, reserved_server);
+	puts(host_server_ip);
+	StrHostIpToUint(host_server_ip, server_ip);
+  			 printf("{%u, %u, %u, %u}\n", server_ip[0], server_ip[1],
+				server_ip[2], server_ip[3]);
+
+	puts("++++++++++++++++++++server_ip+++++++++++++++++");
+
+	printf("res = { %d }\n", res);
+
+	puts("++++++++++++++++++++broadcast_ip++++++++++++++++");
+	strcpy(prefix_ip_copy, prefix_ip);
+	puts(prefix_ip_copy);
+	
+	host_broadcast_ip = strcat(prefix_ip_copy, reserved_broadcast);
+	puts(host_broadcast_ip);
+
+	StrHostIpToUint(host_broadcast_ip, broadcast_ip);
+  			 printf("{%u, %u, %u, %u}\n", broadcast_ip[0], broadcast_ip[1],
+				broadcast_ip[2], broadcast_ip[3]);
+				
+	puts("++++++++++++++++++++broadcast_ip++++++++++++++++++");
+
 
 }
 */
