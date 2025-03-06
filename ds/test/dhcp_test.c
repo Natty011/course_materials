@@ -132,11 +132,12 @@ static void TestDhcp(void)
 	result = DHCPAllocateIP(dhcp1,  requested_ip[0], ret_allocated_ip[0]);
 	
 	#ifdef PRINTS
-
+/*
 		printf("result = { %d }\n", result);
 		printf("ret_allocated_ip_test = {%u, %u, %u, %u} \n", 
 			ret_allocated_ip[0][0], ret_allocated_ip[0][1],
 			ret_allocated_ip[0][2], ret_allocated_ip[0][3]);
+*/			
 	#endif
 
 	if( REQUEST_NOT_MET != result || 
