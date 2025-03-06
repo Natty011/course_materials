@@ -146,6 +146,9 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 	uint8_t host_size = WORD_SIZE - bits_num_in_subnet;
 	int res = 0;
 	char *host_ip_to_allocate = NULL;
+	uint32_t total = 1U<<host_size, res_candidate = 0;
+	total = total - 1;
+	printf("total = { %u} \n", total );
 
 	/*ip_addrs_t subnet_mask = {255, 255, 255, 0};*/
 
@@ -158,6 +161,7 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 	/*ip2[2] = ip2[2] & subnet_mask[2];*/
 	/*printf("%u\n", (uint8_t)(ip2 + 2));*/
    /* printf("%u.%u.%u.%u", ip2[0], ip2[1], ip2[2], ip2[3]);*/
+
 
 	/*
 	printf(" %u \n ", *((uint8_t*)ip2 + 1 ));
@@ -250,6 +254,7 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 
 	res = TryToAllocExactHostIp( dhcp_ptr->root,reserved_network, host_size );
 
+
 	printf("res = { %d }\n", res);
 
 	if(IS_FULL != res)
@@ -257,10 +262,25 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 		if(host_size != res )
 		{
 			strcpy(word2, reserved_network );
+			res_candidate = AtoiUpTo36Base(word2, BASE);
 			puts(word2);
 
-			if( 0 == word2[res])
 
+			printf("res_candidate = { %u} \n", res_candidate );
+			res_candidate += 1U;
+			printf("res_candidate = { %u} \n", res_candidate );
+
+			ItoaUpTo36Base(res_candidate, word2, BASE);
+			puts(word2);
+
+			res = TryToAllocExactHostIp( dhcp_ptr->root,word2, host_size );
+
+			printf("res = { %d }\n", res);
+
+			if( 0 == word2[res] )
+			{
+
+			}
 			/*host_ip_to_allocate = */
 		}
 
