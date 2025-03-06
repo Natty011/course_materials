@@ -44,6 +44,7 @@ typedef enum
 
 typedef enum
 {
+	IS_FULL = -3,
 	SYS_FAIL = -2,
 	SUCCESS = 0,
 	FAIL = 1,
@@ -119,7 +120,9 @@ static char *ItoaTo2Base(dhcp_t* dhcp, char *dest,
 	       const ip_addrs_t requested_ip, state_convert_t state );
 
 static void UpdadePathToIsAllocated( dhcp_node_t *node );
-
+static int
+		 TryToAllocExactHostIp(dhcp_node_t *root, char *host_ip,
+								 size_t host_bits);
 #ifdef PRINTS
 #endif
 
@@ -141,6 +144,9 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 	char word[MAX_SIZE] = { 0 };
 	char word2[MAX_SIZE] = { 0 };
 	uint8_t host_size = WORD_SIZE - bits_num_in_subnet;
+	int res = 0;
+
+
 	/*ip_addrs_t subnet_mask = {255, 255, 255, 0};*/
 
 	/*uint32_t subnet_mask = 0xffffff00;*/
@@ -227,7 +233,9 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 	reserved_server[host_size] = BACK_SLASH_NULL;
 
 	
+	res = TryToAllocExactHostIp( dhcp_ptr->root,reserved_network, host_size );
 
+	printf("res = { %d }\n", res);
 	puts(reserved_network);
 	puts(reserved_server);
 	puts(reserved_broadcast);
@@ -274,6 +282,11 @@ static int TryToAllocExactHostIp(dhcp_node_t *root, char *host_ip,
 	dhcp_node_t *current = root;
 	size_t level = 0;
 
+	if(root->is_occupied)
+	{
+		return IS_FULL;
+	}
+
 	for( level = 0; level < host_bits; ++level)
 	{
 		int bit = host_ip[level] - ZERO_CHAR;
@@ -283,7 +296,7 @@ static int TryToAllocExactHostIp(dhcp_node_t *root, char *host_ip,
 			return level;
 		}*/
 
-		if( NULL == current->child[bit] )
+		if( NULL == current->child[bit] ) /* not_occupuied bit */
 		{
 			current->child[bit] = CreateNode(current);
 
@@ -296,16 +309,15 @@ static int TryToAllocExactHostIp(dhcp_node_t *root, char *host_ip,
 
 		current = current->child[bit];
 
-		if( current->is_occupied )
+		if( current->is_occupied ) /* the required path already occupied */
 		{
 			return level;
 		}
-
-
-
-
 	}
 
+	current->is_occupied = TRUE;
+	UpdadePathToIsAllocated(current);
+	return level;
 }
 
 
