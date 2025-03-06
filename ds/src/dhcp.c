@@ -44,6 +44,7 @@ typedef enum
 
 typedef enum
 {
+	SYS_FAIL = -2,
 	SUCCESS = 0,
 	FAIL = 1,
 	REQUEST_NOT_MET = 2
@@ -267,7 +268,45 @@ int DHCPAllocateIP(dhcp_t* dhcp,
 
 }
 
+static int TryToAllocExactHostIp(dhcp_node_t *root, char *host_ip,
+									 size_t host_bits)
+{
+	dhcp_node_t *current = root;
+	size_t level = 0;
 
+	for( level = 0; level < host_bits; ++level)
+	{
+		int bit = host_ip[level] - ZERO_CHAR;
+
+		/*if( current->child[bit]->is_occupied )
+		{
+			return level;
+		}*/
+
+		if( NULL == current->child[bit] )
+		{
+			current->child[bit] = CreateNode(current);
+
+			if( !current->child[bit] )
+			{
+				return SYS_FAIL;
+			}
+
+		}
+
+		current = current->child[bit];
+
+		if( current->is_occupied )
+		{
+			return level;
+		}
+
+
+
+
+	}
+
+}
 
 
 
