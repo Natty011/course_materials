@@ -13,7 +13,6 @@
 #include <stdint.h> 	/* uint8_t*/
 
 #include "dhcp.h" 
-#include "bit_array.h" 
 
 #ifdef PRINTS
 
@@ -45,9 +44,13 @@
 #define RELEASE		"RELEASE MODE"
 #define STEP_LANGTH 	64
 #define BOARD_SIZE 		8
+
 #define MIN(a, b)		((a > b ) ? b : a )
 #define MAX(a, b)		((a > b ) ? a : b )
 #define UNUSED( var )       ( (void)var )
+
+#define  BYTES_IN_IP    (4)
+
 /***************struct and enum declaration *******/
 
 
@@ -55,7 +58,8 @@ typedef enum
 {
 	
 	SUCCESS = 0,
-	FAIL = 1
+	FAIL = 1,
+	REQUEST_NOT_MET = 2
 	
 }dhcp_result_t;
 
@@ -78,7 +82,8 @@ typedef uint8_t ip_addrs_t[4];
 
 /***************************function declaration**************************/
 static void TestDhcp(void);
-
+static int
+	 	CompareRetIp(ip_addrs_t expected_ip, ip_addrs_t ret_ip );
 /***************************End of function declaration******************/
 
 /******************static functions definition**********************/
@@ -112,18 +117,53 @@ int main ()
 static void TestDhcp(void)
 {	
 
-	int result = FALSE; 
+	int result = FALSE, status_result = FALSE; 
 	dhcp_t *dhcp1 = NULL;
-	ip_addrs_t ip = {192, 168, 2, 0};
-	size_t bits_num_in_subnet1 = 18;
+	ip_addrs_t ip = {192, 168, 2, 5};
+	ip_addrs_t requested_ip[10] ={ {192, 168, 2, 0}, { 0 } } ;
+	ip_addrs_t ret_allocated_ip[10] =  { { 0 } } ;
+	ip_addrs_t arr_expected[10] = { {192, 168, 2, 1} , { 192, 168, 2, 2 } ,
+	{ 192, 168, 2, 254 }, {192, 168, 2, 254 }, { 0 } };
+
+	size_t bits_num_in_subnet1 = 24;
 
 	dhcp1 = DHCPCreate(ip, bits_num_in_subnet1);
 	
+	result = DHCPAllocateIP(dhcp1,  requested_ip[0], ret_allocated_ip[0]);
+	
+	#ifdef PRINTS
+
+		printf("result = { %d }\n", result);
+		printf("ret_allocated_ip_test = {%u, %u, %u, %u} \n", 
+			ret_allocated_ip[0][0], ret_allocated_ip[0][1],
+			ret_allocated_ip[0][2], ret_allocated_ip[0][3]);
+	#endif
+
+	if( REQUEST_NOT_MET != result || 
+		CompareRetIp(arr_expected[0],ret_allocated_ip[0] )
+	)	
+	{
+		printf("line: %d \n" , __LINE__ );
+		status_result =  TRUE;
+		puts("Failes in: AllocateIP ");
+	}
+
+	result = DHCPAllocateIP(dhcp1, requested_ip[1], ret_allocated_ip[1]);
+
+	if( REQUEST_NOT_MET != result || 
+		CompareRetIp(arr_expected[1],ret_allocated_ip[1] )
+	)	
+	{
+		printf("line: %d \n" , __LINE__ );
+		status_result =  TRUE;
+		puts("Failes in: AllocateIP ");
+	}
 
 	DHCPDestroy(dhcp1);
 	dhcp1 = NULL;
 
-	if( !result  )
+	
+	if( !status_result  )
 	{
 		puts(RESET);		
 		puts(BACK_BLUE"Test: Success"RESET);
@@ -135,7 +175,27 @@ static void TestDhcp(void)
 		puts(BACK_YELLOW"Test: Failure"RESET);	
 	}
 
+
 }
+
+
+/************************************************************/
+/****************** CompareRetIp *****************/
+/************************************************************/
+static int 	CompareRetIp(ip_addrs_t expected_ip, ip_addrs_t ret_ip )
+{
+	uint8_t i = 0;
+	for(i = 0; i < BYTES_IN_IP ; ++i )
+	{
+		if( expected_ip[i] != ret_ip[i] )
+		{
+			return FAIL;
+		}
+	}
+
+	return SUCCESS;
+}
+
 
 
 
