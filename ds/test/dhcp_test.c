@@ -184,6 +184,7 @@ static void TestDhcp(void)
 	}
 
 
+	
 	DHCPDestroy(dhcp1);
 	dhcp1 = NULL;
 
