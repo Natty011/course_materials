@@ -232,7 +232,7 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 	reserved_server[host_size - 1] = ZERO_CHAR;
 	reserved_server[host_size] = BACK_SLASH_NULL;
 
-	
+
 	res = TryToAllocExactHostIp( dhcp_ptr->root,reserved_network, host_size );
 
 	printf("res = { %d }\n", res);
