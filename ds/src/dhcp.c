@@ -117,6 +117,8 @@ static char* Itoa10Base(int n, char* str);
 static char *ItoaTo2Base(dhcp_t* dhcp, char *dest, 
 	       const ip_addrs_t requested_ip, state_convert_t state );
 
+static void UpdadePathToIsAllocated( dhcp_node_t *node );
+
 #ifdef PRINTS
 #endif
 
@@ -266,18 +268,7 @@ int DHCPAllocateIP(dhcp_t* dhcp,
 }
 
 
-static void UpdadePathToIsAllocated( dhcp_node_t *node)
-{
-	dhcp_node_t *parent = NULL;
-	int
-	assert(node);
-	parent = node->parent;
 
-	while(parent)
-	{
-
-	}
-}
 
 
 /************************************************************/
@@ -644,7 +635,7 @@ static char *ItoaTo2Base(dhcp_t* dhcp, char *dest,
 }
 
 /************************************************************/
-/******************* CreateNode *************************/
+/********************** CreateNode **************************/
 /************************************************************/
 static dhcp_node_t *CreateNode(dhcp_node_t *parent )
 {
@@ -663,6 +654,37 @@ static dhcp_node_t *CreateNode(dhcp_node_t *parent )
 	return new_node;
 }
 
+/************************************************************/
+/****************** UpdadePathToIsAllocated *****************/
+/************************************************************/
+static void UpdadePathToIsAllocated( dhcp_node_t *node)
+{
+	dhcp_node_t *parent = NULL;
+	int left_alloc = 0, right_alloc = 0;
+	assert(node);
+	parent = node->parent;
+
+	while(parent)
+	{
+		left_alloc = ( parent->child[LEFT] && 
+					parent->child[LEFT]->is_occupied );
+
+		right_alloc = ( parent->child[RIGHT] && 
+			parent->child[RIGHT]->is_occupied );
+
+		if( left_alloc && right_alloc )
+		{
+			parent->is_occupied = TRUE;
+		}
+		
+		else
+		{
+			break;
+		}
+
+		parent = parent->parent;
+	}
+}
 
 
 /************************************************************/
