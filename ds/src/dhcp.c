@@ -155,36 +155,7 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 
 	total = total - 1;
 	printf("total = { %u} \n", total );
-	/*ip_addrs_t subnet_mask = {255, 255, 255, 0};*/
 
-	/*uint32_t subnet_mask = 0xffffff00;*/
-	/*uint32_t *ptr = NULL;*/
-	/*const uint8_t *test = NULL;*/
-	/*ip_addrs_t ip1 = {192, 168, 3, 5};*/
-	/*ip_addrs_t *ip2  = (ip_addrs_t*)subnet_ip; *//* (ip_addrs_t*)*/
-	/*ip_addrs_t ip2  = (ip_addrs_t)subnet_ip ;*/ /* (ip_addrs_t*)*/
-	/*ip2[2] = ip2[2] & subnet_mask[2];*/
-	/*printf("%u\n", (uint8_t)(ip2 + 2));*/
-   /* printf("%u.%u.%u.%u", ip2[0], ip2[1], ip2[2], ip2[3]);*/
-
-
-	/*
-	printf(" %u \n ", *((uint8_t*)ip2 + 1 ));
-	printf(" %u \n ", (*ip2 & 0xffffff00) );
-
-	printf(" %u \n ", *(ip2 + 1) );
-	*/
-	/*
-	uint32_t network_ip = subnet_ip & (*(uint32_t*)subnet_mask);
-	uint32_t server_ip = subnet_ip & (*(uint32_t*)subnet_mask) ;
-	uint32_t broadcast_ip = subnet_ip & (*(uint32_t*)subnet_mask );
-*/
-	/*test = (const uint8_t*)ip1;*/
-	/*puts((char*)test );*/
-	/*ptr = (uint32_t*)ip1;*/
-	/*puts((char*)ptr + 1);*/
-	/*printf(" %u \n ", *((uint8_t*)ptr + 1 ));*/
-	/*printf(" %u \n ", *(test + 2) );*/
 
 	dhcp_ptr = (dhcp_t*)malloc( sizeof(dhcp_t) );
 
@@ -294,38 +265,96 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 
 		}
 
+		
+
 	}
 	
-	
-
-
-
-	/*
-	res = TryToAllocExactHostIp( dhcp_ptr->root,reserved_network, host_size );
-
-	printf("res = { %d }\n", res);
-*/
-
-
-	/*reserved_network = 	ItoaTo2Base(dhcp_ptr, word, subnet_ip, PORTION_IP) ;*/
-
-
-/*
-	*ip2 = (*ip2 & 0xffffff00);
-*/
-	/*ItoaTo2Base(dhcp_ptr, word2, *(ip_addrs_t*)ip2, PORTION_IP) ;*/
-	/*ItoaTo2Base(dhcp_ptr, word2, &ip2, PORTION_IP) ;*/
-	/*puts( word2 +  bits_num_in_subnet) ;*/
-	
-	
-	/*
-	static char *reserved_network;
-	static char *reserved_server;
-	static char *reserved_broadcast;
-	*/
 
 	return dhcp_ptr;
 }
+
+
+
+int DHCPAllocateIP(dhcp_t* dhcp,
+	const unsigned char requested_ip[BYTES_IN_IP],
+	unsigned char ret_allocated_ip[BYTES_IN_IP])
+{
+	
+	char word[MAX_SIZE] = { 0 };
+	char *candidate = NULL;
+	dhcp_node_t *root = dhcp->root;
+	size_t subnet_size_bits = dhcp->bits_num_in_subnet;
+	char word2[MAX_SIZE] = { 0 };
+	uint8_t host_size = WORD_SIZE - subnet_size_bits;
+	int res = 0;
+	char *host_ip_to_allocate = NULL;
+	uint32_t total = 1U<<host_size, res_candidate = 0;
+	total = total - 3; /* 253 */
+
+	ItoaTo2Base(dhcp, word, requested_ip, PORTION_IP) ;
+	host_ip_to_allocate = word +  subnet_size_bits;
+	/*puts(word +  bits_num_in_subnet) ;*/
+
+	res = TryToAllocExactHostIp( root,
+				host_ip_to_allocate, host_size );
+
+	printf("res = { %d }\n", res);
+
+	if(IS_FULL != res)
+	{
+		
+		if(SYS_FAIL == res )
+		{
+			return FAIL;
+		}
+
+		if(host_size == res )
+		{
+			memcpy(ret_allocated_ip, requested_ip, BYTES_IN_IP);
+			return SUCCESS;
+		}
+		
+		while(host_size != res )
+		{
+			/*strcpy(word2, reserved_network );*/
+			res_candidate = AtoiUpTo36Base(host_ip_to_allocate, BASE);
+			puts(host_ip_to_allocate);
+
+			if(res_candidate >= total )
+			{
+				return FAIL;
+			}
+
+			printf("res_candidate = { %u} \n", res_candidate );
+			res_candidate += 1U;
+			printf("res_candidate = { %u} \n", res_candidate );
+
+			ItoaUpTo36Base(res_candidate, host_ip_to_allocate, BASE);
+			puts(host_ip_to_allocate);
+
+			res = TryToAllocExactHostIp( root,
+				host_ip_to_allocate, host_size );
+
+			printf("res = { %d }\n", res);
+
+			
+
+		}
+
+		host_ip_to_allocate = strcat(dhcp->ip, host_ip_to_allocate);
+			puts(host_ip_to_allocate);
+
+			StrHostIpToUint(host_ip_to_allocate, ret_allocated_ip);
+  			 printf("{%u, %u, %u, %u}", ret_allocated_ip[0], ret_allocated_ip[1],
+					ret_allocated_ip[2], ret_allocated_ip[3]);
+
+		return 	REQUEST_NOT_MET;		
+	}
+
+	return FAIL;
+}
+
+
 static void StrHostIpToUint(char *host_ip, ip_addrs_t ret_allocated_ip)
 {
 	uint8_t i = 0;
@@ -343,21 +372,6 @@ static void StrHostIpToUint(char *host_ip, ip_addrs_t ret_allocated_ip)
 }
 
 
-int DHCPAllocateIP(dhcp_t* dhcp,
-	const unsigned char requested_ip[BYTES_IN_IP],
-	unsigned char ret_allocated_ip[BYTES_IN_IP])
-{
-	
-	char word[MAX_SIZE] = { 0 };
-	char *candidate = NULL;
-	dhcp_node_t *root = dhcp->root;
-
-
-
-	
-	
-
-}
 
 static int TryToAllocExactHostIp(dhcp_node_t *root, char *host_ip,
 									 size_t host_bits)
