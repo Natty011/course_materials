@@ -46,6 +46,7 @@ typedef enum
 {
 	IS_FULL = -3,
 	SYS_FAIL = -2,
+	DOUBLE_FREE_FAIL = -1,
 	SUCCESS = 0,
 	FAIL = 1,
 	REQUEST_NOT_MET = 2
@@ -235,7 +236,9 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 	return dhcp_ptr;
 }
 
-
+/************************************************************/
+/********************  DHCPAllocateIP  **********************/
+/************************************************************/
 
 int DHCPAllocateIP(dhcp_t* dhcp,
 	const unsigned char requested_ip[BYTES_IN_IP],
@@ -247,11 +250,25 @@ int DHCPAllocateIP(dhcp_t* dhcp,
 	dhcp_node_t *root = dhcp->root;
 	size_t subnet_size_bits = dhcp->bits_num_in_subnet;
 	/*char word2[MAX_SIZE] = { 0 };*/
-	uint8_t host_size = WORD_SIZE - subnet_size_bits;
+	uint8_t host_size_bits = WORD_SIZE - subnet_size_bits;
 	int res = 0;
 	char prefix_ip_copy[MAX_SIZE] = { 0 };
 	char *host_ip_to_allocate = NULL;
-	uint32_t total = 1U<<host_size, res_candidate = 0;
+	uint32_t total = 1U<<host_size_bits, res_candidate = 0;
+
+	assert(dhcp);
+	assert(requested_ip);
+	assert(ret_allocated_ip);
+
+
+	/* check if the prefix of requested_ip is correct */
+	if(  *(uint32_t*)requested_ip )
+	{
+		ItoaTo2Base(dhcp, prefix_ip_copy, requested_ip, INIT_IP) ;
+		assert( ! strcmp(prefix_ip_copy, dhcp->ip ) );
+
+	}
+
 	total = total - 3; /* 253 */
 
 	strcpy(prefix_ip_copy, dhcp->ip);
@@ -264,7 +281,7 @@ int DHCPAllocateIP(dhcp_t* dhcp,
 	/*puts(host_ip_to_allocate) ;*/
 
 	res = TryToAllocExactHostIp( root,
-				host_ip_to_allocate, host_size );
+				host_ip_to_allocate, host_size_bits );
 
 	/*printf("res = { %d }\n", res);*/
 
@@ -276,13 +293,13 @@ int DHCPAllocateIP(dhcp_t* dhcp,
 			return FAIL;
 		}
 
-		if(host_size == res )
+		if(host_size_bits == res )
 		{
 			memcpy(ret_allocated_ip, requested_ip, BYTES_IN_IP);
 			return SUCCESS;
 		}
 		
-		while(host_size != res )
+		while(host_size_bits != res )
 		{
 			/*strcpy(word2, reserved_network );*/
 			res_candidate = AtoiUpTo36Base(host_ip_to_allocate, BASE);
@@ -301,7 +318,7 @@ int DHCPAllocateIP(dhcp_t* dhcp,
 			/*puts(host_ip_to_allocate);*/
 
 			res = TryToAllocExactHostIp( root,
-				host_ip_to_allocate, host_size );
+				host_ip_to_allocate, host_size_bits );
 
 			/*printf("res = { %d }\n", res);*/
 
@@ -322,70 +339,63 @@ int DHCPAllocateIP(dhcp_t* dhcp,
 	return FAIL;
 }
 
+/************************************************************/
+/*********************  DHCPFreeIP  *************************/
+/************************************************************/
 
-static void StrHostIpToUint(char *host_ip, ip_addrs_t ret_allocated_ip)
+int DHCPFreeIP(dhcp_t* dhcp,
+	const unsigned char ip_to_free[BYTES_IN_IP])
 {
-	uint8_t i = 0;
+	char word[MAX_SIZE] = { 0 };
+	char *reserved_ips[3] = {reserved_network, reserved_server,
+							 reserved_broadcast };
+	/*char *candidate = NULL;*/
+	dhcp_node_t *root = dhcp->root;
+	size_t subnet_size_bits = dhcp->bits_num_in_subnet;
+	/*char word2[MAX_SIZE] = { 0 };*/
+	uint8_t host_size_bits = WORD_SIZE - subnet_size_bits, idx = 0;
+	int res = 0;
+	char prefix_ip_copy[MAX_SIZE] = { 0 };
+	char *host_ip_to_free = NULL;
+	uint32_t total = 1U<<host_size_bits, res_candidate = 0;
 
-	char one_bye[9] = { 0 };
-	one_bye[8] = BACK_SLASH_NULL;	
-
-	for( i = 0; i < BYTES_IN_IP; ++i )
+	assert(dhcp);
+	assert(ip_to_free);
+	
+	/* check if the prefix of requested_ip is correct */
+	if(  *(uint32_t*)ip_to_free )
 	{
-		strncpy(one_bye,host_ip + (i * BYTE_SIZE), BYTE_SIZE );
-		ret_allocated_ip[i] =
-			 (uint8_t)AtoiUpTo36Base(one_bye , BASE);
+		ItoaTo2Base(dhcp, prefix_ip_copy, ip_to_free, INIT_IP) ;
+		assert( ! strcmp(prefix_ip_copy, dhcp->ip ) );
+
 	}
 
-}
+	total = total - 3; /* 253 */
 
+	strcpy(prefix_ip_copy, dhcp->ip);
 
+	printf("ip_to_free = {%u, %u, %u, %u} \n", ip_to_free[0], ip_to_free[1],
+						ip_to_free[2], ip_to_free[3]);
 
-static int TryToAllocExactHostIp(dhcp_node_t *root, char *host_ip,
-									 size_t host_bits)
-{
-	dhcp_node_t *current = root;
-	size_t level = 0;
+	
+												
+	ItoaTo2Base(dhcp, word, ip_to_free, PORTION_IP) ;
+	host_ip_to_free = word +  subnet_size_bits;
+	
 
-	if(root->is_occupied)
+	for(idx = 0; idx < 3; ++idx )
 	{
-		return IS_FULL;
-	}
-
-	for( level = 0; level < host_bits; ++level)
-	{
-		int bit = host_ip[level] - ZERO_CHAR;
-
-		/*if( current->child[bit]->is_occupied )
+		if ( ! strcmp(host_ip_to_free, reserved_ips[idx] ) )
 		{
-			return level;
-		}*/
-
-		if( NULL == current->child[bit] ) /* not_occupuied bit */
-		{
-			current->child[bit] = CreateNode(current);
-
-			if( !current->child[bit] )
-			{
-				return SYS_FAIL;
-			}
-
-		}
-
-		current = current->child[bit];
-
-		if( current->is_occupied ) /* the required path already occupied */
-		{
-			return level;
+			return FAIL; /* or  DOUBLE_FREE_FAIL ?  */
 		}
 	}
 
-	current->is_occupied = TRUE;
-	UpdadePathToIsAllocated(current);
-	return level;
+	
+
+
+
 }
-
-
 
 /************************************************************/
 /********************  DHCPDestroy  *************************/
@@ -802,6 +812,81 @@ static void UpdadePathToIsAllocated( dhcp_node_t *node)
 	}
 }
 
+
+
+/************************************************************/
+/********************  StrHostIpToUint  *********************/
+/************************************************************/
+
+static void StrHostIpToUint(char *host_ip, ip_addrs_t ret_allocated_ip)
+{
+	uint8_t i = 0;
+
+	char one_bye[9] = { 0 };
+	one_bye[8] = BACK_SLASH_NULL;	
+
+	for( i = 0; i < BYTES_IN_IP; ++i )
+	{
+		strncpy(one_bye,host_ip + (i * BYTE_SIZE), BYTE_SIZE );
+		ret_allocated_ip[i] =
+			 (uint8_t)AtoiUpTo36Base(one_bye , BASE);
+	}
+
+}
+
+/************************************************************/
+/****************  TryToAllocExactHostIp  *******************/
+/************************************************************/
+
+static int TryToAllocExactHostIp(dhcp_node_t *root, char *host_ip,
+									 size_t host_bits)
+{
+	dhcp_node_t *current = root;
+	size_t level = 0;
+
+	if(root->is_occupied)
+	{
+		return IS_FULL;
+	}
+
+	for( level = 0; level < host_bits; ++level)
+	{
+		int bit = host_ip[level] - ZERO_CHAR;
+
+		/*if( current->child[bit]->is_occupied )
+		{
+			return level;
+		}*/
+
+		if( NULL == current->child[bit] ) /* not_occupuied bit */
+		{
+			current->child[bit] = CreateNode(current);
+
+			if( !current->child[bit] )
+			{
+				return SYS_FAIL;
+			}
+
+		}
+
+		current = current->child[bit];
+
+		if( current->is_occupied ) /* the required path already occupied */
+		{
+			return level;
+		}
+	}
+
+	current->is_occupied = TRUE;
+	UpdadePathToIsAllocated(current);
+	return level;
+}
+
+
+/************************************************************/
+/********** End Of Static Functions definition  *************/
+/************************************************************/
+
 /*static PrintDataIp()
 {
 
@@ -991,9 +1076,7 @@ if(IS_FULL != res)
 	*/
 
 
-/************************************************************/
-/********** End Of Static Functions definition  *************/
-/************************************************************/
+
 
 
 	
