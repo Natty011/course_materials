@@ -96,6 +96,7 @@ struct dhcp
 	dhcp_node_t *root;
 	char *ip;
 	size_t bits_num_in_subnet;
+	size_t count_Free_ip;
 
 };
 
@@ -164,7 +165,7 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 	ip_addrs_t server_ip = { 0 };
 */
 	
-	total = total - 3;
+	/*total = total - 3;*/
 	/*printf("total = { %u} \n", total );*/
 
 
@@ -233,6 +234,8 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 	res = TryToAllocExactHostIp( dhcp_ptr->root,reserved_broadcast, host_size );
 	UNUSED(res);
 
+	dhcp_ptr->count_Free_ip = total; 
+
 	return dhcp_ptr;
 }
 
@@ -298,6 +301,7 @@ int DHCPAllocateIP(dhcp_t* dhcp,
 		if(host_size_bits == res )
 		{
 			memcpy(ret_allocated_ip, requested_ip, BYTES_IN_IP);
+			--dhcp->count_Free_ip;		 
 			return SUCCESS;
 		}
 		
@@ -335,6 +339,7 @@ int DHCPAllocateIP(dhcp_t* dhcp,
   			 printf("ret_allocated_ip = {%u, %u, %u, %u} \n", ret_allocated_ip[0],
 				 ret_allocated_ip[1], ret_allocated_ip[2], ret_allocated_ip[3]);
 
+		--dhcp->count_Free_ip;		 
 		return 	REQUEST_NOT_MET;		
 	}
 
@@ -349,7 +354,7 @@ int DHCPFreeIP(dhcp_t* dhcp,
 	const unsigned char ip_to_free[BYTES_IN_IP])
 {
 	
-	int level = 0;
+	int level = 0, res = DOUBLE_FREE_FAIL;
 	dhcp_node_t *current = NULL, *root = NULL;
 
 	char word[MAX_SIZE] = { 0 }, *host_ip_to_free = NULL;
@@ -409,9 +414,10 @@ int DHCPFreeIP(dhcp_t* dhcp,
 
 	}
 
-	return DHCPFreeIpExist(root, host_ip_to_free , host_size_bits);
-
-	
+	res = DHCPFreeIpExist(root, host_ip_to_free , host_size_bits);
+	 
+	return res ? res  : ! (++dhcp->count_Free_ip ) ; 	 
+ 
 }
 
 /************************************************************/
@@ -487,12 +493,12 @@ static int DHCPFreeIpExist(dhcp_node_t *root, char *host_ip,
 
 				--level;
 			}
+
 			break;
 		}
 	}
 
 	return SUCCESS;
-
 }						
 /************************************************************/
 /********************  DHCPDestroy  *************************/
@@ -514,6 +520,14 @@ void DHCPDestroy(dhcp_t* dhcp)
 	}
 }
 
+/************************************************************/
+/******************  DHCPCountFree  *************************/
+/************************************************************/
+size_t DHCPCountFree(const dhcp_t* dhcp)
+{
+	assert(dhcp);
+	return dhcp->count_Free_ip;
+}
 
 	
 /************************************************************/
