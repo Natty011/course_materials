@@ -34,15 +34,6 @@ typedef uint8_t ip_addrs_t[4];
 /***************************** Success / Fail Enum ****************************/
 /******************************************************************************/
 
-
-typedef enum
-{
-	BACK_SLASH_NULL = '\0',
-	ZERO_CHAR = 48,
-	ONE_CHAR = 49
-
-} char_represents_t;
-
 typedef enum
 {
 	IS_FULL = -3,
@@ -64,6 +55,19 @@ typedef enum
 	TRUE = 1
 } op_result_t;
 
+/******************************************************************************/
+/******************************* results/states Enums *************************/
+/******************************************************************************/
+
+typedef enum
+{
+	BACK_SLASH_NULL = '\0',
+	ZERO_CHAR = 48,
+	ONE_CHAR = 49
+
+} char_represents_t;
+
+
 typedef enum
 {
 	LEFT = 0,
@@ -82,6 +86,7 @@ typedef enum
 
 /******************************************************************************/
 /***************************** Management struct ******************************/
+/******************************************************************************/
 
 typedef struct dhcp_node
 {
@@ -102,7 +107,7 @@ struct dhcp
 };
 
 /******************************************************************************/
-/************************ static variables globals  ************************/
+/************************ static globals variables   ************************/
 /******************************************************************************/
 
 static char reserved_network[MAX_SIZE] = { 0 };
@@ -125,7 +130,7 @@ static char* ItoaUpTo36Base(int n, char* str, int base, size_t len_str);
 static const char* WhiteSpacesSkip(const char *nptr);
 static void ReverseStr(char* str);
 static int Atoi10Base(const char *nptr);
-static char* Itoa10Base(int n, char* str);
+
 static char *ItoaTo2Base(dhcp_t* dhcp, char *dest, 
 	       const ip_addrs_t requested_ip, state_convert_t state );
 
@@ -140,11 +145,13 @@ static void
 static int 
 		DHCPFreeIpExist(dhcp_node_t *root, char *host_ip, int host_bits);
 
+		static int InitReservedIps(dhcp *dhcp,
+			char *reserved_ips[RESERVED_ADDR_SIZE], uint8_t host_size);		
+
 /******************************************************************************/
 /*******************End Of Static Functions declartions************************/
 /******************************************************************************/
 
-/******************************************************************************/
 
 /************************************************************/
 /********************  DHCPCreate  *************************/
@@ -160,7 +167,6 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 	/*char word[MAX_SIZE] = { 0 };*/
 	/*char word2[MAX_SIZE] = { 0 };*/
 	uint8_t host_size = WORD_SIZE - bits_num_in_subnet;
-	int res = 0;
 	/*
 	char *host_network_ip = NULL;
 	char *host_broadcast_ip = NULL;
@@ -222,7 +228,7 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 
 	/*ItoaTo2Base(dhcp_ptr, word, subnet_ip, PORTION_IP) ;*/
 	/*puts(word +  bits_num_in_subnet) ;*/
-
+/*
 	memset(reserved_ips[0], '0', host_size);
 	reserved_ips[0][host_size] = BACK_SLASH_NULL;
 
@@ -232,16 +238,18 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 
 	memset(reserved_ips[2], '1', host_size);
 	reserved_ips[2][host_size] = BACK_SLASH_NULL;
+	*/
 /*
 	puts(reserved_ips[0]);
 	puts(reserved_ips[1]);
 	puts(reserved_ips[2]);
 */
 
-	res = TryToAllocExactHostIp( dhcp_ptr->root,reserved_ips[0], host_size );
-	res = TryToAllocExactHostIp( dhcp_ptr->root,reserved_ips[1], host_size);
-	res = TryToAllocExactHostIp( dhcp_ptr->root,reserved_ips[2], host_size );
-	UNUSED(res);
+
+	if ( FAIL == InitReservedIps(dhcp_ptr, reserved_ips, host_size ) )
+	{
+		return NULL;
+	}
 
 	dhcp_ptr->count_Free_ip = total; 
 
@@ -249,8 +257,46 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 }
 
 /************************************************************/
-/********************  DHCPAllocateIP  **********************/
+/********************  InitReservedIps  *********************/
 /************************************************************/
+
+static int InitReservedIps(dhcp *dhcp,
+	char *reserved_ips[RESERVED_ADDR_SIZE], uint8_t host_size)
+{
+   int res = 0, i = 0;
+   dhcp_node_t *root = dhcp->root;
+
+   memset(reserved_ips[0], '0', host_size);
+   reserved_ips[0][host_size] = BACK_SLASH_NULL;
+
+   memset(reserved_ips[1], '1', host_size);
+   reserved_ips[1][host_size - 1] = ZERO_CHAR;
+   reserved_ips[1][host_size] = BACK_SLASH_NULL;
+
+   memset(reserved_ips[2], '1', host_size);
+   reserved_ips[2][host_size] = BACK_SLASH_NULL;
+
+   
+   for( i = 0; i < RESERVED_ADDR_SIZE ; ++i )
+   {
+	   res = TryToAllocExactHostIp(root, reserved_ips[i], host_size );
+
+	   if( FAIL == res )
+	   {
+		   DHCPDestroy(dhcp);
+		   root = NULL;
+		   dhcp = NULL;
+
+		   return FAIL;
+	   }
+   }
+
+   return SUCCESS;
+   
+}
+
+
+
 
 int DHCPAllocateIP(dhcp_t* dhcp,
 	const unsigned char requested_ip[BYTES_IN_IP],
@@ -410,7 +456,7 @@ int DHCPFreeIP(dhcp_t* dhcp,
 												
 	host_ip_to_free = ItoaTo2Base(dhcp, host_ip_to_free, ip_to_free, PORTION_IP) ;
 	/*host_ip_to_free = word +  subnet_size_bits;*/
-	puts(host_ip_to_free);
+	/*puts(host_ip_to_free);*/
 
 	for(idx = 0; idx < RESERVED_ADDR_SIZE ; ++idx )
 	{
@@ -603,27 +649,17 @@ static char* ItoaUpTo36Base(int n, char* str, int base , size_t len_str)
 	   return str;
 	}
 
-	if( n <= 0 )
+	if ( n == 0)
 	{
-		if ( n == 0)
+		for(i = 0; i < len_str ; ++i)
 		{
-			for(i = 0; i < 8 ; ++i)
-			{
-				*( str+i )= '0';
-			}
-			*(str +i) = '\0';
-			return str; 
+			*( str + i )= ZERO_CHAR;
 		}
-		else if ((n < 0) && ( base == 10) )
-		{
-			return Itoa10Base( n, str);
-		}
-		
-		else
-		{
-			n = -n;
-		}
+		*(str + i ) = BACK_SLASH_NULL;
+		return str; 
 	}
+		
+	
 	/* The base isn't negative decimal */
 	while( n )
 	{
@@ -636,7 +672,7 @@ static char* ItoaUpTo36Base(int n, char* str, int base , size_t len_str)
 
 	if( len_str - count != 0)
 	{
-		str = strncat(str, "0000000000000000000000", len_str  - count); /*8 - count */
+		str = strncat(str, "0000000000000000000000", len_str  - count); 
 	}
 	
 
@@ -782,62 +818,6 @@ static int Atoi10Base(const char *nptr)
 
 	return ( sign * num );
 
-}
-
-/************************************************************/
-/************* Itoa10Base function definition ***************/
-/************************************************************/
-/* 
-   DESCRIPTION: Converts an integer value of base 10 to a null-terminated 
-                string and stores the result in the array
-                given by str parameter.
-                 
-   RETURN VALUE: A pointer to the resulting null-terminated string,
-                  same as parameter str.
-  
-*/
-static char* Itoa10Base(int n, char* str)
-{
-
-	int sign = 1;
-	char* pstr = str;
-	if(NULL == str )
-	{
-		puts("str is a null pointer");
-		exit(EXIT_FAILURE);
-	}
-	
-	if( n <= 0 )
-	{
-		if ( n == 0)
-		{
-			*str++ = '0';
-			*str = '\0';
-			return str; 
-		}
-		else
-		{
-			n = -n;
-			sign = -1;
-		}
-	}
-	
-	while( n )
-	{
-		*str++ = n % 10 + '0';
-		n = n / 10;
-	}
-	
-	if(sign == -1 )
-	{
-		*str++ = '-';
-	}
-	
-	*str = '\0'; 
-
-	ReverseStr(pstr);
-
-	return pstr;
 }
 
 /************************************************************/
