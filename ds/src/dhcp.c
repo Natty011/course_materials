@@ -157,7 +157,7 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 	char *prefix_ip = NULL;
 	/*char prefix_ip_copy[MAX_SIZE] = { 0 };*/
 
-	char word[MAX_SIZE] = { 0 };
+	/*char word[MAX_SIZE] = { 0 };*/
 	/*char word2[MAX_SIZE] = { 0 };*/
 	uint8_t host_size = WORD_SIZE - bits_num_in_subnet;
 	int res = 0;
@@ -220,7 +220,7 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 
 	/*puts(dhcp_ptr->ip);*/
 
-	ItoaTo2Base(dhcp_ptr, word, subnet_ip, PORTION_IP) ;
+	/*ItoaTo2Base(dhcp_ptr, word, subnet_ip, PORTION_IP) ;*/
 	/*puts(word +  bits_num_in_subnet) ;*/
 
 	memset(reserved_ips[0], '0', host_size);
@@ -286,10 +286,9 @@ int DHCPAllocateIP(dhcp_t* dhcp,
 		}
 	#endif
 
-	/*total = total - 3;*/ /* 253 */
 
 	strcpy(prefix_ip_copy, dhcp->ip);
-	puts(prefix_ip_copy) ;
+	/*puts(prefix_ip_copy) ;*/
 
 	printf("requested_ip = {%u, %u, %u, %u} \n", requested_ip[0], requested_ip[1],
 							requested_ip[2], requested_ip[3]);
@@ -298,7 +297,7 @@ int DHCPAllocateIP(dhcp_t* dhcp,
 	host_ip_to_allocate = ItoaTo2Base(dhcp, host_ip_to_allocate,
 					 requested_ip, PORTION_IP) ;
 	/*host_ip_to_allocate = word +  subnet_size_bits;*/
-	puts(host_ip_to_allocate) ;
+	/*puts(host_ip_to_allocate) ;*/
 
 	res = TryToAllocExactHostIp( root,
 				host_ip_to_allocate, host_size_bits );
@@ -332,7 +331,7 @@ int DHCPAllocateIP(dhcp_t* dhcp,
 			}
 
 			/*printf("res_candidate = { %u} \n", res_candidate );*/
-			res_candidate += 1UL;
+			res_candidate += 1U;
 			/*printf("res_candidate = { %u} \n", res_candidate );*/
 			/*ItoaTo2Base(dhcp, host_ip_to_allocate, res_candidate, PORTION_IP) ;*/
 
@@ -341,7 +340,7 @@ int DHCPAllocateIP(dhcp_t* dhcp,
 			/*ItoaTo2Base(dhcp, word, (uint8_t*)(&res_candidate), PORTION_IP) ;*/
 
 			/*host_ip_to_allocate = word +  subnet_size_bits;*/
-			puts(host_ip_to_allocate) ;
+			/*puts(host_ip_to_allocate) ;*/
 
 			res = TryToAllocExactHostIp( root,
 				host_ip_to_allocate, host_size_bits );
@@ -352,10 +351,10 @@ int DHCPAllocateIP(dhcp_t* dhcp,
 
 		}
 
-		puts(host_ip_to_allocate);
+		/*puts(host_ip_to_allocate);*/
 
 		host_ip_to_allocate = strcat(prefix_ip_copy, host_ip_to_allocate);
-			puts(host_ip_to_allocate);
+			/*puts(host_ip_to_allocate);*/
 
 			StrHostIpToUint(host_ip_to_allocate, ret_allocated_ip);
   			 printf("ret_allocated_ip = {%u, %u, %u, %u} \n", ret_allocated_ip[0],
@@ -380,13 +379,16 @@ int DHCPFreeIP(dhcp_t* dhcp,
 	dhcp_node_t *current = NULL, *root = NULL;
 
 	char word[MAX_SIZE] = { 0 }, *host_ip_to_free = NULL;
-	
 
 	size_t subnet_size_bits = dhcp->bits_num_in_subnet;
 	uint8_t host_size_bits = WORD_SIZE - subnet_size_bits, idx = 0;
 
+	word[WORD_SIZE] = BACK_SLASH_NULL;
+	host_ip_to_free = word;
+
 	assert(dhcp);
 	assert(ip_to_free);
+
 	root = dhcp->root;
 
 	/* check if the prefix of requested_ip is correct */
@@ -406,9 +408,9 @@ int DHCPFreeIP(dhcp_t* dhcp,
 
 	
 												
-	ItoaTo2Base(dhcp, word, ip_to_free, PORTION_IP) ;
-	host_ip_to_free = word +  subnet_size_bits;
-	
+	ItoaTo2Base(dhcp, host_ip_to_free, ip_to_free, PORTION_IP) ;
+	/*host_ip_to_free = word +  subnet_size_bits;*/
+	puts(host_ip_to_free);
 
 	for(idx = 0; idx < RESERVED_ADDR_SIZE ; ++idx )
 	{
@@ -634,7 +636,7 @@ static char* ItoaUpTo36Base(int n, char* str, int base , size_t len_str)
 
 	if( len_str - count != 0)
 	{
-		str = strncat(str, "00000000000000000000000", len_str  - count); /*8 - count */
+		str = strncat(str, "0000000000000000000000", len_str  - count); /*8 - count */
 	}
 	
 
