@@ -408,7 +408,7 @@ int DHCPFreeIP(dhcp_t* dhcp,
 
 	
 												
-	ItoaTo2Base(dhcp, host_ip_to_free, ip_to_free, PORTION_IP) ;
+	host_ip_to_free = ItoaTo2Base(dhcp, host_ip_to_free, ip_to_free, PORTION_IP) ;
 	/*host_ip_to_free = word +  subnet_size_bits;*/
 	puts(host_ip_to_free);
 
