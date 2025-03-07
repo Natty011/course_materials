@@ -128,8 +128,8 @@ static int
 static void
  	   StrHostIpToUint(char *host_ip, ip_addrs_t ret_allocated_ip);
 	   
-#ifdef PRINTS
-#endif
+static int 
+		DHCPFreeIpExist(dhcp_node_t *root, char *host_ip, size_t host_bits);
 
 /******************************************************************************/
 /*******************End Of Static Functions declartions************************/
@@ -260,14 +260,16 @@ int DHCPAllocateIP(dhcp_t* dhcp,
 	assert(requested_ip);
 	assert(ret_allocated_ip);
 
-
 	/* check if the prefix of requested_ip is correct */
+
+	#ifndef NDEBUG 
 	if(  *(uint32_t*)requested_ip )
 	{
 		ItoaTo2Base(dhcp, prefix_ip_copy, requested_ip, INIT_IP) ;
 		assert( ! strcmp(prefix_ip_copy, dhcp->ip ) );
 
 	}
+	#endif
 
 	total = total - 3; /* 253 */
 
@@ -349,28 +351,27 @@ int DHCPFreeIP(dhcp_t* dhcp,
 	char word[MAX_SIZE] = { 0 };
 	char *reserved_ips[3] = {reserved_network, reserved_server,
 							 reserved_broadcast };
-	/*char *candidate = NULL;*/
-	dhcp_node_t *root = dhcp->root;
+
+							 dhcp_node_t *root = dhcp->root;
 	size_t subnet_size_bits = dhcp->bits_num_in_subnet;
-	/*char word2[MAX_SIZE] = { 0 };*/
 	uint8_t host_size_bits = WORD_SIZE - subnet_size_bits, idx = 0;
-	int res = 0;
+	/*int res = 0;*/
+	
 	char prefix_ip_copy[MAX_SIZE] = { 0 };
 	char *host_ip_to_free = NULL;
-	uint32_t total = 1U<<host_size_bits, res_candidate = 0;
 
 	assert(dhcp);
 	assert(ip_to_free);
 	
 	/* check if the prefix of requested_ip is correct */
-	if(  *(uint32_t*)ip_to_free )
-	{
-		ItoaTo2Base(dhcp, prefix_ip_copy, ip_to_free, INIT_IP) ;
-		assert( ! strcmp(prefix_ip_copy, dhcp->ip ) );
+	#ifndef NDEBUG 
+		if(  *(uint32_t*)ip_to_free )
+		{
+			ItoaTo2Base(dhcp, prefix_ip_copy, ip_to_free, INIT_IP) ;
+			assert( ! strcmp(prefix_ip_copy, dhcp->ip ) );
 
-	}
-
-	total = total - 3; /* 253 */
+		}
+	#endif
 
 	strcpy(prefix_ip_copy, dhcp->ip);
 
@@ -387,16 +388,76 @@ int DHCPFreeIP(dhcp_t* dhcp,
 	{
 		if ( ! strcmp(host_ip_to_free, reserved_ips[idx] ) )
 		{
-			return FAIL; /* or  DOUBLE_FREE_FAIL ?  */
+			return DOUBLE_FREE_FAIL; /* or  FAIL ? DOUBLE_FREE_FAIL ?  */
 		}
 	}
 
+	return DHCPFreeIpExist(root, host_ip_to_free , host_size_bits);
+
 	
-
-
-
 }
 
+/************************************************************/
+/********************  DHCPFreeIpExist  *********************/
+/************************************************************/
+
+static int DHCPFreeIpExist(dhcp_node_t *root, char *host_ip,
+							size_t host_bits)
+{
+	size_t level = 0;
+	dhcp_node_t *current = NULL, *parent = NULL;
+
+	current = root;
+	/* To go down to the leaf */
+	for(level = 0; level < host_bits; ++level )
+	{
+		int bit = host_ip[level] - ZERO_CHAR;
+
+		if( NULL == current->child[bit] )
+		{
+			return DOUBLE_FREE_FAIL;
+		}
+
+		current = current->child[bit];
+ 
+	}
+
+	for(level = host_bits -1; level < host_bits; ++level )
+	{
+		int bit = host_ip[level] - ZERO_CHAR;
+
+		if( NULL == current->child[bit] )
+		{
+			return DOUBLE_FREE_FAIL;
+		}
+
+		current = current->child[bit];
+ 
+	}
+	/* level == host_bits */
+	while(current != root )
+	{
+		int bit = host_ip[--level] - ZERO_CHAR;
+		parent = current->parent;
+
+		free(current);
+		current = NULL;
+		parent->is_occupied = FALSE;
+
+		if( NULL == parent->child[ !bit ] )
+		{
+			current = parent;
+		}
+
+		else
+		{
+			break;
+		}
+	}
+
+	return SUCCESS;
+
+}						
 /************************************************************/
 /********************  DHCPDestroy  *************************/
 /************************************************************/
@@ -749,7 +810,6 @@ static char *ItoaTo2Base(dhcp_t* dhcp, char *dest,
 	if( PORTION_IP == state)
 	{
 		*(dest + MAX_SIZE) = '\0';
-
 		return dest ;
 
 	}
