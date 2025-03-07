@@ -348,6 +348,11 @@ int DHCPAllocateIP(dhcp_t* dhcp,
 int DHCPFreeIP(dhcp_t* dhcp,
 	const unsigned char ip_to_free[BYTES_IN_IP])
 {
+	
+	int level = 0;
+	dhcp_node_t *current = NULL, *parent = NULL;
+
+
 	char word[MAX_SIZE] = { 0 };
 	char *reserved_ips[3] = {reserved_network, reserved_server,
 							 reserved_broadcast };
@@ -356,7 +361,7 @@ int DHCPFreeIP(dhcp_t* dhcp,
 	size_t subnet_size_bits = dhcp->bits_num_in_subnet;
 	uint8_t host_size_bits = WORD_SIZE - subnet_size_bits, idx = 0;
 	/*int res = 0;*/
-	
+
 	char prefix_ip_copy[MAX_SIZE] = { 0 };
 	char *host_ip_to_free = NULL;
 
@@ -391,8 +396,73 @@ int DHCPFreeIP(dhcp_t* dhcp,
 			return DOUBLE_FREE_FAIL; /* or  FAIL ? DOUBLE_FREE_FAIL ?  */
 		}
 	}
+	
+	current = root;
 
-	return DHCPFreeIpExist(root, host_ip_to_free , host_size_bits);
+	printf("root = %p\n", (void*)root);
+
+	/* To go down to the leaf */
+	for(level = 0; level < host_size_bits; ++level )
+	{
+		int bit = host_ip_to_free[level] - ZERO_CHAR;
+
+		if( NULL == current->child[bit] )
+		{
+			return DOUBLE_FREE_FAIL;
+		}
+
+		current = current->child[bit];
+		printf("current = %p\n", (void*)current);
+
+	}
+	/* level == host_bits */
+	/*while(current != root )*/
+	puts("hiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii");
+
+	for(level = host_size_bits - 1; level >= 0; --level )
+
+	{
+		int bit = host_ip_to_free[level] - ZERO_CHAR;
+		printf("bit = %d \n", bit );
+		printf("current = %p\n", (void*)current);
+
+		parent = current->parent;
+		printf("level = %d \n", level );
+		printf("parent = %p\n", (void*)parent);
+		free(current);
+		current = NULL;
+		parent->is_occupied = FALSE;
+		parent->child[ bit ] = NULL;
+
+		if( NULL == parent->child[ !bit ] )
+		{
+			current = parent;
+		}
+
+		else
+		{
+			--level;
+			while( level >= 0)
+			{
+
+				parent = parent->parent;
+				printf("parent = %p\n", (void*)parent);
+
+				parent->is_occupied = FALSE;
+
+				--level;
+			}
+			puts("bbbbbbbbbbbbbbbbbbbbbbbbb");
+			printf("level = %d \n", level );
+
+			break;
+		}
+	}
+
+	return SUCCESS;
+
+
+	/*return DHCPFreeIpExist(root, host_ip_to_free , host_size_bits);*/
 
 	
 }
@@ -404,10 +474,12 @@ int DHCPFreeIP(dhcp_t* dhcp,
 static int DHCPFreeIpExist(dhcp_node_t *root, char *host_ip,
 							size_t host_bits)
 {
-	size_t level = 0;
+	int level = 0;
 	dhcp_node_t *current = NULL, *parent = NULL;
 
 	current = root;
+	printf("root = %p\n", (void*)root);
+
 	/* To go down to the leaf */
 	for(level = 0; level < host_bits; ++level )
 	{
@@ -419,27 +491,23 @@ static int DHCPFreeIpExist(dhcp_node_t *root, char *host_ip,
 		}
 
 		current = current->child[bit];
- 
-	}
+		printf("current = %p\n", (void*)current);
 
-	for(level = host_bits -1; level < host_bits; ++level )
-	{
-		int bit = host_ip[level] - ZERO_CHAR;
-
-		if( NULL == current->child[bit] )
-		{
-			return DOUBLE_FREE_FAIL;
-		}
-
-		current = current->child[bit];
- 
 	}
 	/* level == host_bits */
-	while(current != root )
-	{
-		int bit = host_ip[--level] - ZERO_CHAR;
-		parent = current->parent;
+	/*while(current != root )*/
+	puts("hiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii");
 
+	for(level = host_bits - 1; level >= 7; --level )
+
+	{
+		int bit = host_ip[level] - ZERO_CHAR;
+		printf("bit = %d \n", bit );
+		printf("current = %p\n", (void*)current);
+
+		parent = current->parent;
+		printf("level = %d \n", level );
+		printf("parent = %p\n", (void*)parent);
 		free(current);
 		current = NULL;
 		parent->is_occupied = FALSE;
@@ -451,6 +519,9 @@ static int DHCPFreeIpExist(dhcp_node_t *root, char *host_ip,
 
 		else
 		{
+			puts("bbbbbbbbbbbbbbbbbbbbbbbbb");
+			printf("level = %d \n", level );
+
 			break;
 		}
 	}
