@@ -121,7 +121,7 @@ static dhcp_node_t *CreateNode(dhcp_node_t *parent );
 
 
 static int AtoiUpTo36Base(const char *str, int base);
-static char* ItoaUpTo36Base(int n, char* str, int base);
+static char* ItoaUpTo36Base(int n, char* str, int base, size_t len_str);
 static const char* WhiteSpacesSkip(const char *nptr);
 static void ReverseStr(char* str);
 static int Atoi10Base(const char *nptr);
@@ -233,9 +233,9 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 	memset(reserved_ips[2], '1', host_size);
 	reserved_ips[2][host_size] = BACK_SLASH_NULL;
 /*
-	puts(reserved_network);
-	puts(reserved_server);
-	puts(reserved_broadcast);
+	puts(reserved_ips[0]);
+	puts(reserved_ips[1]);
+	puts(reserved_ips[2]);
 */
 
 	res = TryToAllocExactHostIp( dhcp_ptr->root,reserved_ips[0], host_size );
@@ -258,15 +258,17 @@ int DHCPAllocateIP(dhcp_t* dhcp,
 {
 	
 	char word[MAX_SIZE] = { 0 };
+
 	/*char *candidate = NULL;*/
 	dhcp_node_t *root = dhcp->root;
 	size_t subnet_size_bits = dhcp->bits_num_in_subnet;
+	/*size_t len_str = 0;*/
 	/*char word2[MAX_SIZE] = { 0 };*/
 	uint8_t host_size_bits = WORD_SIZE - subnet_size_bits;
 	int res = 0;
 	char prefix_ip_copy[MAX_SIZE] = { 0 };
 	char *host_ip_to_allocate = NULL;
-	uint32_t total = 1U<<host_size_bits, res_candidate = 0;
+	uint32_t total = 1UL<<host_size_bits, res_candidate = 0;
 
 	assert(dhcp);
 	assert(requested_ip);
@@ -282,17 +284,19 @@ int DHCPAllocateIP(dhcp_t* dhcp,
 
 		}
 	#endif
+	word[WORD_SIZE] = BACK_SLASH_NULL;
 
 	total = total - 3; /* 253 */
 
 	strcpy(prefix_ip_copy, dhcp->ip);
+	puts(prefix_ip_copy) ;
 
 	printf("requested_ip = {%u, %u, %u, %u} \n", requested_ip[0], requested_ip[1],
 							requested_ip[2], requested_ip[3]);
 
 	ItoaTo2Base(dhcp, word, requested_ip, PORTION_IP) ;
 	host_ip_to_allocate = word +  subnet_size_bits;
-	/*puts(host_ip_to_allocate) ;*/
+	puts(host_ip_to_allocate) ;
 
 	res = TryToAllocExactHostIp( root,
 				host_ip_to_allocate, host_size_bits );
@@ -326,11 +330,16 @@ int DHCPAllocateIP(dhcp_t* dhcp,
 			}
 
 			/*printf("res_candidate = { %u} \n", res_candidate );*/
-			res_candidate += 1U;
+			res_candidate += 1UL;
 			/*printf("res_candidate = { %u} \n", res_candidate );*/
+			/*ItoaTo2Base(dhcp, host_ip_to_allocate, res_candidate, PORTION_IP) ;*/
 
-			ItoaUpTo36Base(res_candidate, host_ip_to_allocate, BASE);
-			/*puts(host_ip_to_allocate);*/
+			ItoaUpTo36Base(res_candidate, host_ip_to_allocate,
+				 BASE, host_size_bits);
+			/*ItoaTo2Base(dhcp, word, (uint8_t*)(&res_candidate), PORTION_IP) ;*/
+
+			/*host_ip_to_allocate = word +  subnet_size_bits;*/
+			puts(host_ip_to_allocate) ;
 
 			res = TryToAllocExactHostIp( root,
 				host_ip_to_allocate, host_size_bits );
@@ -341,8 +350,10 @@ int DHCPAllocateIP(dhcp_t* dhcp,
 
 		}
 
+		puts(host_ip_to_allocate);
+
 		host_ip_to_allocate = strcat(prefix_ip_copy, host_ip_to_allocate);
-			/*puts(host_ip_to_allocate);*/
+			puts(host_ip_to_allocate);
 
 			StrHostIpToUint(host_ip_to_allocate, ret_allocated_ip);
   			 printf("ret_allocated_ip = {%u, %u, %u, %u} \n", ret_allocated_ip[0],
@@ -569,19 +580,20 @@ size_t DHCPCountFree(const dhcp_t* dhcp)
 /********************  ItoaUpTo36Base ***********************/
 /************************************************************/
 
-static char* ItoaUpTo36Base(int n, char* str, int base)
+static char* ItoaUpTo36Base(int n, char* str, int base , size_t len_str)
 {
 
 	int remainder = 0;
 	char* pstr = str;
-	size_t count = 0, i = 0;
+	size_t count = 0, i = 0; /*, str_len = 0 */
 
 	if(NULL == str )
 	{
 		puts("str is a null pointer");
 		exit(EXIT_FAILURE);
 	}
-	
+	/*str_len = strlen(str);*/
+	printf("len_str = %lu \n", len_str);
 	if (  (base > 36) || (base < 2) )
 	{
 	   puts("Invalid base value");
@@ -619,9 +631,9 @@ static char* ItoaUpTo36Base(int n, char* str, int base)
 	}
 	*str = '\0'; 
 
-	if( BYTE_SIZE - count != 0)
+	if( len_str - count != 0)
 	{
-		str = strncat(str, "00000000", BYTE_SIZE - count); /*8 - count */
+		str = strncat(str, "00000000000000000000000", len_str  - count); /*8 - count */
 	}
 	
 
@@ -860,7 +872,7 @@ static char *ItoaTo2Base(dhcp_t* dhcp, char *dest,
 	{
 
 	ItoaUpTo36Base(requested_ip[i],
-		dest + (i * BYTE_SIZE) , BASE); 
+		dest + (i * BYTE_SIZE) , BASE, BYTE_SIZE); 
 
 	}
 
