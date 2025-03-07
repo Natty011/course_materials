@@ -145,8 +145,8 @@ static void
 static int 
 		DHCPFreeIpExist(dhcp_node_t *root, char *host_ip, int host_bits);
 
-		static int InitReservedIps(dhcp *dhcp,
-			char *reserved_ips[RESERVED_ADDR_SIZE], uint8_t host_size);		
+static int InitReservedIps(dhcp_t *dhcp,
+	char *reserved_ips[RESERVED_ADDR_SIZE], uint8_t host_size);		
 
 /******************************************************************************/
 /*******************End Of Static Functions declartions************************/
@@ -260,7 +260,7 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 /********************  InitReservedIps  *********************/
 /************************************************************/
 
-static int InitReservedIps(dhcp *dhcp,
+static int InitReservedIps(dhcp_t *dhcp,
 	char *reserved_ips[RESERVED_ADDR_SIZE], uint8_t host_size)
 {
    int res = 0, i = 0;
