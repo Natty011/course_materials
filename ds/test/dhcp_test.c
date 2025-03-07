@@ -56,7 +56,7 @@
 
 typedef enum
 {
-	
+	DOUBLE_FREE_FAIL = -1,
 	SUCCESS = 0,
 	FAIL = 1,
 	REQUEST_NOT_MET = 2
@@ -117,7 +117,7 @@ int main ()
 static void TestDhcp(void)
 {	
 
-	int result = FALSE, status_result = FALSE; 
+	int result = FALSE, status_result = FALSE, idx = 0; 
 	dhcp_t *dhcp1 = NULL;
 	ip_addrs_t ip = {192, 168, 2, 5};
 	ip_addrs_t requested_ip[10] ={ {192, 168, 2, 0}, { 0 },
@@ -184,6 +184,24 @@ static void TestDhcp(void)
 	}
 
 
+	for( idx = 0 ; idx < BYTES_IN_IP; ++idx )
+	{
+		if( 1 == idx) continue;
+
+		result = DHCPFreeIP(dhcp1, requested_ip[idx]);
+
+		if( DOUBLE_FREE_FAIL != result )
+		
+		{
+			printf("line: %d \n" , __LINE__ );
+			status_result =  TRUE;
+			puts("Failes in: DHCPFreeIP ");
+		}
+
+	}
+
+	
+	
 	
 	DHCPDestroy(dhcp1);
 	dhcp1 = NULL;
