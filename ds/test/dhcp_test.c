@@ -141,8 +141,8 @@ static void TestDhcp(void)
 
 		return;
 	}
-	printf("count_free = %lu\n", count_free);
-	printf("DHCPCountFree(dhcp1) = %lu\n", DHCPCountFree(dhcp1));
+	/*printf("count_free = %lu\n", count_free);
+	printf("DHCPCountFree(dhcp1) = %lu\n", DHCPCountFree(dhcp1));*/
 
 	if( DHCPCountFree(dhcp1) != count_free )
 	{
@@ -164,43 +164,46 @@ static void TestDhcp(void)
 	#endif
 
 	if( REQUEST_NOT_MET != result || 
-		CompareRetIp(arr_expected[0],ret_allocated_ip[0] ) )	
+		CompareRetIp(arr_expected[0],ret_allocated_ip[0] ) ||
+		DHCPCountFree(dhcp1) != --count_free  )	
 	{
 		printf("line: %d \n" , __LINE__ );
 		status_result =  TRUE;
-		puts("Failes in: AllocateIP ");
+		puts("Failes in: AllocateIP || CountFree ");
 	}
 
 	result = DHCPAllocateIP(dhcp1, requested_ip[1], ret_allocated_ip[1]);
 
 	if( REQUEST_NOT_MET != result || 
-		CompareRetIp(arr_expected[1],ret_allocated_ip[1] ) )	
+		CompareRetIp(arr_expected[1],ret_allocated_ip[1] ) ||
+		DHCPCountFree(dhcp1) != --count_free  )	
 	{
 		printf("line: %d \n" , __LINE__ );
 		status_result =  TRUE;
-		puts("Failes in: AllocateIP ");
+		puts("Failes in: AllocateIP || CountFree ");
 	}
 
 	result = DHCPAllocateIP(dhcp1, requested_ip[2], ret_allocated_ip[2]);
 
 	if( FAIL != result || 
-		CompareRetIp(arr_expected[2],ret_allocated_ip[2] ) )	
+		CompareRetIp(arr_expected[2],ret_allocated_ip[2] ) ||
+		DHCPCountFree(dhcp1) != count_free  )	
 	{
 		printf("line: %d \n" , __LINE__ );
 		status_result =  TRUE;
-		puts("Failes in: AllocateIP ");
+		puts("Failes in: AllocateIP || CountFree ");
 	}
 
 	result = DHCPAllocateIP(dhcp1, requested_ip[3], ret_allocated_ip[3]);
 
 	if( FAIL != result || 
-		CompareRetIp(arr_expected[3],ret_allocated_ip[3] ) )	
+		CompareRetIp(arr_expected[3],ret_allocated_ip[3] ) ||
+		DHCPCountFree(dhcp1) != count_free   )	
 	{
 		printf("line: %d \n" , __LINE__ );
 		status_result =  TRUE;
-		puts("Failes in: AllocateIP ");
+		puts("Failes in: AllocateIP || CountFree ");
 	}
-
 
 	for( idx = 0 ; idx < BYTES_IN_IP; ++idx )
 	{
@@ -208,14 +211,14 @@ static void TestDhcp(void)
 
 		result = DHCPFreeIP(dhcp1, requested_ip[idx]);
 
-		if( DOUBLE_FREE_FAIL != result )
+		if( DOUBLE_FREE_FAIL != result ||
+			DHCPCountFree(dhcp1) != count_free )
 		
 		{
 			printf("line: %d \n" , __LINE__ );
 			status_result =  TRUE;
-			puts("Failes in: DHCPFreeIP ");
+			puts("Failes in: DHCPFreeIP || CountFree ");
 		}
-
 	}
 
 	for( idx = 0 ; idx < 2; ++idx )
@@ -223,7 +226,8 @@ static void TestDhcp(void)
 
 		result = DHCPFreeIP(dhcp1, arr_expected[idx]);
 
-		if( SUCCESS != result )
+		if( SUCCESS != result ||
+			DHCPCountFree(dhcp1) != ++count_free )
 		
 		{
 			printf("line: %d \n" , __LINE__ );
