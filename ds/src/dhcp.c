@@ -22,6 +22,7 @@
 #define BASE				( 2 )
 #define MAX_SIZE			( 33 )
 #define WORD_SIZE			( 32 )
+#define RESERVED_ADDR_SIZE  ( 3 )
 
 
 /************************************************************/
@@ -100,9 +101,16 @@ struct dhcp
 
 };
 
+/******************************************************************************/
+/************************ static variables globals  ************************/
+/******************************************************************************/
+
 static char reserved_network[MAX_SIZE] = { 0 };
 static char reserved_server[MAX_SIZE] = { 0 };
 static char reserved_broadcast[MAX_SIZE]= { 0 };
+
+static char *reserved_ips[RESERVED_ADDR_SIZE] = {reserved_network, 
+										reserved_server, reserved_broadcast };
 
 /******************************************************************************/
 /************************ static functions declartions ************************/
@@ -159,13 +167,14 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 	char *host_server_ip = NULL;
 */
 	uint32_t total = 1U<<host_size; /*, res_candidate = 0*/
+	total = total - RESERVED_ADDR_SIZE;
+
 	/*
 	ip_addrs_t network_ip = { 0 };
 	ip_addrs_t broadcast_ip = { 0 };
 	ip_addrs_t server_ip = { 0 };
 */
 	
-	/*total = total - 3;*/
 	/*printf("total = { %u} \n", total );*/
 
 
@@ -214,24 +223,24 @@ dhcp_t *DHCPCreate(const unsigned char subnet_ip[BYTES_IN_IP],
 	ItoaTo2Base(dhcp_ptr, word, subnet_ip, PORTION_IP) ;
 	/*puts(word +  bits_num_in_subnet) ;*/
 
-	memset(reserved_network, '0', host_size);
-	reserved_network[host_size] = BACK_SLASH_NULL;
+	memset(reserved_ips[0], '0', host_size);
+	reserved_ips[0][host_size] = BACK_SLASH_NULL;
 
-	memset(reserved_broadcast, '1', host_size);
-	reserved_broadcast[host_size] = BACK_SLASH_NULL;
+	memset(reserved_ips[1], '1', host_size);
+	reserved_ips[1][host_size - 1] = ZERO_CHAR;
+	reserved_ips[1][host_size] = BACK_SLASH_NULL;
 
-	memset(reserved_server, '1', host_size);
-	reserved_server[host_size - 1] = ZERO_CHAR;
-	reserved_server[host_size] = BACK_SLASH_NULL;
+	memset(reserved_ips[2], '1', host_size);
+	reserved_ips[2][host_size] = BACK_SLASH_NULL;
 /*
 	puts(reserved_network);
 	puts(reserved_server);
 	puts(reserved_broadcast);
 */
 
-	res = TryToAllocExactHostIp( dhcp_ptr->root,reserved_network, host_size );
-	res = TryToAllocExactHostIp( dhcp_ptr->root,reserved_server, host_size);
-	res = TryToAllocExactHostIp( dhcp_ptr->root,reserved_broadcast, host_size );
+	res = TryToAllocExactHostIp( dhcp_ptr->root,reserved_ips[0], host_size );
+	res = TryToAllocExactHostIp( dhcp_ptr->root,reserved_ips[1], host_size);
+	res = TryToAllocExactHostIp( dhcp_ptr->root,reserved_ips[2], host_size );
 	UNUSED(res);
 
 	dhcp_ptr->count_Free_ip = total; 
@@ -358,8 +367,7 @@ int DHCPFreeIP(dhcp_t* dhcp,
 	dhcp_node_t *current = NULL, *root = NULL;
 
 	char word[MAX_SIZE] = { 0 }, *host_ip_to_free = NULL;
-	char *reserved_ips[3] = {reserved_network, reserved_server,
-							 reserved_broadcast };
+	
 
 	size_t subnet_size_bits = dhcp->bits_num_in_subnet;
 	uint8_t host_size_bits = WORD_SIZE - subnet_size_bits, idx = 0;
@@ -389,7 +397,7 @@ int DHCPFreeIP(dhcp_t* dhcp,
 	host_ip_to_free = word +  subnet_size_bits;
 	
 
-	for(idx = 0; idx < 3; ++idx )
+	for(idx = 0; idx < RESERVED_ADDR_SIZE ; ++idx )
 	{
 		if ( ! strcmp(host_ip_to_free, reserved_ips[idx] ) )
 		{
