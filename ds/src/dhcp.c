@@ -2,12 +2,13 @@
 * Author : Natty
 * Reviewer : ???
 * Date : 05 / 03 / 2025
-* Last update: 08 / 03 / 2025
+* Last update: 09 / 03 / 2025
 *****************************************/
 /*#define PRINTS*/
 #ifdef PRINTS
 	#include <stdio.h> /* printf, puts  */
 #endif
+
 #include <stdint.h>		/*uint8_t, uint32_t */
 #include <assert.h> 	/* assert */
 #include <stdlib.h> 	/* malloc, free */
@@ -315,15 +316,9 @@ int DHCPFreeIP(dhcp_t* dhcp,
 			assert( ! strcmp(word, dhcp->ip ) );
 
 		}
-		
+
 	#endif
-	
-	#ifdef PRINTS 
-		/*
-		printf("ip_to_free = {%u, %u, %u, %u} \n", ip_to_free[0], ip_to_free[1],
-						ip_to_free[2], ip_to_free[3]);*/
-	#endif
-				
+			
 	host_ip_to_free = ItoaTo2Base(dhcp, host_ip_to_free, ip_to_free, PORTION_IP) ;
 
 	for(idx = 0; idx < RESERVED_ADDR_SIZE ; ++idx )
