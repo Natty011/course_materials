@@ -1,8 +1,8 @@
 /***************************************
 * Author : Natty
-* Reviewer : Rawan
-* Date : 26 / 02 / 2025
-* Last update: 26 / 02 / 2025
+* Reviewer : ???
+* Date : 05 / 03 / 2025
+* Last update: 08 / 03 / 2025
 *****************************************/
 
 #include <stdio.h> 		/* printf, puts  */
@@ -102,12 +102,12 @@ int main ()
 		mode = DEBUG;
 		background =  BACK_YELLOW;
 	#endif
-/*
+
 	puts(BLUE"====================================================="RESET);
 	printf("%sTEST: %s "RESET" \n", background,  mode);
    	puts(BACK_BLUE"'TestDhcp()'"RESET);
 	TestDhcp();
-*/
+
 	puts(BLUE"====================================================="RESET);
 	printf("%sTEST: %s "RESET" \n", background,  mode);
    	puts(BACK_BLUE"'TestDhcp2()'"RESET);
@@ -231,7 +231,6 @@ static void TestDhcp(void)
 
 	for( idx = 0 ; idx < 2; ++idx )
 	{
-
 		result = DHCPFreeIP(dhcp1, arr_expected[idx]);
 
 		if( SUCCESS != result ||
@@ -277,10 +276,11 @@ static void TestDhcp2(void)
 	ip_addrs_t ip = {192, 168, 2, 5};
 
 	ip_addrs_t requested_ip[10] ={ {192, 168, 0, 0}, { 0 },
-		 {192, 168, 63, 254 }, {192, 168, 63, 255 } } ;
+		 {192, 168, 63, 254 }, {192, 168, 63, 255 } , 
+		 {192, 168, 0, 255 }, {192, 168, 0, 255 } } ;
 	ip_addrs_t ret_allocated_ip[10] =  { { 0 } } ;
 	ip_addrs_t arr_expected[10] = { {192, 168, 0, 1} , { 192, 168, 0, 2 } ,
-	{ 0 }, { 0 }, { 0 } };
+	{ 0 }, { 0 },  {192, 168, 0, 255 }, {192, 168, 1, 0 } };
 
 	size_t bits_num_in_subnet1 = 18, count_free = 0;
 
@@ -331,8 +331,8 @@ static void TestDhcp2(void)
 
 	result = DHCPAllocateIP(dhcp1, requested_ip[1], ret_allocated_ip[1]);
 
-	if( REQUEST_NOT_MET != result /*|| 
-		CompareRetIp(arr_expected[1],ret_allocated_ip[1] )*/ ||
+	if( REQUEST_NOT_MET != result || 
+		CompareRetIp(arr_expected[1],ret_allocated_ip[1] ) ||
 		DHCPCountFree(dhcp1) != --count_free  )	
 	{
 		printf("line: %d \n" , __LINE__ );
@@ -340,7 +340,7 @@ static void TestDhcp2(void)
 		puts("Failes in: AllocateIP || CountFree ");
 	}
 
-/*
+
 	result = DHCPAllocateIP(dhcp1, requested_ip[2], ret_allocated_ip[2]);
 
 	if( FAIL != result || 
@@ -362,6 +362,46 @@ static void TestDhcp2(void)
 		status_result =  TRUE;
 		puts("Failes in: AllocateIP || CountFree ");
 	}
+
+	
+	result = DHCPAllocateIP(dhcp1, requested_ip[4], ret_allocated_ip[4]);
+	
+	#ifdef PRINTS
+
+		/*printf("ret_allocated_ip_test = {%u, %u, %u, %u} \n", 
+				ret_allocated_ip[4][0], ret_allocated_ip[4][1],
+				ret_allocated_ip[4][2], ret_allocated_ip[4][3]);*/
+	#endif
+
+	if( SUCCESS != result || 
+		CompareRetIp(arr_expected[4],ret_allocated_ip[4] ) ||
+		DHCPCountFree(dhcp1) != --count_free   )	
+	{
+		printf("line: %d \n" , __LINE__ );
+		status_result =  TRUE;
+		puts("Failes in: AllocateIP || CountFree ");
+	}
+
+	result = DHCPAllocateIP(dhcp1, requested_ip[5], ret_allocated_ip[5]);
+	
+	#ifdef PRINTS
+
+		/*
+		printf("ret_allocated_ip_test = {%u, %u, %u, %u} \n", 
+				ret_allocated_ip[5][0], ret_allocated_ip[5][1],
+				ret_allocated_ip[5][2], ret_allocated_ip[5][3]);
+		*/
+	#endif
+
+	if( REQUEST_NOT_MET != result || 
+		CompareRetIp(arr_expected[5],ret_allocated_ip[5] ) ||
+		DHCPCountFree(dhcp1) != --count_free   )	
+	{
+		printf("line: %d \n" , __LINE__ );
+		status_result =  TRUE;
+		puts("Failes in: AllocateIP || CountFree ");
+	}
+
 
 	for( idx = 0 ; idx < BYTES_IN_IP; ++idx )
 	{
@@ -395,7 +435,7 @@ static void TestDhcp2(void)
 
 	}
 
-*/
+
 	DHCPDestroy(dhcp1);
 	dhcp1 = NULL;
 
@@ -408,12 +448,13 @@ static void TestDhcp2(void)
 
 	else
 	{
-		puts(BACK_YELLOW"Test: Failure"RESET);	
+		puts(BACK_RED"Test: Failure"RESET);	
 	}
 
 }
+
 /************************************************************/
-/****************** CompareRetIp *****************/
+/*********************** CompareRetIp ***********************/
 /************************************************************/
 static int 	CompareRetIp(ip_addrs_t expected_ip, ip_addrs_t ret_ip )
 {
