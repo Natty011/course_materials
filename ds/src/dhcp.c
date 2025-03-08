@@ -236,20 +236,13 @@ int DHCPAllocateIP(dhcp_t* dhcp,
 	char prefix_ip_copy[MAX_SIZE] = { 0 }, word[MAX_SIZE] = { 0 },
 				*host_ip_to_allocate = NULL;
 
-	uint32_t total = (1UL<<host_size_bits) - RESERVED_ADDR_SIZE,
-						 res_candidate = 0;
-
-	word[WORD_SIZE] = BACK_SLASH_NULL;
-
 	assert(dhcp);
-	/*assert(requested_ip);*/
 	assert(ret_allocated_ip);
 
-	
-	if( NULL != requested_ip )
+	/* if it is null, than find the smallest availble host_ip*/
+	if( NULL != requested_ip ) 
 	{
-			memcpy(requested_ip_temp, requested_ip, 4 ) ;
-
+		memcpy(requested_ip_temp, requested_ip, 4 ) ;
 	}
 	
 
@@ -262,110 +255,29 @@ int DHCPAllocateIP(dhcp_t* dhcp,
 			assert( ! strcmp(prefix_ip_copy, dhcp->ip ) );
 
 		}
-	}	
-		#ifndef NDEBUG 
 
-		#endif
+	}	
 
 	strcpy(prefix_ip_copy, dhcp->ip);
 
-	#ifdef PRINTS
-	/*
-		printf("requested_ip = {%u, %u, %u, %u} \n", requested_ip[0], requested_ip[1],
-							requested_ip[2], requested_ip[3]);*/
-	#endif
-
 	host_ip_to_allocate = word;
-	/*host_ip_to_allocate = requested_ip_temp;*/
 
-	/*if( NULL == requested_ip )
-	{
-		}	*/
-		host_ip_to_allocate = ItoaTo2Base(dhcp, host_ip_to_allocate,
-			requested_ip_temp, PORTION_IP) ;
-	
-	/*
-	else
-	{
-		host_ip_to_allocate = ItoaTo2Base(dhcp, host_ip_to_allocate,
-			requested_ip_temp, PORTION_IP) ;
-	}
-	*/
+	host_ip_to_allocate = 
+		ItoaTo2Base(dhcp, host_ip_to_allocate, requested_ip_temp, PORTION_IP) ;
 
-	res = TryToAllocExactHostIp( root,
-				host_ip_to_allocate, host_size_bits );
 
-	/*printf("res_start = { %d } \n", res);	*/	
+	res = TryToAllocExactHostIp( root, host_ip_to_allocate, host_size_bits );
+
 	if(FAIL != res)
 	{
-		
-		/*puts(host_ip_to_allocate);*/
-					/*printf("res_middle = { %d } \n", res);*/			
+		host_ip_to_allocate = strcat(prefix_ip_copy, host_ip_to_allocate);
 
-			/*if(  SUCCESS == res)
-			{
-			}*/
-					/*printf("res_start = { %d } \n", res);*/
+		StrHostIpToUint(host_ip_to_allocate, ret_allocated_ip);
 
-					host_ip_to_allocate = strcat(prefix_ip_copy, host_ip_to_allocate);
+		--dhcp->count_Free_ip;		 
 
-					StrHostIpToUint(host_ip_to_allocate, ret_allocated_ip);
-					--dhcp->count_Free_ip;		 
+		return res ; 
 
-					return res ; /* res   SUCCESS */
-				/*return (NULL == requested_ip) ? REQUEST_NOT_MET : SUCCESS;*/
-
-				if( NULL == requested_ip )
-				{
-				
-					
-					memcpy(ret_allocated_ip, requested_ip_temp, BYTES_IN_IP);
-					/*return REQUEST_NOT_MET;*/
-				}
-				
-				
-				else 
-				{
-					memcpy(ret_allocated_ip, requested_ip_temp, BYTES_IN_IP);
-									/*--dhcp->count_Free_ip;	*/	 
-
-				}
-				--dhcp->count_Free_ip;		 
-
-				return (NULL == requested_ip) ? REQUEST_NOT_MET : SUCCESS;
-				
-				#ifdef PRINTS
-		
-  				/*printf("ret_allocated_ip = {%u, %u, %u, %u} \n", ret_allocated_ip[0],
-				 ret_allocated_ip[1], ret_allocated_ip[2], ret_allocated_ip[3]);
-				*/
-				#endif
-
-				--dhcp->count_Free_ip;		 
-				return SUCCESS;
-				
-		
-			/*else*/
-			{
-				host_ip_to_allocate = strcat(prefix_ip_copy, host_ip_to_allocate);
-
-				StrHostIpToUint(host_ip_to_allocate, ret_allocated_ip);
-				--dhcp->count_Free_ip;
-			}
-
-		
-		#ifdef PRINTS
-		/*
-  			printf("ret_allocated_ip = {%u, %u, %u, %u} \n", ret_allocated_ip[0],
-				 ret_allocated_ip[1], ret_allocated_ip[2], ret_allocated_ip[3]);
-		*/
-		#endif
-
-		return  res	;/* res REQUEST_NOT_MET */
-		
-		
-
-				
 	}
 
 	return res; /* FAIL */
@@ -403,13 +315,13 @@ int DHCPFreeIP(dhcp_t* dhcp,
 			assert( ! strcmp(word, dhcp->ip ) );
 
 		}
+		
 	#endif
 	
 	#ifdef PRINTS 
 		/*
 		printf("ip_to_free = {%u, %u, %u, %u} \n", ip_to_free[0], ip_to_free[1],
 						ip_to_free[2], ip_to_free[3]);*/
-	
 	#endif
 				
 	host_ip_to_free = ItoaTo2Base(dhcp, host_ip_to_free, ip_to_free, PORTION_IP) ;
@@ -418,7 +330,6 @@ int DHCPFreeIP(dhcp_t* dhcp,
 	{
 		if ( ! strcmp(host_ip_to_free, reserved_ips[idx] ) )
 		{
-			/*puts("hhhhhhhhh");*/
 			return DOUBLE_FREE_FAIL; /* or  FAIL ? DOUBLE_FREE_FAIL ?  */
 		}
 	}
@@ -456,17 +367,14 @@ static int DHCPFreeIpExist(dhcp_node_t *root, char *host_ip,
 	dhcp_node_t *current = NULL, *parent = NULL;
 
 	current = root;
-	/*puts(host_ip);*/
+
 	/* To go down to the leaf */
 	for(level = 0; level < host_bits; ++level )
 	{
 		int bit = host_ip[level] - ZERO_CHAR;
-		/*puts(host_ip);*/
 
 		if( NULL == current->child[bit] )
 		{
-			/*puts("double_free");*/
-
 			return DOUBLE_FREE_FAIL;
 		}
 
@@ -514,6 +422,7 @@ static int DHCPFreeIpExist(dhcp_node_t *root, char *host_ip,
 /******************************************************************************/
 /********************  DHCPDestroy  *******************************************/
 /******************************************************************************/
+
 void DHCPDestroy(dhcp_t* dhcp)
 {
 	if( NULL != dhcp )
@@ -614,19 +523,9 @@ static char* ItoaTo2BaseOrigin(int n, char* str, int base , size_t len_str)
 /**************** Atoi2Base function definition *******************************/
 /******************************************************************************/
 /* 
-   DESCRIPTION: The Atoi2Base() function converts the initial 
-                part of the string in str to an integer value
-                 according to  base 2(binary string).
-       
-   RETURN VALUE:  The  Atoi2Base() function returns the result
-                  of the conversion in decimal integer, unless the
-                  value would underflow or overflow. 
-        
-    NOTE:  
-          1) errno  is  not set on error so there is no way to distinguish
+    NOTE:   1) errno  is  not set on error so there is no way to distinguish
              between 0 as an error and as the converted value. 
              
-          2) No checks for overflow or underflow are done.
 */
 
 static int Atoi2Base(const char *str, int base)
@@ -832,7 +731,6 @@ static int TryToAllocExactHostIp(dhcp_node_t *root, char *host_ip,
 									 size_t host_bits)
 {
 	int  j = 0, k = 0;
-	/*int exact_alloc = FAIL;*/
 	int exact_alloc = FAIL;
 
 	if(root->is_occupied)
@@ -849,8 +747,9 @@ static int TryToAllocExactHostIp(dhcp_node_t *root, char *host_ip,
 		for( level = 0; level < (int)host_bits; ++level)
 		{
 			int bit = host_ip[level] - ZERO_CHAR;
-
-			if( NULL == current->child[bit] ) /* not occupied bit */
+			
+			/* not occupied bit */	
+			if( NULL == current->child[bit] ) 
 			{
 				current->child[bit] = CreateNode(current);
 
@@ -859,16 +758,14 @@ static int TryToAllocExactHostIp(dhcp_node_t *root, char *host_ip,
 					return FAIL;
 				}
 				current->child[bit]->parent = current;
-
-
 			}
 
 			current = current->child[bit];
 
-			if( current->is_occupied ) /* the required path already occupied */
+			/* the required path already occupied */
+			if( current->is_occupied ) 
 			{
 				conflict_level = level;
-				/*puts("conflict_level = level");*/
 
 				break;
 			}
@@ -879,21 +776,9 @@ static int TryToAllocExactHostIp(dhcp_node_t *root, char *host_ip,
 		{
 			current->is_occupied = TRUE;
 			UpdadePathToIsAllocated(current);
-			/*puts("hiiiiiiii");*/
-
-			if(  REQUEST_NOT_MET == exact_alloc )
-			{
-				return REQUEST_NOT_MET;
-			}
-
-			else
-			{
-				return SUCCESS;
-			}
-			/*return (REQUEST_NOT_MET * (exact_alloc == REQUEST_NOT_MET) ); */
-			/*(REQUEST_NOT_MET * (exact_alloc == REQUEST_NOT_MET) ) */
+	
+			return (REQUEST_NOT_MET * (exact_alloc == REQUEST_NOT_MET) ); 
 		}
-		/*puts("bbbbbbbbbiiiiiiii");*/
 
 		j = conflict_level; /* there is a conflict */
 
@@ -903,36 +788,28 @@ static int TryToAllocExactHostIp(dhcp_node_t *root, char *host_ip,
 
 		while( j >= 0 &&  ONE_CHAR == host_ip[j] )
 		{
-			/*puts("LLLLLLiiiiiiii");*/
-
 			--j;
 		}
+
+		/* can't allocate, all the next addresses are used */
 		if( j < 0 )
 		{
-			/*puts("ggggggggggggggggggggiiiiiiii");*/
-
-			return FAIL; /* can't allocate, all the next addresses are used */
+			return FAIL; 
 		}
 
-		host_ip[j] = ONE_CHAR; /* try to solve the conflict with the next
-								 ip address */
+		/* try to solve the conflict with the next ip address */
+		host_ip[j] = ONE_CHAR; 
 
-		
 		/*reset the next bits */
 		for(k = j + 1; k < (int)host_bits; ++k )
 		{
 			host_ip[k] = ZERO_CHAR;
 		}
-		/*puts(host_ip);*/
-
-		/*puts("ssssssssssssssssssssssssssssgiiiiiiii");*/
 
 		exact_alloc = REQUEST_NOT_MET;
-
 	}	
 
 	return FAIL; /* won't arrive here*/
-
 }
 
 /******************************************************************************/
