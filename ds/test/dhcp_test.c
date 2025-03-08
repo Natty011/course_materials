@@ -2,7 +2,7 @@
 * Author : Natty
 * Reviewer : ???
 * Date : 05 / 03 / 2025
-* Last update: 08 / 03 / 2025
+* Last update: 09 / 03 / 2025
 *****************************************/
 
 #include <stdio.h> 		/* printf, puts  */
@@ -75,9 +75,15 @@ typedef uint8_t ip_addrs_t[4];
 /***************************function declaration**************************/
 static void TestDhcp(void);
 static void TestDhcp2(void);
+static void TestDHCPAllAddresses(void);
 static int
 	 	CompareRetIp(ip_addrs_t expected_ip, ip_addrs_t ret_ip );
 
+static int AllocateNextIP(dhcp_t *dhcp, ip_addrs_t allocated_ip);
+
+#ifdef PRINTS
+	static void PrintIP(const char *msg, const ip_addrs_t ip);
+#endif
 /***************************End of function declaration******************/
 
 /******************static functions definition**********************/
@@ -99,6 +105,7 @@ int main ()
 	printf("%sTEST: %s "RESET" \n", background,  mode);
    	puts(BACK_BLUE"'TestDhcp()'"RESET);
 	TestDhcp();
+	
 
 	puts(BLUE"====================================================="RESET);
 	printf("%sTEST: %s "RESET" \n", background,  mode);
@@ -106,6 +113,12 @@ int main ()
 	TestDhcp2();
 
 	puts(BLUE"====================================================="RESET);
+	printf("%sTEST: %s "RESET" \n", background,  mode);
+   	puts(BACK_BLUE"'TestDHCPAllAddresses()'"RESET);
+	TestDHCPAllAddresses();
+
+	puts(BLUE"====================================================="RESET);
+
 
 	return 0;
 }
@@ -172,6 +185,7 @@ static void TestDhcp(void)
 		puts("Failes in: AllocateIP || CountFree ");
 	}
 
+	
 	result = DHCPAllocateIP(dhcp1, requested_ip[1], ret_allocated_ip[1]);
 
 	if( REQUEST_NOT_MET != result || 
@@ -416,7 +430,7 @@ static void TestDhcp2(void)
 	{
 
 		result = DHCPFreeIP(dhcp1, arr_expected[idx]);
-
+		/*printf("result = { %d }\n", result);*/
 		if( SUCCESS != result ||
 			DHCPCountFree(dhcp1) != ++count_free )
 		
@@ -446,6 +460,126 @@ static void TestDhcp2(void)
 
 }
 
+
+
+/************************************************************/
+/***************  TestDTestDHCPAllAddresses *****************/
+/************************************************************/
+
+static void TestDHCPAllAddresses(void)
+{	
+	int status_result = FALSE; 
+	dhcp_t *dhcp;
+	ip_addrs_t subnet = {192, 168, 1, 0};  
+	ip_addrs_t *allocated_ips = NULL;
+	size_t subnet_bits = 18;
+	size_t free_before = 0, free_after = 0;
+	size_t allocated_count = 0, expected_free = 0, i = 0;
+
+	printf("\n===== Start allocation and release addresses(HOST_BITS = 14) =====\n");
+
+	dhcp = DHCPCreate(subnet, subnet_bits);
+	if (!dhcp)
+	{
+		printf("line: %d \n" , __LINE__ );
+		status_result =  TRUE;
+		puts("Failes in: DHCPCreate ");
+
+		return;
+	}
+	
+	/*   count the free address at the start  */
+	free_before = DHCPCountFree(dhcp);
+	printf("free addresses at the start: %lu\n", free_before);
+	
+	/* try to allocate all available addresses */
+	allocated_count = 0;
+	expected_free = free_before;
+
+	allocated_ips = (ip_addrs_t*)malloc(free_before * sizeof(ip_addrs_t));
+
+	if ( ! allocated_ips)
+	{
+		printf("line: %d \n" , __LINE__ );
+		puts("Failes of allocation of ips arrays  ");
+
+		DHCPDestroy(dhcp);
+		return;
+	}
+	
+	while ( AllocateNextIP(dhcp, allocated_ips[allocated_count]) )
+	{
+		size_t current_free = DHCPCountFree(dhcp);
+		allocated_count++;
+		expected_free--; 
+		if (current_free != expected_free)
+		 {
+			printf("line: %d \n" , __LINE__ );
+			printf("Filure between free number of addresses \
+					after allocation: %lu. EXPECTED: %lu, CURRENT: %lu\n",
+					allocated_count, expected_free, current_free);
+					status_result =  TRUE;
+
+		}
+		#ifdef PRINTS
+			/*printf("allocated_count %lu: ", allocated_count), \
+				 PrintIP("", allocated_ips[allocated_count-1]);*/
+		#endif		 
+	}
+	
+	printf("total of addresses allocation : %lu\n", allocated_count);
+	printf("free addresses left to allocte: %lu\n", DHCPCountFree(dhcp));
+	
+	/*release the addresses */
+	for ( i = 0; i < allocated_count; i++) 
+	{
+		int res = DHCPFreeIP(dhcp, allocated_ips[i]);
+		if (  SUCCESS != res )
+		{
+			printf("line: %d \n" , __LINE__ );
+			printf("Failure of the following address: {%u, %u, %u, %u}\n", \
+					allocated_ips[i][0], allocated_ips[i][1],
+					allocated_ips[i][2], allocated_ips[i][3]);
+			status_result =  TRUE;
+		
+		}
+
+		else
+		{
+			free_after = DHCPCountFree(dhcp);
+			expected_free++;
+			if (free_after != expected_free)
+			{
+				printf("Filure between free number of addresses \
+					after allocation: %lu. EXPECTED: %lu, CURRENT: %lu\n",
+						i+1, expected_free, free_after);
+			}
+		}
+	}
+	
+	printf("allocted addresses left after free: %lu\n", DHCPCountFree(dhcp));
+	
+	free(allocated_ips);
+	allocated_ips = NULL;
+
+	DHCPDestroy(dhcp);
+	dhcp = NULL;
+
+	if( !status_result  )
+	{
+		puts(RESET);		
+		puts(BACK_BLUE"Test: Success"RESET);
+
+	}
+
+	else
+	{
+		puts(BACK_RED"Test: Failure"RESET);	
+	}
+
+}
+
+
 /************************************************************/
 /*********************** CompareRetIp ***********************/
 /************************************************************/
@@ -465,5 +599,24 @@ static int 	CompareRetIp(ip_addrs_t expected_ip, ip_addrs_t ret_ip )
 
 
 
-
+/************************************************************/
+/*********************** AllocateNextIP *********************/
+/************************************************************/
 	
+static int AllocateNextIP(dhcp_t *dhcp, ip_addrs_t allocated_ip)
+ {
+    int res = DHCPAllocateIP(dhcp, NULL, allocated_ip);
+    return  (res == SUCCESS || res == REQUEST_NOT_MET);
+}
+
+/************************************************************/
+/*********************** PrintIP ****************************/
+/************************************************************/
+#ifdef PRINTS
+
+static void PrintIP(const char *msg, const ip_addrs_t ip)
+{
+    printf("%s %u.%u.%u.%u\n", msg, ip[0], ip[1], ip[2], ip[3]);
+}
+
+#endif
