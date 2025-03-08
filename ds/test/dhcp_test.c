@@ -16,10 +16,6 @@
 
 #include "dhcp.h" 
 
-#ifdef PRINTS
-
-#endif
-
 #define BLACK        "\x1b[30m"
 #define RED          "\x1b[31m"
 #define GREEN        "\x1b[32m"
@@ -74,11 +70,6 @@ typedef enum
 
 typedef uint8_t ip_addrs_t[4];
 
-/*
-	#ifdef PRINTS
-		Aux_Pre_Print_Tree(avl1, 0);
-	#endif
-*/
 /***************End of struct and enum declaration *******/
 
 /***************************function declaration**************************/
@@ -86,6 +77,7 @@ static void TestDhcp(void);
 static void TestDhcp2(void);
 static int
 	 	CompareRetIp(ip_addrs_t expected_ip, ip_addrs_t ret_ip );
+
 /***************************End of function declaration******************/
 
 /******************static functions definition**********************/
@@ -119,7 +111,7 @@ int main ()
 }
 
 /************************************************************/
-/********************  TestDhcp  *********************/
+/************************  TestDhcp  ************************/
 /************************************************************/
 static void TestDhcp(void)
 {	
@@ -266,8 +258,9 @@ static void TestDhcp(void)
 
 
 /************************************************************/
-/********************  TestDhcp2  *********************/
+/***********************  TestDhcp2  ************************/
 /************************************************************/
+
 static void TestDhcp2(void)
 {	
 
