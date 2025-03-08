@@ -311,6 +311,7 @@ int DHCPAllocateIP(dhcp_t* dhcp,
 					StrHostIpToUint(host_ip_to_allocate, ret_allocated_ip);
 					--dhcp->count_Free_ip;		 
 
+					return SUCCESS;
 				return (NULL == requested_ip) ? REQUEST_NOT_MET : SUCCESS;
 
 				if( NULL == requested_ip )
@@ -343,11 +344,14 @@ int DHCPAllocateIP(dhcp_t* dhcp,
 				return SUCCESS;
 			}	
 		
+			else
+			{
+				host_ip_to_allocate = strcat(prefix_ip_copy, host_ip_to_allocate);
 
-		host_ip_to_allocate = strcat(prefix_ip_copy, host_ip_to_allocate);
+				StrHostIpToUint(host_ip_to_allocate, ret_allocated_ip);
+				--dhcp->count_Free_ip;
+			}
 
-		StrHostIpToUint(host_ip_to_allocate, ret_allocated_ip);
-		--dhcp->count_Free_ip;
 		
 		#ifdef PRINTS
 		/*
@@ -876,7 +880,17 @@ static int TryToAllocExactHostIp(dhcp_node_t *root, char *host_ip,
 			current->is_occupied = TRUE;
 			UpdadePathToIsAllocated(current);
 			/*puts("hiiiiiiii");*/
-			return (REQUEST_NOT_MET * (exact_alloc == REQUEST_NOT_MET) ); 
+
+			if(  REQUEST_NOT_MET == exact_alloc )
+			{
+				return REQUEST_NOT_MET;
+			}
+
+			else
+			{
+				return SUCCESS;
+			}
+			/*return (REQUEST_NOT_MET * (exact_alloc == REQUEST_NOT_MET) ); */
 			/*(REQUEST_NOT_MET * (exact_alloc == REQUEST_NOT_MET) ) */
 		}
 		/*puts("bbbbbbbbbiiiiiiii");*/
