@@ -302,17 +302,18 @@ int DHCPAllocateIP(dhcp_t* dhcp,
 		/*puts(host_ip_to_allocate);*/
 					/*printf("res_middle = { %d } \n", res);*/			
 
-			if(  SUCCESS == res)
+			/*if(  SUCCESS == res)
 			{
-					printf("res_start = { %d } \n", res);
+			}*/
+					/*printf("res_start = { %d } \n", res);*/
 
 					host_ip_to_allocate = strcat(prefix_ip_copy, host_ip_to_allocate);
 
 					StrHostIpToUint(host_ip_to_allocate, ret_allocated_ip);
 					--dhcp->count_Free_ip;		 
 
-					return SUCCESS;
-				return (NULL == requested_ip) ? REQUEST_NOT_MET : SUCCESS;
+					return res ; /* res   SUCCESS */
+				/*return (NULL == requested_ip) ? REQUEST_NOT_MET : SUCCESS;*/
 
 				if( NULL == requested_ip )
 				{
@@ -342,9 +343,9 @@ int DHCPAllocateIP(dhcp_t* dhcp,
 
 				--dhcp->count_Free_ip;		 
 				return SUCCESS;
-			}	
+				
 		
-			else
+			/*else*/
 			{
 				host_ip_to_allocate = strcat(prefix_ip_copy, host_ip_to_allocate);
 
@@ -360,15 +361,14 @@ int DHCPAllocateIP(dhcp_t* dhcp,
 		*/
 		#endif
 
-		return 	REQUEST_NOT_MET;
+		return  res	;/* res REQUEST_NOT_MET */
 		
 		
 
 				
 	}
-	/*printf("res_end = { %d } \n", res);	*/		
 
-	return res; /* res */
+	return res; /* FAIL */
 }
 
 /******************************************************************************/
