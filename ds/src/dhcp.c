@@ -82,8 +82,6 @@ typedef enum
 
 } state_convert_t;
 
-
-
 /******************************************************************************/
 /***************************** Management struct ******************************/
 /******************************************************************************/
@@ -517,6 +515,7 @@ static char* ItoaTo2BaseOrigin(int n, char* str, int base , size_t len_str)
 		puts("str is a null pointer");
 		exit(EXIT_FAILURE);
 	}
+	
 	if (  2 != base )
 	{
 	   puts("Invalid base value");
