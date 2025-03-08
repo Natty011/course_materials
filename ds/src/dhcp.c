@@ -248,7 +248,7 @@ int DHCPAllocateIP(dhcp_t* dhcp,
 	
 	if( NULL != requested_ip )
 	{
-			memcpy(requested_ip_temp, requested_ip, BYTES_IN_IP ) ;
+			memcpy(requested_ip_temp, requested_ip, 4 ) ;
 
 	}
 	
@@ -293,8 +293,7 @@ int DHCPAllocateIP(dhcp_t* dhcp,
 	*/
 
 	res = TryToAllocExactHostIp( root,
-				host_ip_to_allocate, host_size_bits,
-					 prefix_ip_copy,   );
+				host_ip_to_allocate, host_size_bits );
 
 	/*printf("res_start = { %d } \n", res);	*/	
 	if(FAIL != res)
@@ -305,13 +304,20 @@ int DHCPAllocateIP(dhcp_t* dhcp,
 
 			if(  SUCCESS == res)
 			{
-				printf("res_start = { %d } \n", res);
+					printf("res_start = { %d } \n", res);
+
+					host_ip_to_allocate = strcat(prefix_ip_copy, host_ip_to_allocate);
+
+					StrHostIpToUint(host_ip_to_allocate, ret_allocated_ip);
+					--dhcp->count_Free_ip;		 
+
+				return (NULL == requested_ip) ? REQUEST_NOT_MET : SUCCESS;
+
 				if( NULL == requested_ip )
 				{
 				
 					
 					memcpy(ret_allocated_ip, requested_ip_temp, BYTES_IN_IP);
-					--dhcp->count_Free_ip;		 
 					/*return REQUEST_NOT_MET;*/
 				}
 				
@@ -319,10 +325,11 @@ int DHCPAllocateIP(dhcp_t* dhcp,
 				else 
 				{
 					memcpy(ret_allocated_ip, requested_ip_temp, BYTES_IN_IP);
-					--dhcp->count_Free_ip;		 
+									/*--dhcp->count_Free_ip;	*/	 
 
 				}
-				
+				--dhcp->count_Free_ip;		 
+
 				return (NULL == requested_ip) ? REQUEST_NOT_MET : SUCCESS;
 				
 				#ifdef PRINTS
@@ -821,8 +828,9 @@ static int TryToAllocExactHostIp(dhcp_node_t *root, char *host_ip,
 									 size_t host_bits)
 {
 	int  j = 0, k = 0;
-	int exact_alloc = SUCCESS;
-	
+	/*int exact_alloc = FAIL;*/
+	int exact_alloc = FAIL;
+
 	if(root->is_occupied)
 	{
 		return FAIL;
@@ -909,7 +917,7 @@ static int TryToAllocExactHostIp(dhcp_node_t *root, char *host_ip,
 
 	}	
 
-	return SUCCESS; /* won't arrive here*/
+	return FAIL; /* won't arrive here*/
 
 }
 
