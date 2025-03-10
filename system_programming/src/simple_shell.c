@@ -137,7 +137,22 @@ void Tokenizer(char *buffer, char *myargv[], size_t argv_size)
 {
 	char *token = NULL;
 	token = strtok(buffer, " \n");
-	ExitIfBad(strcmp( token, "exit"), msg[2]);
+	int i = 1;
+
+	ExitIfBad(NULL != token && strcmp( token, "exit") , msg[2]);
+
+	myargv[0] = token;
+
+	while (NULL != token)
+	{
+		token = strtok(NULL, " \n");
+		ExitIfBad(NULL != token  , msg[2]);
+
+		myargv[i++] = token;
+	}
+	
+	myargv[i] = NULL;
+
 }
 
 int RunProgram(char **myargv)
@@ -147,7 +162,7 @@ int RunProgram(char **myargv)
 
 void ExitIfBad(int is_good, const char* msg)
 {
-	if ( FALSE == is_good)
+	if ( FALSE == is_good) /* */
 	{
 		perror(msg);
 		exit(EXIT_FAILURE);
