@@ -25,7 +25,7 @@
 #define UNUSED( var )       ( (void)var )
 
 #define BUFFER_SIZE			( 501 )
-#define MAX_WORDS			( 20 )
+#define MAX_STRINGS			( 20 )
 #define MSG				"Fork failed\n"
 
 /******************************************************************************/
@@ -92,14 +92,14 @@ void ExitIfBad(int is_good, const char* msg);
 int main(  ) /* int argc, char *argv[] */
 {
 	char buffer[BUFFER_SIZE] = {0};
-	char *myargv[MAX_WORDS] = {0};
+	char *myargv[MAX_STRINGS] = {0};
 	int res = 0;
 
 	while( 1 )
 	{
 		GetInput(buffer, BUFFER_SIZE); /* read*/
 
-		Tokenizer(buffer, myargv, MAX_WORDS); /* parse*/
+		Tokenizer(buffer, myargv, MAX_STRINGS); /* parse*/
 
 		RunProgram(myargv); /* execute*/
 
@@ -136,16 +136,20 @@ void GetInput(char buffer[] , size_t buff_len)
 void Tokenizer(char *buffer, char *myargv[], size_t argv_size)
 {
 	char *token = NULL;
-	token = strtok(buffer, " \n");
+	token = strtok(buffer, " ,\n");
 	int i = 1;
 
-	ExitIfBad(NULL != token && strcmp( token, "exit") , msg[2]);
-
+	ExitIfBad(NULL != token  , msg[2]);
+	
+	if( 0 == strcmp( token, "exit") )
+	{
+		exit(EXIT_SUCCESS);
+	}
 	myargv[0] = token;
 
 	while (NULL != token)
 	{
-		token = strtok(NULL, " \n");
+		token = strtok(NULL, " ,\n");
 		ExitIfBad(NULL != token  , msg[2]);
 
 		myargv[i++] = token;
@@ -157,7 +161,7 @@ void Tokenizer(char *buffer, char *myargv[], size_t argv_size)
 
 int RunProgram(char **myargv)
 {
-
+	pid_t pid  = fork();
 }
 
 void ExitIfBad(int is_good, const char* msg)
@@ -168,6 +172,30 @@ void ExitIfBad(int is_good, const char* msg)
 		exit(EXIT_FAILURE);
 	}
 }
+
+/*
+
+pid_t pid = fork();
+	int status = 0;
+
+	if (BAD_PID == pid)
+	{
+		perror(msg[0]);
+		return FAIL;
+	}
+	else if (0 == pid)
+	{
+		execvp(myargv[0], myargv);
+		perror("execvp failed\n");
+		return FAIL;
+	}
+	else
+	{
+		waitpid(pid, &status, 0);
+	}
+
+	return SUCCESS;
+	*/
 /*
 	Description: Store the arrguments in the array of strings.
 	Return Value: ret_val3 
