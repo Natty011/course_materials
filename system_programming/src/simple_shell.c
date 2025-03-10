@@ -28,24 +28,23 @@
 
 
 
-typedef enum
+enum
 {
 	BAD_PID = -1,
 	SUCCESS = 0,
-	FAIL = 1,
-} result_t;
+	FAIL = 1
+} ;
 
 
-typedef enum
+enum
 {
-
 	FALSE = 0,
 	TRUE = 1
 
-} op_result_t;
+};
 
 
-static char *msg[2] = {"Fork failed\n", "Fgets failed\n", "Strtok failed\n",
+static char *msg[4] = {"Fork failed\n", "Fgets failed\n", "Strtok failed\n",
 					   "Execvp failed\n"};
 
 void GetInput(char buffer[], size_t buff_len);
@@ -63,7 +62,7 @@ int main() /* int argc, char *argv[] */
 {
 	char buffer[BUFFER_SIZE] = {0};
 	char *my_argv[MAX_STRINGS] = {0};
-	int res = 0;
+	/*int res = 0;*/
 
 	while ( 1 )
 	{
@@ -71,7 +70,7 @@ int main() /* int argc, char *argv[] */
 
 		Tokenizer(buffer, my_argv, MAX_STRINGS); /* parse*/
 
-		res = RunProgram(my_argv); /* execute*/
+		RunProgram(my_argv); /* execute*/
 
 		/*ExitIfBad(res, msg[0]);*/
 	}
@@ -99,8 +98,9 @@ void GetInput(char buffer[], size_t buff_len)
 void Tokenizer(char *buffer, char *my_argv[], size_t my_argc)
 {
 	char *token = NULL;
-	token = strtok(buffer, " ,\n");
 	int i = 1;
+
+	token = strtok(buffer, " ,\n");
 
 	ExitIfBad(NULL != token, msg[2]);
 
@@ -112,9 +112,8 @@ void Tokenizer(char *buffer, char *my_argv[], size_t my_argc)
 
 	while (NULL != token)
 	{
-		token = strtok(NULL, " ,\n");
-
 		my_argv[i++] = token;
+		token = strtok(NULL, " ,\n");
 	}
 
 	my_argv[i] = NULL;
@@ -128,7 +127,6 @@ int RunProgram(char **my_argv)
 {
 	pid_t pid = fork();
 
-	ExitIfBad(BAD_PID != pid, msg[0]);
 
 	if (0 == pid)
 	{
@@ -136,9 +134,14 @@ int RunProgram(char **my_argv)
 		ExitIfBad(FALSE , msg[3]);
 
 	}
-	else
+	else if( pid > 0 )
 	{
 		wait(NULL);
+	}
+
+	else
+	{
+		ExitIfBad(FALSE, msg[0]);
 	}
 
 	return SUCCESS; 
@@ -148,7 +151,7 @@ void ExitIfBad(int is_good, const char *msg)
 {
 	if (FALSE == is_good) /* */
 	{
-		printf("%n", msg);
+		printf("%s", msg);
 		exit(EXIT_FAILURE);
 	}
 }
