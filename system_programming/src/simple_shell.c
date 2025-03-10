@@ -4,6 +4,7 @@
 * Date : 05 / 03 / 2025
 * Last update: 09 / 03 / 2025
 *****************************************/
+
 /*#define PRINTS*/
 #ifdef PRINTS
 	#include <stdio.h> /* printf, puts  */
@@ -14,7 +15,11 @@
 #include <stdlib.h> 	/* malloc, free */
 #include <string.h> 	/* memcpy, memset, strcat,
 							 strncat, strcpy, strcmp, strncpy */
-
+#include <unistd.h> 	/* fork, execvp, chdir, close, dup2, pipe */
+#include <sys/wait.h> 	/* waitpid */
+#include <sys/types.h> 	/* pid_t */
+#include <fcntl.h> 		/* open */
+#include <errno.h> 		/* perror */
 #include "simple_shell.h"
 
 #define UNUSED( var )       ( (void)var )
@@ -45,6 +50,7 @@ typedef enum
 {
 	FALSE = 0,
 	TRUE = 1
+	
 } op_result_t;
 
 
@@ -62,27 +68,82 @@ typedef enum
 /******************************************************************************/
 /************************ static functions declartions ************************/
 /******************************************************************************/
-
-	
+void GetInput(char* buffer[BUFFER_SIZE] , size_t buff_len);
+void Tokenizer(char *buffer, char *myargv[], size_t argv_size);
+int RunProgram(char **myargv);
 
 /******************************************************************************/
 /*******************End Of Static Functions declartions************************/
 /******************************************************************************/
 
 
+
+int main(  ) /* int argc, char *argv[] */
+{
+	char buffer[BUFFER_SIZE] = {0};
+	char *myargv[MAX_WORDS] = {0};
+	while( 1 )
+	{
+		GetInput(buffer, BUFFER_SIZE);
+		Tokenizer(buffer, myargv, MAX_WORDS);
+
+	}
+
+
+ /*argc will be the number of strings pointed to by argv( argument count ).
+This will (in practice) be 1 plus the number of arguments.( with null in the end.
+ argv = (argument vector)  
+ret_val0 =  MakeProgramRunAndwaitForIt()
+
+	*/
+
+return 0;
+}
+
+
 /*
-@ Read a line of input from stdin.
-@ return: void
-@ param: char* buffer[BUFFER_SIZE] , size_t buff_len
+ Read a line of input from stdin.
+ return: void
+ param: char* buffer[BUFFER_SIZE] , size_t buff_len
 
 */
+
 void GetInput(char* buffer[BUFFER_SIZE] , size_t buff_len)
 {
 
 
 }
 
+void Tokenizer(char *buffer, char *myargv[], size_t argv_size)
+{
+	
+}
 
+int RunProgram(char **myargv)
+{
+
+}
+/*
+	Description: Store the arrguments in the array of strings.
+	Return Value: ret_val3 
+	
+	
+	ret_val3 SaperateIntputArgumetes (  char *argv[]  )  /
+	{
+	
+	/* Using strtok( char *argv[], int delimeter )
+
+	1.  get the start of the string into char* ptr token 
+	2. strtok can get several tokens 
+		saperate in comma. add '\n' delimeter.
+	3. copy the strings  to arrays of parameter
+		of token ( allocate with malloc for each token )
+	while( token )
+	{
+
+	}
+
+	/* 
 
 
 
