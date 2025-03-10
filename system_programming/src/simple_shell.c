@@ -5,11 +5,11 @@
 * Last update: 09 / 03 / 2025
 *****************************************/
 
-/*#define PRINTS*/
+
 #ifdef PRINTS
-	#include <stdio.h> /* printf, puts  */
 #endif
 
+#include <stdio.h> 		/* printf, fgets  */
 #include <stdint.h>		/*uint8_t, uint32_t */
 #include <assert.h> 	/* assert */
 #include <stdlib.h> 	/* malloc, free */
@@ -26,6 +26,7 @@
 
 #define BUFFER_SIZE			( 501 )
 #define MAX_WORDS			( 20 )
+#define MSG				"Fork failed\n"
 
 /******************************************************************************/
 /*********************  Typedef ip array  *************************************/
@@ -38,6 +39,7 @@
 
 typedef enum
 {
+	BAD_PID = -1,
 	SUCCESS = 0,
 	FAIL = 1,
 } result_t;
@@ -48,6 +50,7 @@ typedef enum
 
 typedef enum
 {
+	
 	FALSE = 0,
 	TRUE = 1
 
@@ -67,30 +70,40 @@ typedef enum
 /************************ static globals variables ****************************/
 /******************************************************************************/
 
-
+static char *msg[2] = { "Fork failed\n", "fgets failed\n", "strtok failed\n" };
 
 
 /******************************************************************************/
 /************************ static functions declartions ************************/
 /******************************************************************************/
-void GetInput(char* buffer[BUFFER_SIZE] , size_t buff_len);
+void GetInput(char buffer[] , size_t buff_len);
 void Tokenizer(char *buffer, char *myargv[], size_t argv_size);
 int RunProgram(char **myargv);
-
+void ExitIfBad(int is_good, const char* msg);
 /******************************************************************************/
 /*******************End Of Static Functions declartions************************/
 /******************************************************************************/
 
+/*
+ Read a line of input from stdin.
 
+*/
 
 int main(  ) /* int argc, char *argv[] */
 {
 	char buffer[BUFFER_SIZE] = {0};
 	char *myargv[MAX_WORDS] = {0};
+	int res = 0;
+
 	while( 1 )
 	{
-		GetInput(buffer, BUFFER_SIZE);
-		Tokenizer(buffer, myargv, MAX_WORDS);
+		GetInput(buffer, BUFFER_SIZE); /* read*/
+
+		Tokenizer(buffer, myargv, MAX_WORDS); /* parse*/
+
+		RunProgram(myargv); /* execute*/
+
+		ExitIfBad(res, MSG);
 
 	}
 
@@ -113,20 +126,32 @@ return 0;
 
 */
 
-void GetInput(char* buffer[BUFFER_SIZE] , size_t buff_len)
+void GetInput(char buffer[] , size_t buff_len)
 {
-
-
+	ExitIfBad(  NULL != fgets(buffer, (int)buff_len, stdin), msg[1]);
 }
-
+/*
+	Description: Store the arrguments in the array of strings.
+*/
 void Tokenizer(char *buffer, char *myargv[], size_t argv_size)
 {
-	
+	char *token = NULL;
+	token = strtok(buffer, " \n");
+	ExitIfBad(strcmp( token, "exit"), msg[2]);
 }
 
 int RunProgram(char **myargv)
 {
 
+}
+
+void ExitIfBad(int is_good, const char* msg)
+{
+	if ( FALSE == is_good)
+	{
+		perror(msg);
+		exit(EXIT_FAILURE);
+	}
 }
 /*
 	Description: Store the arrguments in the array of strings.
