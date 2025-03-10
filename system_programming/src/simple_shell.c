@@ -26,7 +26,6 @@
 
 #define BUFFER_SIZE			( 501 )
 #define MAX_STRINGS			( 20 )
-#define MSG				"Fork failed\n"
 
 /******************************************************************************/
 /*********************  Typedef ip array  *************************************/
@@ -103,7 +102,7 @@ int main(  ) /* int argc, char *argv[] */
 
 		RunProgram(myargv); /* execute*/
 
-		ExitIfBad(res, MSG);
+		ExitIfBad(res, msg[0]);
 
 	}
 
@@ -140,7 +139,7 @@ void Tokenizer(char *buffer, char *myargv[], size_t argv_size)
 	int i = 1;
 
 	ExitIfBad(NULL != token  , msg[2]);
-	
+
 	if( 0 == strcmp( token, "exit") )
 	{
 		exit(EXIT_SUCCESS);
@@ -150,7 +149,7 @@ void Tokenizer(char *buffer, char *myargv[], size_t argv_size)
 	while (NULL != token)
 	{
 		token = strtok(NULL, " ,\n");
-		ExitIfBad(NULL != token  , msg[2]);
+		/*ExitIfBad(NULL != token  , msg[2]);*/
 
 		myargv[i++] = token;
 	}
@@ -158,10 +157,17 @@ void Tokenizer(char *buffer, char *myargv[], size_t argv_size)
 	myargv[i] = NULL;
 
 }
-
+/*
+Description: create proccess child for execute 
+		the command of the user .
+	Return Value: ret_val4 
+*/
 int RunProgram(char **myargv)
 {
 	pid_t pid  = fork();
+
+	ExitIfBad(BAD_PID != pid, msg[0]);
+
 }
 
 void ExitIfBad(int is_good, const char* msg)
