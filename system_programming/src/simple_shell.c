@@ -44,7 +44,7 @@ enum
 };
 
 
-static char *msg[4] = {"Fork failed\n", "Fgets failed\n", "Strtok failed\n",
+static char *msg[] = {"Fork failed\n", "Fgets failed\n", "Strtok failed\n",
 					   "Execvp failed\n"};
 
 void GetInput(char buffer[], size_t buff_len);
@@ -62,7 +62,6 @@ int main() /* int argc, char *argv[] */
 {
 	char buffer[BUFFER_SIZE] = {0};
 	char *my_argv[MAX_STRINGS] = {0};
-	/*int res = 0;*/
 
 	while ( 1 )
 	{
@@ -72,7 +71,6 @@ int main() /* int argc, char *argv[] */
 
 		RunProgram(my_argv); /* execute*/
 
-		/*ExitIfBad(res, msg[0]);*/
 	}
 
 	
@@ -89,8 +87,8 @@ int main() /* int argc, char *argv[] */
 
 void GetInput(char buffer[], size_t buff_len)
 {
-	fgets(buffer, (int)buff_len, stdin);
-	ExitIfBad( '\n' == buffer[strlen(buffer) - 1],  msg[1] );
+	fgets(buffer, buff_len, stdin);
+	ExitIfBad( ('\n' == buffer[strlen(buffer) - 1]),  msg[1] );
 }
 /*
 	Description: Store the arrguments in the array of strings.
@@ -98,8 +96,8 @@ void GetInput(char buffer[], size_t buff_len)
 void Tokenizer(char *buffer, char *my_argv[], size_t my_argc)
 {
 	char *token = NULL;
-	int i = 1;
-
+	int i = 0;
+	UNUSED(my_argc);
 	token = strtok(buffer, " ,\n");
 
 	ExitIfBad(NULL != token, msg[2]);
@@ -108,7 +106,6 @@ void Tokenizer(char *buffer, char *my_argv[], size_t my_argc)
 	{
 		exit(EXIT_SUCCESS);
 	}
-	my_argv[0] = token;
 
 	while (NULL != token)
 	{
