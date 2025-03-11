@@ -44,7 +44,7 @@ enum
 	TRUE = 1
 };
 
-int handle_signal(int signal )
+void handle_signal(int signal )
 {
 	if(SIGUSR1 == signal)
 	{
@@ -60,6 +60,7 @@ int handle_signal(int signal )
 	{
 		ExitIfBad(SIGINT != signal, msg[6]); 
 	}
+
 }
 
 /*exercise1 - ping pong*/
@@ -67,6 +68,7 @@ int main()
 {
 	struct sigaction sa;
 	sa.sa_handler = handle_signal;
+
 	sigemptyset(&sa.sa_mask); /* reset all signal group*/
 
 	sigaction(SIGUSR1, &sa, NULL);
