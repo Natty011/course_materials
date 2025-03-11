@@ -45,7 +45,7 @@ enum
 
 
 static char *msg[] = {"Fork failed\n", "Fgets failed\n", "Strtok failed\n",
-					   "Execvp failed\n"};
+					   "Execvp failed\n", "Too many arguments\n"};
 
 void GetInput(char buffer[], size_t buff_len);
 void Tokenizer(char *buffer, char *myargv[], size_t my_argc);
@@ -97,7 +97,6 @@ void Tokenizer(char *buffer, char *my_argv[], size_t my_argc)
 {
 	char *token = NULL;
 	int i = 0;
-	UNUSED(my_argc);
 	token = strtok(buffer, " ,\n");
 
 	ExitIfBad(NULL != token, msg[2]);
@@ -109,8 +108,10 @@ void Tokenizer(char *buffer, char *my_argv[], size_t my_argc)
 
 	while (NULL != token)
 	{
+		ExitIfBad(i < (int)my_argc, msg[4]);
 		my_argv[i++] = token;
 		token = strtok(NULL, " ,\n");
+
 	}
 
 	my_argv[i] = NULL;
