@@ -61,7 +61,7 @@ void ExitIfBad(int is_good, const char *msg);
 int main() /* int argc, char *argv[] */
 {
 	char buffer[BUFFER_SIZE] = {0};
-	char *my_argv[MAX_STRINGS] = {0};
+	char *my_argv[MAX_STRINGS] = {NULL};
 
 	while ( 1 )
 	{
@@ -114,7 +114,7 @@ void Tokenizer(char *buffer, char *my_argv[], size_t my_argc)
 
 	}
 
-	my_argv[i] = NULL;
+	/*my_argv[i] = NULL;*/
 }
 /*
 Description: create proccess child for execute
