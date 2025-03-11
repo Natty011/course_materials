@@ -17,12 +17,13 @@
 #include <sys/types.h> /* pid_t */
 
 
+static int is_on_child = 0;
+static int is_on_parent = 0;
 
 static char *msg[] = {"fork failed\n", "fgets failed\n", "strtok failed\n",
 	"execvp failed\n", "Too many arguments\n",
  "Empty line is not allowed\n", "SIGINT terminated the proccess\n"};
 
-pid_t child_pid = 0;
 
 #define UNUSED(var) ((void)var)
 
@@ -46,14 +47,29 @@ enum
 
 void handle_signal(int signal )
 {
+	is_on_child = 1;
+	is_on_parent = 1;
+
+	if (signal == SIGUSR1)
+		printf("Received SIGUSR1\n");
+	else if (signal == SIGUSR2)
+		printf("Received SIGUSR2\n");
+
+
 	if(SIGUSR1 == signal)
 	{
 		printf("Caught signal %d\n", signal);
+		/*fflush(stdout);*/
+		/*ExitIfBad(SIGINT != signal, msg[6]); */
+
+
 	}
 
 	else if (SIGUSR2 == signal)
 	{
 		printf("Caught signal %d\n", signal);
+		/*fflush(stdout);*/
+
 	}
 
 	else 			/* SIGINT*/
@@ -67,28 +83,40 @@ void handle_signal(int signal )
 int main() 
 {
 	struct sigaction sa;
+	pid_t child_pid = fork();
+
 	sa.sa_handler = handle_signal;
 
-	sigemptyset(&sa.sa_mask); /* reset all signal group*/
+	/*sigemptyset(&sa.sa_mask);*/ /* reset all signal group*/
 
 	sigaction(SIGUSR1, &sa, NULL);
 	sigaction(SIGUSR2, &sa, NULL); 
 	sigaction(SIGINT, &sa, NULL); /* ctrl + c to terminate */
 	
-	child_pid = fork();
 
 	if( 0 == child_pid)
 	{
-		sleep(1);
-		printf("Parent pid: %d, Child pid: %d\n", getpid(), child_pid);
-		kill(getppid(), SIGUSR2); /* send signal from the child to his parent*/ 
+		while(1)
+		{
+			sleep(3);
+			printf("Im am the child:\nParent pid: %d, Child pid: %d\n", getppid(), child_pid);
+			fflush(stdout);
+			is_on_child = 0;
+
+			kill(getppid(), SIGUSR2); /* send signal from the child to his parent*/ 
+		}
+		
 	}
 
 	else if ( child_pid > 0 )/* the parent proccess*/
 	{
-		while(1)
+		while(1  ) /* && !is_on */
 		{
-			sleep(1);
+			/*wait(NULL);*/
+			sleep(3);
+			printf("Im am the perent:\nParent pid: %d, Child pid: %d\n", getpid(), child_pid);
+			fflush(stdout);
+			is_on_parent = 0;
 			kill(child_pid, SIGUSR1); /*send signal from parent to his child */
 		}
 	}
@@ -100,10 +128,6 @@ int main()
 
 	return 0;
 }
-
-
-
-
 
 
 void ExitIfBad(int is_good, const char *msg)
