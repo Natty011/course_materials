@@ -118,12 +118,12 @@ int RunProgram(char **my_argv)
 {
 	pid_t pid = fork();
 
-	TODO: need to fix some codes lines 
+	/*TODO: need to fix some codes lines */
 	if (0 == pid)
 	{
 		execv(my_argv[0], my_argv);
 		ExitIfBad(FALSE , msg[3]);
-
+		
 	}
 
 	else if( pid > 0 )
