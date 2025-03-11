@@ -39,15 +39,14 @@ enum
 };
 
 
-static char *msg[] = {"Fork failed\n", "Fgets failed\n", "Strtok failed\n",
-					   "Execvp failed\n", "Too many arguments\n"};
+static char *msg[] = {"fork failed\n", "fgets failed\n", "strtok failed\n",
+					   "execvp failed\n", "Too many arguments\n",
+					"Empty line is not allowed\n"};
 
 void GetInput(char buffer[], size_t buff_len);
 void Tokenizer(char *buffer, char *myargv[], size_t my_argc);
 int RunProgram(char **myargv);
 void ExitIfBad(int is_good, const char *msg);
-
-
 
 /*
  Read a line of input from stdin.
@@ -68,7 +67,6 @@ int main()
 
 	}
 
-	
 
 	return 0;
 }
@@ -91,9 +89,15 @@ void Tokenizer(char *buffer, char *my_argv[], size_t my_argc)
 	int i = 0;
 	token = strtok(buffer, " ,\n");
 
-	ExitIfBad(NULL != token, msg[2]);
+	ExitIfBad(NULL != token, msg[5]);
 
-	if (0 == strcmp(token, "exit"))
+	/* להכניס את זה לפונקציה במטפלת בזה בנפרד ולא בפונקציית טוקנייזר*/
+	/*למשל לא נכניס פקודת היסטורי לכן לא נרצה שיהיה בטוקיינזר לכן  נכניס את הבדיקה בפונקציה שהיא אחרי פונקציית הטוקיינזייר
+	כי יתווספו לי בעתיד עוד פקוודת נוספות לא נרצה לטפל בהן בטוקינייזר */
+	/*  למשל פונקציה שתטפל בזה  IfIsExit */
+		/*  למשל פונקציה שתטפל בזה  IfIsHistory */
+
+	if (0 == strcmp(token, "exit")) 
 	{
 		exit(EXIT_SUCCESS);
 	}
@@ -114,7 +118,7 @@ int RunProgram(char **my_argv)
 {
 	pid_t pid = fork();
 
-
+	TODO: need to fix some codes lines 
 	if (0 == pid)
 	{
 		execv(my_argv[0], my_argv);
