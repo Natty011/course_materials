@@ -16,13 +16,14 @@
 #include <sys/wait.h>  /* wait */
 #include <sys/types.h> /* pid_t */
 
+/*
 pid_t child_pid; 
 int counter = 3;
+*/
 
-/*
 static int is_on_child = 0;
 static int is_on_parent = 0;
-*/
+
 static char *msg[] = {"fork failed\n", "fgets failed\n", "strtok failed\n",
 	"execvp failed\n", "Too many arguments\n",
  "Empty line is not allowed\n", "SIGINT terminated the proccess\n"};
@@ -30,8 +31,6 @@ static char *msg[] = {"fork failed\n", "fgets failed\n", "strtok failed\n",
 
 #define UNUSED(var) ((void)var)
 
-#define BUFFER_SIZE (501)
-#define MAX_STRINGS (20)
 
 void ExitIfBad(int is_good, const char *msg);
 
@@ -54,95 +53,68 @@ void handle_signal(int sig)
     if (sig == SIGUSR2)
      {
         printf("Parent: Received SIGUSR2 from child, sending SIGUSR1\n");
-        kill(child_pid, SIGUSR1);
-    } 
+        is_on_parent = 1;
+ 	} 
     else if (sig == SIGUSR1)
     {
         printf("Child: Received SIGUSR1 from parent, sending SIGUSR2\n");
-        kill(getppid(), SIGUSR2);
+		is_on_child = 1;
     }
 }
-
-void child_process()
- {
-    struct sigaction sa;
-    sa.sa_handler = handle_signal;
-
-    sigaction(SIGUSR1, &sa, NULL);
-
-    if( 0!= counter)
-    {
-        --counter;
-
-        if( 0 == counter)
-    {
-        exit(0);
-    }
-    while (1 && 0!= counter)
-    {
-        sleep(1);
-
-    
-		--counter;
-		if( 0== counter)
-		{
-			exit(0);
-		}
-			--counter;
-			printf("Child: Sending SIGUSR2 to parent\n");
-			if( 0!= counter)
-			{    
-				--counter;
-
-				kill(getppid(), SIGUSR2);
-			}
-	}
-	}
- }
 
 
 int main() 
 {
-    struct sigaction sa;
+    struct sigaction sa = { 0 };
+	int child_cnt = 0, parent_cnt = 0;
+    pid_t child_pid = -1;
+
     sa.sa_handler = handle_signal;
 
+	sigaction(SIGUSR1, &sa, NULL);
     sigaction(SIGUSR2, &sa, NULL);
 
-    child_pid = fork();
+	child_pid = fork();
+	printf("Parent PID: %d, Child PID: %d\n", getpid(), child_pid);
 
-    if (child_pid == -1 )
+	ExitIfBad(BAD_PID != child_pid , msg[0]);
+
+    if (  0 ==  child_pid )
     {
-		ExitIfBad(FAIL, msg[0]);
+		while (child_cnt++ < 3 )
+		{
+			/*printf("Child: Sending SIGUSR2 to parent\n");*/
+			kill(getppid(), SIGUSR2);
 
-    }
-    if( 0!= counter)
-    {
-        --counter;
+			while( !is_on_child )
+			{
+				sleep(1);
+			}
+			
+			is_on_child = 0;
+		
+		}
+	}	
 
-    if (child_pid == 0)
-     {
-        child_process();
-    } 
-    else 
-    {
-        printf("Parent PID: %d, Child PID: %d\n", getpid(), child_pid);
+	else /* The parent */
+	{
+		while (parent_cnt++ < 3 )
+		{
+			
 
-        sleep(1); 
-        printf("Parent: Sending SIGUSR1 to child\n");
-        if( 0!= counter)
-        {
-            --counter;
+			while( !is_on_parent )
+			{
+				sleep(1);
+			}
 
-            kill(child_pid, SIGUSR1);
-        }
-        while (1 ) 
-        {
-            sleep(1);
-        }
-       
-    }   
+			/*printf("Parent: Sending SIGUSR1 to child\n");*/
+			kill(child_pid, SIGUSR1);
 
-    }
+			
+			is_on_parent = 0;
+		
+		}
+	}
 
     return 0;
 }
