@@ -1,24 +1,20 @@
 /***************************************
  * Author : Natty
  * Reviewer : ???
- * Date : 05 / 03 / 2025
- * Last update: 09 / 03 / 2025
+ * Date : 05 / 10 / 2025
+ * Last update: 11 / 03 / 2025
  *****************************************/
 
 #ifdef PRINTS
 #endif
 
 #include <stdio.h>	   /* printf, fgets  */
-#include <stdint.h>	   /*uint8_t, uint32_t */
-#include <assert.h>	   /* assert */
 #include <stdlib.h>	   /* exit, EXIT_SECCESS, EXIT_FAILURE */
-#include <string.h>	   /* memcpy, memset, strcat,
-							 strncat, strcpy, strcmp, strncpy */
-#include <unistd.h>	   /* fork, execvp*/
-#include <sys/wait.h>  /* waitpid */
+#include <string.h>	   /* strcmp */
+#include <unistd.h>	   /* fork, execv*/
+#include <sys/wait.h>  /* wait */
 #include <sys/types.h> /* pid_t */
-#include <fcntl.h>	   /* open */
-#include <errno.h>	   /* perror */
+
 /*#include "simple_shell.h"*/
 
 #define UNUSED(var) ((void)var)
@@ -33,8 +29,7 @@ enum
 	BAD_PID = -1,
 	SUCCESS = 0,
 	FAIL = 1
-} ;
-
+};
 
 enum
 {
@@ -53,12 +48,12 @@ int RunProgram(char **myargv);
 void ExitIfBad(int is_good, const char *msg);
 
 
+
 /*
  Read a line of input from stdin.
-
 */
 
-int main() /* int argc, char *argv[] */
+int main() 
 {
 	char buffer[BUFFER_SIZE] = {0};
 	char *my_argv[MAX_STRINGS] = {NULL};
@@ -80,9 +75,6 @@ int main() /* int argc, char *argv[] */
 
 /*
  Read a line of input from stdin.
- return: void
- param: char* buffer[BUFFER_SIZE] , size_t buff_len
-
 */
 
 void GetInput(char buffer[], size_t buff_len)
@@ -91,7 +83,7 @@ void GetInput(char buffer[], size_t buff_len)
 	ExitIfBad( ('\n' == buffer[strlen(buffer) - 1]),  msg[1] );
 }
 /*
-	Description: Store the arrguments in the array of strings.
+Store the arrguments in the array of strings.
 */
 void Tokenizer(char *buffer, char *my_argv[], size_t my_argc)
 {
@@ -113,13 +105,10 @@ void Tokenizer(char *buffer, char *my_argv[], size_t my_argc)
 		token = strtok(NULL, " ,\n");
 
 	}
-
-	/*my_argv[i] = NULL;*/
 }
 /*
 Description: create proccess child for execute
 		the command of the user .
-	Return Value: SUCCESS
 */
 int RunProgram(char **my_argv)
 {
@@ -132,6 +121,7 @@ int RunProgram(char **my_argv)
 		ExitIfBad(FALSE , msg[3]);
 
 	}
+
 	else if( pid > 0 )
 	{
 		wait(NULL);
@@ -147,7 +137,7 @@ int RunProgram(char **my_argv)
 
 void ExitIfBad(int is_good, const char *msg)
 {
-	if (FALSE == is_good) /* */
+	if (FALSE == is_good) 
 	{
 		printf("%s", msg);
 		exit(EXIT_FAILURE);
