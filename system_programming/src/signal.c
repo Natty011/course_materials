@@ -1,60 +1,31 @@
 /***************************************
  * Author : Natty
  * Reviewer : ???
- * Date : 05 / 10 / 2025
- * Last update: 11 / 03 / 2025
+ * Date : 05 / 03 / 2025
+ * Last update: 12 / 03 / 2025
  ***************************************/
 
-#define _POSIX_C_SOURCE 199309L
+#define _POSIX_C_SOURCE 199309L /*struct sigaction*/
 
-#include <stdio.h>	   /* perror  */
-#include <stdlib.h>    /* exit, EXIT_SUCCESS, EXIT_FAILURE */
-#include <string.h>	   /* strcmp */
-#include <unistd.h>	   /* fork, execv*/
-#include <sys/wait.h>  /* wait */
-#include <sys/types.h> /* pid_t */
-
+#include <stdio.h>	   /* perror , printf */
+#include <stdlib.h>    /* exit */
+#include <unistd.h>	   /* fork*/
+#include <sys/types.h>  /* pid_t */
+#include "utils.h"		/* ExitIfBad, msg */
 #include <signal.h>	   /* sigaction */
-#define UNUSED(var) ((void)var)
 
 
-volatile static int is_on_child = 0;
-volatile static int is_on_parent = 0;
-
-static char *msg[] = {"fork failed\n", "fgets failed\n", "strtok failed\n",
-	"execvp failed\n", "Too many arguments\n",
- "Empty line is not allowed\n", "SIGINT terminated the proccess\n"};
-
-
-
-
-void ExitIfBad(int is_good, const char *msg);
-
-enum
-{
-	BAD_PID = -1,
-	SUCCESS = 0,
-	FAIL = 1
-};
-
-enum
-{
-	FALSE = 0,
-	TRUE = 1
-};
-
+static volatile sig_atomic_t is_on_child = 0;
+static volatile sig_atomic_t is_on_parent = 0;
 
 void handle_signal(int sig)
  {
-    /*TO DO: REMOVE printf from handles*/
 	if (sig == SIGUSR2)
-     {
-        /*printf("Parent: Received SIGUSR2 from child, sending SIGUSR1\n");*/
+    {
         is_on_parent = 1;
  	} 
     else if (sig == SIGUSR1)
     {
-       /* printf("Child: Received SIGUSR1 from parent, sending SIGUSR2\n");*/
 		is_on_child = 1;
     }
 }
@@ -72,7 +43,6 @@ int main()
     sigaction(SIGUSR2, &sa, NULL);
 
 	child_pid = fork();
-	printf("Parent PID: %d, Child PID: %d\n", getpid(), child_pid);
 
 	ExitIfBad(BAD_PID != child_pid , msg[0]);
 
@@ -80,8 +50,8 @@ int main()
     {
 		while (child_cnt++ < 3 )
 		{
-			printf("Child: Sending SIGUSR2 to parent\n");
-			kill(getppid(), SIGUSR2);
+       		printf("Child: Received SIGUSR1 from parent, sending SIGUSR2\n");
+	  		kill(getppid(), SIGUSR2);
 
 			while( !is_on_child )
 			{
@@ -97,35 +67,21 @@ int main()
 	{
 		while (parent_cnt++ < 3 )
 		{
-			
-
+		
 			while( !is_on_parent )
 			{
 				sleep(1);
 			}
 
-			printf("Parent: Sending SIGUSR1 to child\n");
+			printf("Parent: Received SIGUSR2 from child, sending SIGUSR1\n");
 			kill(child_pid, SIGUSR1);
 
-			
 			is_on_parent = 0;
 		
 		}
 
-
-		
 	}
 
     return 0;
-}
-
-
-void ExitIfBad(int is_good, const char *msg)
-{
-	if (FALSE == is_good) 
-	{
-		perror(msg);
-		exit(EXIT_FAILURE);
-	}
 }
 
