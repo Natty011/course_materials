@@ -39,10 +39,11 @@ int main()
 
     child_pid = fork();
     ExitIfBad(BAD_PID != child_pid , msg[0]);
-    
+
     if (  0 ==  child_pid )
     {        
         puts("hiiii");
+        printf("Parent PID: %d, Child PID: %d\n", getppid(), getpid());
         execl("./child", "child", (char*)NULL );
         ExitIfBad(FAIL, msg[0]);
     
@@ -50,6 +51,9 @@ int main()
 
     else if (0 < child_pid)
     {
+
+        printf("Parent PID: %d, Child PID: %d\n", getpid(), child_pid);
+
         while (parent_cnt++ < 3)
         {
             printf("parent_cnt = %d\n", parent_cnt);
