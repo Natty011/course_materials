@@ -1,6 +1,6 @@
 /***************************************
  * Author : Natty
- * Reviewer : ???
+ * Reviewer : Idan
  * Date : 12 / 03 / 2025
  * Last update: 12 / 03 / 2025
  ***************************************/
@@ -15,7 +15,7 @@
 #include <signal.h>	/* sigaction */
 
 
-static volatile sig_atomic_t is_on_child = 0;
+volatile sig_atomic_t is_on_child = 0;
 
 static void handle_signal(int sig)
 {
@@ -23,12 +23,12 @@ static void handle_signal(int sig)
     {
         is_on_child = 1;
     }
-/*
+
     else if(SIGTERM == sig )
     {
         ExitIfBad(FALSE, msg[7]);
         
-    }*/
+    }
 }
  
  
@@ -40,28 +40,20 @@ int main()
     sa.sa_handler = handle_signal;
 
     sigaction(SIGUSR1, &sa, NULL);
-    puts("child");
-
-    /*sigaction(SIGTERM, &sa, NULL);*/
-    /*kill(getppid(), SIGUSR2);*/
-    printf("Group PID: %d, Parent PID: %d, Child PID: %d\n", getpgid(0) ,getppid(), getpid());
 
     while (child_cnt++ < 3 )
     {
         printf("Child: Received SIGUSR1 from parent, sending SIGUSR2\n");
         kill(getppid(), SIGUSR2);
-        printf("child_cnt = %d\n", child_cnt);
 
         while( !is_on_child )
         {
             sleep(1);
         }
 
-        
-        
         is_on_child = 0;
-    
     }
+
 
     return 0;
 }
