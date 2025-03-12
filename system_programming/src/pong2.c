@@ -24,11 +24,6 @@ static void handle_signal(int sig)
         is_on_parent = 1;
     }
     
-    else if( SIGTERM == sig  || SIGINT == sig )
-    {
-        ExitIfBad(FAIL, "Parent: terminated the proccess\n");
-    }
-
 }
  
  
@@ -41,8 +36,7 @@ int main(int argc, char *argv[])
     sa.sa_handler = handle_signal;
 
     sigaction(SIGUSR2, &sa, NULL);
-    sigaction(SIGTERM, &sa, NULL);
-    sigaction(SIGINT, &sa, NULL);
+
 
     if (2 != argc)
     {
@@ -52,7 +46,6 @@ int main(int argc, char *argv[])
     child_pid = atoi(argv[1]);
     printf("Ping process started with PID: %d, communicating with Pong PID: %d\n", getpid(), child_pid);
 
-    /*kill(child_pid, SIGUSR1);*/
 
     while ( parent_cnt++ < 3 ) 
     {
@@ -68,9 +61,7 @@ int main(int argc, char *argv[])
         kill(child_pid, SIGUSR1);
 
     }
-
     
-
     return 0;
 }
  
