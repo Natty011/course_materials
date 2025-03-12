@@ -19,10 +19,15 @@ volatile sig_atomic_t is_on_parent = 0;
  
 static void handle_signal(int sig)
 {
-    if (sig == SIGUSR2)
+    if (SIGUSR2 == sig)
     {
         is_on_parent = 1;
-    } 
+    }
+    
+    else if( SIGTERM == sig  || SIGINT == sig )
+    {
+        ExitIfBad(FAIL, "Parent: terminated the proccess\n");
+    }
 
 }
  
@@ -36,6 +41,8 @@ int main(int argc, char *argv[])
     sa.sa_handler = handle_signal;
 
     sigaction(SIGUSR2, &sa, NULL);
+    sigaction(SIGTERM, &sa, NULL);
+    sigaction(SIGINT, &sa, NULL);
 
     if (2 != argc)
     {
@@ -43,25 +50,26 @@ int main(int argc, char *argv[])
     }
     
     child_pid = atoi(argv[1]);
+    printf("Ping process started with PID: %d, communicating with Pong PID: %d\n", getpid(), child_pid);
 
+    /*kill(child_pid, SIGUSR1);*/
 
-    else /*if (0 < child_pid)*/
+    while ( parent_cnt++ < 3 ) 
     {
-        while ( parent_cnt++ < 3 ) 
+        while( !is_on_parent )
         {
-            while( !is_on_parent )
-            {
-                sleep(1);
-            }
-
-            is_on_parent = 0;
-            
-            printf("Parent: Received SIGUSR2 from child, sending SIGUSR1\n");
-            kill(child_pid, SIGUSR1);
-
+            puts("i am pong_parent");
+            sleep(1);
         }
 
+        is_on_parent = 0;
+        
+        printf("Parent: Received SIGUSR2 from child, sending SIGUSR1\n");
+        kill(child_pid, SIGUSR1);
+
     }
+
+    
 
     return 0;
 }
