@@ -22,9 +22,11 @@ enum
 };
 
 
- char *msg[] = {"fork failed\n", "fgets failed\n", "strtok failed\n",
+ char *msg[] = 
+ {"fork failed\n", "fgets failed\n", "strtok failed\n",
 	"execvp failed\n", "Too many arguments\n",
- "Empty line is not allowed\n", "SIGINT terminated the proccess\n"};
+ "Empty line is not allowed\n", "SIGINT terminated the proccess\n",
+	"SIGTERM terminated the proccess\n"};
 
 
 
