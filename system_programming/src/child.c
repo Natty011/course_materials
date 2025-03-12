@@ -44,6 +44,7 @@ int main()
 
     /*sigaction(SIGTERM, &sa, NULL);*/
     /*kill(getppid(), SIGUSR2);*/
+    printf("Parent PID: %d, Child PID: %d\n", getppid(), getpid());
 
     while (child_cnt++ < 3 )
     {
