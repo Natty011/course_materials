@@ -111,6 +111,8 @@ int main()
 			is_on_parent = 0;
 		
 		}
+
+		
 	}
 
     return 0;
