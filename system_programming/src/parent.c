@@ -15,7 +15,7 @@
 #include "utils.h"		/* ExitIfBad, msg */
 #include <signal.h>	   /* sigaction */
 
-static volatile sig_atomic_t is_on_parent = 0;
+volatile sig_atomic_t is_on_parent = 0;
 
 static void handle_signal(int sig)
 {
@@ -42,40 +42,26 @@ int main()
 
     if (0 == child_pid)
     {        
-        puts("hiiii");
-        printf("Parent PID: %d, Child PID: %d\n", getppid(), getpid());
         execl("./child", "child", (char*)NULL );
         ExitIfBad(FAIL, msg[0]);
-    
     }  
 
-    else if (0 < child_pid)
+    else /*if (0 < child_pid)*/
     {
-
-        printf("Parent PID: %d, Child PID: %d\n", getpid(), child_pid);
 
         while (parent_cnt++ < 3)
         {
-            printf("parent_cnt = %d\n", parent_cnt);
             while( !is_on_parent )
             {
-                puts("hi");
                 sleep(1);
             }
 
             is_on_parent = 0;
-
+            
             printf("Parent: Received SIGUSR2 from child, sending SIGUSR1\n");
             kill(child_pid, SIGUSR1);
 
-           /* waitpid(child_pid, NULL, 0);*/
-
-
-        
         }
-
-        /*kill(child_pid, SIGTERM);
-        waitpid(child_pid, NULL, 0 );*/
 
     }
 
