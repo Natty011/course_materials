@@ -3,33 +3,29 @@
  * Reviewer : ???
  * Date : 05 / 10 / 2025
  * Last update: 11 / 03 / 2025
- *****************************************/
+ ***************************************/
 
-#ifdef PRINTS
-#endif
-#define _GNU_SOURCE
-#include <signal.h>	   /* sigaction */
+#define _POSIX_C_SOURCE 199309L
+
 #include <stdio.h>	   /* perror  */
-#include <stdlib.h>	   /* exit, EXIT_SECCESS, EXIT_FAILURE */
+#include <stdlib.h>    /* exit, EXIT_SUCCESS, EXIT_FAILURE */
 #include <string.h>	   /* strcmp */
 #include <unistd.h>	   /* fork, execv*/
 #include <sys/wait.h>  /* wait */
 #include <sys/types.h> /* pid_t */
 
-/*
-pid_t child_pid; 
-int counter = 3;
-*/
+#include <signal.h>	   /* sigaction */
+#define UNUSED(var) ((void)var)
 
-static int is_on_child = 0;
-static int is_on_parent = 0;
+
+volatile static int is_on_child = 0;
+volatile static int is_on_parent = 0;
 
 static char *msg[] = {"fork failed\n", "fgets failed\n", "strtok failed\n",
 	"execvp failed\n", "Too many arguments\n",
  "Empty line is not allowed\n", "SIGINT terminated the proccess\n"};
 
 
-#define UNUSED(var) ((void)var)
 
 
 void ExitIfBad(int is_good, const char *msg);
@@ -50,14 +46,15 @@ enum
 
 void handle_signal(int sig)
  {
-    if (sig == SIGUSR2)
+    /*TO DO: REMOVE printf from handles*/
+	if (sig == SIGUSR2)
      {
-        printf("Parent: Received SIGUSR2 from child, sending SIGUSR1\n");
+        /*printf("Parent: Received SIGUSR2 from child, sending SIGUSR1\n");*/
         is_on_parent = 1;
  	} 
     else if (sig == SIGUSR1)
     {
-        printf("Child: Received SIGUSR1 from parent, sending SIGUSR2\n");
+       /* printf("Child: Received SIGUSR1 from parent, sending SIGUSR2\n");*/
 		is_on_child = 1;
     }
 }
@@ -83,7 +80,7 @@ int main()
     {
 		while (child_cnt++ < 3 )
 		{
-			/*printf("Child: Sending SIGUSR2 to parent\n");*/
+			printf("Child: Sending SIGUSR2 to parent\n");
 			kill(getppid(), SIGUSR2);
 
 			while( !is_on_child )
@@ -107,7 +104,7 @@ int main()
 				sleep(1);
 			}
 
-			/*printf("Parent: Sending SIGUSR1 to child\n");*/
+			printf("Parent: Sending SIGUSR1 to child\n");
 			kill(child_pid, SIGUSR1);
 
 			
