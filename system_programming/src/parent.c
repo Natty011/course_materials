@@ -40,7 +40,7 @@ int main()
     child_pid = fork();
     ExitIfBad(BAD_PID != child_pid , msg[0]);
 
-    if (  0 ==  child_pid )
+    if (0 == child_pid)
     {        
         puts("hiiii");
         printf("Parent PID: %d, Child PID: %d\n", getppid(), getpid());
