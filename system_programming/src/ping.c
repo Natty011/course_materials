@@ -24,11 +24,6 @@ static void handle_signal(int sig)
         is_on_child = 1;
     }
 
-    else if(SIGTERM == sig )
-    {
-        ExitIfBad(FALSE, msg[7]);
-        
-    }
 }
  
  
