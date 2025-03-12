@@ -18,7 +18,7 @@
 static volatile sig_atomic_t is_on_child = 0;
 static volatile sig_atomic_t is_on_parent = 0;
 
-void handle_signal(int sig)
+static void handle_signal(int sig)
  {
 	if (sig == SIGUSR2)
     {
