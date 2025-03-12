@@ -23,12 +23,6 @@ static void handle_signal(int sig)
     {
         is_on_child = 1;
     }
-
-    else if( SIGTERM == sig || SIGINT == sig )
-    {
-        ExitIfBad(FAIL, "Parent: terminated the proccess\n");
-    }
-
 }
 
 
@@ -47,8 +41,6 @@ int main(int argc, char *argv[])
     sa.sa_handler = handle_signal;
 
     sigaction(SIGUSR1, &sa, NULL);
-    sigaction(SIGTERM, &sa, NULL);
-    sigaction(SIGINT, &sa, NULL);
 
     parent_pid = atoi(argv[1]);
 
@@ -56,17 +48,18 @@ int main(int argc, char *argv[])
     while (child_cnt++ < 3 ) 
     {
         printf("Child: Received SIGUSR1 from parent, sending SIGUSR2\n");
-        kill(parent_pid, SIGUSR2);
+
 
         while( !is_on_child )
         {
            puts("i am ping_child");
             sleep(1);
         }
+        
 
+        kill(parent_pid, SIGUSR2);
         is_on_child = 0;
     }
-
 
     return 0;
 }
