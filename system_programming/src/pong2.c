@@ -15,18 +15,18 @@
 #include "utils.h"		/* ExitIfBad, msg */
 #include <signal.h>	   /* sigaction */
 
-volatile sig_atomic_t is_on_parent = 0;
- 
+volatile sig_atomic_t g_on_parent = 0;
+
 static void handle_signal(int sig)
 {
     if (SIGUSR2 == sig)
     {
-        is_on_parent = 1;
+        g_on_parent = 1;
     }
     
 }
  
- 
+
 int main(int argc, char *argv[]) 
 {
     struct sigaction sa = { 0 };
@@ -47,19 +47,21 @@ int main(int argc, char *argv[])
     printf("Ping process started with PID: %d, communicating with Pong PID: %d\n", getpid(), child_pid);
 
 
-    while ( parent_cnt++ < 3 ) 
+    while ( parent_cnt++ < 10 ) 
     {
-        while( !is_on_parent )
+        printf("Parent: Received SIGUSR2 from child, sending SIGUSR1\n");
+        kill(child_pid, SIGUSR1);
+
+
+        while( !g_on_parent )
         {
             puts("i am pong_parent");
             sleep(1);
         }
 
-        is_on_parent = 0;
+        g_on_parent = 0;
         
-        printf("Parent: Received SIGUSR2 from child, sending SIGUSR1\n");
-        kill(child_pid, SIGUSR1);
-
+       
     }
     
     return 0;

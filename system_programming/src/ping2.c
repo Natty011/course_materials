@@ -15,50 +15,49 @@
 #include <signal.h>	    /* sigaction */
 
 
-volatile sig_atomic_t is_on_child = 0;
+volatile sig_atomic_t g_on_child = 0;
+volatile pid_t g_procces_parent_pid = 0;
 
-static void handle_signal(int sig)
+static void handle_signal(int sig, siginfo_t *info, void *ucontext)
 {
+    
+    (void)ucontext;
+    g_procces_parent_pid = info->si_pid;
+   
     if (sig == SIGUSR1)
     {
-        is_on_child = 1;
+        g_on_child = 1;
     }
+
+
 }
 
 
-int main(int argc, char *argv[]) 
+int main()  
 {
     struct sigaction sa = { 0 };
     int child_cnt = 0;
-    pid_t parent_pid = -1;
-
-
-    if (2 != argc)
-    {
-        ExitIfBad(FAIL, msg[8]);
-    }
-
-    sa.sa_handler = handle_signal;
+ 
+    sa.sa_sigaction = handle_signal;
+    sa.sa_flags = SA_SIGINFO;
 
     sigaction(SIGUSR1, &sa, NULL);
-
-    parent_pid = atoi(argv[1]);
-
-    printf("Pong process started with PID: %d, communicating with Ping PID: %d\n", getpid(), parent_pid);
-    while (child_cnt++ < 3 ) 
+    
+    printf("Pong process started with PID: %d\n", getpid());
+    while (child_cnt++ < 10 ) 
     {
         printf("Child: Received SIGUSR1 from parent, sending SIGUSR2\n");
 
 
-        while( !is_on_child )
+        while( !g_on_child )
         {
            puts("i am ping_child");
             sleep(1);
         }
         
 
-        kill(parent_pid, SIGUSR2);
-        is_on_child = 0;
+        kill(g_procces_parent_pid, SIGUSR2);
+        g_on_child = 0;
     }
 
     return 0;
