@@ -1,42 +1,41 @@
 /***************************************
  * Author : Natty
- * Reviewer : ???
+ * Reviewer : David
  * Date : 05 / 03 / 2025
- * Last update: 12 / 03 / 2025
+ * Last update: 15 / 03 / 2025
  ***************************************/
 
 #define _POSIX_C_SOURCE 199309L /*struct sigaction*/
 
-#include <stdio.h>	   /* perror , printf */
-#include <stdlib.h>    /* exit */
-#include <unistd.h>	   /* fork*/
+#include <stdio.h>	    /* perror , printf */
+#include <stdlib.h>     /* exit */
+#include <unistd.h>	    /* fork*/
 #include <sys/types.h>  /* pid_t */
+#include <signal.h>	    /* sigaction */
 #include "utils.h"		/* ExitIfBad, msg */
-#include <signal.h>	   /* sigaction */
 
 
-static volatile sig_atomic_t is_on_child = 0;
-static volatile sig_atomic_t is_on_parent = 0;
+static volatile sig_atomic_t g_on_child = 0;
+static volatile sig_atomic_t g_on_parent = 0;
 
 static void handle_signal(int sig)
  {
 	if (sig == SIGUSR2)
     {
-        is_on_parent = 1;
+        g_on_parent = 1;
  	} 
     else if (sig == SIGUSR1)
     {
-		is_on_child = 1;
+		g_on_child = 1;
     }
 }
-
 
 int main() 
 {
     struct sigaction sa = { 0 };
 	int child_cnt = 0, parent_cnt = 0;
     pid_t child_pid = -1;
-
+	
     sa.sa_handler = handle_signal;
 
 	sigaction(SIGUSR1, &sa, NULL);
@@ -53,12 +52,12 @@ int main()
        		printf("Child: Received SIGUSR1 from parent, sending SIGUSR2\n");
 	  		kill(getppid(), SIGUSR2);
 
-			while( !is_on_child )
+			while( !g_on_child )
 			{
 				sleep(1);
 			}
 			
-			is_on_child = 0;
+			g_on_child = 0;
 		
 		}
 	}	
@@ -68,7 +67,7 @@ int main()
 		while (parent_cnt++ < 3 )
 		{
 		
-			while( !is_on_parent )
+			while( !g_on_parent )
 			{
 				sleep(1);
 			}
@@ -76,7 +75,7 @@ int main()
 			printf("Parent: Received SIGUSR2 from child, sending SIGUSR1\n");
 			kill(child_pid, SIGUSR1);
 
-			is_on_parent = 0;
+			g_on_parent = 0;
 		
 		}
 
