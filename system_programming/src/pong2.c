@@ -1,19 +1,18 @@
 /***************************************
  * Author : Natty
- * Reviewer : ???
+ * Reviewer : David
  * Date : 05 / 03 / 2025
- * Last update: 12 / 03 / 2025
+ * Last update: 15 / 03 / 2025
  ***************************************/
 
 #define _POSIX_C_SOURCE 199309L /*struct sigaction*/
 
 #include <stdio.h>	   /* perror , printf */
 #include <stdlib.h>    /* exit */
-#include <unistd.h>	   /* fork*/
 #include <sys/types.h>  /* pid_t */
-#include <sys/wait.h>   /* wait */
+#include <signal.h>	   /* sigaction, kill */
+#include <unistd.h>       /* sleep, getpid */
 #include "utils.h"		/* ExitIfBad, msg */
-#include <signal.h>	   /* sigaction */
 
 volatile sig_atomic_t g_on_parent = 0;
 
@@ -55,7 +54,6 @@ int main(int argc, char *argv[])
 
         while( !g_on_parent )
         {
-            puts("i am pong_parent");
             sleep(1);
         }
 
