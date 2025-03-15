@@ -1,12 +1,12 @@
 /******************************************************************************
 *	Version         0.2
-*   Last Update:    15/01/25    17:17
+*   Last Update:    15/03/25    
 ******************************************************************************/
 
 #ifndef __UTILS__     /* __UTILS__  */
 #define __UTILS__     /* __UTILS__  */
 
-#include <stddef.h>     /* size_t       */
+#include <stdlib.h>    /* exit */
 
 enum
 {
@@ -26,7 +26,7 @@ enum
  {"fork failed\n", "fgets failed\n", "strtok failed\n",
 	"execvp failed\n", "Too many arguments\n",
  "Empty line is not allowed\n", "SIGINT terminated the proccess\n",
-	"SIGTERM terminated the proccess\n"};
+	"SIGTERM terminated the proccess\n", "Arguments not met\n"};
 
 
 
