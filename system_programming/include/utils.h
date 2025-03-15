@@ -28,8 +28,6 @@ enum
  "Empty line is not allowed\n", "SIGINT terminated the proccess\n",
 	"SIGTERM terminated the proccess\n", "Arguments not met\n"};
 
-
-
 /*
     Description: 
     Arguments: 
@@ -41,7 +39,7 @@ void ExitIfBad(int is_good, const char *msg)
 {
 	if (FALSE == is_good) 
 	{
-		perror(msg);
+		puts(msg);
 		exit(0);
 	}
 }
