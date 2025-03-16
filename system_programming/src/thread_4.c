@@ -14,17 +14,34 @@
 
 #define UNUSED(var) ((void)var)
 
-#define ARR_SIZE (100000)
+#define ARR_SIZE (3) /*62778*/
+#define RANGE_SIZE (100) 
 
 /* the position of each thread in his jobs priority*/
 int g_arr_ret_threads[ARR_SIZE] = { 0 }; 
+int g_number = 300;
 
 /* hold the thread_id*/
 pthread_t g_arr_thread_id[ARR_SIZE]  = { 0 }; 
 
-void *start_routine(void *arg)
+int g_sum_of_divisors_local[ARR_SIZE] = { 0 } ;
+
+
+void *StartRoutine(void *arg)
 {
+	int start = ((int)arg ) * RANGE_SIZE + 1 ;
+	int end = ( (int)arg + 1) * RANGE_SIZE ;
+
 	g_arr_ret_threads[(int)arg] =  (int)arg;
+
+	for( ; start <= end ; ++start ) /* (g_number/ARR_SIZE)*( (int)arg  */
+	{
+		if( 0 == g_number % start)
+		{
+			g_sum_of_divisors_local[(int)arg] += start;
+		}
+	}
+	
 
 	return NULL;
 }
@@ -33,20 +50,21 @@ void *start_routine(void *arg)
 int main() 
 {
 	int arg = 0, result = 0;
+	int sum_of_divisors = 0 ;
 
 	pthread_attr_t attr;
 
 	ExitIfBad(0 == pthread_attr_init(&attr), "pthread_attr_init failed\n"); 
 
-	ExitIfBad( 0 == pthread_attr_setdetachstate(&attr,
-			 PTHREAD_CREATE_DETACHED), "pthread_attr_setdetachstate failed\n");
+	/*ExitIfBad( 0 == pthread_attr_setdetachstate(&attr,
+			 PTHREAD_CREATE_DETACHED), "pthread_attr_setdetachstate failed\n");*/
 
 	for( arg = 0; arg < ARR_SIZE ; ++arg )
 	{
 		do
 		{
 			result = pthread_create(&g_arr_thread_id[arg],
-				&attr , start_routine, (void*)arg ) ;
+				&attr , StartRoutine, (void*)arg ) ;
 
 			ExitIfBad(!result,"pthread_create failed\n" );	
 			
@@ -54,10 +72,26 @@ int main()
 		
 	}
 
+	for( arg = 0; arg < ARR_SIZE ; ++arg )
+	{
+		ExitIfBad(0 == pthread_join(g_arr_thread_id[arg], NULL),"pthread_join failed\n" );
+
+			sum_of_divisors += g_sum_of_divisors_local[arg];
+	}
 	/* release internal resource of struct 'attr' after using
 		 attr_init function */
-	ExitIfBad(0 == pthread_attr_destroy(&attr), "pthread_attr_destroy failed\n" );
 
+	/*ExitIfBad(0 == pthread_attr_destroy(&attr), "pthread_attr_destroy failed\n" );*/
+
+	for( arg = 0; arg < ARR_SIZE ; ++arg )
+	{
+		if(arg != g_arr_ret_threads[arg] )
+		{
+			printf("line: %d \n" , __LINE__ );
+			puts("Failes in:  ");
+			printf("g_arr_ret_threads[%d] = { %d }\n", arg, g_arr_ret_threads[arg]);
+		}
+	}
 
 
 	return 0;
