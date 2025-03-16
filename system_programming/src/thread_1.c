@@ -15,12 +15,12 @@
 
 #define ARR_SIZE (100000)
 
-int ret_threads[ARR_SIZE] = { 0 };
-pthread_t thread_id[ARR_SIZE]  = { 0 }; /* hold the thread_id*/
+int g_arr_ret_threads[ARR_SIZE] = { 0 };
+pthread_t g_arr_thread_id[ARR_SIZE]  = { 0 }; /* hold the thread_id*/
 
 void *start_routine(void *arg)
 {
-	ret_threads[*(int*)arg] =  *(int*)arg;
+	g_arr_ret_threads[*(int*)arg] =  *(int*)arg;
 	return NULL;
 }
 
@@ -29,18 +29,16 @@ int main()
 {
 	int i = 0;
 
-	/*pthread_attr_t attr;*/
-
 	for( i = 0; i < ARR_SIZE ; ++i )
 	{
-		ExitIfBad( 0 == pthread_create(&thread_id[i], NULL, start_routine, &i ), "pthread_create failed\n");
-		pthread_join(thread_id[i], NULL);
+		ExitIfBad( 0 == pthread_create(&g_arr_thread_id[i], NULL, start_routine, &i ), "pthread_create failed\n");
+		pthread_join(g_arr_thread_id[i], NULL);
 	}
 
 	puts("arr_values");
 	for( i = 0; i < ARR_SIZE ; ++i )
 	{
-		printf("ret_threads[%d] = { %d }\n", i, ret_threads[i]);
+		printf("g_arr_ret_threads[%d] = { %d }\n", i, g_arr_ret_threads[i]);
 	}
 	return 0;
 }
