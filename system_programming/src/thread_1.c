@@ -24,24 +24,32 @@ pthread_t g_arr_thread_id[ARR_SIZE]  = { 0 };
 void *start_routine(void *arg)
 {
 	g_arr_ret_threads[*(int*)arg] =  *(int*)arg;
+
 	return NULL;
 }
 
 int main() 
 {
-	int i = 0;
+	int arg = 0;
 
-	for( i = 0; i < ARR_SIZE ; ++i )
+	for( arg = 0; arg < ARR_SIZE ; ++arg )
 	{
-		ExitIfBad( 0 == pthread_create(&g_arr_thread_id[i], NULL, start_routine, &i ), "pthread_create failed\n");
-		pthread_join(g_arr_thread_id[i], NULL);
+		ExitIfBad( 0 == pthread_create(&g_arr_thread_id[arg],
+				 NULL, start_routine, &arg ), "pthread_create failed\n");
+
+		pthread_join(g_arr_thread_id[arg], NULL);
 	}
 
-	puts("arr_values");
+	puts("start test:");
 
-	for( i = 0; i < ARR_SIZE ; ++i )
+	for( arg = 0; arg < ARR_SIZE ; ++arg )
 	{
-		printf("g_arr_ret_threads[%d] = { %d }\n", i, g_arr_ret_threads[i]);
+		if(arg != g_arr_ret_threads[arg] )
+		{
+			printf("line: %d \n" , __LINE__ );
+			puts("Failes in:  ");
+			printf("g_arr_ret_threads[%d] = { %d }\n", arg, g_arr_ret_threads[arg]);
+		}
 	}
 	return 0;
 }
