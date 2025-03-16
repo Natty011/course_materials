@@ -14,36 +14,34 @@
 #define UNUSED(var) ((void)var)
 
 #define ARR_SIZE (100000)
-/*thread_t arr_threads[ARR_SIZE] = { 0 };*/
-pthread_t thread_id[ARR_SIZE]  = { 0 };
 
-/*
-typedef struct thread
+int ret_threads[ARR_SIZE] = { 0 };
+pthread_t thread_id[ARR_SIZE]  = { 0 }; /* hold the thread_id*/
+
+void *start_routine(void *arg)
 {
-	pthread_t thread_id;
-	int arr_idx;
-
-}thread_t;
-*/
-
-
-void *start_routine(void *idx)
-{
-	
+	ret_threads[*(int*)arg] =  *(int*)arg;
+	return NULL;
 }
 
-
-int pthread_create(pthread_t *thread, const pthread_attr_t *attr, void *(*start_routine)(void *), void *arg);
 
 int main() 
 {
 	int i = 0;
 
+	/*pthread_attr_t attr;*/
+
 	for( i = 0; i < ARR_SIZE ; ++i )
 	{
-		pthread_create()
+		pthread_create(&thread_id[i], NULL, start_routine, &i );
+		pthread_join(thread_id[i], NULL);
 	}
 
+	puts("arr_values");
+	for( i = 0; i < ARR_SIZE ; ++i )
+	{
+		printf("ret_threads[%d] = { %d }\n", i, ret_threads[i]);
+	}
 	return 0;
 }
 
