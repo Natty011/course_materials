@@ -14,12 +14,12 @@
 
 #define UNUSED(var) ((void)var)
 
-#define ARR_SIZE (3) /*62778*/
+#define ARR_SIZE (10) /*62778*/
 #define RANGE_SIZE (100) 
 
 /* the position of each thread in his jobs priority*/
 int g_arr_ret_threads[ARR_SIZE] = { 0 }; 
-int g_number = 300;
+int g_number = 6;
 
 /* hold the thread_id*/
 pthread_t g_arr_thread_id[ARR_SIZE]  = { 0 }; 
@@ -29,16 +29,16 @@ int g_sum_of_divisors_local[ARR_SIZE] = { 0 } ;
 
 void *StartRoutine(void *arg)
 {
-	int start = ((int)arg ) * RANGE_SIZE + 1 ;
-	int end = ( (int)arg + 1) * RANGE_SIZE ;
+	int start = ((int)(long)arg ) * RANGE_SIZE + 1 ;
+	int end = ( (int)(long)arg + 1) * RANGE_SIZE ;
 
-	g_arr_ret_threads[(int)arg] =  (int)arg;
+	g_arr_ret_threads[(int)(long)arg] =  (int)(long)arg;
 
 	for( ; start <= end ; ++start ) /* (g_number/ARR_SIZE)*( (int)arg  */
 	{
 		if( 0 == g_number % start)
 		{
-			g_sum_of_divisors_local[(int)arg] += start;
+			g_sum_of_divisors_local[(int)(long)arg] += start;
 		}
 	}
 	
@@ -64,7 +64,7 @@ int main()
 		do
 		{
 			result = pthread_create(&g_arr_thread_id[arg],
-				&attr , StartRoutine, (void*)arg ) ;
+				&attr , StartRoutine, (void*)(unsigned long)arg ) ;
 
 			ExitIfBad(!result,"pthread_create failed\n" );	
 			
@@ -78,6 +78,8 @@ int main()
 
 			sum_of_divisors += g_sum_of_divisors_local[arg];
 	}
+
+	printf("sum_of_divisors = { %d }\n", sum_of_divisors);
 	/* release internal resource of struct 'attr' after using
 		 attr_init function */
 
