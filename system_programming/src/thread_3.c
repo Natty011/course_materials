@@ -14,7 +14,7 @@
 
 #define UNUSED(var) ((void)var)
 
-#define ARR_SIZE (100000)
+#define ARR_SIZE (100)
 
 /* the position of each thread in his jobs priority*/
 int g_arr_ret_threads[ARR_SIZE] = { 0 }; 
@@ -33,29 +33,26 @@ void *start_routine(void *arg)
 int main() 
 {
 	int arg = 0;
+
 	pthread_attr_t attr;
 
+	pthread_attr_init(&attr); 
+	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
 
-	pthread_attr_init(&attr);
 	for( arg = 0; arg < ARR_SIZE ; ++arg )
 	{
 		while(pthread_create(&g_arr_thread_id[arg],
-			&attr, start_routine, (void*)arg ) ){}
-
-		pthread_detach(g_arr_thread_id[arg]) ;
+			&attr , start_routine, (void*)arg ) ){}
 
 	}
 
+	/* release internal resource of struct 'attr' after using
+		 attr_init function */
+	pthread_attr_destroy(&attr);
 
 	/*sleep(10);*/
 
-	for( arg = 0; arg < ARR_SIZE ; ++arg )
-	{
-		if(arg != g_arr_ret_threads[arg] )
-		{
-			printf("g_arr_ret_threads[%d] = { %d }\n", arg, g_arr_ret_threads[arg]);
-		}
-	}
+
 	return 0;
 }
 
