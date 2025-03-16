@@ -33,26 +33,18 @@ void *start_routine(void *arg)
 int main() 
 {
 	int arg = 0, result = 0, cnt = 0;
-	/*sleep(10);*/
 
 	for( arg = 0; arg < ARR_SIZE ; ++arg )
 	{
 		while(pthread_create(&g_arr_thread_id[arg],
-			NULL, start_routine, (void*)arg ) )
-		{
+			NULL, start_routine, (void*)arg ) ){}
 
-		}
+		while(pthread_detach(g_arr_thread_id[arg]) ){}
 
 	}
 
-	for( arg = 0; arg < ARR_SIZE ; ++arg )
-	{
-		while(pthread_detach(g_arr_thread_id[arg]) )
-		{
+	/*sleep(10);*/
 
-		}
-	}
-	
 	for( arg = 0; arg < ARR_SIZE ; ++arg )
 	{
 		if(arg != g_arr_ret_threads[arg] )
