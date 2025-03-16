@@ -7,7 +7,7 @@
 
 #include <stdio.h>	 	 /* printf, fgets  */
 #include <stdlib.h>	  	 /* exit, EXIT_SECCESS, EXIT_FAILURE */
-
+#include <time.h> 		/*clock*/
 #include <pthread.h>    /* */
 #include "utils.h"		 /* ExitIfBad, msg */
 
@@ -33,7 +33,7 @@ int main()
 
 	for( i = 0; i < ARR_SIZE ; ++i )
 	{
-		pthread_create(&thread_id[i], NULL, start_routine, &i );
+		ExitIfBad( 0 == pthread_create(&thread_id[i], NULL, start_routine, &i ), "pthread_create failed\n");
 		pthread_join(thread_id[i], NULL);
 	}
 
