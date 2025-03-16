@@ -32,16 +32,20 @@ void *start_routine(void *arg)
 
 int main() 
 {
-	int arg = 0, result = 0, cnt = 0;
+	int arg = 0;
+	pthread_attr_t attr;
 
+
+	pthread_attr_init(&attr);
 	for( arg = 0; arg < ARR_SIZE ; ++arg )
 	{
 		while(pthread_create(&g_arr_thread_id[arg],
-			NULL, start_routine, (void*)arg ) ){}
+			&attr, start_routine, (void*)arg ) ){}
 
-		while(pthread_detach(g_arr_thread_id[arg]) ){}
+		pthread_detach(g_arr_thread_id[arg]) ;
 
 	}
+
 
 	/*sleep(10);*/
 
