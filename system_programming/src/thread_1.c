@@ -15,15 +15,17 @@
 
 #define ARR_SIZE (100000)
 
-int g_arr_ret_threads[ARR_SIZE] = { 0 };
-pthread_t g_arr_thread_id[ARR_SIZE]  = { 0 }; /* hold the thread_id*/
+/* the position of each thread in his jobs priority*/
+int g_arr_ret_threads[ARR_SIZE] = { 0 }; 
+
+/* hold the thread_id*/
+pthread_t g_arr_thread_id[ARR_SIZE]  = { 0 }; 
 
 void *start_routine(void *arg)
 {
 	g_arr_ret_threads[*(int*)arg] =  *(int*)arg;
 	return NULL;
 }
-
 
 int main() 
 {
@@ -36,6 +38,7 @@ int main()
 	}
 
 	puts("arr_values");
+
 	for( i = 0; i < ARR_SIZE ; ++i )
 	{
 		printf("g_arr_ret_threads[%d] = { %d }\n", i, g_arr_ret_threads[i]);
