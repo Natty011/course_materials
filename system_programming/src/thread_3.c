@@ -32,25 +32,31 @@ void *start_routine(void *arg)
 
 int main() 
 {
-	int arg = 0;
+	int arg = 0, result = 0;
 
 	pthread_attr_t attr;
 
-	pthread_attr_init(&attr); 
-	pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
+	ExitIfBad(0 == pthread_attr_init(&attr), "pthread_attr_init failed\n"); 
+
+	ExitIfBad( 0 == pthread_attr_setdetachstate(&attr,
+			 PTHREAD_CREATE_DETACHED), "pthread_attr_setdetachstate failed\n");
 
 	for( arg = 0; arg < ARR_SIZE ; ++arg )
 	{
-		while(pthread_create(&g_arr_thread_id[arg],
-			&attr , start_routine, (void*)arg ) ){}
+		do
+		{
+			result = pthread_create(&g_arr_thread_id[arg],
+				&attr , start_routine, (void*)arg ) ;
 
+			ExitIfBad(!result,"pthread_create failed\n" );	
+		} while (result);
+		
 	}
 
 	/* release internal resource of struct 'attr' after using
 		 attr_init function */
-	pthread_attr_destroy(&attr);
+	ExitIfBad(0 == pthread_attr_destroy(&attr), "pthread_attr_destroy failed\n" );
 
-	/*sleep(10);*/
 
 
 	return 0;
