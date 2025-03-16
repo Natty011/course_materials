@@ -49,6 +49,7 @@ int main()
 				&attr , start_routine, (void*)arg ) ;
 
 			ExitIfBad(!result,"pthread_create failed\n" );	
+			
 		} while (result);
 		
 	}
