@@ -8,7 +8,9 @@
 #include <stdio.h>	 	 /* printf, fgets  */
 #include <stdlib.h>	  	 /* exit, EXIT_SECCESS, EXIT_FAILURE */
 #include <time.h> 		/*clock*/
-#include <pthread.h>    /* */
+#include <unistd.h> 	/*sleep*/
+
+#include <pthread.h>    /* pthread_create */
 #include "utils.h"		 /* ExitIfBad, msg */
 
 #define UNUSED(var) ((void)var)
@@ -31,6 +33,8 @@ void *start_routine(void *arg)
 int main() 
 {
 	int arg = 0;
+
+	sleep(10);
 
 	for( arg = 0; arg < ARR_SIZE ; ++arg )
 	{
