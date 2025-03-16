@@ -14,7 +14,7 @@
 
 #define UNUSED(var) ((void)var)
 
-#define ARR_SIZE (32000)
+#define ARR_SIZE (100000)
 
 /* the position of each thread in his jobs priority*/
 int g_arr_ret_threads[ARR_SIZE] = { 0 }; 
@@ -45,13 +45,6 @@ int main()
 
 	}
 
-	for( arg = 0; arg < ARR_SIZE ; ++arg )
-	{
-		while(pthread_join(g_arr_thread_id[arg], NULL) )
-		{
-
-		}
-	}
 	
 	for( arg = 0; arg < ARR_SIZE ; ++arg )
 	{
