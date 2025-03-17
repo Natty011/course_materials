@@ -8,9 +8,7 @@
 #include <stdio.h>	 	 /* printf, fgets  */
 #include <pthread.h>    /* pthread_create */
 #include "utils.h"		 /* ExitIfBad, msg */
-#define UNUSED(var) ((void)var)
 #include <omp.h>		/* omp parallel for */
-
 
 unsigned int g_number = 333314;
 
