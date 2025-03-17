@@ -9,8 +9,6 @@
 #include <pthread.h>    /* pthread_create */
 #include "utils.h"		 /* ExitIfBad, msg */
 
-#define UNUSED(var) ((void)var)
-
 #define ARR_SIZE (10000) /*62778*/
 #define RANGE_SIZE (100) 
 
