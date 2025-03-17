@@ -24,7 +24,7 @@ pthread_t g_arr_thread_id[ARR_SIZE]  = { 0 };
 
 void *start_routine(void *arg)
 {
-	g_arr_ret_threads[(int)arg] =  (int)arg;
+	g_arr_ret_threads[(int)(long)arg] =  (int)(long)arg;
 
 	return NULL;
 }
@@ -46,7 +46,7 @@ int main()
 		do
 		{
 			result = pthread_create(&g_arr_thread_id[arg],
-				&attr , start_routine, (void*)arg ) ;
+				&attr , start_routine, (void*)(unsigned long)arg ) ;
 
 			ExitIfBad(!result,"pthread_create failed\n" );	
 			
