@@ -15,7 +15,7 @@
 
 #define UNUSED(var) ((void)var)
 
-#define ARR_SIZE (32000)
+#define ARR_SIZE (100000)
 
 /* the position of each thread in his jobs priority*/
 int g_arr_ret_threads[ARR_SIZE] = { 0 }; 
@@ -25,7 +25,7 @@ pthread_t g_arr_thread_id[ARR_SIZE]  = { 0 };
 
 void *start_routine(void *arg)
 {
-	g_arr_ret_threads[(size_t)arg] =  (size_t)arg;
+	g_arr_ret_threads[(int)(long)arg] =  (int)(long)arg;
 
 	return NULL;
 }
@@ -35,12 +35,11 @@ int main()
 {
 	int arg = 0;
 
-	sleep(10);
 
 	for( arg = 0; arg < ARR_SIZE ; ++arg )
 	{
 		ExitIfBad( 0 == pthread_create(&g_arr_thread_id[arg],
-				 NULL, start_routine, (void*)arg ), "pthread_create failed\n");
+				 NULL, start_routine, (void*)(unsigned long)arg ), "pthread_create failed\n");
 
 		/*pthread_join(g_arr_thread_id[arg], NULL);*/
 	}
@@ -49,6 +48,8 @@ int main()
 	{
 		pthread_join(g_arr_thread_id[arg], NULL);
 	}
+
+	sleep(10);
 
 	puts("start test:");
 
