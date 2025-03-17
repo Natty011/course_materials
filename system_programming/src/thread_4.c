@@ -11,7 +11,7 @@
 
 #define UNUSED(var) ((void)var)
 
-#define ARR_SIZE (10) /*62778*/
+#define ARR_SIZE (50) /*62778*/
 #define RANGE_SIZE (100) 
 
 /* the position of each thread in his jobs priority*/
@@ -28,12 +28,13 @@ void *SumOfDivisors(void *arg)
 {
 	unsigned int start = ((long)arg ) * RANGE_SIZE + 1 ;
 	unsigned int end = ( (long)arg + 1) * RANGE_SIZE ;
-	
+	g_flag_routine = FALSE;
 	g_arr_ret_threads[(long)arg] =  (long)arg;
 
 	if(start <= g_number)
 	{
 		g_flag_routine = TRUE;
+
 		for( ; start <= end ; ++start ) 
 		{
 			if( 0 == g_number % start)
@@ -44,7 +45,7 @@ void *SumOfDivisors(void *arg)
 
 	}
 	
-	return (void*)g_flag_routine;
+	return g_flag_routine ? (void*)g_flag_routine: NULL;
 }
 
 int main() 
@@ -72,14 +73,15 @@ int main()
 			break;
 		}
 
-		
 	}
 
 	for( arg = 0; arg <=  g_arr_ret_threads[ arg ] ; ++arg )
 	{
-		ExitIfBad(0 == pthread_join(g_arr_thread_id[arg], NULL),"pthread_join failed\n" );
 
-			sum_of_divisors += g_sum_of_divisors_local[arg];
+		ExitIfBad(0 == pthread_join(g_arr_thread_id[arg], NULL),"pthread_join failed\n" );
+		
+		sum_of_divisors += g_sum_of_divisors_local[arg];
+
 	}
 
 	printf("sum_of_divisors = { %d }\n", sum_of_divisors);
