@@ -2,13 +2,10 @@
  * Author : Natty
  * Reviewer : Sauser
  * Date : 16 / 03 / 2025
- * Last update: 16 / 03 / 2025
+ * Last update: 17 / 03 / 2025
  *****************************************/
 
 #include <stdio.h>	 	 /* printf, fgets  */
-#include <stdlib.h>	  	 /* exit, EXIT_SECCESS, EXIT_FAILURE */
-#include <unistd.h> 	/*sleep*/
-
 #include <pthread.h>    /* pthread_create */
 #include "utils.h"		 /* ExitIfBad, msg */
 
@@ -34,7 +31,7 @@ void *SumOfDivisors(void *arg)
 
 	g_arr_ret_threads[(int)(long)arg] =  (int)(long)arg;
 
-	for( ; start <= end ; ++start ) /* (g_number/ARR_SIZE)*( (int)arg  */
+	for( ; start <= end ; ++start ) 
 	{
 		if( 0 == g_number % start)
 		{
@@ -44,7 +41,6 @@ void *SumOfDivisors(void *arg)
 
 	return NULL;
 }
-
 
 int main() 
 {
@@ -86,8 +82,7 @@ int main()
 			printf("g_arr_ret_threads[%d] = { %d }\n", arg, g_arr_ret_threads[arg]);
 		}
 	}
-
-
+	
 	return 0;
 }
 
