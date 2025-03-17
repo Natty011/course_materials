@@ -46,22 +46,17 @@ void *SumOfDivisors(void *arg)
 
 int main() 
 {
-	int arg = 0, result = 0;
-	int sum_of_divisors = 0 ;
+	unsigned int arg = 0;
+	unsigned int sum_of_divisors = 0 ;
 
 	for( arg = 0; arg <=  g_sum_of_divisors_local[ arg ] ; ++arg )
 	{
-		do
-		{
-			result = *(int*)SumOfDivisors((void*)(unsigned long)arg);
-
-		} while (result);
+		SumOfDivisors((void*)(unsigned long)arg);
 
 		if(!g_flag_routine) /* not to creat un necessary threads*/
 		{
 			break;
 		}
-		
 	}
 
 	for( arg = 0; arg <=  g_sum_of_divisors_local[ arg ] ; ++arg )
