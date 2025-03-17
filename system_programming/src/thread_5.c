@@ -8,33 +8,27 @@
 #include <stdio.h>	 	 /* printf, fgets  */
 #include <pthread.h>    /* pthread_create */
 #include "utils.h"		 /* ExitIfBad, msg */
-#include <omp.h>		/**/
 #define UNUSED(var) ((void)var)
+#include <omp.h>		/* omp parallel for */
 
 
-/* the position of each thread in his jobs priority*/
-unsigned int g_number = 10;
-
-/* hold the thread_id*/
-
-
+unsigned int g_number = 333314;
 
 size_t SumOfDivisors(void)
 {
-
 	unsigned int start = 1;
 	unsigned int end = g_number;
 	size_t sum_of_divisors = 0;
 
 	#pragma omp parallel for
 
-		for( start = 1 ; start <= end ; ++start ) 
+	for( start = 1 ; start <= end ; ++start ) 
+	{
+		if( 0 == g_number % start)
 		{
-			if( 0 == g_number % start)
-			{
-			sum_of_divisors += start;
-			}
+		sum_of_divisors += start;
 		}
+	}
 		
 	return sum_of_divisors;
 }
