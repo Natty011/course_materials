@@ -11,13 +11,12 @@
 
 #define UNUSED(var) ((void)var)
 
-#define ARR_SIZE (50) /*62778*/
+#define ARR_SIZE (10000) /*62778*/
 #define RANGE_SIZE (100) 
 
 /* the position of each thread in his jobs priority*/
-int g_arr_ret_threads[ARR_SIZE] = { 0 }; 
-unsigned int g_number = 10;
-size_t g_flag_routine = FALSE;
+unsigned int g_arr_ret_threads[ARR_SIZE] = { 0 }; 
+unsigned int g_number = 333314;
 
 /* hold the thread_id*/
 pthread_t g_arr_thread_id[ARR_SIZE]  = { 0 }; 
@@ -28,12 +27,10 @@ void *SumOfDivisors(void *arg)
 {
 	unsigned int start = ((long)arg ) * RANGE_SIZE + 1 ;
 	unsigned int end = ( (long)arg + 1) * RANGE_SIZE ;
-	g_flag_routine = FALSE;
 	g_arr_ret_threads[(long)arg] =  (long)arg;
 
 	if(start <= g_number)
 	{
-		g_flag_routine = TRUE;
 
 		for( ; start <= end ; ++start ) 
 		{
@@ -45,19 +42,20 @@ void *SumOfDivisors(void *arg)
 
 	}
 	
-	return g_flag_routine ? (void*)g_flag_routine: NULL;
+	return NULL;
 }
 
 int main() 
 {
-	int arg = 0, result = 0;
-	int sum_of_divisors = 0 ;
-	
+	unsigned int arg = 0, result = 0;
+	unsigned int sum_of_divisors = 0 ;
 	pthread_attr_t attr;
+
+	size_t num_threads = g_number / RANGE_SIZE;
 
 	ExitIfBad(0 == pthread_attr_init(&attr), "pthread_attr_init failed\n"); 
 
-	for( arg = 0; arg <=  g_arr_ret_threads[ arg ] ; ++arg )
+	for( arg = 0; arg <= num_threads  ; ++arg )  
 	{
 		do
 		{
@@ -68,14 +66,10 @@ int main()
 			
 		} while (result);
 
-		if(!g_flag_routine) /* not to creat un necessary threads*/
-		{
-			break;
-		}
-
+	
 	}
 
-	for( arg = 0; arg <=  g_arr_ret_threads[ arg ] ; ++arg )
+	for( arg = 0; arg <=  num_threads ; ++arg )
 	{
 
 		ExitIfBad(0 == pthread_join(g_arr_thread_id[arg], NULL),"pthread_join failed\n" );
@@ -86,7 +80,7 @@ int main()
 
 	printf("sum_of_divisors = { %d }\n", sum_of_divisors);
 
-	for( arg = 0; arg <=  g_arr_ret_threads[ arg ] ; ++arg ) /*ARR_SIZE && arg !=*/
+	for( arg = 0; arg <=  num_threads ; ++arg ) 
 	{
 		if(arg != g_arr_ret_threads[arg] )
 		{
