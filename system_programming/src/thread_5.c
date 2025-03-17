@@ -11,7 +11,7 @@
 
 #define UNUSED(var) ((void)var)
 
-#define ARR_SIZE (30000) /*62778*/
+#define ARR_SIZE (50) /*62778*/
 #define RANGE_SIZE (100) 
 
 /* the position of each thread in his jobs priority*/
@@ -53,7 +53,7 @@ int main()
 	{
 		SumOfDivisors((void*)(unsigned long)arg);
 
-		if(!g_flag_routine) /* not to creat un necessary threads*/
+		if(!g_flag_routine) /* not to creat an un-necessary threads*/
 		{
 			break;
 		}
