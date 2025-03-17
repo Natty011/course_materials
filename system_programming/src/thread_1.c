@@ -13,8 +13,6 @@
 #include <pthread.h>    /* pthread_create */
 #include "utils.h"		 /* ExitIfBad, msg */
 
-#define UNUSED(var) ((void)var)
-
 #define ARR_SIZE (100000)
 
 /* the position of each thread in his jobs priority*/
