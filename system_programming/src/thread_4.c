@@ -11,7 +11,7 @@
 
 #define UNUSED(var) ((void)var)
 
-#define ARR_SIZE (30000) /*62778*/
+#define ARR_SIZE (10) /*62778*/
 #define RANGE_SIZE (100) 
 
 /* the position of each thread in his jobs priority*/
@@ -26,19 +26,23 @@ unsigned int g_sum_of_divisors_local[ARR_SIZE] = { 0 } ;
 
 void *SumOfDivisors(void *arg)
 {
-	int start = ((int)(long)arg ) * RANGE_SIZE + 1 ;
-	int end = ( (int)(long)arg + 1) * RANGE_SIZE ;
+	unsigned int start = ((long)arg ) * RANGE_SIZE + 1 ;
+	unsigned int end = ( (long)arg + 1) * RANGE_SIZE ;
 
-	g_arr_ret_threads[(int)(long)arg] =  (int)(long)arg;
+	g_arr_ret_threads[(long)arg] =  (long)arg;
 
-	for( ; start <= end ; ++start ) 
+	if(start <= g_number)
 	{
-		if( 0 == g_number % start)
+		for( ; start <= end ; ++start ) 
 		{
-			g_sum_of_divisors_local[(int)(long)arg] += start;
+			if( 0 == g_number % start)
+			{
+				g_sum_of_divisors_local[(long)arg] += start;
+			}
 		}
-	}
 
+	}
+	
 	return NULL;
 }
 
@@ -46,7 +50,7 @@ int main()
 {
 	int arg = 0, result = 0;
 	int sum_of_divisors = 0 ;
-
+	
 	pthread_attr_t attr;
 
 	ExitIfBad(0 == pthread_attr_init(&attr), "pthread_attr_init failed\n"); 
@@ -82,7 +86,7 @@ int main()
 			printf("g_arr_ret_threads[%d] = { %d }\n", arg, g_arr_ret_threads[arg]);
 		}
 	}
-	
+
 	return 0;
 }
 
