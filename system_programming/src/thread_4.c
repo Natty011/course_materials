@@ -67,7 +67,7 @@ int main()
 			
 		} while (result);
 
-		if(!g_flag_routine)
+		if(!g_flag_routine) /* not to creat un necessary threads*/
 		{
 			break;
 		}
