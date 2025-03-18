@@ -5,7 +5,7 @@
  * Last update: 17 / 03 / 2025
  *****************************************/
 
-#include <stdio.h>
+#include <stdio.h> /* fgets*/
 #include <stdlib.h>
 #include <semaphore.h>
 #include <pthread.h>
@@ -16,12 +16,20 @@
 #define BUFFER_SIZE (50)
 #define MAX_COMMAND_SIZE (20)
 
-#define TMP_STR     "/tmp/"
+#define TMP_DIR     "/tmp/"
 
 int main(int argc, char *argv[])
 {
     char buffer[BUFFER_SIZE] = {0};
     char command[MAX_COMMAND_SIZE] = {0};
+
+    if(2 != argc)
+    {
+        ExitIfBad(FALSE, "Wrong number of arguments\n");
+    }
+
+
+
 /*
    1.  int GetInput( buffer, size_t buff_len, char *argv[1])
 
@@ -41,6 +49,12 @@ int main(int argc, char *argv[])
     return 0;
 }
 
+int GetInput(char buffer[], size_t buff_len)
+{
+    snprintf(buffer, BUFFER_SIZE, "%s%s",TMP_DIR, argv[1] );
+    ExitIfBad( ('\n' == buffer[strlen(buffer) - 1]),  msg[1] );
+}
+    
 
  
 
