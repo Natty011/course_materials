@@ -31,19 +31,20 @@ union semun
 void GetInput(char buffer[],  char *argv);
 void InitSemaphore(int semid);
 int CreateKeyAndSemId(char sem_file_path[]);
-
+void RunSemaphore(int semid, char *sem_file_path);
 
 int main(int argc, char *argv[])
 {
     char sem_file_path[BUFFER_SIZE] = {0};
-
+    inr semid = -1;
     if(2 != argc)
     {
         ExitIfBad(FALSE, "Wrong number of arguments\n");
     }
 
     GetInput(sem_file_path, argv[1]);
-
+    semid = CreateKeyAndSemId(sem_file_path);
+    RunSemaphore(semid, sem_file_path);
     /*puts(buffer);*/
 
     return 0;
@@ -108,8 +109,6 @@ void RunSemaphore(int semid, char *sem_file_path)
 
 }
 
-
-
 int CreateKeyAndSemId(char sem_file_path[])
 {
     key_t key = -1;
@@ -154,7 +153,6 @@ void GetInput(char buffer[], char *argv)
 
 
     
-
  /*
    1.  int GetInput( buffer, size_t buff_len, char *argv[1])
 
