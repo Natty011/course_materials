@@ -5,10 +5,11 @@
  * Last update: 19 / 03 / 2025
  *****************************************/
 
- #include <stdio.h>     /* fgets, sprintf*/
+ #include <stdio.h>     /* fgets, sprintf, fopen*/
 #include <stdlib.h>
 #include <sys/ipc.h>    /* key_t, ftok*/
 #include <sys/sem.h>    /*semctl, */
+#include <string.h>     /*strstr, strcspn*/
 #include <sys/types.h>
 #include <unistd.h>
 #include "utils.h"		 /* ExitIfBad, msg */
@@ -35,7 +36,6 @@ int CreateKeyAndSemId(char sem_file_path[]);
 int main(int argc, char *argv[])
 {
     char sem_file_path[BUFFER_SIZE] = {0};
-    char command[MAX_COMMAND_SIZE] = {0};
 
     if(2 != argc)
     {
@@ -47,6 +47,24 @@ int main(int argc, char *argv[])
     /*puts(buffer);*/
 
     return 0;
+}
+
+
+void RunSemaphore(int semid)
+{
+    struct sembuf op;
+    char command[MAX_COMMAND_SIZE] = {0};
+    char undo_flag[MAX_COMMAND_SIZE] = {0};
+    int num = 0;
+
+    while(1)
+    {
+        fgets(command, MAX_COMMAND_SIZE, stdin);
+        command[strcspn(command, '\n')] = '\0';
+    }
+
+
+
 }
 
 
