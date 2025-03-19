@@ -8,7 +8,7 @@
  #include <stdio.h>     /* fgets, sprintf, fopen, sscanf*/
 #include <stdlib.h>
 #include <sys/ipc.h>    /* key_t, ftok*/
-#include <sys/sem.h>    /*semctl, */
+#include <sys/sem.h>    /*semctl, semop, semget */
 #include <string.h>     /*strstr, strcspn*/
 #include <sys/types.h>
 #include <unistd.h>
@@ -56,6 +56,7 @@ void RunSemaphore(int semid)
     char command[MAX_COMMAND_SIZE] = {0};
     char undo_flag[MAX_COMMAND_SIZE] = {0};
     int number = 0;
+    int sem_value = 0;
 
     while(1)
     {
@@ -67,10 +68,33 @@ void RunSemaphore(int semid)
         {
             op.sem_num = 0;
             op.sem_op = -number; 
-           
             op.sem_flg = (NULL != strstr(undo_flag, "undo") ) ? SEM_UNDO : 0;
+            
+            ExitIfBad( -1 != semop(semid, &op, 1),"semop failed\n" );
         }
 
+        /* Increasing number */
+        else if(sscanf(command, "I %d %s", &number, undo_flag )>= 1)
+        {
+            op.sem_num = 0;
+            op.sem_op = number; 
+            op.sem_flg = (NULL != strstr(undo_flag, "undo") ) ? SEM_UNDO : 0;
+            
+            ExitIfBad( -1 != semop(semid, &op, 1),"semop failed\n" );
+        }
+
+        /* view number */
+        else if('V' == command[0])
+        {
+            sem_value = semctl( semid, 0, GETVAL);
+            printf("Semaphore value: %d\n", sem_value);
+        }
+        /* exit and removing the semophore*/
+
+        else if('X' == command[0])
+        {
+
+        }
     }
 
 
