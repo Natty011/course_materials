@@ -7,8 +7,8 @@
 
  #include <stdio.h>     /* fgets, sprintf*/
 #include <stdlib.h>
-#include <sys/ipc.h>    /* key_t*/
-#include <sys/sem.h>
+#include <sys/ipc.h>    /* key_t, ftok*/
+#include <sys/sem.h>    /*semctl, */
 #include <sys/types.h>
 #include <unistd.h>
 #include "utils.h"		 /* ExitIfBad, msg */
@@ -19,12 +19,22 @@
 
 #define TMP_DIR     "/tmp/"
 
-void GetInput(char buffer[],  char argv[]);
+
+union semun
+{
+    int val; /* Value for SETVAL */
+    struct semid_ds *buf; /* Buffer for IPC_STAT, IPC_SET */
+    unsigned short *array; /* Array for GETALL, SETALL */
+}arg;
+
+void GetInput(char buffer[],  char *argv);
+void InitSemaphore(int semid);
+int CreateKeyAndSemId(char sem_file_path[]);
 
 
 int main(int argc, char *argv[])
 {
-    char buffer[BUFFER_SIZE] = {0};
+    char sem_file_path[BUFFER_SIZE] = {0};
     char command[MAX_COMMAND_SIZE] = {0};
 
     if(2 != argc)
@@ -32,18 +42,48 @@ int main(int argc, char *argv[])
         ExitIfBad(FALSE, "Wrong number of arguments\n");
     }
 
-     GetInput(buffer, argv[1]);
+    GetInput(sem_file_path, argv[1]);
 
-    /*sprintf(buffer, "%s%s",TMP_DIR, argv[1] );*/
-    puts(buffer);
-    
     /*puts(buffer);*/
+
     return 0;
 }
 
-int CreateKeyAndSemId(char buffer[])
+
+int CreateKeyAndSemId(char sem_file_path[])
 {
-    key_t
+    key_t key = -1;
+    FILE *file = NULL;
+    int semid = -1;
+
+    file = fopen(sem_file_path, "a");
+    ExitIfBad( NULL != file, "File creation failed\n");
+    ExitIfBad( 0 == fclose(file), "File closing failed\n");
+
+    key = ftok(sem_file_path, 'A');
+    ExitIfBad( -1 != key, "ftok failed\n");
+
+    /* 0666 flag permisions for write/read to all users/processes*/
+    semid = semget(key, 1, 0666); 
+
+    if(-1 != semid)
+    {
+        return semid; /* the semaphore allready exist */
+    }
+
+    /* creat semid */
+    semid = semget(key, 1, IPC_CREAT | 0666);
+    ExitIfBad( -1 != semid, "semget failed\n");
+
+    return semid;
+}
+
+void InitSemaphore(int semid)
+{
+    union semun arg;
+    arg.val = 1; /*initial value - the critical code is available*/ 
+    ExitIfBad( -1 != semctl(semid, 0, SETVAL, arg), "semctl failed\n");
+
 }
 
 
