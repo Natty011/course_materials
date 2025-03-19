@@ -52,7 +52,8 @@ int main(int argc, char *argv[])
 
 void RunSemaphore(int semid, char *sem_file_path)
 {
-    struct sembuf op;
+    /* TO DO: change op to op[1] because it is array of semaphores */
+    struct sembuf op; 
     char command[MAX_COMMAND_SIZE] = {0};
     char undo_flag[MAX_COMMAND_SIZE] = {0};
     int number = 0;
@@ -95,7 +96,7 @@ void RunSemaphore(int semid, char *sem_file_path)
         else if('V' == command[0])
         {
            /* sem_value = semctl( semid, 0, GETVAL);*/
-            ExitIfBad( -1 != (sem_value = semctl( semid, 0, GETVAL)), "semctl failed\n");
+            ExitIfBad(-1 != (sem_value = semctl( semid, 0, GETVAL)), "semctl failed\n");
 
             printf("Semaphore value: %d\n", sem_value);
         }
@@ -104,7 +105,7 @@ void RunSemaphore(int semid, char *sem_file_path)
         else if('X' == command[0])
         {
             /*semctl(semid, 0, IPC_RMID);*/
-            ExitIfBad( -1 != (semctl(semid, 0, IPC_RMID)), "semctl failed\n");
+            ExitIfBad(-1 != (semctl(semid, 0, IPC_RMID)), "semctl failed\n");
 
             printf("Semaphore removed and exiting.\n");
 
@@ -125,13 +126,15 @@ int CreateKeyAndSemId(char sem_file_path[])
     key_t key = -1;
     FILE *file = NULL;
     int semid = -1;
-
+    /*TO DO: use open instead fopen, we dont need to read o write from the file*/
     file = fopen(sem_file_path, "a");
-    ExitIfBad( NULL != file, "File creation failed\n");
-    ExitIfBad( 0 == fclose(file), "File closing failed\n");
+    /*TO DO: use perror in ExitIfBad and then printf. perror allow more info
+        about the erroring */
+    ExitIfBad(NULL != file, "File creation failed\n");
+    ExitIfBad(0 == fclose(file), "File closing failed\n");
 
     key = ftok(sem_file_path, 'A');
-    ExitIfBad( -1 != key, "ftok failed\n");
+    ExitIfBad(-1 != key, "ftok failed\n");
 
     /* 0666 flag permisions for write/read to all users/processes*/
     semid = semget(key, 1, 0666); /* 1 is nsems*/
@@ -143,7 +146,7 @@ int CreateKeyAndSemId(char sem_file_path[])
 
     /* creat semid */
     semid = semget(key, 1, IPC_CREAT | 0666);
-    ExitIfBad( -1 != semid, "semget failed\n");
+    ExitIfBad(-1 != semid, "semget failed\n");
 
     InitSemaphore(semid);
 
@@ -160,9 +163,11 @@ void InitSemaphore(int semid)
 
 }
 
+/*TO DO: use const char *argv, else there is a good reason not */
 
 void GetInput(char buffer[], char *argv)
 {
+    /*TO DO: use strcat instead sprintf, more efficient */
     sprintf(buffer, "%s%s",TMP_DIR, argv );
 }
 
