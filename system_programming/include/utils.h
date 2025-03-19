@@ -39,6 +39,7 @@ void ExitIfBad(int is_good, const char *msg)
 {
 	if (FALSE == is_good) 
 	{
+		perror(msg);
 		puts(msg);
 		exit(0);
 	}
