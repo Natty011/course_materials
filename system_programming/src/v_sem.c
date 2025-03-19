@@ -5,7 +5,7 @@
  * Last update: 19 / 03 / 2025
  *****************************************/
 
- #include <stdio.h>     /* fgets, sprintf, fopen*/
+ #include <stdio.h>     /* fgets, sprintf, fopen, sscanf*/
 #include <stdlib.h>
 #include <sys/ipc.h>    /* key_t, ftok*/
 #include <sys/sem.h>    /*semctl, */
@@ -55,17 +55,28 @@ void RunSemaphore(int semid)
     struct sembuf op;
     char command[MAX_COMMAND_SIZE] = {0};
     char undo_flag[MAX_COMMAND_SIZE] = {0};
-    int num = 0;
+    int number = 0;
 
     while(1)
     {
         fgets(command, MAX_COMMAND_SIZE, stdin);
         command[strcspn(command, '\n')] = '\0';
+
+        /* Decreasing number */
+        if(sscanf(command, "D %d %s", &number, undo_flag )>= 1)
+        {
+            op.sem_num = 0;
+            op.sem_op = -number; 
+           
+            op.sem_flg = (NULL != strstr(undo_flag, "undo") ) ? SEM_UNDO : 0;
+        }
+
     }
 
 
 
 }
+
 
 
 int CreateKeyAndSemId(char sem_file_path[])
