@@ -1,16 +1,16 @@
 /***************************************
  * Author : Natty
- * Reviewer : Sauser
- * Date : 16 / 03 / 2025
- * Last update: 17 / 03 / 2025
+ * Reviewer : ?
+ * Date : 18 / 03 / 2025
+ * Last update: 19 / 03 / 2025
  *****************************************/
-/*#define _POSIX_C_SOURCE __USE_ISOC99*/
-#include <stdio.h> /* fgets*/
+
+ #include <stdio.h>     /* fgets, sprintf*/
 #include <stdlib.h>
-#include <semaphore.h>
-#include <pthread.h>
+#include <sys/ipc.h>    /* key_t*/
+#include <sys/sem.h>
+#include <sys/types.h>
 #include <unistd.h>
-/*#include <string.h> *//* sprintf*/
 #include "utils.h"		 /* ExitIfBad, msg */
 
 #define MAX_STRINGS (2)
@@ -41,10 +41,18 @@ int main(int argc, char *argv[])
     return 0;
 }
 
+int CreateKeyAndSemId(char buffer[])
+{
+    key_t
+}
+
+
 void GetInput(char buffer[], char *argv)
 {
     sprintf(buffer, "%s%s",TMP_DIR, argv );
 }
+
+
     
 
  /*
