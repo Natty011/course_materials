@@ -61,6 +61,7 @@ void RunSemaphore(int semid, char *sem_file_path)
 
     while(1)
     {
+        printf("> ");
         fgets(command, MAX_COMMAND_SIZE, stdin);
         command[strcspn(command, "\n")] = '\0';
 
