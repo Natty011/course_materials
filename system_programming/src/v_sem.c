@@ -50,6 +50,10 @@ int main(int argc, char *argv[])
     return 0;
 }
 
+static void PrintOperation()
+{
+
+}
 
 void RunSemaphore(int semid, char *sem_file_path)
 {
@@ -72,6 +76,9 @@ void RunSemaphore(int semid, char *sem_file_path)
             op.sem_flg = (NULL != strstr(undo_flag, "undo") ) ? SEM_UNDO : 0;
             
             ExitIfBad( -1 != semop(semid, &op, 1),"semop failed\n" );
+            printf("Semaphore decreased by %d (UNDO: %s)\n",
+                     number, (op.sem_flg ? "ON" : "OFF"));
+
         }
 
         /* Increasing number */
@@ -82,6 +89,10 @@ void RunSemaphore(int semid, char *sem_file_path)
             op.sem_flg = (NULL != strstr(undo_flag, "undo") ) ? SEM_UNDO : 0;
             
             ExitIfBad( -1 != semop(semid, &op, 1),"semop failed\n" );
+
+            printf("Semaphore increased by %d (UNDO: %s)\n",
+                     number, (op.sem_flg ? "ON" : "OFF"));
+
         }
 
         /* view number */
@@ -103,6 +114,11 @@ void RunSemaphore(int semid, char *sem_file_path)
 
             /*remove(sem_file_path);*/ /* optionally */
             break;
+        }
+
+        else
+        {
+            ExitIfBad(FALSE,"Invalid command\n");
         }
     }
 
