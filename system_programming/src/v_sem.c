@@ -153,7 +153,8 @@ int CreateKeyAndSemId(char sem_file_path[])
 void InitSemaphore(int semid)
 {
     union semun arg;
-    arg.val = 1; /*initial value - the critical code is available*/ 
+    arg.val = 1; /*initial value - the critical code is available for the
+                first process that calling the program */ 
     /* semnum = 0 is the index of the semaphore in the group set */
     ExitIfBad( -1 != semctl(semid, 0, SETVAL, arg), "semctl failed\n");
 
