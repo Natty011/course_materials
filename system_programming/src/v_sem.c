@@ -4,12 +4,15 @@
  * Date : 16 / 03 / 2025
  * Last update: 17 / 03 / 2025
  *****************************************/
-
+#define __USE_UNIX98
+ #define _POSIX_C_SOURCE 200809L
+/*_POSIX_C_SOURCE __USE_ISOC99*/
 #include <stdio.h> /* fgets*/
 #include <stdlib.h>
 #include <semaphore.h>
 #include <pthread.h>
 #include <unistd.h>
+/*#include <string.h> *//* sprintf*/
 #include "utils.h"		 /* ExitIfBad, msg */
 
 #define MAX_STRINGS (2)
@@ -18,7 +21,7 @@
 
 #define TMP_DIR     "/tmp/"
 
-void GetInput(char buffer[], size_t buff_len, char argv[]);
+void GetInput(char buffer[],  char argv[]);
 
 
 int main(int argc, char *argv[])
@@ -30,16 +33,17 @@ int main(int argc, char *argv[])
     {
         ExitIfBad(FALSE, "Wrong number of arguments\n");
     }
-
-    GetInput(buffer, BUFFER_SIZE, argv[1]);
-
-
+    sprintf(buffer, "%s%s",TMP_DIR, argv[1] );
+    puts(buffer);
+   /* GetInput(buffer, BUFFER_SIZE, argv[1]);*/
+    
+    /*puts(buffer);*/
     return 0;
 }
 
-void GetInput(char buffer[], size_t buff_len, char argv[])
+void GetInput(char buffer[], char argv[])
 {
-    snprintf(buffer, buff_len, "%s%s",TMP_DIR, argv[1] );
+   sprintf(buffer, "%s%s",TMP_DIR, argv[1] );
 }
     
 
