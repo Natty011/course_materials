@@ -18,6 +18,9 @@
 
 #define TMP_DIR     "/tmp/"
 
+void GetInput(char buffer[], size_t buff_len, char argv[]);
+
+
 int main(int argc, char *argv[])
 {
     char buffer[BUFFER_SIZE] = {0};
@@ -28,9 +31,19 @@ int main(int argc, char *argv[])
         ExitIfBad(FALSE, "Wrong number of arguments\n");
     }
 
+    GetInput(buffer, BUFFER_SIZE, argv[1]);
 
 
-/*
+    return 0;
+}
+
+void GetInput(char buffer[], size_t buff_len, char argv[])
+{
+    snprintf(buffer, buff_len, "%s%s",TMP_DIR, argv[1] );
+}
+    
+
+ /*
    1.  int GetInput( buffer, size_t buff_len, char *argv[1])
 
     Get from user file name string for creating semaphore
@@ -46,17 +59,6 @@ int main(int argc, char *argv[])
         in another terminal window. 
 
    */
-    return 0;
-}
-
-int GetInput(char buffer[], size_t buff_len)
-{
-    snprintf(buffer, BUFFER_SIZE, "%s%s",TMP_DIR, argv[1] );
-    ExitIfBad( ('\n' == buffer[strlen(buffer) - 1]),  msg[1] );
-}
-    
-
- 
 
 
 /*
