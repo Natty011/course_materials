@@ -5,7 +5,7 @@
  * Last update: 19 / 03 / 2025
  *****************************************/
 
- #include <stdio.h>     /* fgets, sprintf, fopen, sscanf*/
+ #include <stdio.h>     /* fgets, sprintf, fopen, sscanf, remove, fclose*/
 #include <stdlib.h>
 #include <sys/ipc.h>    /* key_t, ftok*/
 #include <sys/sem.h>    /*semctl, semop, semget */
@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
 }
 
 
-void RunSemaphore(int semid)
+void RunSemaphore(int semid, char *sem_file_path)
 {
     struct sembuf op;
     char command[MAX_COMMAND_SIZE] = {0};
@@ -86,17 +86,24 @@ void RunSemaphore(int semid)
         /* view number */
         else if('V' == command[0])
         {
-            sem_value = semctl( semid, 0, GETVAL);
+           /* sem_value = semctl( semid, 0, GETVAL);*/
+            ExitIfBad( -1 != (sem_value = semctl( semid, 0, GETVAL)), "semctl failed\n");
+
             printf("Semaphore value: %d\n", sem_value);
         }
         /* exit and removing the semophore*/
 
         else if('X' == command[0])
         {
+            /*semctl(semid, 0, IPC_RMID);*/
+            ExitIfBad( -1 != (semctl(semid, 0, IPC_RMID)), "semctl failed\n");
 
+            printf("Semaphore removed and exiting.\n");
+
+            /*remove(sem_file_path);*/ /* optionally */
+            break;
         }
     }
-
 
 
 }
