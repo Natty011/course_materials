@@ -36,7 +36,7 @@ void RunSemaphore(int semid, char *sem_file_path);
 int main(int argc, char *argv[])
 {
     char sem_file_path[BUFFER_SIZE] = {0};
-    inr semid = -1;
+    int semid = -1;
     if(2 != argc)
     {
         ExitIfBad(FALSE, "Wrong number of arguments\n");
@@ -50,10 +50,6 @@ int main(int argc, char *argv[])
     return 0;
 }
 
-static void PrintOperation()
-{
-
-}
 
 void RunSemaphore(int semid, char *sem_file_path)
 {
@@ -66,7 +62,7 @@ void RunSemaphore(int semid, char *sem_file_path)
     while(1)
     {
         fgets(command, MAX_COMMAND_SIZE, stdin);
-        command[strcspn(command, '\n')] = '\0';
+        command[strcspn(command, "\n")] = '\0';
 
         /* Decreasing number */
         if(sscanf(command, "D %d %s", &number, undo_flag )>= 1)
@@ -149,6 +145,8 @@ int CreateKeyAndSemId(char sem_file_path[])
     /* creat semid */
     semid = semget(key, 1, IPC_CREAT | 0666);
     ExitIfBad( -1 != semid, "semget failed\n");
+
+    InitSemaphore(semid);
 
     return semid;
 }
