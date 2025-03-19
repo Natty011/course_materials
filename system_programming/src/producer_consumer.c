@@ -6,16 +6,47 @@
  *****************************************/
 
 #include <stdio.h>       /* fgets, sprintf, fopen, sscanf, remove, fclose*/
-#include <sys/ipc.h>     /* key_t, ftok*/
-#include <sys/sem.h>     /*semctl, semop, semget */
-#include <string.h>      /*strstr, strcspn*/
+
 #include "utils.h"		 /* ExitIfBad, msg */
 
-
-
+/*
+int g_shared_data -> shared data both of consumer and producer  
+int g_spinlock = 0 -> 0 == unlock, 1 == lock the access to g_shared_data
+int g_deta_ready = 0 -> 0 == not_ready(there is no data in the buffer to consum),
+                         1 == ready
+*/
 
 int main(int argc, char *argv[])
 {
+    
+   /*
+    pthread producer_thread, consumer_thread
+   */
+   
+    /*
+        create_pthread(function producer)
+        create_pthread(function consumer)
+    */
+
+    /*
+        pthread_join(function producer)
+        pthread_join(function consumer)
+
+    */
     return 0;
 }
+
+/*
+function producer:
+    
+
+
+*/
+
+/*
+function consumer:
+
+
+
+*/
 
