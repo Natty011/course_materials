@@ -75,12 +75,20 @@ int main()
 void *Producer(void *arg)
 {
     int i = 0;
+    unsigned int new_data = 0;
     g_arr_producer_num[(long)arg] =  (long)arg;
 
     for(i = 0; i < NUM_ITEMS; ++i  ) /*produce 5 items*/
     {
-        *((unsigned int*)arg + i ) = rand() % 1000000000;
-        /*waiting to consumer*/
+        new_data = rand() % 1000000000;
+
+        /*lock the critical code -> shared slist */
+        ExitIfBad(0 == pthread_mutex_lock(&g_mutex_lock),
+                 "pthread_mutex_lock failed\n");
+        
+        ExitIfBad(SlistEnd(g_shared_slist) != SlistInsertBefore(g_shared_slist,
+            SlistEnd(g_shared_slist), &new_data ), "SlistInsertBefore failed\n");
+
         while(__atomic_load_n(&g_is_fresh_data, __ATOMIC_SEQ_CST))
         {}
 
