@@ -15,8 +15,8 @@ enum
     NUM_ITEMS = 5
 };
 
-volatile unsigned int g_shared_data = 0; /* shared data both of consumer and producer   */
-volatile int g_is_data_fresh = 0; /*0 == not_fresh(there is no data in the buffer to consum),
+unsigned int g_shared_data = 0; /* shared data both of consumer and producer   */
+int g_is_data_fresh = 0; /*0 == not_fresh(there is no data in the buffer to consum),
                          1 == fresh*/
                          
 void *producer(void *arg);
@@ -29,8 +29,8 @@ int main()
     pthread_create(&producer_thread, NULL, producer, NULL);
     pthread_create(&consumer_thread, NULL, consumer, NULL);
 
-    pthread_join( producer_thread, NULL);
-    pthread_join( consumer_thread, NULL);
+    pthread_join(producer_thread, NULL);
+    pthread_join(consumer_thread, NULL);
 
     
     return 0;
@@ -53,7 +53,6 @@ void *producer(void *arg)
 
         /* indicating to consumer that it can read the new data */
         __atomic_store_n(&g_is_data_fresh, 1, __ATOMIC_SEQ_CST); 
-
 
         /*waiting to consumer*/
         while(__atomic_load_n(&g_is_data_fresh, __ATOMIC_SEQ_CST))
@@ -83,7 +82,6 @@ void *consumer(void *arg)
         __atomic_store_n(&g_is_data_fresh, 0, __ATOMIC_SEQ_CST); 
 
         printf("Consume: %u\n", consume_data);
-
 
     }
 
