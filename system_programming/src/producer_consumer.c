@@ -5,17 +5,10 @@
  * Last update: 19 / 03 / 2025
  *****************************************/
 
-#include <stdio.h>       /* */
+#include <stdio.h>       /*__atomic_store_n, __atomic_load_n */
 #include <pthread.h>
 #include <unistd.h>
 #include "utils.h"		 /* ExitIfBad, msg */
-
-/*
-int g_shared_data -> shared data both of consumer and producer  
-int g_spinlock = 0 -> 0 == unlock, 1 == lock the access to g_shared_data
-int g_deta_ready = 0 -> 0 == not_ready(there is no data in the buffer to consum),
-                         1 == ready
-*/
 
 enum 
 {
@@ -25,26 +18,21 @@ enum
 volatile unsigned int shared_data = 0; /* shared data both of consumer and producer   */
 volatile int is_data_fresh = 0; /*0 == not_fresh(there is no data in the buffer to consum),
                          1 == fresh*/
+                         
+void *producer(void *arg);
+void *consumer(void *arg);
 
-
-
-int main(int argc, char *argv[])
+int main()
 {
-    
-   /*
-    pthread producer_thread, consumer_thread
-   */
+    pthread_t producer_thread, consumer_thread;
    
-    /*
-        create_pthread(function producer)
-        create_pthread(function consumer)
-    */
+    pthread_create(&producer_thread, NULL, producer, NULL);
+    pthread_create(&consumer_thread, NULL, consumer, NULL);
 
-    /*
-        pthread_join(function producer)
-        pthread_join(function consumer)
+    pthread_join( producer_thread);
+    pthread_join( consumer_thread);
 
-    */
+    
     return 0;
 }
 
@@ -63,7 +51,7 @@ void *producer(void *arg)
 
         /* indicating to consumer that it can read the new data */
         __atomic_store_n(&is_data_fresh, 1, __ATOMIC_SEQ_CST); 
-        
+
         printf("Produce: %ld\n",new_data);
 
         /*waiting to consumer*/
