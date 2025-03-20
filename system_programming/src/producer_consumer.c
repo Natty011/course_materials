@@ -19,11 +19,12 @@ int g_deta_ready = 0 -> 0 == not_ready(there is no data in the buffer to consum)
 
 enum 
 {
-    NUM_ITEMS = 10
+    NUM_ITEMS = 5
 };
 
-int shared_data = 0;
-int is_data_fresh = 0;
+volatile unsigned int shared_data = 0; /* shared data both of consumer and producer   */
+volatile int is_data_fresh = 0; /*0 == not_fresh(there is no data in the buffer to consum),
+                         1 == fresh*/
 
 
 
@@ -52,9 +53,19 @@ void *producer(void *arg)
 {
     int i = 0;
 
-    for(i = 0; i < NUM_ITEMS; ++i  ) /*(produce 10 items)*/
+    for(i = 0; i < NUM_ITEMS; ++i  ) /*(produce 5 items)*/
     {
-        while(__atomic_load)
+        unsigned int new_data = rand() % 100000;
+       
+        /*storing new_date to consume*/
+        __atomic_store_n(&shared_data, new_data, __ATOMIC_SEQ_CST);
+
+        /* indicating to consumer that it can read the new data */
+        __atomic_store_n(&is_data_fresh, 1, __ATOMIC_SEQ_CST); 
+
+        /*waiting to consumer*/
+        while(__atomic_load_n(&is_data_fresh, __ATOMIC_SEQ_CST))
+        {}
     }
 
     return NULL;
