@@ -15,8 +15,8 @@ enum
     NUM_ITEMS = 5
 };
 
-unsigned int g_shared_data = 0; /* shared data both of consumer and producer   */
-int g_is_data_fresh = 0; /*0 == not_fresh(there is no data in the buffer to consum),
+volatile unsigned int g_shared_data = 0; /* shared data both of consumer and producer   */
+volatile int g_is_data_fresh = 0; /*0 == not_fresh(there is no data in the buffer to consum),
                          1 == fresh*/
                          
 void *producer(void *arg);
