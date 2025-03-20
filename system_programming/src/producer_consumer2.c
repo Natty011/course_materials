@@ -7,17 +7,18 @@
 
 #include <stdio.h>       /* rand */
 #include <pthread.h>    /*pthread_create, pthread_join*/
-#include "../../git/ds/include/slist.h"
+#include "slist.h"
 #include "utils.h"		 /* ExitIfBad, msg */
-
+/*"../../../git/ds/include/slist.h"*/
 enum 
 {
     NUM_ITEMS = 3,
     NUM_PRODUCERS = 3,
     NUM_CONSUMERS = 3
 };
-volatile unsigned int g_arr_producer_data[NUM_PRODUCERS][NUM_ITEMS] = {0};
-volatile unsigned int g_arr_consumer_data[NUM_CONSUMERS][NUM_ITEMS*NUM_ITEMS] = {0};
+unsigned int g_arr_producer_data[NUM_PRODUCERS][NUM_ITEMS] = {0};
+unsigned int g_arr_consumer_data[NUM_CONSUMERS][NUM_ITEMS*NUM_ITEMS] = {0};
+unsigned long temp_data = 0;
 
 slist_t *g_shared_slist = NULL;
 
@@ -60,11 +61,11 @@ int main()
             "pthread_join failed\n");
     }
     
-    ExitIfBad(0 == pthread_mutex_desroy(&g_mutex_lock),
-        "pthread_mutex_desroy failed\n");
+    ExitIfBad(0 == pthread_mutex_destroy(&g_mutex_lock),
+        "pthread_mutex_destroy failed\n");
 
-    ExitIfBad(0 == pthread_cond_desroy(&g_cond_empty),
-        "pthread_mutex_desroy failed\n");         
+    ExitIfBad(0 == pthread_cond_destroy(&g_cond_empty),
+        "pthread_cond_destroy failed\n");         
 
     SlistDestroy(g_shared_slist);         
     g_shared_slist = NULL;
@@ -75,24 +76,26 @@ int main()
 
 void *Producer(void *arg)
 {
-    unsigned int i = 0;
-    
-
+    unsigned long i = 0;
+    temp_data = rand() % 10000;
     for(i = 0; i < NUM_ITEMS; ++i  ) /*produce 3 items*/
     {
-        g_arr_producer_data[(long)arg][i] =  rand() % 1000000000;
+        g_arr_producer_data[(long)arg][i] =  rand() % 10000;
 
         /*lock the critical code -> shared slist */
         ExitIfBad(0 == pthread_mutex_lock(&g_mutex_lock),
                  "pthread_mutex_lock failed\n");
         
         ExitIfBad(SlistEnd(g_shared_slist) != SlistInsertBefore(g_shared_slist,
-            SlistEnd(g_shared_slist), &g_arr_producer_data[(long)arg][i] ), 
-                 "SlistInsertBefore failed\n");
+        SlistBegin(g_shared_slist), &temp_data ), 
+                "SlistInsertBefore failed\n");
+        /*ExitIfBad(SlistEnd(g_shared_slist) != SlistInsertBefore(g_shared_slist,
+            SlistBegin(g_shared_slist), (void*)&g_arr_producer_data[(long)arg][i] ), 
+                 "SlistInsertBefore failed\n");*/
 
 
-        ExitIfBad(0 == pthread_mutex_signal(&g_cond_empty),
-                 "pthread_mutex_signal failed\n" );   
+        ExitIfBad(0 == pthread_cond_signal(&g_cond_empty),
+                 "pthread_cond_signal failed\n" );   
 
    
         ExitIfBad(0 == pthread_mutex_unlock(&g_mutex_lock),
@@ -108,7 +111,7 @@ void *Producer(void *arg)
 void *Consumer(void *arg)
 {
     unsigned int item = 0;
-    unsigned int temp_data = 0;
+   /* unsigned int temp_data = 0;*/
 
     while(1)
     {
@@ -121,12 +124,12 @@ void *Consumer(void *arg)
                 "pthread_cond_wait failed\n");
         }
 
-        temp_data = (g_arr_consumer_data[(long)arg][item++] = 
+       (g_arr_consumer_data[(long)arg][item++] = 
                 *(unsigned int*)SlistGetData(SlistBegin(g_shared_slist) ) );
 
         /* exit if SlistBegin is dummies */
-        ExitIfBad(NULL != temp_data || 
-                g_shared_slist != temp_data, "SlistGetData failed\n");
+       /* ExitIfBad(NULL != temp_data || 
+                g_shared_slist != temp_data, "SlistGetData failed\n");*/
 
         SlistRemove(SlistBegin(g_shared_slist) );
         
