@@ -20,8 +20,9 @@ volatile unsigned int g_arr_producer_num[NUM_PRODUCERS] = {0};
 volatile unsigned int g_arr_consumer_num[NUM_CONSUMERS] = {0};
 
 slist_t *g_shared_slist = NULL;
-pthread_mutex_t g_mutex_lock = {0};
-pthread_cond_t g_cond_var = {0};
+
+pthread_mutex_t g_mutex_lock = PTHREAD_MUTEX_INITIALIZER; 
+pthread_cond_t g_cond_var = PTHREAD_COND_INITIALIZER ;
                         
 void *Producer(void *arg);
 void *Consumer(void *arg);
@@ -37,8 +38,8 @@ int main()
 
     ExitIfBad(NULL != g_shared_slist, "SlistCreate failed\n");
 
-    ExitIfBad(0 == pthread_mutex_init(&g_mutex_lock, NULL),
-        "pthread_mutex_init failed\n" );
+    /*ExitIfBad(0 == pthread_mutex_init(&g_mutex_lock, NULL),
+        "pthread_mutex_init failed\n" );*/
 
     for(arg = 0; arg < NUM_PRODUCERS; ++arg)
     {
