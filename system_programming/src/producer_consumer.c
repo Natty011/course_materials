@@ -6,8 +6,7 @@
  *****************************************/
 
 #include <stdio.h>       /*__atomic_store_n, __atomic_load_n */
-#include <pthread.h>
-#include <unistd.h>
+#include <pthread.h>    /*pthread_create, pthread_join*/
 #include "utils.h"		 /* ExitIfBad, msg */
 
 enum 
@@ -16,7 +15,7 @@ enum
 };
 
 volatile unsigned int g_shared_data = 0; /* shared data both of consumer and producer   */
-volatile int g_is_data_fresh = 0; /*0 == not_fresh(there is no data in the buffer to consum),
+volatile int g_is_fresh_data = 0; /*0 == not_fresh(there is no data in the buffer to consum),
                          1 == fresh*/
                          
 void *producer(void *arg);
@@ -24,14 +23,30 @@ void *consumer(void *arg);
 
 int main()
 {
+    int i = 0;
     pthread_t producer_thread, consumer_thread;
-   
-    pthread_create(&producer_thread, NULL, producer, NULL);
-    pthread_create(&consumer_thread, NULL, consumer, NULL);
+
+    unsigned int produce_data[NUM_ITEMS] = {0};
+    unsigned int consume_data[NUM_ITEMS] = {0};
+
+    pthread_create(&producer_thread, NULL, producer, produce_data);
+    pthread_create(&consumer_thread, NULL, consumer, consume_data);
 
     pthread_join(producer_thread, NULL);
     pthread_join(consumer_thread, NULL);
 
+    for(i = 0; i < NUM_ITEMS; ++i  )  
+    {
+        if(produce_data[i] != consume_data[i])
+        {
+            printf("line: %d \n" , __LINE__ );
+			puts("Failes in:  ");
+
+            printf("Produce: %u\n", produce_data[i]);
+            printf("Consume: %u\n", consume_data[i]);
+
+        }
+    }
     
     return 0;
 }
@@ -40,24 +55,20 @@ int main()
 void *producer(void *arg)
 {
     int i = 0;
-    UNUSED(arg);
 
-    for(i = 0; i < NUM_ITEMS; ++i  ) /*(produce 5 items)*/
+    for(i = 0; i < NUM_ITEMS; ++i  ) /*produce 5 items*/
     {
-        unsigned int new_data = rand() % 100000;
-       
-        /*storing new_date to consume*/
-        g_shared_data = new_data;
-        /*__atomic_store_n(&g_shared_data, new_data, __ATOMIC_SEQ_CST);*/
+        *((unsigned int*)arg + i ) = rand() % 1000000000;
+        /*waiting to consumer*/
+        while(__atomic_load_n(&g_is_fresh_data, __ATOMIC_SEQ_CST))
+        {}
 
-        printf("Produce: %u\n",new_data);
+        /*storing new_date to consume*/
+        g_shared_data = *((unsigned int*)arg + i );
 
         /* indicating to consumer that it can read the new data */
-        __atomic_store_n(&g_is_data_fresh, 1, __ATOMIC_SEQ_CST); 
+        __atomic_store_n(&g_is_fresh_data, 1, __ATOMIC_SEQ_CST); 
 
-        /*waiting to consumer*/
-        while(__atomic_load_n(&g_is_data_fresh, __ATOMIC_SEQ_CST))
-        {}
     }
 
     return NULL;
@@ -67,24 +78,18 @@ void *producer(void *arg)
 void *consumer(void *arg)
 {
     int i = 0;
-    UNUSED(arg);
     
     for(i = 0; i < NUM_ITEMS; ++i  ) /*(consume 5 items)*/
     {
-        unsigned int consume_data = 0;
         /*waiting to product*/
-        while(!__atomic_load_n(&g_is_data_fresh, __ATOMIC_SEQ_CST))
+        while(!__atomic_load_n(&g_is_fresh_data, __ATOMIC_SEQ_CST))
         {}
        
         /*reading new_date to consume*/
-        consume_data = g_shared_data;
-       /* consume_data = __atomic_load_n(&g_shared_data, __ATOMIC_SEQ_CST);*/
-
-        printf("Consume: %u\n", consume_data);
+        *((unsigned int*)arg + i ) = g_shared_data;
 
         /* indicating to producer that it can create a new data */
-        __atomic_store_n(&g_is_data_fresh, 0, __ATOMIC_SEQ_CST); 
-
+        __atomic_store_n(&g_is_fresh_data, 0, __ATOMIC_SEQ_CST); 
 
     }
 
