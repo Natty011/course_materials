@@ -28,7 +28,6 @@ void *Consumer(void *arg);
 
 int main()
 {
-    int i = 0;
     int arg = 0;
 
     pthread_t producer_thread_id[NUM_PRODUCERS] = {0};
@@ -64,8 +63,10 @@ int main()
     }
     
     ExitIfBad(0 == pthread_mutex_desroy(&g_mutex_lock),
-             "pthread_join failed\n");
+             "pthread_mutex_desroy failed\n");
 
+    SlistDestroy(g_shared_slist);         
+    g_shared_slist = NULL;
     
     return 0;
 }
