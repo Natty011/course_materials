@@ -47,7 +47,8 @@ void *producer(void *arg)
         unsigned int new_data = rand() % 100000;
        
         /*storing new_date to consume*/
-        __atomic_store_n(&g_shared_data, new_data, __ATOMIC_SEQ_CST);
+        g_shared_data = new_data;
+        /*__atomic_store_n(&g_shared_data, new_data, __ATOMIC_SEQ_CST);*/
 
         printf("Produce: %u\n",new_data);
 
@@ -76,7 +77,8 @@ void *consumer(void *arg)
         {}
        
         /*reading new_date to consume*/
-        consume_data = __atomic_load_n(&g_shared_data, __ATOMIC_SEQ_CST);
+        consume_data = g_shared_data;
+       /* consume_data = __atomic_load_n(&g_shared_data, __ATOMIC_SEQ_CST);*/
 
         printf("Consume: %u\n", consume_data);
 
