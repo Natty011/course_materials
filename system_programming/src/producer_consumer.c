@@ -49,11 +49,11 @@ void *producer(void *arg)
         /*storing new_date to consume*/
         __atomic_store_n(&g_shared_data, new_data, __ATOMIC_SEQ_CST);
 
+        printf("Produce: %u\n",new_data);
 
         /* indicating to consumer that it can read the new data */
         __atomic_store_n(&g_is_data_fresh, 1, __ATOMIC_SEQ_CST); 
 
-        printf("Produce: %u\n",new_data);
 
         /*waiting to consumer*/
         while(__atomic_load_n(&g_is_data_fresh, __ATOMIC_SEQ_CST))
@@ -78,11 +78,11 @@ void *consumer(void *arg)
        
         /*reading new_date to consume*/
         consume_data = __atomic_load_n(&g_shared_data, __ATOMIC_SEQ_CST);
+        printf("Consume: %u\n", consume_data);
 
         /* indicating to producer that it can create a new data */
         __atomic_store_n(&g_is_data_fresh, 0, __ATOMIC_SEQ_CST); 
 
-        printf("Consume: %u\n", consume_data);
 
     }
 
