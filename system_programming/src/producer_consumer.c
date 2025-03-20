@@ -15,8 +15,8 @@ enum
     NUM_ITEMS = 5
 };
 
-volatile unsigned int shared_data = 0; /* shared data both of consumer and producer   */
-volatile int is_data_fresh = 0; /*0 == not_fresh(there is no data in the buffer to consum),
+volatile unsigned int g_shared_data = 0; /* shared data both of consumer and producer   */
+volatile int g_is_data_fresh = 0; /*0 == not_fresh(there is no data in the buffer to consum),
                          1 == fresh*/
                          
 void *producer(void *arg);
@@ -46,16 +46,16 @@ void *producer(void *arg)
         unsigned int new_data = rand() % 100000;
        
         /*storing new_date to consume*/
-        __atomic_store_n(&shared_data, new_data, __ATOMIC_SEQ_CST);
+        __atomic_store_n(&g_shared_data, new_data, __ATOMIC_SEQ_CST);
 
 
         /* indicating to consumer that it can read the new data */
-        __atomic_store_n(&is_data_fresh, 1, __ATOMIC_SEQ_CST); 
+        __atomic_store_n(&g_is_data_fresh, 1, __ATOMIC_SEQ_CST); 
 
         printf("Produce: %ld\n",new_data);
 
         /*waiting to consumer*/
-        while(__atomic_load_n(&is_data_fresh, __ATOMIC_SEQ_CST))
+        while(__atomic_load_n(&g_is_data_fresh, __ATOMIC_SEQ_CST))
         {}
     }
 
@@ -71,14 +71,14 @@ void *consumer(void *arg)
     {
         unsigned int consume_data = 0;
         /*waiting to product*/
-        while(!__atomic_load_n(&is_data_fresh, __ATOMIC_SEQ_CST))
+        while(!__atomic_load_n(&g_is_data_fresh, __ATOMIC_SEQ_CST))
         {}
        
         /*reading new_date to consume*/
-        consume_data = __atomic_load_n(&shared_data, __ATOMIC_SEQ_CST);
+        consume_data = __atomic_load_n(&g_shared_data, __ATOMIC_SEQ_CST);
 
         /* indicating to producer that it can create a new data */
-        __atomic_store_n(&is_data_fresh, 0, __ATOMIC_SEQ_CST); 
+        __atomic_store_n(&g_is_data_fresh, 0, __ATOMIC_SEQ_CST); 
 
         printf("Consume: %ld\n", consume_data);
 
