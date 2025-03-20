@@ -29,11 +29,17 @@ int main()
     unsigned int produce_data[NUM_ITEMS] = {0};
     unsigned int consume_data[NUM_ITEMS] = {0};
 
-    pthread_create(&producer_thread, NULL, producer, produce_data);
-    pthread_create(&consumer_thread, NULL, consumer, consume_data);
+    ExitIfBad( 0 == pthread_create(&producer_thread,
+        NULL, producer, produce_data), "pthread_create failed\n");
 
-    pthread_join(producer_thread, NULL);
-    pthread_join(consumer_thread, NULL);
+    ExitIfBad( 0 == pthread_create(&consumer_thread,
+        NULL, consumer, consume_data), "pthread_create failed\n" );
+
+    ExitIfBad(0 == pthread_join(producer_thread, NULL),
+                "pthread_join failed\n");
+
+    ExitIfBad(0 == pthread_join(consumer_thread, NULL),
+                "pthread_join failed\n");
 
     for(i = 0; i < NUM_ITEMS; ++i  )  
     {
