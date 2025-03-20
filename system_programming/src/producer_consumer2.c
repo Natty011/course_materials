@@ -18,7 +18,6 @@ enum
 };
 unsigned int g_arr_producer_data[NUM_PRODUCERS][NUM_ITEMS] = {0};
 unsigned int g_arr_consumer_data[NUM_CONSUMERS][NUM_ITEMS*NUM_ITEMS] = {0};
-unsigned long temp_data = 0;
 
 slist_t *g_shared_slist = NULL;
 
@@ -30,7 +29,7 @@ void *Consumer(void *arg);
 
 int main()
 {
-    int arg = 0;
+    size_t arg = 0;
 
     pthread_t producer_thread_id[NUM_PRODUCERS] = {0};
     pthread_t consumer_thread_id[NUM_CONSUMERS] = {0};
@@ -43,7 +42,7 @@ int main()
     {
 
         ExitIfBad(0 == pthread_create(&producer_thread_id[arg], NULL,
-             Producer, (void*)(unsigned long)arg ), "pthread_create failed\n" );
+             Producer, (void*)(size_t)arg ), "pthread_create failed\n" );
 
     }
 
@@ -77,18 +76,22 @@ int main()
 void *Producer(void *arg)
 {
     unsigned long i = 0;
-    temp_data = rand() % 10000;
     for(i = 0; i < NUM_ITEMS; ++i  ) /*produce 3 items*/
     {
-        g_arr_producer_data[(long)arg][i] =  rand() % 10000;
-
+        g_arr_producer_data[(long)arg][i] =  rand() % 100000000;
         /*lock the critical code -> shared slist */
         ExitIfBad(0 == pthread_mutex_lock(&g_mutex_lock),
                  "pthread_mutex_lock failed\n");
-        
+                 printf("g_arr_producer_data[%u][%u] = { %u}\n",
+                     (long)arg, i, g_arr_producer_data[(long)arg][i] );
+
+        ExitIfBad(! IsItrEqual(SlistEnd(g_shared_slist),
+         SlistInsertBefore(g_shared_slist, SlistEnd(g_shared_slist),
+          &g_arr_producer_data[(long)arg][i] ) ), "SlistInsertBefore failed\n");
+         /*
         ExitIfBad(SlistEnd(g_shared_slist) != SlistInsertBefore(g_shared_slist,
         SlistBegin(g_shared_slist), &temp_data ), 
-                "SlistInsertBefore failed\n");
+                "SlistInsertBefore failed\n");*/
         /*ExitIfBad(SlistEnd(g_shared_slist) != SlistInsertBefore(g_shared_slist,
             SlistBegin(g_shared_slist), (void*)&g_arr_producer_data[(long)arg][i] ), 
                  "SlistInsertBefore failed\n");*/
