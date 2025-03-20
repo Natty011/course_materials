@@ -56,12 +56,15 @@ int main()
 
     for(arg = 0; arg < NUM_PRODUCERS; ++arg)
     {
-        ExitIfBad(0 == pthread_join(consumer_thread_id[arg], NULL)
-                    , "pthread_join failed\n");
+        ExitIfBad(0 == pthread_join(consumer_thread_id[arg], NULL),
+            "pthread_join failed\n");
     }
     
     ExitIfBad(0 == pthread_mutex_desroy(&g_mutex_lock),
-             "pthread_mutex_desroy failed\n");
+        "pthread_mutex_desroy failed\n");
+
+    ExitIfBad(0 == pthread_cond_desroy(&g_cond_empty),
+        "pthread_mutex_desroy failed\n");         
 
     SlistDestroy(g_shared_slist);         
     g_shared_slist = NULL;
@@ -127,12 +130,8 @@ void *Consumer(void *arg)
 
         SlistRemove(SlistBegin(g_shared_slist) );
         
-        
-        /*waiting to product*/
-        
-        /*reading new_date to consume*/
-
-        /* indicating to producer that it can create a new data */
+        ExitIfBad(0 == pthread_mutex_unlock(&g_mutex_lock),
+        "pthread_mutex_unlock failed\n");
 
     }
 
