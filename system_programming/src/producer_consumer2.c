@@ -16,12 +16,12 @@ enum
     NUM_PRODUCERS = 3,
     NUM_CONSUMERS = 3
 };
-unsigned int g_arr_producer_num[NUM_PRODUCERS] = {0};
-unsigned int g_arr_consumer_num[NUM_CONSUMERS] = {0};
+volatile unsigned int g_arr_producer_num[NUM_PRODUCERS] = {0};
+volatile unsigned int g_arr_consumer_num[NUM_CONSUMERS] = {0};
 
 slist_t *g_shared_slist = NULL;
 pthread_mutex_t g_mutex_lock = {0};
-
+pthread_cond_t g_cond_var = {0};
                         
 void *Producer(void *arg);
 void *Consumer(void *arg);
@@ -89,14 +89,14 @@ void *Producer(void *arg)
         ExitIfBad(SlistEnd(g_shared_slist) != SlistInsertBefore(g_shared_slist,
             SlistEnd(g_shared_slist), &new_data ), "SlistInsertBefore failed\n");
 
-        while(__atomic_load_n(&g_is_fresh_data, __ATOMIC_SEQ_CST))
-        {}
 
-        /*storing new_date to consume*/
-        g_shared_data = *((unsigned int*)arg + i );
+        ExitIfBad(0 == pthread_mutex_signal(&g_cond_var),
+                 "pthread_mutex_signal failed\n" );   
 
-        /* indicating to consumer that it can read the new data */
-        __atomic_store_n(&g_is_fresh_data, 1, __ATOMIC_SEQ_CST); 
+        /*printf("g_arr_producer_num[%u] produced: %u\n", (long)arg, new_data);*/
+   
+        ExitIfBad(0 == pthread_mutex_unlock(&g_mutex_lock),
+        "pthread_mutex_unlock failed\n");
 
     }
 
@@ -112,14 +112,10 @@ void *Consumer(void *arg)
     for(i = 0; i < NUM_ITEMS; ++i  ) /*(consume 5 items)*/
     {
         /*waiting to product*/
-        while(!__atomic_load_n(&g_is_fresh_data, __ATOMIC_SEQ_CST))
-        {}
-       
+        
         /*reading new_date to consume*/
-        *((unsigned int*)arg + i ) = g_shared_data;
 
         /* indicating to producer that it can create a new data */
-        __atomic_store_n(&g_is_fresh_data, 0, __ATOMIC_SEQ_CST); 
 
     }
 
