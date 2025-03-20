@@ -37,10 +37,7 @@ int main()
     g_shared_slist = SlistCreate();
 
     ExitIfBad(NULL != g_shared_slist, "SlistCreate failed\n");
-
-    /*ExitIfBad(0 == pthread_mutex_init(&g_mutex_lock, NULL),
-        "pthread_mutex_init failed\n" );*/
-
+    
     for(arg = 0; arg < NUM_PRODUCERS; ++arg)
     {
 
