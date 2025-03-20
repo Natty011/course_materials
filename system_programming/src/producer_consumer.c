@@ -18,8 +18,8 @@ volatile unsigned int g_shared_data = 0; /* shared data both of consumer and pro
 volatile int g_is_fresh_data = 0; /*0 == not_fresh(there is no data in the buffer to consum),
                          1 == fresh*/
                          
-void *producer(void *arg);
-void *consumer(void *arg);
+void *Producer(void *arg);
+void *Consumer(void *arg);
 
 int main()
 {
@@ -30,10 +30,10 @@ int main()
     unsigned int consume_data[NUM_ITEMS] = {0};
 
     ExitIfBad( 0 == pthread_create(&producer_thread,
-        NULL, producer, produce_data), "pthread_create failed\n");
+        NULL, Producer, produce_data), "pthread_create failed\n");
 
     ExitIfBad( 0 == pthread_create(&consumer_thread,
-        NULL, consumer, consume_data), "pthread_create failed\n" );
+        NULL, Consumer, consume_data), "pthread_create failed\n" );
 
     ExitIfBad(0 == pthread_join(producer_thread, NULL),
                 "pthread_join failed\n");
@@ -58,7 +58,7 @@ int main()
 }
 
 
-void *producer(void *arg)
+void *Producer(void *arg)
 {
     int i = 0;
 
@@ -81,7 +81,7 @@ void *producer(void *arg)
 }
 
 
-void *consumer(void *arg)
+void *Consumer(void *arg)
 {
     int i = 0;
     
