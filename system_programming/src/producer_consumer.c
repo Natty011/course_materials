@@ -29,8 +29,8 @@ int main()
     pthread_create(&producer_thread, NULL, producer, NULL);
     pthread_create(&consumer_thread, NULL, consumer, NULL);
 
-    pthread_join( producer_thread);
-    pthread_join( consumer_thread);
+    pthread_join( producer_thread, NULL);
+    pthread_join( consumer_thread, NULL);
 
     
     return 0;
@@ -40,6 +40,7 @@ int main()
 void *producer(void *arg)
 {
     int i = 0;
+    UNUSED(arg);
 
     for(i = 0; i < NUM_ITEMS; ++i  ) /*(produce 5 items)*/
     {
@@ -52,7 +53,7 @@ void *producer(void *arg)
         /* indicating to consumer that it can read the new data */
         __atomic_store_n(&g_is_data_fresh, 1, __ATOMIC_SEQ_CST); 
 
-        printf("Produce: %ld\n",new_data);
+        printf("Produce: %u\n",new_data);
 
         /*waiting to consumer*/
         while(__atomic_load_n(&g_is_data_fresh, __ATOMIC_SEQ_CST))
@@ -66,7 +67,8 @@ void *producer(void *arg)
 void *consumer(void *arg)
 {
     int i = 0;
-
+    UNUSED(arg);
+    
     for(i = 0; i < NUM_ITEMS; ++i  ) /*(consume 5 items)*/
     {
         unsigned int consume_data = 0;
@@ -80,7 +82,7 @@ void *consumer(void *arg)
         /* indicating to producer that it can create a new data */
         __atomic_store_n(&g_is_data_fresh, 0, __ATOMIC_SEQ_CST); 
 
-        printf("Consume: %ld\n", consume_data);
+        printf("Consume: %u\n", consume_data);
 
     }
 
