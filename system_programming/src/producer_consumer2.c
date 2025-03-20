@@ -91,9 +91,10 @@ int main()
 void *Producer(void *arg)
 {
     unsigned long i = 0;
-    for(i = 0; i < NUM_ITEMS; ++i  ) /*produce 3 items*/
+
+    for(i = 0; i < NUM_ITEMS; ++i ) /*produce 3 items*/
     {
-        g_arr_producer_data[(long)arg][i] =  rand() % 100000000;
+        g_arr_producer_data[(long)arg][i] += i + (long)arg + (10)*(long)arg; /*= (long)arg + i   rand() % 100000000*/
         /*lock the critical code -> shared slist */
         ExitIfBad(0 == pthread_mutex_lock(&g_mutex_lock),
                  "pthread_mutex_lock failed\n");
@@ -121,25 +122,24 @@ void *Producer(void *arg)
 void *Consumer(void *arg)
 {
     unsigned long item = 0;
-   /* unsigned int temp_data = 0;*/
 
     while(1)
     {
         ExitIfBad(0 == pthread_mutex_lock(&g_mutex_lock),
-                "pthread_mutex_lock failed\n");
+            "pthread_mutex_lock failed\n");
 
-        while(SlistIsEmpty(g_shared_slist))
+        while(SlistIsEmpty(g_shared_slist) && !g_stop_consumers)
         {
-            if(!g_stop_consumers)
-            {
-                ExitIfBad(0 == pthread_cond_wait(&g_cond_empty, &g_mutex_lock),
+            ExitIfBad(0 == pthread_cond_wait(&g_cond_empty, &g_mutex_lock),
                 "pthread_cond_wait failed\n");
-            }
+        }
 
-            else
-            {
-                return NULL;
-            }
+        if(g_stop_consumers && SlistIsEmpty(g_shared_slist) )
+        {
+            ExitIfBad(0 == pthread_mutex_unlock(&g_mutex_lock), 
+                "pthread_mutex_unlock failed\n");
+            printf("Consumer %lu exiting...\n", (long)arg);
+            break;
         }
 
        (g_arr_consumer_data[(long)arg][item++] = 
