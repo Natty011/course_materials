@@ -118,7 +118,6 @@ void *Producer(void *arg)
     return NULL;
 }
 
-
 void *Consumer(void *arg)
 {
     unsigned long item = 0;
