@@ -5,10 +5,10 @@
  * Last update: 20 / 03 / 2025
  *****************************************/
 
-#include <stdio.h>       /* rand */
-#include <pthread.h>    /*pthread_create, pthread_join*/
-#include <semaphore.h> /* */
-#include "slist.h"
+#include <stdio.h>       
+#include <pthread.h>    /*pthread_create, pthread_join,  pthread_mutex_destoy*/
+#include <semaphore.h>  /*sem_wait, sem_post, sem_destroy, sem_init */
+#include "slist.h"      /*Create, GetData, Remove, End, Begin*/
 #include "utils.h"		 /* ExitIfBad, msg */
 
 enum 
@@ -74,14 +74,12 @@ int main()
     {
         ExitIfBad(0 == sem_post(&g_sem_item_available),
             "sem_post failed\n");
-
     }
 
     for(arg = 0; arg < NUM_CONSUMERS; ++arg)
     {
         ExitIfBad(0 == pthread_join(consumer_thread_id[arg], NULL),
             "pthread_join failed\n");
-
     }
     
     ExitIfBad(0 == pthread_mutex_destroy(&g_mutex_lock),
