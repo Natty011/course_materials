@@ -2,12 +2,15 @@
  * Author : Natty
  * Reviewer : ?
  * Date : 20 / 03 / 2025
- * Last update: 20 / 03 / 2025
+ * Last update: 21 / 03 / 2025
  *****************************************/
 
-#include <stdio.h>       /* rand */
-#include <pthread.h>    /*pthread_create, pthread_join*/
-#include "slist.h"
+#include <stdio.h>       
+#include <pthread.h>    /*pthread_create, join, cond_wait, cond_signal,
+                         cond_broadcast, mutex_(un)lock, mutex_destroy,
+                          cond_destroy */
+
+#include "slist.h"      /*Create, GetData, Remove, End, Begin, Equal, IsEmpty*/
 #include "utils.h"		 /* ExitIfBad, msg */
 
 enum 
@@ -63,6 +66,7 @@ int main()
     /*Wake up all threads after consumed the entire data*/
     pthread_mutex_lock(&g_mutex_lock);
     g_stop_consumers = 1;
+ 
     pthread_cond_broadcast(&g_cond_empty);
     pthread_mutex_unlock(&g_mutex_lock);
     
@@ -109,7 +113,6 @@ void *Producer(void *arg)
         ExitIfBad(0 == pthread_mutex_unlock(&g_mutex_lock),
         "pthread_mutex_unlock failed\n");
 
-
     }
 
     return NULL;
@@ -122,6 +125,7 @@ void *Consumer(void *arg)
 
     while(1)
     {
+
         ExitIfBad(0 == pthread_mutex_lock(&g_mutex_lock),
             "pthread_mutex_lock failed\n");
 
@@ -139,8 +143,8 @@ void *Consumer(void *arg)
             break;
         }
 
-       (g_arr_consumer_data[(long)arg][item++] = 
-                *(unsigned int*)SlistGetData(SlistBegin(g_shared_slist) ) );
+       g_arr_consumer_data[(long)arg][item++] = 
+                *(unsigned int*)SlistGetData(SlistBegin(g_shared_slist) );
 
         SlistRemove(SlistBegin(g_shared_slist) );
         
