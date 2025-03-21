@@ -2,13 +2,13 @@
  * Author : Natty
  * Reviewer : ?
  * Date : 20 / 03 / 2025
- * Last update: 20 / 03 / 2025
+ * Last update: 21 / 03 / 2025
  *****************************************/
 
 #include <stdio.h>       
-#include <pthread.h>    /*pthread_create, pthread_join,  pthread_mutex_destoy*/
+#include <pthread.h>    /*pthread_create, join, mutex_destoy, mutex_(un)lock*/
 #include <semaphore.h>  /*sem_wait, sem_post, sem_destroy, sem_init */
-#include "slist.h"      /*Create, GetData, Remove, End, Begin, IsItrEqual*/
+#include "slist.h"      /*Create, GetData, Remove, End, Begin, Equal, IsEmpty*/
 #include "utils.h"		 /* ExitIfBad, msg */
 
 enum 
