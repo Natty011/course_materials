@@ -8,7 +8,7 @@
 #include <stdio.h>       
 #include <pthread.h>    /*pthread_create, pthread_join,  pthread_mutex_destoy*/
 #include <semaphore.h>  /*sem_wait, sem_post, sem_destroy, sem_init */
-#include "slist.h"      /*Create, GetData, Remove, End, Begin*/
+#include "slist.h"      /*Create, GetData, Remove, End, Begin, IsItrEqual*/
 #include "utils.h"		 /* ExitIfBad, msg */
 
 enum 
@@ -110,9 +110,6 @@ void *Producer(void *arg)
          SlistInsertBefore(g_shared_slist, SlistEnd(g_shared_slist),
           &g_arr_producer_data[(long)arg][i] ) ), "SlistInsertBefore failed\n");
 
-        printf("g_arr_producer_data[%lu][%lu] = { %u}\n",
-            (long)arg, i, g_arr_producer_data[(long)arg][i] );
-
         /* wake all the consumers */
         ExitIfBad(0 == sem_post(&g_sem_item_available),
             "sem_post failed\n" );
@@ -141,11 +138,8 @@ void *Consumer(void *arg)
 
         if(g_stop_consumers && SlistIsEmpty(g_shared_slist) ) 
         {
-            puts("blbla11");
-            printf("Exit: %lu\n", (long)arg );
             ExitIfBad(0 == pthread_mutex_unlock(&g_mutex_lock), 
                 "pthread_mutex_unlock failed\n");
-            puts("blbla");
             break;
         }
 
@@ -161,8 +155,6 @@ void *Consumer(void *arg)
         "pthread_mutex_unlock failed\n");
 
         g_arr_consumer_data[(long)arg][item] = item_copy;
-        /*printf("g_arr_consumer_data[%lu][%lu] = { %u}\n",
-            (long)arg, item, g_arr_consumer_data[(long)arg][item] );*/
         item++;    
     }
 
