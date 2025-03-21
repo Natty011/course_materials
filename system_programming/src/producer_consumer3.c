@@ -143,12 +143,8 @@ void *Consumer(void *arg)
             break;
         }
 
-        item_copy = 
-            *(unsigned int*)SlistGetData(SlistBegin(g_shared_slist) );
+        item_copy = *(unsigned int*)SlistGetData(SlistBegin(g_shared_slist) );
 
-            printf("g_arr_consumer_data[%lu][%lu] = { %lu}\n",
-                (long)arg, item, item_copy );
-                
         SlistRemove(SlistBegin(g_shared_slist) );
         
         ExitIfBad(0 == pthread_mutex_unlock(&g_mutex_lock),
