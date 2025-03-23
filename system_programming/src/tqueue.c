@@ -41,7 +41,6 @@ static void CheckSum(tq_t *fsk);
 tq_t *TQCreate(size_t size)
 {
     tq_t *p_fsq = NULL;
-    int *buffer = NULL;
 
     p_fsq = (tq_t*)malloc(sizeof(tq_t));
 
@@ -67,8 +66,19 @@ tq_t *TQCreate(size_t size)
 
     if( !pthread_mutex_init(&p_fsq->read_mutex, NULL) ||
         !pthread_mutex_init(&p_fsq->write_mutex, NULL) ||
-        !sem_init(&p_fsq->empty_size_slots, )
+        !sem_init(&p_fsq->empty_size_slots, 0, (unsigned int)size) ||
+        !sem_init(&p_fsq->full_size_slots, 0, 0) )
 
+    {
+
+        free(p_fsq->buffer);
+        p_fsq->buffer = NULL;
+
+        free(p_fsq);
+        p_fsq = NULL;
+
+        return NULL;
+    }
     
    
 }
