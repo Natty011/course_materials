@@ -8,8 +8,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
+/*#include "utils.h"*/		 /* ExitIfBad, msg */
 #include "tqueue.h"
-#include "utils.h"		 /* ExitIfBad, msg */
 
 
 #define BLACK        "\x1b[30m"
@@ -37,11 +37,17 @@
 #define DEBUG		"DEBUG MODE"
 #define RELEASE		"RELEASE MODE"
 
-#define UNUSED( var )       ( (void)var )
-
 
 /***************struct and enum declaration *******/
 
+
+enum 
+{
+    QUEUE_SIZE = 10,
+	NUM_ITEMS1 = 3,
+    NUM_PRODUCERS1 = 3,
+    NUM_CONSUMERS1 = 3
+};
 
 
 /***************End of struct and enum declaration *******/
@@ -82,14 +88,6 @@ int main ()
 
 
 
-enum 
-{
-    QUEUE_SIZE = 10,
-	NUM_ITEMS = 3,
-    NUM_PRODUCERS = 3,
-    NUM_CONSUMERS = 3
-};
-
 /************************************************************/
 /************************  TestTqueue  ************************/
 /************************************************************/
@@ -98,7 +96,7 @@ enum
 static void TestTqueue(void)
 {
    
-	int status_result = FALSE;
+	int status_result = 0;
 	tq_t *fsq1 = NULL;
 
 	fsq1 = TQCreate(QUEUE_SIZE);
@@ -118,7 +116,7 @@ static void TestTqueue(void)
 	}
 
 
-    return 0;
+    return;
 }
 
 
