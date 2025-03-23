@@ -44,25 +44,27 @@
 enum 
 {
     QUEUE_SIZE = 10,
-	NUM_ITEMS1 = 3,
-    NUM_PRODUCERS1 = 3,
-    NUM_CONSUMERS1 = 3
+	NUM_ITEMS = 3,
+    NUM_PRODUCERS = 3,
+    NUM_CONSUMERS = 3
 };
+
+tq_t *g_fsq1 = NULL;
+
+
+unsigned int g_arr_producer_data[NUM_PRODUCERS][NUM_ITEMS] = {0};
+unsigned int g_arr_consumer_data[NUM_CONSUMERS][NUM_ITEMS*NUM_ITEMS] = {0};
+int g_stop_consumers = 0;
 
 
 /***************End of struct and enum declaration *******/
 
-/***************************function declaration**************************/
+
+
 static void TestTqueue(void);
+void *Producer(void *arg);
+void *Consumer(void *arg);
 
-#ifdef PRINTS
-
-#endif
-/***************************End of function declaration******************/
-
-/******************static functions definition**********************/
-		
-/******************End of static functions definition**********************/
 
 
 int main ()
@@ -97,11 +99,43 @@ static void TestTqueue(void)
 {
    
 	int status_result = 0;
-	tq_t *fsq1 = NULL;
+	size_t arg = 0;
 
-	fsq1 = TQCreate(QUEUE_SIZE);
+	pthread_t producer_thread_id[NUM_PRODUCERS] = {0};
+    pthread_t consumer_thread_id[NUM_CONSUMERS] = {0};
+
+
+	g_fsq1 = TQCreate(QUEUE_SIZE);
   
-	ExitIfBad(NULL == fsq1, "TQCreate failed\n");
+	ExitIfBad(NULL == g_fsq1, "TQCreate failed\n");
+
+	for(arg = 0; arg < NUM_PRODUCERS; ++arg)
+    {
+
+        ExitIfBad(0 == pthread_create(&producer_thread_id[arg], NULL,
+             Producer, (void*)(size_t)arg ), "pthread_create failed\n" );
+
+    }
+
+	for(arg = 0; arg < NUM_CONSUMERS; ++arg)
+    {
+        ExitIfBad(0 == pthread_create(&consumer_thread_id[arg], NULL,
+             Consumer, (void*)(unsigned long)arg ), "pthread_create failed\n" );
+    }
+
+	for(arg = 0; arg < NUM_PRODUCERS; ++arg)
+    {
+        ExitIfBad(0 == pthread_join(producer_thread_id[arg], NULL),
+            "pthread_join failed\n");
+    }
+
+	for(arg = 0; arg < NUM_CONSUMERS; ++arg)
+    {
+        ExitIfBad(0 == pthread_join(consumer_thread_id[arg], NULL),
+            "pthread_join failed\n");
+    }
+
+
 
 	if( !status_result  )
 	{
@@ -121,3 +155,37 @@ static void TestTqueue(void)
 
 
 
+
+void *Producer(void *arg)
+{
+    unsigned long i = 0;
+	int data = 0;
+
+    for(i = 0; i < NUM_ITEMS; ++i ) /*produce 3 items*/
+    {
+        data = g_arr_producer_data[(long)arg][i] += i + (long)arg + (10)*(long)arg;
+
+		TQEnqueue(g_fsq1, data);
+        printf("Producer %ld enqueued: %d\n", (long)arg, data);
+        
+    }
+
+    return NULL;
+}
+
+
+void *Consumer(void *arg)
+{
+    unsigned long item = 0;
+    int item_copy = 0;
+
+	for(item = 0; item < NUM_ITEMS; ++item ) 
+    {
+    
+		item_copy = TQDequeue(g_fsq1);
+		printf("Consumer %d dequeued: %d\n", (long)arg, item_copy);
+   
+    }
+
+    return NULL;
+}
