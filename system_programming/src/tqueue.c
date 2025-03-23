@@ -5,12 +5,13 @@
  * Last update: 21 / 03 / 2025
  *****************************************/
 
-#include <stdio.h>       
+#include <stdio.h>
+#include <assert.h>     /* assert*/
+#include <stdlib.h> 	/* calloc, free */
 #include <pthread.h>    /*pthread_create, join, mutex_destoy, mutex_(un)lock*/
 #include <semaphore.h>  /*sem_wait, sem_post, sem_destroy, sem_init */
-#include "slist.h"      /*Create, GetData, Remove, End, Begin, Equal, IsEmpty*/
-#include "utils.h"		 /* ExitIfBad, msg */
-#include "tqueue.h"		 /* ExitIfBad, msg */
+#include "tqueue.h"		 /* */
+#include "utils.h"	 	 /* ExitIfBad, msg */
 
 enum 
 {
@@ -34,8 +35,8 @@ struct fsq
    sem_t full_size_slots;
 };
 
-
-static void CheckSum(tq_t *fsk);
+/* static functions decleration */
+static void CheckSum(tq_t *fsq);
 
 
 tq_t *TQCreate(size_t size)
@@ -70,7 +71,6 @@ tq_t *TQCreate(size_t size)
         !sem_init(&p_fsq->full_size_slots, 0, 0) )
 
     {
-
         free(p_fsq->buffer);
         p_fsq->buffer = NULL;
 
@@ -80,23 +80,51 @@ tq_t *TQCreate(size_t size)
         return NULL;
     }
     
-   
+    return  p_fsq;
 }
 
-static void CheckSum(tq_t *fsk)
+static void CheckSum(tq_t *fsq)
 {
     int empty = 0;
     int full = 0;
 
-    ExitIfBad(0 == sem_getvalue(&fsk->empty_size_slots, &empty),
+    ExitIfBad(0 == sem_getvalue(&fsq->empty_size_slots, &empty),
         "sem_getvalue failed\n");
 
-    ExitIfBad(0 == sem_getvalue(&fsk->full_size_slots, &full),
+    ExitIfBad(0 == sem_getvalue(&fsq->full_size_slots, &full),
         "sem_getvalue failed\n");
 
-    assert((size_t)(empty + full) == fsk->size);
+    assert((size_t)(empty + full) == fsq->size);
 
 }
+
+void TQEnqueue(tq_t *fsq, int num)
+{
+    ExitIfBad(0 == sem_wait(&fsq->empty_size_slots),
+        "sem_wait failed\n");
+
+    ExitIfBad(0 == pthread_mutex_lock(&fsq->write_mutex),
+        "pthread_mutex_lock failed\n");
+
+    fsq->buffer[fsq->write_index] = num;
+    fsq->write_index = (fsq->write_index + 1) % fsq->size;
+
+    ExitIfBad(0 == sem_post(&fsq->full_size_slots), "sem_post failed\n");
+    
+    ExitIfBad(0 == pthread_mutex_unlock(&fsq->write_mutex),
+    "pthread_mutex_unlock failed\n");
+
+    CheckSum(fsq);
+
+}
+
+int TQDequeue(tq_t *fsq)
+{
+
+    
+}
+
+
 
 
 
