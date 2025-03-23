@@ -120,11 +120,49 @@ void TQEnqueue(tq_t *fsq, int num)
 
 int TQDequeue(tq_t *fsq)
 {
+    int read_value = 0;
 
+    ExitIfBad(0 == sem_wait(&fsq->full_size_slots),
+        "sem_wait failed\n");
+
+    ExitIfBad(0 == pthread_mutex_lock(&fsq->read_mutex),
+        "pthread_mutex_lock failed\n");
     
+    read_value = fsq->buffer[fsq->read_index];
+    fsq->read_index = (fsq->read_index + 1) % fsq->size;
+
+    ExitIfBad(0 == sem_post(&fsq->empty_size_slots), "sem_post failed\n");
+
+    ExitIfBad(0 == pthread_mutex_unlock(&fsq->read_mutex),
+        "pthread_mutex_unlock failed\n");
+
+    CheckSum(fsq);
+
+    return read_value;
+        
 }
 
+void TQDestroy(tq_t *fsq)
+{
+    ExitIfBad(0 == pthread_mutex_destroy(&fsq->read_mutex),
+        "pthread_mutex_destroy failed\n");
+    
+    ExitIfBad(0 == pthread_mutex_destroy(&fsq->write_index),
+        "pthread_mutex_destroy failed\n");
 
+    ExitIfBad(0 == sem_destroy(&fsq->empty_size_slots),
+        "sem_destroy failed\n");
+    
+    ExitIfBad(0 == sem_destroy(&fsq->full_size_slots),
+        "sem_destroy failed\n");
+
+    free(fsq->buffer);
+    fsq->buffer = NULL;
+
+    free(fsq);
+    fsq = NULL;
+
+}
 
 
 
