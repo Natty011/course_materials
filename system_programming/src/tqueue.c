@@ -11,7 +11,7 @@
 #include <pthread.h>    /*pthread_create, join, mutex_destoy, mutex_(un)lock*/
 #include <semaphore.h>  /*sem_wait, sem_post, sem_destroy, sem_init */
 #include "tqueue.h"		 /* */
-#include "utils.h"	 	 /* ExitIfBad, msg */
+/*#include "utils.h"*/	 	 /* ExitIfBad, msg */
 
 enum 
 {
@@ -43,7 +43,7 @@ tq_t *TQCreate(size_t size)
 {
     tq_t *p_fsq = NULL;
 
-    p_fsq = (tq_t*)malloc(sizeof(tq_t));
+    p_fsq = (tq_t*)calloc(1, sizeof(tq_t));
 
     if(!p_fsq)
     {
@@ -65,12 +65,13 @@ tq_t *TQCreate(size_t size)
     p_fsq->read_index = 0;
     p_fsq->write_index = 0;
 
-    if( !pthread_mutex_init(&p_fsq->read_mutex, NULL) ||
-        !pthread_mutex_init(&p_fsq->write_mutex, NULL) ||
-        !sem_init(&p_fsq->empty_size_slots, 0, (unsigned int)size) ||
-        !sem_init(&p_fsq->full_size_slots, 0, 0) )
+    if( pthread_mutex_init(&p_fsq->read_mutex, NULL) ||
+        pthread_mutex_init(&p_fsq->write_mutex, NULL) ||
+        sem_init(&p_fsq->empty_size_slots, 0, (unsigned int)size) ||
+        sem_init(&p_fsq->full_size_slots, 0, 0) )
 
     {
+       
         free(p_fsq->buffer);
         p_fsq->buffer = NULL;
 
@@ -110,9 +111,10 @@ void TQEnqueue(tq_t *fsq, int num)
     fsq->write_index = (fsq->write_index + 1) % fsq->size;
 
     ExitIfBad(0 == sem_post(&fsq->full_size_slots), "sem_post failed\n");
-    
+
     ExitIfBad(0 == pthread_mutex_unlock(&fsq->write_mutex),
     "pthread_mutex_unlock failed\n");
+
 
     CheckSum(fsq);
 
@@ -131,10 +133,12 @@ int TQDequeue(tq_t *fsq)
     read_value = fsq->buffer[fsq->read_index];
     fsq->read_index = (fsq->read_index + 1) % fsq->size;
 
-    ExitIfBad(0 == sem_post(&fsq->empty_size_slots), "sem_post failed\n");
+    
+    ExitIfBad(0 == sem_post(&fsq->empty_size_slots), "sem_post failed\n");    
 
     ExitIfBad(0 == pthread_mutex_unlock(&fsq->read_mutex),
         "pthread_mutex_unlock failed\n");
+     
 
     CheckSum(fsq);
 
@@ -144,15 +148,15 @@ int TQDequeue(tq_t *fsq)
 
 void TQDestroy(tq_t *fsq)
 {
-    ExitIfBad(0 == pthread_mutex_destroy(&fsq->read_mutex),
-        "pthread_mutex_destroy failed\n");
-    
     ExitIfBad(0 == pthread_mutex_destroy(&fsq->write_mutex),
+    "pthread_mutex_destroy failed\n");
+
+    ExitIfBad(0 == pthread_mutex_destroy(&fsq->read_mutex),
         "pthread_mutex_destroy failed\n");
 
     ExitIfBad(0 == sem_destroy(&fsq->empty_size_slots),
         "sem_destroy failed\n");
-    
+
     ExitIfBad(0 == sem_destroy(&fsq->full_size_slots),
         "sem_destroy failed\n");
 
