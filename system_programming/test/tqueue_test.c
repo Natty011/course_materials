@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
-/*#include "utils.h"*/		 /* ExitIfBad, msg */
+#include "utils.h"		 /* ExitIfBad, msg */
 #include "tqueue.h"
 
 
@@ -68,7 +68,7 @@ typedef struct
 
 static void TestTqueue(void);
 void *Producer(void *arg);
-/*void *Consumer(void *arg);*/
+void *Consumer(void *arg);
 
 
 
@@ -106,56 +106,56 @@ static void TestTqueue(void)
 	int status_result = 0;
 	size_t arg = 0;
 	tq_t *fsq1 = NULL;
-    thread_arg_t producer_args[NUM_PRODUCERS] = {0};
 
+    thread_arg_t producer_args[NUM_PRODUCERS] = {0};
+    thread_arg_t consumer_args[NUM_CONSUMERS] = {0};
 	pthread_t producer_thread_id[NUM_PRODUCERS] = {0};
     pthread_t consumer_thread_id[NUM_CONSUMERS] = {0};
 
 
 	fsq1 = TQCreate(QUEUE_SIZE);
   
-	ExitIfBad(NULL == fsq1, "TQCreate failed\n");
+	ExitIfBad(NULL != fsq1, "TQCreate failed\n");
 
-	/*NUM_PRODUCERS*/
-	for(arg = 0; arg < 1; ++arg) 
+
+	for(arg = 0; arg < NUM_PRODUCERS; ++arg) 
     {
 
-		printf("line: %d \n" , __LINE__ );
-		producer_args[0].queue = fsq1;
-		producer_args[0].id = arg;
+		producer_args[arg].queue = fsq1;
+		producer_args[arg].id = arg;
+
 		ExitIfBad(0 == pthread_create(&producer_thread_id[arg], NULL,
              Producer, &producer_args[arg] ), "pthread_create failed\n" );
-			 printf("line: %d \n" , __LINE__ );
 
     }
-	/*
-	for(arg = 0; arg < 1; ++arg)
+	
+	for(arg = 0; arg < NUM_CONSUMERS; ++arg)
     {
-        ExitIfBad(0 == pthread_create(&consumer_thread_id[arg], NULL,
-             Consumer, (void*)(unsigned long)arg ), "pthread_create failed\n" );
+        consumer_args[arg].queue = fsq1;
+		consumer_args[arg].id = arg;
+
+		ExitIfBad(0 == pthread_create(&consumer_thread_id[arg], NULL,
+             Consumer, &consumer_args[arg] ), "pthread_create failed\n" );
     }
-	*/
-	for(arg = 0; arg < 1; ++arg)
+	
+	for(arg = 0; arg < NUM_PRODUCERS; ++arg)
     {
-		printf("line: %d \n" , __LINE__ );
 
 		ExitIfBad(0 == pthread_join(producer_thread_id[arg], NULL),
             "pthread_join failed\n");
 
-			printf("line: %d \n" , __LINE__ );
 		
     }
-    printf("line: %d \n" , __LINE__ );
 
-	/*for(arg = 0; arg < NUM_CONSUMERS; ++arg)
+	for(arg = 0; arg < NUM_CONSUMERS; ++arg)
     {
         ExitIfBad(0 == pthread_join(consumer_thread_id[arg], NULL),
             "pthread_join failed\n");
-    }*/
+    }
 
 
 	TQDestroy(fsq1);
-	/*fsq1 = NULL;*/
+	fsq1 = NULL;
 
 	if( !status_result  )
 	{
@@ -182,41 +182,35 @@ void *Producer(void *arg)
 	int data = 0;
     thread_arg_t *targ = (thread_arg_t*)arg;
 
-    printf("line: %d \n" , __LINE__ );
 
-    for(i = 0; i < 1; ++i ) 
+    for(i = 0; i < NUM_ITEMS; ++i ) 
     {
-        data = g_arr_producer_data[targ->id][i] += i*(100) + i;
+        data = g_arr_producer_data[targ->id][i] += i*(100) + targ->id;
+        printf("Producer %d enqueued: %d\n", targ->id, data);
 
-		printf("line: %d \n" , __LINE__ );
-       printf("Producer %ld enqueued: %d\n", targ->id, data);
-		if(NULL == targ->queue)
-		{
-			puts("vfcsdcf");
-		}
 		TQEnqueue(targ->queue, data);
-		printf("line: %d \n" , __LINE__ );
 
         
     }
 
     return NULL;
 }
-/*
+
 
 void *Consumer(void *arg)
 {
     unsigned long item = 0;
     int item_copy = 0;
+    thread_arg_t *targ = (thread_arg_t*)arg;
 
 	for(item = 0; item < NUM_ITEMS; ++item ) 
     {
-    
-		item_copy = TQDequeue(fsq1);
-		printf("Consumer %ld dequeued: %d\n", (long)arg, item_copy);
-   
+		item_copy = TQDequeue(targ->queue);
+
+		g_arr_consumer_data[targ->id][item] = item_copy;
+
+		printf("Consumer %d enqueued: %d\n", targ->id, item_copy);
     }
 
     return NULL;
 }
-*/
