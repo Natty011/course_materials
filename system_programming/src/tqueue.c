@@ -147,7 +147,7 @@ void TQDestroy(tq_t *fsq)
     ExitIfBad(0 == pthread_mutex_destroy(&fsq->read_mutex),
         "pthread_mutex_destroy failed\n");
     
-    ExitIfBad(0 == pthread_mutex_destroy(&fsq->write_index),
+    ExitIfBad(0 == pthread_mutex_destroy(&fsq->write_mutex),
         "pthread_mutex_destroy failed\n");
 
     ExitIfBad(0 == sem_destroy(&fsq->empty_size_slots),
