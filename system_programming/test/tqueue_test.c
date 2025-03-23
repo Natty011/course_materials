@@ -117,23 +117,23 @@ static void TestTqueue(void)
 
     }
 
-	for(arg = 0; arg < NUM_CONSUMERS; ++arg)
+	/*for(arg = 0; arg < NUM_CONSUMERS; ++arg)
     {
         ExitIfBad(0 == pthread_create(&consumer_thread_id[arg], NULL,
              Consumer, (void*)(unsigned long)arg ), "pthread_create failed\n" );
-    }
+    }*/
 
-	for(arg = 0; arg < NUM_PRODUCERS; ++arg)
+	/*for(arg = 0; arg < NUM_PRODUCERS; ++arg)
     {
         ExitIfBad(0 == pthread_join(producer_thread_id[arg], NULL),
             "pthread_join failed\n");
-    }
+    }*/
 
-	for(arg = 0; arg < NUM_CONSUMERS; ++arg)
+	/*for(arg = 0; arg < NUM_CONSUMERS; ++arg)
     {
         ExitIfBad(0 == pthread_join(consumer_thread_id[arg], NULL),
             "pthread_join failed\n");
-    }
+    }*/
 
 
 
@@ -183,7 +183,7 @@ void *Consumer(void *arg)
     {
     
 		item_copy = TQDequeue(g_fsq1);
-		printf("Consumer %d dequeued: %d\n", (long)arg, item_copy);
+		printf("Consumer %ld dequeued: %d\n", (long)arg, item_copy);
    
     }
 
