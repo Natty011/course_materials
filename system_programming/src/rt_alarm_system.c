@@ -5,9 +5,13 @@
  * Last update: 25 / 03 / 2025
  *****************************************/
 
-#include <stdio.h>  /* printf */     
-#include <stdint.h> /* uint8_t, uint16_t, uint32_t*/
-#include <stdlib.h> /* rand */
+#include <stdio.h>      /* printf, getchar */     
+#include <stdint.h>     /* uint8_t, uint16_t, uint32_t*/
+#include <stdlib.h>     /* rand */
+#include <sys/time.h>   /*gettimeofday, timval*/
+#include <sys/select.h> /*select, FD_ZERO, FD_SET, fd_set */
+#include <signal.h>     /* signal*/
+#include "utils.h"      /* ExitIfBad*/
 
 enum
 {
@@ -36,6 +40,10 @@ static int TriggerEmergency(void);
 
 static void HandlerSmoke(int chosen_tesk);
 static void HandlerEmergecy(int chosen_tesk);
+static int FindHighestPriority(int num_tasks);
+static size_t GetTimeInMs(void);
+static void HandleSignal(int sig);
+static char GetKeyIfPressed(void);
 
 
 typedef struct task
@@ -67,6 +75,8 @@ int main()
 {
     
     InitTasks();
+
+    signal(SIGINT, HandleSignal);
     
     return 0;
 }
@@ -106,8 +116,61 @@ static void HandlerSmoke(int chosen_tesk)
 static void HandlerEmergecy(int chosen_tesk)
 {
     printf("%s buttom PRESSED!\n", g_tasks[chosen_tesk]);
-    
+
     --g_tasks[chosen_tesk].pending_count;
     ++g_tasks[chosen_tesk].executions;
+
+}
+
+static int FindHighestPriority(int num_tasks)
+{
+    int highest = -1;
+    int i = 0;
+
+    for(i = 0; i<num_tasks; ++i)
+    {
+        if(-1 == highest || 
+            g_tasks[i].priority < g_tasks[highest].priority)
+        {
+            highest = i;
+        }
+    }
+
+    return highest;
+
+}
+
+static size_t GetTimeInMs(void)
+{
+    struct timeval tv = {0};
+    ExitIfBad(0 == gettimeofday(&tv, NULL)  , "gettimeofday failed\n");
+
+    return (size_t)(tv.tv_sec * 1000 + tv.tv_usec/1000);
+
+}
+
+static void HandleSignal(int sig)
+{
+    g_running = 0;
+}
+
+static char GetKeyIfPressed(void)
+{
+    struct timeval tv =  {0L, 0L}; /* check if there input, don't wait*/
+    fd_set file_desc = {0};
+    int res = -1;
+
+    FD_ZERO(&file_desc);    /* reset */
+    FD_SET(0, &file_desc); /* 0 == stdin */
+
+    res = select(1, &file_desc, NULL, NULL, &tv);
+    ExitIfBad(-1 != res, "select failed\n");
+
+    if(res > 0)
+    {
+        return getchar();
+    }
+
+    return 0;
 
 }
