@@ -20,12 +20,15 @@ enum
 
 typedef struct task
 {
-    char name[20];          /*name of the task/event */
+    char name[20];          /*name of the task */
     uint16_t interval;      /* The differece of each trigger checking */
     uint8_t priority;       /*priority of the task */
-    size_t trigger_time;    /*when the event requesed */
+    size_t trigger_time;    /*when the task requested/triggered */
     size_t deadline_time;   /* Maximum time the task should be complete*/
-    uint8_t pending_count;  /* How much requests of the task/event */
+    size_t response_time;   /*How long pass from the trigger */
+    size_t next_check;      /*The next time to check if task gets a trigger */
+    uint8_t pending_count;  /* How much requests to operate the task */
+
 
 
 
