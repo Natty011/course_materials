@@ -13,11 +13,13 @@
 #include <signal.h>     /* signal*/
 #include "utils.h"      /* ExitIfBad*/
 
+#define MAX_TASKS (3) 
+
 enum
 {
-    MAX_TASKS = 3,
     SMOKE_INTERVAL = 100, /* Time interval to check the trigger */
     EMERGENCY_INTERVAL = 1000,
+
     /* timer - every TICK_MS the app wake up and checks
          triggers/pending/pressing*/
     TICK_MS = 10,   
@@ -31,8 +33,9 @@ enum
     PRIORITY_SMOKE2 = 2,
     PRIORITY_EMERGENCY = 3
 };
+
 typedef int (*is_trigger_t)(void);
-typedef void (*handler_t)(size_t time_detaction, const char* name);
+typedef void (*handler_t)(int chosen_tesk);
 
 static void InitTasks(void);
 static int TriggerSmoke(void);
@@ -44,6 +47,7 @@ static int FindHighestPriority(int num_tasks);
 static size_t GetTimeInMs(void);
 static void HandleSignal(int sig);
 static char GetKeyIfPressed(void);
+static void TaskRun(void);
 
 
 typedef struct task
@@ -58,7 +62,6 @@ typedef struct task
 
     size_t trigger_time;    /*when the task requested/triggered */
     size_t deadline_time;   /*Maximum time the task should be complete*/
-    size_t response_time;   /*How long pass from the trigger */
     size_t next_check;      /*The next time to check if task gets a trigger */
     int pending_count;  /* How much requests in the qeueue  */
 
@@ -81,17 +84,46 @@ int main()
     return 0;
 }
 
+static void TaskRun(void)
+{
+    int chosen = FindHighestPriority(MAX_TASKS);
+    size_t curr_time = GetTimeInMs();
+
+    if(-1 != chosen)
+    {
+        /*size_t response_time = curr_time - g_tasks[chosen].trigger_time;*/
+        g_tasks[chosen].deadline_misses +=
+                curr_time - g_tasks[chosen].deadline_time;
+
+       g_tasks[chosen].Handler(chosen);
+
+       --g_tasks[chosen].pending_count;
+       ++g_tasks[chosen].executions;
+
+       if(g_tasks[chosen].pending_count > 0)
+       {
+            g_tasks[chosen].trigger_time = curr_time;
+            g_tasks[chosen].deadline_time = curr_time + g_tasks[chosen].interval; 
+       }
+       
+    }
+}
+
+
 static void InitTasks(void)
 {
     g_tasks[0] = (task_t){"Smoke1", SMOKE_INTERVAL, PRIORITY_SMOKE1, TriggerSmoke,
-         HandlerSmoke, 0, 0, 0, 0, 0, 0, 0};
+         HandlerSmoke, 0, 0, 0, 0, 0, 0};
 
     g_tasks[1] = (task_t){"Smoke2", SMOKE_INTERVAL, PRIORITY_SMOKE2, TriggerSmoke,
-        HandlerSmoke, 0, 0, 0, 0, 0, 0, 0};
+        HandlerSmoke, 0, 0, 0, 0, 0, 0};
         
     g_tasks[2] = (task_t){"Emergency", EMERGENCY_INTERVAL, PRIORITY_EMERGENCY,
-        TriggerEmergency, HandlerEmergecy, 0, 0, 0, 0, 0, 0, 0};    
+        TriggerEmergency, HandlerEmergecy, 0, 0, 0, 0, 0, 0};    
 }
+
+
+
 
 static int TriggerSmoke(void)
 {
@@ -108,18 +140,11 @@ static void HandlerSmoke(int chosen_tesk)
 {
     printf("%s Detected!\n", g_tasks[chosen_tesk]);
 
-    --g_tasks[chosen_tesk].pending_count;
-    ++g_tasks[chosen_tesk].executions;
-
 }
 
 static void HandlerEmergecy(int chosen_tesk)
 {
     printf("%s buttom PRESSED!\n", g_tasks[chosen_tesk]);
-
-    --g_tasks[chosen_tesk].pending_count;
-    ++g_tasks[chosen_tesk].executions;
-
 }
 
 static int FindHighestPriority(int num_tasks)
@@ -174,3 +199,6 @@ static char GetKeyIfPressed(void)
     return 0;
 
 }
+
+
+
