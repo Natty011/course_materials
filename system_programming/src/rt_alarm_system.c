@@ -49,7 +49,7 @@ static void HandleSignal(int sig);
 static char GetKeyIfPressed(void);
 static void TaskRun(void);
 static void RunScheduler(void);
-
+void PrintStatistics(void);
 
 typedef struct task
 {
@@ -88,14 +88,82 @@ int main()
 
 static void RunScheduler(void)
 {
-    char keyboard_press = 0;
+    char ch = 0;
     size_t curr_time = 0;
+    int i = 0;
 
     printf("Press A + ENTER for Emergency\n");
     printf("Press S + ENTER for Smoke1 or D + ENTER for Smoke2\n");
     printf("Press CTRL+C to exit and view statistics.\n");
     
-    size_t curr_time = GetTimeInMs();
+    while(g_running)
+    {
+        curr_time = GetTimeInMs();
+
+        for(i = 0; i < MAX_TASKS; ++i)
+        {
+            
+            if(curr_time > g_tasks[i].next_check && 
+              g_tasks[i].pending_count < MAX_PENDING &&
+              g_tasks[i].IsTrigger() )
+            {
+                if(0 == g_tasks[i].pending_count)
+                {
+                    g_tasks[i].trigger_time = curr_time;
+                    g_tasks[i].deadline_time = curr_time + g_tasks[i].interval;
+                }
+
+                ++g_tasks[i].pending_count;
+
+                /*the next time that allowed to check the trigger result of
+                the task i--> not less then the time interval of the task*/
+                g_tasks[i].next_check = curr_time + g_tasks[i].interval;
+            }
+
+            ch = GetKeyIfPressed();
+
+            if('A' == ch)
+            {
+                if(g_tasks[2].pending_count < MAX_PENDING)
+                {
+                    ++g_tasks[2].pending_count;
+                    g_tasks[2].trigger_time = curr_time;
+                    g_tasks[2].deadline_time = curr_time + g_tasks[i].interval;
+
+                }
+            }
+
+            else if('S' == ch)
+            {
+                if(g_tasks[0].pending_count < MAX_PENDING)
+                {
+                    ++g_tasks[0].pending_count;
+                    g_tasks[0].trigger_time = curr_time;
+                    g_tasks[0].deadline_time = curr_time + g_tasks[i].interval;
+
+                }
+            }
+
+
+            else if('D' == ch)
+            {
+                if(g_tasks[1].pending_count < MAX_PENDING)
+                {
+                    ++g_tasks[1].pending_count;
+                    g_tasks[1].trigger_time = curr_time;
+                    g_tasks[1].deadline_time = curr_time + g_tasks[i].interval;
+
+                }
+            }
+
+            TaskRun();
+            usleep(TICK_MS * 1000);
+
+        }
+
+        PrintStatistics();
+
+    }
 
 }
 
@@ -225,6 +293,17 @@ static char GetKeyIfPressed(void)
 
     return 0;
 
+}
+
+void PrintStatistics(void)
+{
+    printf("\n\n=== System Summary ===\n");
+    for (int i = 0; i < MAX_TASKS; ++i)
+    {
+        printf("Task: %-10s | Executions: %3d | Deadline Misses: %3d\n",
+               g_tasks[i].name, g_tasks[i].executions, g_tasks[i].deadline_misses);
+    }
+    printf("=======================\n");
 }
 
 
