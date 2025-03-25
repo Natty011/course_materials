@@ -7,6 +7,15 @@
 
 #include <stdio.h>       
 
+enum
+{
+    MAX_TASKS = 3,
+    SMOKE_INTERVAL = 100,
+    EMERGENCY_INTERVAL = 1000,
+    TICK_MS = 10
+    
+
+}
 int main()
 {
     
