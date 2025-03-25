@@ -30,6 +30,8 @@ typedef int (*is_trigger_t)(void);
 typedef void (*handler_t)(size_t time_detaction, const char* name);
 
 static void InitTasks(void);
+static int TriggerSmoke(void);
+
 
 typedef struct task
 {
@@ -76,25 +78,8 @@ static void InitTasks(void)
         TriggerEmergency, HandlerEmergecy, 0, 0, 0, 0, 0, 0, 0};    
 }
 
-
-typedef struct task
+static int TriggerSmoke(void)
 {
-    char name[20];          /*name of the task */
-   
-    uint16_t interval;      /*The interval of each trigger checking  */
-    uint8_t priority;       /*priority of the task */
+    return rand() % 50 == 0;
+}
 
-    is_trigger_t IsTrigger; /* return if trigger occered */
-    handler_t Handler;      /*Handle the task if it triggered */
-    
-    size_t trigger_time;    /*when the task requested/triggered */
-    size_t deadline_time;   /*Maximum time the task should be complete*/
-    size_t response_time;   /*How long pass from the trigger */
-    size_t next_check;      /*The next time to check if task gets a trigger */
-    uint8_t pending_count;  /* How much requests to operate the task */
-
-    uint32_t executions;    /*How many times the task execute */
-    uint32_t deadline_misses; /*counts the fails in deadlines */
-
-
-}task_t;
