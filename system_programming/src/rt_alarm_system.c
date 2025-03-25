@@ -7,15 +7,24 @@
 
 #include <stdio.h>       
 
+
 enum
 {
     MAX_TASKS = 3,
     SMOKE_INTERVAL = 100,
     EMERGENCY_INTERVAL = 1000,
-    TICK_MS = 10
+    TICK_MS = 10,
+    MAX_PENDING = 10
     
+};
 
-}
+typedef struct task
+{
+
+
+}task_t;
+
+
 int main()
 {
     
