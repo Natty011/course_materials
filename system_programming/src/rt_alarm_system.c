@@ -13,12 +13,15 @@ enum
     MAX_TASKS = 3,
     SMOKE_INTERVAL = 100, /* Time interval to check the trigger */
     EMERGENCY_INTERVAL = 1000,
-    TICK_MS = 10,   /* timer - every TICK_MS the app wake up and do checks*/
+    /* timer - every TICK_MS the app wake up and checks
+         triggers/pending/pressing*/
+    TICK_MS = 10,   
     MAX_PENDING = 10 
     
 };
 typedef int (*is_trigger_t)(void);
 typedef void (*handler_t)(size_t time_detaction, const char* name);
+
 typedef struct task
 {
     char name[20];          /*name of the task */
