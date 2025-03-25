@@ -35,12 +35,15 @@ typedef struct task
     size_t next_check;      /*The next time to check if task gets a trigger */
     uint8_t pending_count;  /* How much requests to operate the task */
 
+    /*for statistics*/
     uint32_t executions;    /*How many times the task execute */
     uint32_t deadline_misses; /*counts the fails in deadlines */
 
 
 }task_t;
 
+task_t g_tasks[MAX_TASKS] = {0};
+int g_running = 1; /* can be exit in grace from the while loop */
 
 int main()
 {
