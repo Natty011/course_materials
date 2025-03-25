@@ -96,11 +96,18 @@ static int TriggerEmergency(void)
 
 static void HandlerSmoke(int chosen_tesk)
 {
+    printf("%s Detected!\n", g_tasks[chosen_tesk]);
+
     --g_tasks[chosen_tesk].pending_count;
-    
+    ++g_tasks[chosen_tesk].executions;
+
 }
 
 static void HandlerEmergecy(int chosen_tesk)
 {
+    printf("%s buttom PRESSED!\n", g_tasks[chosen_tesk]);
+    
     --g_tasks[chosen_tesk].pending_count;
+    ++g_tasks[chosen_tesk].executions;
+
 }
