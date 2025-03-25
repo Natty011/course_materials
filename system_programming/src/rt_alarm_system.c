@@ -48,6 +48,7 @@ static size_t GetTimeInMs(void);
 static void HandleSignal(int sig);
 static char GetKeyIfPressed(void);
 static void TaskRun(void);
+static void RunScheduler(void);
 
 
 typedef struct task
@@ -80,8 +81,22 @@ int main()
     InitTasks();
 
     signal(SIGINT, HandleSignal);
-    
+    RunScheduler();
+
     return 0;
+}
+
+static void RunScheduler(void)
+{
+    char keyboard_press = 0;
+    size_t curr_time = 0;
+
+    printf("Press A + ENTER for Emergency\n");
+    printf("Press S + ENTER for Smoke1 or D + ENTER for Smoke2\n");
+    printf("Press CTRL+C to exit and view statistics.\n");
+    
+    size_t curr_time = GetTimeInMs();
+
 }
 
 static void TaskRun(void)
@@ -92,10 +107,13 @@ static void TaskRun(void)
     if(-1 != chosen)
     {
         /*size_t response_time = curr_time - g_tasks[chosen].trigger_time;*/
-        g_tasks[chosen].deadline_misses +=
-                curr_time - g_tasks[chosen].deadline_time;
+        if(curr_time > g_tasks[chosen].deadline_time)
+        {
+            ++g_tasks[chosen].deadline_misses;
+            printf("%s Task missed deadline. Pending: %d\n", g_tasks[chosen].name, g_tasks[chosen].pending_count);
+        }
 
-       g_tasks[chosen].Handler(chosen);
+        g_tasks[chosen].Handler(chosen);
 
        --g_tasks[chosen].pending_count;
        ++g_tasks[chosen].executions;
@@ -185,6 +203,9 @@ static char GetKeyIfPressed(void)
     fd_set file_desc = {0};
     int res = -1;
 
+    int ch = 0;
+    int c = 0;
+
     FD_ZERO(&file_desc);    /* reset */
     FD_SET(0, &file_desc); /* 0 == stdin */
 
@@ -193,7 +214,13 @@ static char GetKeyIfPressed(void)
 
     if(res > 0)
     {
-        return getchar();
+        ch =  getchar();
+
+        while ( '\n' != (c = getchar()) && EOF !=  c)
+        {}
+
+        return ch;
+
     }
 
     return 0;
