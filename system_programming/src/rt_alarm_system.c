@@ -11,6 +11,8 @@
 #include <sys/time.h>   /*gettimeofday, timval*/
 #include <sys/select.h> /*select, FD_ZERO, FD_SET, fd_set */
 #include <signal.h>     /* signal*/
+#include <string.h>     /*memcpy*/
+#include <unistd.h>     /*usleep*/
 #include "utils.h"      /* ExitIfBad*/
 
 #define MAX_TASKS (3) 
@@ -77,7 +79,6 @@ int g_running = 1; /* can be exit in grace from the while loop */
 
 int main()
 {
-    
     InitTasks();
 
     signal(SIGINT, HandleSignal);
@@ -158,11 +159,9 @@ static void RunScheduler(void)
 
             TaskRun();
             usleep(TICK_MS * 1000);
-
         }
 
         PrintStatistics();
-
     }
 
 }
@@ -191,25 +190,27 @@ static void TaskRun(void)
             g_tasks[chosen].trigger_time = curr_time;
             g_tasks[chosen].deadline_time = curr_time + g_tasks[chosen].interval; 
        }
-       
     }
 }
 
-
 static void InitTasks(void)
 {
-    g_tasks[0] = (task_t){"Smoke1", SMOKE_INTERVAL, PRIORITY_SMOKE1, TriggerSmoke,
-         HandlerSmoke, 0, 0, 0, 0, 0, 0};
+    
+    static const task_t init_tasks[MAX_TASKS] = 
+    {
+        {"Smoke1", SMOKE_INTERVAL, PRIORITY_SMOKE1, TriggerSmoke,
+            HandlerSmoke, 0, 0, 0, 0, 0, 0}, 
 
-    g_tasks[1] = (task_t){"Smoke2", SMOKE_INTERVAL, PRIORITY_SMOKE2, TriggerSmoke,
-        HandlerSmoke, 0, 0, 0, 0, 0, 0};
+        {"Smoke2", SMOKE_INTERVAL, PRIORITY_SMOKE2, TriggerSmoke,
+            HandlerSmoke, 0, 0, 0, 0, 0, 0},
         
-    g_tasks[2] = (task_t){"Emergency", EMERGENCY_INTERVAL, PRIORITY_EMERGENCY,
-        TriggerEmergency, HandlerEmergecy, 0, 0, 0, 0, 0, 0};    
+        {"Emergency", EMERGENCY_INTERVAL, PRIORITY_EMERGENCY,
+            TriggerEmergency, HandlerEmergecy, 0, 0, 0, 0, 0, 0}
+   };   
+   
+   memcpy(g_tasks, init_tasks, sizeof(init_tasks));
+
 }
-
-
-
 
 static int TriggerSmoke(void)
 {
@@ -221,16 +222,14 @@ static int TriggerEmergency(void)
     return rand() % 50 == 0;
 }
 
-
 static void HandlerSmoke(int chosen_tesk)
 {
-    printf("%s Detected!\n", g_tasks[chosen_tesk]);
-
+    printf("%s Detected!\n", g_tasks[chosen_tesk].name);
 }
 
 static void HandlerEmergecy(int chosen_tesk)
 {
-    printf("%s buttom PRESSED!\n", g_tasks[chosen_tesk]);
+    printf("%s buttom PRESSED!\n", g_tasks[chosen_tesk].name);
 }
 
 static int FindHighestPriority(int num_tasks)
@@ -246,9 +245,7 @@ static int FindHighestPriority(int num_tasks)
             highest = i;
         }
     }
-
     return highest;
-
 }
 
 static size_t GetTimeInMs(void)
@@ -257,11 +254,11 @@ static size_t GetTimeInMs(void)
     ExitIfBad(0 == gettimeofday(&tv, NULL)  , "gettimeofday failed\n");
 
     return (size_t)(tv.tv_sec * 1000 + tv.tv_usec/1000);
-
 }
 
 static void HandleSignal(int sig)
 {
+    (void)sig;
     g_running = 0;
 }
 
@@ -297,8 +294,10 @@ static char GetKeyIfPressed(void)
 
 void PrintStatistics(void)
 {
+    int i = 0;
+
     printf("\n\n=== System Summary ===\n");
-    for (int i = 0; i < MAX_TASKS; ++i)
+    for (i = 0; i < MAX_TASKS; ++i)
     {
         printf("Task: %-10s | Executions: %3d | Deadline Misses: %3d\n",
                g_tasks[i].name, g_tasks[i].executions, g_tasks[i].deadline_misses);
