@@ -64,11 +64,15 @@ int main()
     }
 
     /*Wake up all threads after consumed the entire data*/
-    pthread_mutex_lock(&g_mutex_lock);
+    ExitIfBad(0 == pthread_mutex_lock(&g_mutex_lock),
+        "pthread_mutex_lock failed\n");
     g_stop_consumers = 1;
  
-    pthread_cond_broadcast(&g_cond_empty);
-    pthread_mutex_unlock(&g_mutex_lock);
+    ExitIfBad(0 == pthread_cond_broadcast(&g_cond_empty),
+        "pthread_cond_broadcast failed\n" );
+
+    ExitIfBad(0 == pthread_mutex_unlock(&g_mutex_lock),
+        "pthread_mutex_unlock failed\n");
     
     for(arg = 0; arg < NUM_CONSUMERS; ++arg)
     {
@@ -106,8 +110,8 @@ void *Producer(void *arg)
          SlistInsertBefore(g_shared_slist, SlistEnd(g_shared_slist),
           &g_arr_producer_data[(long)arg][i] ) ), "SlistInsertBefore failed\n");
 
-        ExitIfBad(0 == pthread_cond_signal(&g_cond_empty),
-                 "pthread_cond_signal failed\n" );   
+        ExitIfBad(0 == pthread_cond_broadcast(&g_cond_empty),
+                 "pthread_cond_broadcast failed\n" );   
 
    
         ExitIfBad(0 == pthread_mutex_unlock(&g_mutex_lock),
