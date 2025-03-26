@@ -23,10 +23,10 @@ enum
 
 struct fsq
 {
-   int *buffer;
+   volatile int *buffer;
    size_t size;                 /* size of the qeueue*/
-   size_t read_index;             
-   size_t write_index;
+   volatile size_t read_index;             
+   volatile size_t write_index;
 
    pthread_mutex_t read_mutex;  /* locking comsumers*/
    pthread_mutex_t write_mutex; /* locking producers*/
