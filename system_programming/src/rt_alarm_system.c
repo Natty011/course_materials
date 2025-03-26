@@ -35,7 +35,7 @@ enum
 {
     PRIORITY_SMOKE1 = 2,
     PRIORITY_SMOKE2 = 2,
-    PRIORITY_EMERGENCY = 3
+    PRIORITY_EMERGENCY = 1
 };
 
 typedef int (*is_trigger_t)(void);
@@ -161,7 +161,7 @@ static void RunScheduler(void)
             }
 
             TaskRun();
-            SleepMs(TICK_MS * 10);
+            SleepMs(TICK_MS * 100);
         }
 
         PrintStatistics();
@@ -177,7 +177,8 @@ static void TaskRun(void)
     if(-1 != chosen)
     {
         /*size_t response_time = curr_time - g_tasks[chosen].trigger_time;*/
-        if(curr_time > g_tasks[chosen].deadline_time)
+        if(g_tasks[chosen].pending_count > 0 &&
+            curr_time > g_tasks[chosen].deadline_time)
         {
             ++g_tasks[chosen].deadline_misses;
             printf("%s Task missed deadline. Pending: %d\n", g_tasks[chosen].name, g_tasks[chosen].pending_count);
@@ -185,11 +186,11 @@ static void TaskRun(void)
 
         g_tasks[chosen].Handler(chosen);
 
-       --g_tasks[chosen].pending_count;
        ++g_tasks[chosen].executions;
 
        if(g_tasks[chosen].pending_count > 0)
        {
+            --g_tasks[chosen].pending_count;
             g_tasks[chosen].trigger_time = curr_time;
             g_tasks[chosen].deadline_time = curr_time + g_tasks[chosen].interval; 
        }
@@ -217,12 +218,12 @@ static void InitTasks(void)
 
 static int TriggerSmoke(void)
 {
-    return rand() % 50 == 0;
+    return rand() % 2000 == 0;
 }
 
 static int TriggerEmergency(void)
 {
-    return rand() % 50 == 0;
+    return rand() % 2000 == 0;
 }
 
 static void HandlerSmoke(int chosen_tesk)
