@@ -117,7 +117,7 @@ static void RunScheduler(void)
         for(i = 0; i < MAX_TASKS; ++i)
         {
             
-            if(curr_time > g_tasks[i].next_check && 
+            if(curr_time >= g_tasks[i].next_check && 
               g_tasks[i].pending_count < MAX_PENDING &&
               g_tasks[i].IsTrigger() )
             {
@@ -189,7 +189,7 @@ static void TaskRun(void)
         size_t response_time = curr_time - g_tasks[chosen].trigger_time;
         printf("[%lums] Executing %s (response time = %lums) [Pending=%d]\n\n",
             curr_time, g_tasks[chosen].name, response_time, g_tasks[chosen].pending_count);
-            ח
+            
 
         if(curr_time > g_tasks[chosen].deadline_time)
         {
