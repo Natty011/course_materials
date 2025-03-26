@@ -139,7 +139,7 @@ void *Consumer(void *arg)
         you dont need the g_stop_consumers and the if condition after
         the internal while.
         2. Create Consume() function that the consumer us after 
-           it releasing the mutex, this is the purpose of multithreading!! */
+           it releasing the mutex, this is the purpose of multithreading!! 
     */
     while(1)
     {
