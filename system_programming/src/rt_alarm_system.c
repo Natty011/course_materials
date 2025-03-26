@@ -161,11 +161,13 @@ static void RunScheduler(void)
             }
 
             TaskRun();
-            SleepMs(TICK_MS * 100);
+            SleepMs(TICK_MS);
         }
 
-        PrintStatistics();
     }
+
+    PrintStatistics();
+
 
 }
 
@@ -177,11 +179,12 @@ static void TaskRun(void)
     if(-1 != chosen)
     {
         /*size_t response_time = curr_time - g_tasks[chosen].trigger_time;*/
-        if(g_tasks[chosen].pending_count > 0 &&
-            curr_time > g_tasks[chosen].deadline_time)
+        /*g_tasks[chosen].pending_count > 0 &&*/
+        if(curr_time > g_tasks[chosen].deadline_time)
         {
             ++g_tasks[chosen].deadline_misses;
             printf("%s Task missed deadline. Pending: %d\n", g_tasks[chosen].name, g_tasks[chosen].pending_count);
+        
         }
 
         g_tasks[chosen].Handler(chosen);
@@ -241,15 +244,20 @@ static int FindHighestPriority(int num_tasks)
     int highest = -1;
     int i = 0;
 
-    for(i = 0; i<num_tasks; ++i)
-    {
-        if(-1 == highest || 
-            g_tasks[i].priority < g_tasks[highest].priority)
+    
+        for(i = 0; i<num_tasks; ++i)
         {
-            highest = i;
-        }
-    }
-    return highest;
+            if(g_tasks[i].pending_count > 0)
+            {
+
+                if(-1 == highest || 
+                    g_tasks[i].priority < g_tasks[highest].priority)
+                {
+                    highest = i;
+                }
+            }
+        }    
+        return highest;
 }
 
 static void SleepMs(size_t ms)
