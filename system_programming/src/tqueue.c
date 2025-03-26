@@ -122,7 +122,7 @@ void TQEnqueue(tq_t *fsq, int num)
 
 int TQDequeue(tq_t *fsq)
 {
-    int read_value = 0;
+    int ret = 0;
 
     ExitIfBad(0 == sem_wait(&fsq->full_size_slots),
         "sem_wait failed\n");
@@ -130,7 +130,7 @@ int TQDequeue(tq_t *fsq)
     ExitIfBad(0 == pthread_mutex_lock(&fsq->read_mutex),
         "pthread_mutex_lock failed\n");
     
-    read_value = fsq->buffer[fsq->read_index];
+        ret = fsq->buffer[fsq->read_index];
     fsq->read_index = (fsq->read_index + 1) % fsq->size;
 
     
@@ -142,7 +142,7 @@ int TQDequeue(tq_t *fsq)
 
     CheckSum(fsq);
 
-    return read_value;
+    return ret;
         
 }
 
