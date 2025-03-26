@@ -17,7 +17,11 @@
 #include <signal.h>     /* signal*/
 #include <string.h>     /*memcpy*/
 #include "utils.h"      /* ExitIfBad*/
+
 #define MAX_TASKS (3) 
+#define BACK_RED     "\x1b[41m"
+#define RESET        "\x1b[0m"
+
 
 enum
 {
@@ -26,22 +30,22 @@ enum
 
     /* timer - every TICK_MS the app wake up and checks
          triggers/pending/pressing*/
-    TICK_MS = 100,   
+    TICK_MS = 10,   
     MAX_PENDING = 10 
     
 };
 
 enum
 {
-    PRIORITY_SMOKE1 = 9,
-    PRIORITY_SMOKE2 = 20,
+    PRIORITY_SMOKE1 = 2,
+    PRIORITY_SMOKE2 = 2,
     PRIORITY_EMERGENCY = 1
 };
 
 enum
 {
     TRIGGER_PROBABILITY_SMOKE = 50,
-    TRIGGER_PROBABILITY_EMERGENCY = 10
+    TRIGGER_PROBABILITY_EMERGENCY = 50
 };
 
 typedef int (*is_trigger_t)(void);
@@ -182,12 +186,15 @@ static void TaskRun(void)
 
     if(-1 != chosen)
     {
-        /*size_t response_time = curr_time - g_tasks[chosen].trigger_time;*/
-        /*g_tasks[chosen].pending_count > 0 &&*/
+        size_t response_time = curr_time - g_tasks[chosen].trigger_time;
+        printf("[%lums] Executing %s (response time = %lums) [Pending=%d]\n\n",
+            curr_time, g_tasks[chosen].name, response_time, g_tasks[chosen].pending_count);
+            ח
+
         if(curr_time > g_tasks[chosen].deadline_time)
         {
             ++g_tasks[chosen].deadline_misses;
-            printf("%s Task missed deadline. Pending: %d\n", g_tasks[chosen].name, g_tasks[chosen].pending_count);
+            printf(""BACK_RED"%s Task missed deadline. Pending: %d"RESET"\n", g_tasks[chosen].name, g_tasks[chosen].pending_count);
         
         }
 
