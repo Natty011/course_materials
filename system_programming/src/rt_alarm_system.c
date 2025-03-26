@@ -2,19 +2,21 @@
  * Author : Natty
  * Reviewer : ?
  * Date : 25 / 03 / 2025
- * Last update: 25 / 03 / 2025
+ * Last update: 26 / 03 / 2025
  *****************************************/
+
+#define _POSIX_C_SOURCE 199309L
 
 #include <stdio.h>      /* printf, getchar */     
 #include <stdint.h>     /* uint8_t, uint16_t, uint32_t*/
 #include <stdlib.h>     /* rand */
+#include <time.h>       /*nanosleep */
+
 #include <sys/time.h>   /*gettimeofday, timval*/
 #include <sys/select.h> /*select, FD_ZERO, FD_SET, fd_set */
 #include <signal.h>     /* signal*/
 #include <string.h>     /*memcpy*/
-#include <unistd.h>     /*usleep*/
 #include "utils.h"      /* ExitIfBad*/
-
 #define MAX_TASKS (3) 
 
 enum
@@ -52,6 +54,7 @@ static char GetKeyIfPressed(void);
 static void TaskRun(void);
 static void RunScheduler(void);
 void PrintStatistics(void);
+static void SleepMs(size_t ms);
 
 typedef struct task
 {
@@ -158,7 +161,7 @@ static void RunScheduler(void)
             }
 
             TaskRun();
-            usleep(TICK_MS * 1000);
+            SleepMs(TICK_MS * 10);
         }
 
         PrintStatistics();
@@ -248,6 +251,14 @@ static int FindHighestPriority(int num_tasks)
     return highest;
 }
 
+static void SleepMs(size_t ms)
+{
+    struct timespec ts;
+    ts.tv_sec = ms / 1000;
+    ts.tv_nsec = (ms % 1000) * 1000000;
+    nanosleep(&ts, NULL);
+
+}
 static size_t GetTimeInMs(void)
 {
     struct timeval tv = {0};
@@ -265,7 +276,7 @@ static void HandleSignal(int sig)
 static char GetKeyIfPressed(void)
 {
     struct timeval tv =  {0L, 0L}; /* check if there input, don't wait*/
-    fd_set file_desc = {0};
+    fd_set file_desc;
     int res = -1;
 
     int ch = 0;
