@@ -5,7 +5,6 @@
 
 #ifndef TQUEUE_H    /* TQUEUE_H */
 #define TQUEUE_H    /* TQUEUE_H */
-
 #include <stddef.h> /* size_t */
 
 /*

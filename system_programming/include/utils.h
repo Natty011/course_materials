@@ -1,12 +1,15 @@
-/******************************************************************************
-*	Version         0.2
-*   Last Update:    15/03/25    
-******************************************************************************/
+/***************************************
+ * Author : Natty
+ * Reviewer : 
+ * Date : 26 / 03 / 2025
+ * Last update: 26 / 03 / 2025
+ *****************************************/
 
 #ifndef __UTILS__     /* __UTILS__  */
 #define __UTILS__     /* __UTILS__  */
 
 #include <stdlib.h>    /* exit */
+#include <stdio.h>
 
 enum
 {
@@ -21,31 +24,10 @@ enum
 	TRUE = 1
 };
 
+extern char *msg[];  /* declared here, defined in utils.c */
 
- char *msg[] = 
- {"fork failed\n", "fgets failed\n", "strtok failed\n",
-	"execvp failed\n", "Too many arguments\n",
- "Empty line is not allowed\n", "SIGINT terminated the proccess\n",
-	"SIGTERM terminated the proccess\n", "Arguments not met\n"};
-
-/*
-    Description: 
-    Arguments: 
-    Return: 
-    Note: 
-
-*/
-void ExitIfBad(int is_good, const char *msg)
-{
-	if (FALSE == is_good) 
-	{
-		perror(msg);
-		puts(msg);
-		exit(0);
-	}
-}
-
-    
+void ExitIfBad(int is_good, const char *msg);
+ 
 #endif                  /* ___UTILS___  */
 
 
