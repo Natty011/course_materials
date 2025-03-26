@@ -26,16 +26,22 @@ enum
 
     /* timer - every TICK_MS the app wake up and checks
          triggers/pending/pressing*/
-    TICK_MS = 10,   
+    TICK_MS = 100,   
     MAX_PENDING = 10 
     
 };
 
 enum
 {
-    PRIORITY_SMOKE1 = 2,
-    PRIORITY_SMOKE2 = 2,
+    PRIORITY_SMOKE1 = 9,
+    PRIORITY_SMOKE2 = 20,
     PRIORITY_EMERGENCY = 1
+};
+
+enum
+{
+    TRIGGER_PROBABILITY_SMOKE = 50,
+    TRIGGER_PROBABILITY_EMERGENCY = 10
 };
 
 typedef int (*is_trigger_t)(void);
@@ -148,7 +154,6 @@ static void RunScheduler(void)
                 }
             }
 
-
             else if('D' == ch)
             {
                 if(g_tasks[1].pending_count < MAX_PENDING)
@@ -167,7 +172,6 @@ static void RunScheduler(void)
     }
 
     PrintStatistics();
-
 
 }
 
@@ -221,12 +225,12 @@ static void InitTasks(void)
 
 static int TriggerSmoke(void)
 {
-    return rand() % 2000 == 0;
+    return rand() % TRIGGER_PROBABILITY_SMOKE == 0;
 }
 
 static int TriggerEmergency(void)
 {
-    return rand() % 2000 == 0;
+    return rand() % TRIGGER_PROBABILITY_EMERGENCY == 0;
 }
 
 static void HandlerSmoke(int chosen_tesk)
@@ -315,14 +319,31 @@ static char GetKeyIfPressed(void)
 void PrintStatistics(void)
 {
     int i = 0;
+    int total_exec = 0;
+    int total_miss = 0;
+    float success = 0.0;
+    float system_success = 0.0;
 
     printf("\n\n=== System Summary ===\n");
     for (i = 0; i < MAX_TASKS; ++i)
     {
-        printf("Task: %-10s | Executions: %3d | Deadline Misses: %3d\n",
-               g_tasks[i].name, g_tasks[i].executions, g_tasks[i].deadline_misses);
+        total_exec += g_tasks[i].executions;
+        total_miss += g_tasks[i].deadline_misses;
+        
+        success = g_tasks[i].executions > 0 ?
+            100.0f * (g_tasks[i].executions - g_tasks[i].deadline_misses) / g_tasks[i].executions : 0.0f;
+
+        printf("Task: %-10s | Executions: %3d | Deadline Misses: %3d | Success: %5.1f%%\n",
+               g_tasks[i].name, g_tasks[i].executions, g_tasks[i].deadline_misses, success);
     }
     printf("=======================\n");
+
+    system_success = total_exec > 0 ?
+    100.0f * (total_exec - total_miss) / total_exec : 0.0f;
+
+    printf("Overall Success Rate: %.1f%%\n", system_success);
+    printf("=======================\n");
+    
 }
 
 
