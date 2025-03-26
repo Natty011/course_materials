@@ -110,10 +110,11 @@ void TQEnqueue(tq_t *fsq, int num)
     fsq->buffer[fsq->write_index] = num;
     fsq->write_index = (fsq->write_index + 1) % fsq->size;
 
-    ExitIfBad(0 == sem_post(&fsq->full_size_slots), "sem_post failed\n");
 
     ExitIfBad(0 == pthread_mutex_unlock(&fsq->write_mutex),
     "pthread_mutex_unlock failed\n");
+
+    ExitIfBad(0 == sem_post(&fsq->full_size_slots), "sem_post failed\n");
 
     CheckSum(fsq);
 
@@ -133,11 +134,11 @@ int TQDequeue(tq_t *fsq)
     fsq->read_index = (fsq->read_index + 1) % fsq->size;
 
     
-    ExitIfBad(0 == sem_post(&fsq->empty_size_slots), "sem_post failed\n");    
-
     ExitIfBad(0 == pthread_mutex_unlock(&fsq->read_mutex),
         "pthread_mutex_unlock failed\n");
      
+
+    ExitIfBad(0 == sem_post(&fsq->empty_size_slots), "sem_post failed\n");    
 
     CheckSum(fsq);
 
