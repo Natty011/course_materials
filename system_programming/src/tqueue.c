@@ -11,7 +11,7 @@
 #include <pthread.h>    /*pthread_create, join, mutex_destoy, mutex_(un)lock*/
 #include <semaphore.h>  /*sem_wait, sem_post, sem_destroy, sem_init */
 #include "tqueue.h"		 /* */
-/*#include "utils.h"*/	 	 /* ExitIfBad, msg */
+#include "utils.h"	 	 /* ExitIfBad, msg */
 
 enum 
 {
@@ -115,7 +115,6 @@ void TQEnqueue(tq_t *fsq, int num)
     ExitIfBad(0 == pthread_mutex_unlock(&fsq->write_mutex),
     "pthread_mutex_unlock failed\n");
 
-
     CheckSum(fsq);
 
 }
@@ -160,6 +159,12 @@ void TQDestroy(tq_t *fsq)
     ExitIfBad(0 == sem_destroy(&fsq->full_size_slots),
         "sem_destroy failed\n");
 
+    /*DEBUG ONLY */
+    /*
+        assert(! (fsq->size = 0) );
+        fsq->read_index = 0
+        fsq->write_index = 0;
+    */
     free(fsq->buffer);
     fsq->buffer = NULL;
 
