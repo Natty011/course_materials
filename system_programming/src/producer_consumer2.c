@@ -101,6 +101,12 @@ void *Producer(void *arg)
 
     for(i = 0; i < NUM_ITEMS; ++i ) /*produce 3 items*/
     {
+        /* TO DO: create Produce function while the 
+        i don't have the mutex, insert to produce the  g_arr_producer_data
+        and return the result in order to insert to the slist.*/
+
+        /*Produce();*/
+
         g_arr_producer_data[(long)arg][i] += i + (long)arg + (10)*(long)arg;
         /*lock the critical code -> shared slist */
         ExitIfBad(0 == pthread_mutex_lock(&g_mutex_lock),
@@ -110,8 +116,10 @@ void *Producer(void *arg)
          SlistInsertBefore(g_shared_slist, SlistEnd(g_shared_slist),
           &g_arr_producer_data[(long)arg][i] ) ), "SlistInsertBefore failed\n");
 
-        ExitIfBad(0 == pthread_cond_broadcast(&g_cond_empty),
-                 "pthread_cond_broadcast failed\n" );   
+        /*cond_signal must be inside the critical section
+        while using conditional variable */
+        ExitIfBad(0 == pthread_cond_signal(&g_cond_empty),
+                 "pthread_cond_signal failed\n" );   
 
    
         ExitIfBad(0 == pthread_mutex_unlock(&g_mutex_lock),
@@ -125,7 +133,14 @@ void *Producer(void *arg)
 void *Consumer(void *arg)
 {
     unsigned long item = 0;
-
+    
+    /* TO DO:
+        1. do just limited iterations such as while( i < 20 ) and the 
+        you dont need the g_stop_consumers and the if condition after
+        the internal while.
+        2. Create Consume() function that the consumer us after 
+           it releasing the mutex, this is the purpose of multithreading!! */
+    */
     while(1)
     {
 
@@ -153,6 +168,8 @@ void *Consumer(void *arg)
         
         ExitIfBad(0 == pthread_mutex_unlock(&g_mutex_lock),
         "pthread_mutex_unlock failed\n");
+
+        /*Consume();*/
 
     }
 
