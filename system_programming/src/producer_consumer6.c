@@ -30,6 +30,7 @@ void *Consumer(void *arg);
 void Produce(int *product);
 void Consume(size_t arg, int data, int version);
 
+TO DO: To contiue the implemation of this exersize !
 int main()
 {
     size_t arg = 0;
