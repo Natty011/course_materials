@@ -1,6 +1,45 @@
 #include <stdio.h>
+#include <pthread.h> /* */
+#include "scheduler.h"
+#include "uid.h"
 #include "watchdog.h"
 #include "utils.h"
+
+
+typedef struct wd_info  //shared memory 
+{
+
+pid_t self_pid; /* current pid of watchdog or client */
+pid_t parter; /* the other side pid */
+
+/* mutex to protect if the other proccess collaps - robust mutex */
+pthread_mutex_t mutex; 
+
+/* condition variable waiting to heatbeat/signal */
+pthread_cond_t cond_heartbeat;         
+
+/*if i am watchdog / client ->the code of both is equal so 
+need to know what the purpose of
+itself(watchdog/client -->monitor each other)*/
+
+int is_watchdog;
+/*to terminate the monitoring if the proccess client / watchdog collapse*/
+
+int should_terminate;        
+/*misses count to check if the proccess is dead. above N misses it 
+will do resuscitate to the proccess that collapse. (in DNR)*/
+int misses_count;
+size_t allowed_misses; /* N misses allowes*/
+
+/*the frequency of the signaling sending */
+size_t ping_interval;
+
+
+}wd_info_ty;
+
+/*Shared struct */
+static wd_info_ty *g_info = NULL;
+
 
 /*
     Input: argv: strings of the commands of the current procces,
@@ -21,7 +60,7 @@
 
     */
 
-int MakeMeImmortal(void *argv, info_ty *info, int max_misses, int interval_sec)
+    int MakeMeImmortal(size_t allowed_misses, size_t ping_frequency, char** argv)
 {
     /*
     0. If allready called brfore return succes - don't want to create
@@ -78,7 +117,7 @@ int MakeMeImmortal(void *argv, info_ty *info, int max_misses, int interval_sec)
     
 }
 
-void DoNotResuscitate(void *argv, info_ty *info)
+int DoNotResuscitate(void)
 {
 
 }
