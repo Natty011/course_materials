@@ -23,6 +23,10 @@ typedef struct info
      // condition variable waiting to heatbeat/signal 
     pthread_cond_t cond_heatbeat;         
 
+    // Use API if sch like SchedAdd and ScheddStop / ScheddDestroy(in resuscitate)
+    scheduler_t *sch	
+
+
     //if ia am watchdog / client becuse the code of both is equal so 
     need to know what the purpose of itself ( watchdog/client -->monitor wach other )
 
