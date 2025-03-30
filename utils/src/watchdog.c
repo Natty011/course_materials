@@ -21,7 +21,7 @@
 
     */
 
-int MakeMeImmortal(void *argv, g_shared_info_t *info, int max_misses, int interval_sec)
+int MakeMeImmortal(void *argv, info_ty *info, int max_misses, int interval_sec)
 {
     /*
     0. If allready called brfore return succes - don't want to create
@@ -30,8 +30,9 @@ int MakeMeImmortal(void *argv, g_shared_info_t *info, int max_misses, int interv
     // to prevent duplicate of creation 
     1. Marke already_called_before = TRUE;
 
+     Intitialization: mutex and condition variable 
 
-    2. 
+    2.a. 
          //handle if the thread that has the mutex is died
          // use with "pthread_mutexattr_setrobust"
 
@@ -44,8 +45,18 @@ int MakeMeImmortal(void *argv, g_shared_info_t *info, int max_misses, int interv
 
         info.mutex  = PTHREAD_PROCESS_SHARED 
 
+    2.b.
+
+        // use pthread_condattr_init to initialization 
+        info.cond_heatbeat
+        // use with "pthread_condattr_setpshared(&cond_heatbeat, PTHREAD_PROCESS_SHARED);"
+        info.cond_heatbeat  = PTHREAD_PROCESS_SHARED 
+
+
+
 
     3. Initilaize info struct:
+
        info.self_pid = getpid() // of the client
        info.is_watchdog =  0 // client == 0, watchdog ==1 
        info.shuld_terminate = 0 // still not asked so stop(DNR)
@@ -54,7 +65,7 @@ int MakeMeImmortal(void *argv, g_shared_info_t *info, int max_misses, int interv
     */
 }
 
-void DoNotResuscitate(void *args, info_ty *info)
+void DoNotResuscitate(void *argv, info_ty *info)
 {
 
 }
