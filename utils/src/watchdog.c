@@ -1,16 +1,25 @@
+#define _GNU_SOURCE /* setrobust */
+
 #include <stdio.h>
-#include <pthread.h> /* */
+#include <pthread.h> /*mutexattr_init, setpshared, setrobust  */
+#include <sys/types.h> /* getpid, */
+#include <unistd.h>     /*getpid */
 #include "scheduler.h"
 #include "uid.h"
 #include "watchdog.h"
 #include "utils.h"
 
+enum
+{
+    ALLOWED_MISSES = 5
+};
+
 
 typedef struct wd_info  //shared memory 
 {
 
-pid_t self_pid; /* current pid of watchdog or client */
-pid_t parter; /* the other side pid */
+pid_t self_pid; /* current pid of watchdog (1) or client (0)*/
+pid_t partner; /* the other side pid */
 
 /* mutex to protect if the other proccess collaps - robust mutex */
 pthread_mutex_t mutex; 
@@ -29,7 +38,7 @@ int should_terminate;
 /*misses count to check if the proccess is dead. above N misses it 
 will do resuscitate to the proccess that collapse. (in DNR)*/
 int misses_count;
-size_t allowed_misses; /* N misses allowes*/
+size_t allowed_misses; /* N misses allow*/
 
 /*the frequency of the signaling sending */
 size_t ping_interval;
@@ -40,6 +49,54 @@ size_t ping_interval;
 /*Shared struct */
 static wd_info_ty *g_info = NULL;
 
+
+static int InitInfo(wd_info_ty *g_info);
+
+static int InitInfo(wd_info_ty *g_info)
+{
+    pthread_mutexattr_t mutex_attr;
+    pthread_condattr_t cond_attr;
+
+    RETURN_IF_BAD(g_info, 1, "g_info is NULL");
+
+    g_info->self_pid = getpid();
+    
+    g_info->is_watchdog = 0;
+    g_info->partner = 0;
+
+    g_info->misses_count = 0;
+    g_info->should_terminate = 0;
+
+    /* Initialize mutex attributes */
+    RETURN_IF_BAD(0 == pthread_mutexattr_init(&mutex_attr), 1, "mutexattr_init failed \n");
+    RETURN_IF_BAD(0 == pthread_mutexattr_setpshared(&mutex_attr, PTHREAD_PROCESS_SHARED),
+        1, "mutexattr_setpshared failed\n");
+
+    RETURN_IF_BAD(0 == pthread_mutexattr_setrobust(&mutex_attr, PTHREAD_MUTEX_ROBUST),
+        1, "mutexattr_setrobust failed\n");
+
+    /* Initialize the mutex itself */
+    RETURN_IF_BAD(pthread_mutex_init(&g_info->mutex, &mutex_attr),
+        1,"mutex_init failed\n" );
+
+    /* Initialize condition variable attributes */
+    RETURN_IF_BAD(0 == pthread_condattr_init(&cond_attr), 1, "condattr_init failed\n");
+    RETURN_IF_BAD(0 == pthread_condattr_setpshared(&cond_attr, PTHREAD_PROCESS_SHARED),
+         1, "condattr_setpshared failed\n");
+
+    /* Initialize the condition variable */
+    RETURN_IF_BAD(0 == pthread_cond_init(&g_info->cond_heartbeat, &cond_attr),
+        1,"cond_init failed\n" );
+
+    /* Clean up attributes (no longer needed) */
+    RETURN_IF_BAD(0 == pthread_mutexattr_destroy(&mutex_attr),
+        1,"mutexattr_destroy failed\n" );
+
+    RETURN_IF_BAD(0 == pthread_condattr_destroy(&cond_attr),
+        1,"pthread_condattr_destroy failed\n" );
+
+    return SUCCESS;
+}
 
 /*
     Input: argv: strings of the commands of the current procces,
@@ -62,6 +119,12 @@ static wd_info_ty *g_info = NULL;
 
     int MakeMeImmortal(size_t allowed_misses, size_t ping_frequency, char** argv)
 {
+
+    /*
+    
+    /*g_info->allowed_misses  by MMI ARGUMENTS */
+    /*g_info->ping_interval by MMI ARGUMENTS*/
+    
     /*
     0. If allready called brfore return succes - don't want to create
         watchdog 
@@ -98,7 +161,7 @@ static wd_info_ty *g_info = NULL;
 
        info.self_pid = getpid() // of the client
        info.is_watchdog =  0 // client == 0, watchdog ==1 
-       info.shuld_terminate = 0 // still not asked so stop(DNR)
+       info.shuld_terminate = 0 // still not asked to stop(DNR)
        info.misses = 0 //still do not miss signal/heartbit
 
 
