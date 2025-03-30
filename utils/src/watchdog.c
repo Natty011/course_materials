@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include "watchdog.h"
-
+#include "utils.h"
 
 /*
     Input: argv: strings of the commands of the current procces,
@@ -62,7 +62,20 @@ int MakeMeImmortal(void *argv, info_ty *info, int max_misses, int interval_sec)
        info.shuld_terminate = 0 // still not asked so stop(DNR)
        info.misses = 0 //still do not miss signal/heartbit
 
+
+
+
+    Create a new proccess:
+        pid = fork();
+
+        RETURN_IF_BAD(-1 != pid, -1, "fork failed\n");
+
+       if
+
     */
+
+
+    
 }
 
 void DoNotResuscitate(void *argv, info_ty *info)
