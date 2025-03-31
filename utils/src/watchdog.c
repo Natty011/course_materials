@@ -100,6 +100,8 @@ int MakeMeImmortal(size_t allowed_misses, size_t ping_frequency, char** argv)
         perror("execvp failed\n");
         exit(1);
         /*RETURN_IF_BAD(FALSE, 1, "execvp failed\n");*/
+
+        //else Parent continues as client  
     }
 
 
