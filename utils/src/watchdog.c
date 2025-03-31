@@ -43,7 +43,7 @@ size_t allowed_misses; /* N misses allow*/
 
 /*the frequency of the signaling sending */
 size_t ping_interval;
-
+/*the */
 int is_ready = 0;   /* */
 
 }wd_info_ty;
@@ -51,9 +51,24 @@ int is_ready = 0;   /* */
 /*Shared struct */
 static wd_info_ty *g_info = NULL;
 
-
+/*----------------
+INITIAL MODE
+-----------------*/
 static int InitInfo(wd_info_ty *g_info);
 
+/*----------------
+NORNAL MODE TASKS
+-----------------*/
+
+int SendPing_TSK(void *param);
+int CheckMisses_TSK(void *param);
+int ResetMisses_TSK(void *param);
+int CheckTermination_TSK(void *param);
+
+/*----------------
+FAILURE MODE TASKS
+-----------------*/
+int RevivePartner_TSK(void *parem);
 
 
 /*
