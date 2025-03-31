@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <pthread.h>    /*mutexattr_init, setpshared, setrobust  */
 #include <sys/types.h>  /* getpid, */
-#include <unistd.h>     /*getpid */
+#include <unistd.h>     /*getpid, fork */
 #include <sys/mman.h>   /*mmap */
 #include "scheduler.h"
 #include "uid.h"
@@ -20,7 +20,7 @@ typedef struct wd_info  //shared memory
 {
 
 pid_t self_pid; /* current pid of watchdog (1) or client (0)*/
-pid_t partner; /* the other side pid */
+pid_t partner_pid; /* the other side pid */
 
 /* mutex to protect if the other proccess collaps - robust mutex */
 pthread_mutex_t mutex; 
@@ -88,6 +88,19 @@ int MakeMeImmortal(size_t allowed_misses, size_t ping_frequency, char** argv)
     g_info->allowed_misses = allowed_misses;
     g_info->ping_interval = ping_frequency;
 
+    /*fork a new watchdog proccess*/
+    RETURN_IF_BAD(-1 != (g_info->partner_pid = fork()), 1, "fork failed\n");
+
+    if(0 == g_info->partner_pid) 
+    {
+        /*child process becomes watchdog */
+        g_info->is_watchdog = 1;
+        execvp(argv[0], argv);  /* replace child  in main */
+
+        perror("execvp failed\n");
+        exit(1);
+        /*RETURN_IF_BAD(FALSE, 1, "execvp failed\n");*/
+    }
 
 
     
@@ -162,8 +175,6 @@ static int InitInfo(wd_info_ty *g_info)
     g_info->self_pid = getpid();
     
     g_info->is_watchdog = 0;
-    g_info->partner = 0;
-
     g_info->misses_count = 0;
     g_info->should_terminate = 0;
 
