@@ -1,9 +1,10 @@
 #define _GNU_SOURCE /* setrobust */
 
 #include <stdio.h>
-#include <pthread.h> /*mutexattr_init, setpshared, setrobust  */
-#include <sys/types.h> /* getpid, */
+#include <pthread.h>    /*mutexattr_init, setpshared, setrobust  */
+#include <sys/types.h>  /* getpid, */
 #include <unistd.h>     /*getpid */
+#include <sys/mman.h>   /*mmap */
 #include "scheduler.h"
 #include "uid.h"
 #include "watchdog.h"
@@ -52,51 +53,7 @@ static wd_info_ty *g_info = NULL;
 
 static int InitInfo(wd_info_ty *g_info);
 
-static int InitInfo(wd_info_ty *g_info)
-{
-    pthread_mutexattr_t mutex_attr;
-    pthread_condattr_t cond_attr;
 
-    RETURN_IF_BAD(g_info, 1, "g_info is NULL");
-
-    g_info->self_pid = getpid();
-    
-    g_info->is_watchdog = 0;
-    g_info->partner = 0;
-
-    g_info->misses_count = 0;
-    g_info->should_terminate = 0;
-
-    /* Initialize mutex attributes */
-    RETURN_IF_BAD(0 == pthread_mutexattr_init(&mutex_attr), 1, "mutexattr_init failed \n");
-    RETURN_IF_BAD(0 == pthread_mutexattr_setpshared(&mutex_attr, PTHREAD_PROCESS_SHARED),
-        1, "mutexattr_setpshared failed\n");
-
-    RETURN_IF_BAD(0 == pthread_mutexattr_setrobust(&mutex_attr, PTHREAD_MUTEX_ROBUST),
-        1, "mutexattr_setrobust failed\n");
-
-    /* Initialize the mutex itself */
-    RETURN_IF_BAD(pthread_mutex_init(&g_info->mutex, &mutex_attr),
-        1,"mutex_init failed\n" );
-
-    /* Initialize condition variable attributes */
-    RETURN_IF_BAD(0 == pthread_condattr_init(&cond_attr), 1, "condattr_init failed\n");
-    RETURN_IF_BAD(0 == pthread_condattr_setpshared(&cond_attr, PTHREAD_PROCESS_SHARED),
-         1, "condattr_setpshared failed\n");
-
-    /* Initialize the condition variable */
-    RETURN_IF_BAD(0 == pthread_cond_init(&g_info->cond_heartbeat, &cond_attr),
-        1,"cond_init failed\n" );
-
-    /* Clean up attributes (no longer needed) */
-    RETURN_IF_BAD(0 == pthread_mutexattr_destroy(&mutex_attr),
-        1,"mutexattr_destroy failed\n" );
-
-    RETURN_IF_BAD(0 == pthread_condattr_destroy(&cond_attr),
-        1,"pthread_condattr_destroy failed\n" );
-
-    return SUCCESS;
-}
 
 /*
     Input: argv: strings of the commands of the current procces,
@@ -117,9 +74,17 @@ static int InitInfo(wd_info_ty *g_info)
 
     */
 
-    int MakeMeImmortal(size_t allowed_misses, size_t ping_frequency, char** argv)
+int MakeMeImmortal(size_t allowed_misses, size_t ping_frequency, char** argv)
 {
-
+    
+    /*Allocate shared memory of g_info to the client and watchdog*/
+    g_info = mmap(NULL, sizeof(wd_info_ty), PROT_READ | PROT_WRITE,
+                    MAP_SHARED | MAP_ANONYMOUS, -1, 0);
+    
+    RETURN_IF_BAD(MAP_FAILED != g_info, 1, "mmap failed\n");
+    
+    
+    
     /*
     
     /*g_info->allowed_misses  by MMI ARGUMENTS */
@@ -183,4 +148,50 @@ static int InitInfo(wd_info_ty *g_info)
 int DoNotResuscitate(void)
 {
 
+}
+
+static int InitInfo(wd_info_ty *g_info)
+{
+    pthread_mutexattr_t mutex_attr;
+    pthread_condattr_t cond_attr;
+
+    RETURN_IF_BAD(g_info, 1, "g_info is NULL");
+
+    g_info->self_pid = getpid();
+    
+    g_info->is_watchdog = 0;
+    g_info->partner = 0;
+
+    g_info->misses_count = 0;
+    g_info->should_terminate = 0;
+
+    /* Initialize mutex attributes */
+    RETURN_IF_BAD(0 == pthread_mutexattr_init(&mutex_attr), 1, "mutexattr_init failed \n");
+    RETURN_IF_BAD(0 == pthread_mutexattr_setpshared(&mutex_attr, PTHREAD_PROCESS_SHARED),
+        1, "mutexattr_setpshared failed\n");
+
+    RETURN_IF_BAD(0 == pthread_mutexattr_setrobust(&mutex_attr, PTHREAD_MUTEX_ROBUST),
+        1, "mutexattr_setrobust failed\n");
+
+    /* Initialize the mutex itself */
+    RETURN_IF_BAD(pthread_mutex_init(&g_info->mutex, &mutex_attr),
+        1,"mutex_init failed\n" );
+
+    /* Initialize condition variable attributes */
+    RETURN_IF_BAD(0 == pthread_condattr_init(&cond_attr), 1, "condattr_init failed\n");
+    RETURN_IF_BAD(0 == pthread_condattr_setpshared(&cond_attr, PTHREAD_PROCESS_SHARED),
+         1, "condattr_setpshared failed\n");
+
+    /* Initialize the condition variable */
+    RETURN_IF_BAD(0 == pthread_cond_init(&g_info->cond_heartbeat, &cond_attr),
+        1,"cond_init failed\n" );
+
+    /* Clean up attributes (no longer needed) */
+    RETURN_IF_BAD(0 == pthread_mutexattr_destroy(&mutex_attr),
+        1,"mutexattr_destroy failed\n" );
+
+    RETURN_IF_BAD(0 == pthread_condattr_destroy(&cond_attr),
+        1,"pthread_condattr_destroy failed\n" );
+
+    return SUCCESS;
 }
