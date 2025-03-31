@@ -83,14 +83,16 @@ int MakeMeImmortal(size_t allowed_misses, size_t ping_frequency, char** argv)
     
     RETURN_IF_BAD(MAP_FAILED != g_info, 1, "mmap failed\n");
     
-    
+    RETURN_IF_BAD(0 == InitInfo(g_info), 1, "InitInfo failed\n");
+
+    g_info->allowed_misses = allowed_misses;
+    g_info->ping_interval = ping_frequency;
+
+
+
     
     /*
-    
-    /*g_info->allowed_misses  by MMI ARGUMENTS */
-    /*g_info->ping_interval by MMI ARGUMENTS*/
-    
-    /*
+
     0. If allready called brfore return succes - don't want to create
         watchdog 
     
