@@ -1,10 +1,11 @@
-#define _GNU_SOURCE /* setrobust */
+#define _POSIX_C_SOURCE 199309L /*struct sigaction*/
 
 #include <stdio.h>
-#include <pthread.h>    /*mutexattr_init, setpshared, setrobust  */
+#include <pthread.h>    /*  */
 #include <sys/types.h>  /* getpid, */
 #include <unistd.h>     /*getpid, fork */
-#include <sys/mman.h>   /*mmap */
+#include <signal.h>     /*kill, SIGUSR1 , siaction*/
+#include <sys/types.h>
 #include "scheduler.h"
 #include "uid.h"
 #include "watchdog.h"
@@ -16,17 +17,11 @@ enum
 };
 
 
-typedef struct wd_info  //shared memory 
+typedef struct wd_info  
 {
 
 pid_t self_pid; /* current pid of watchdog (1) or client (0)*/
 pid_t partner_pid; /* the other side pid */
-
-/* mutex to protect if the other proccess collaps - robust mutex */
-pthread_mutex_t mutex; 
-
-/* condition variable waiting to heatbeat/signal */
-pthread_cond_t cond_heartbeat;         
 
 /*if i am watchdog / client ->the code of both is equal so 
 need to know what the purpose of
@@ -43,14 +38,13 @@ size_t allowed_misses; /* N misses allow*/
 
 /*the frequency of the signaling sending */
 size_t ping_interval;
-/*the */
-int is_ready = 0;   /* */
+
 
 }wd_info_ty;
 
 /*Shared struct */
 static wd_info_ty *g_info = NULL;
-
+static volatile sig_atomic_t g_watchdog_is_ready = 0;
 /*----------------
 INITIAL MODE
 -----------------*/
@@ -70,58 +64,51 @@ FAILURE MODE TASKS
 -----------------*/
 int RevivePartner_TSK(void *parem);
 
+static void *WatchdogThread_TH(void *arg);
+static void ReadySignal_HAND(int sig);
 
-/*
-    Input: argv: strings of the commands of the current procces,
-         the watchdog need to run it again in order it will succeded.
-
-          
-         info - poiner to strcuct info_ty, saving inforamion on the system:
-            states, sync_object, pid,v ...
-
-        max_misses- how many times can miss respponse from the client/watchdog
-
-        interval_sec - how many secodns to charck that the client is alive
-
-    return:
-     Success - If the creations seccessed
-     Failure - If there was a failure in in the creation of thr proccess's client
-
-
-    */
 
 int MakeMeImmortal(size_t allowed_misses, size_t ping_frequency, char** argv)
 {
-    scheduler_t *scheduler = NULL;
+    char *new_argv[] = {argv[0], "--watchdog", NULL};
+    struct sigaction
+  
+    
     /*assert*/
     /*Allocate shared memory of g_info to the client and watchdog*/
-    g_info = mmap(NULL, sizeof(wd_info_ty), PROT_READ | PROT_WRITE,
-                    MAP_SHARED | MAP_ANONYMOUS, -1, 0);
+    struct sigaction sig_act = {0};
+    RETURN_IF_BAD(g_info = calloc(1, sizeof(wd_info_ty)), 1, "calloc failed" );
+
     
-    RETURN_IF_BAD(MAP_FAILED != g_info, 1, "mmap failed");
-    
+    /*Init variable*/
+
     RETURN_IF_BAD(0 == InitInfo(g_info), 1, "InitInfo failed");
 
     g_info->allowed_misses = allowed_misses;
     g_info->ping_interval = ping_frequency;
-
-    /*fork a new watchdog proccess*/
+    /*assign ReadySignal_HAND*/
+    /*create watchdog proccess */
     RETURN_IF_BAD(-1 != (g_info->partner_pid = fork()), 1, "fork failed");
 
     if(0 == g_info->partner_pid) 
     {
-        /*child process becomes watchdog */
+        /*create watchdog proccess */
         g_info->is_watchdog = 1;
-        execvp(argv[0], argv);  /* replace child  in main */
+        execvp(argv[0], new_argv);  /*replace child proccess with watchdog proccess */
 
         perror("execvp failed");
         exit(1);
     }
 
-    /*scheduler = SchedulerCreate();
-    RETURN_IF_BAD(scheduler, 1, "SchedulerCreate failed");*/
+    while(!g_watchdog_is_ready)
+    {
+        /*sigwait(&sigset, &sig);*/
+
+        /*wait for SIGUSR1*/
+    }
 
 
+    return 0;
     
 }
 
@@ -131,10 +118,54 @@ int DoNotResuscitate(void)
 
 }
 
+/*send signal to the other side */
+int SendPing_TSK(void *param)
+{
+    /* Send SIGUSR1 to partner */
+    kill(g_info->partner_pid, SIGUSR1);
+
+    return SHOULD_REPEAT;
+}
+
+/* chack if signal/heartbeat arrived */
+int CheckMisses_TSK(void *param)
+{
+    if(g_info->misses_count > g_info->allowed_misses )
+    {
+        return FAIL;
+    
+    }
+
+    ++g_info->misses_count;
+    return SHOULD_REPEAT;
+
+}
+
+/*reset the misses if signal/heatbeat arrived*/
+int ResetMisses_TSK(void *param)
+{
+    g_info->misses_count = 0;
+
+    return SHOULD_REPEAT;
+}
+
+/*check if need to end the proccess*/
+int CheckTermination_TSK(void *param)
+{
+    if(g_info->should_terminate)
+    {
+        return STOPPED;
+    }
+
+    return SHOULD_REPEAT;
+
+}
+
+
+
 static int InitInfo(wd_info_ty *g_info)
 {
-    pthread_mutexattr_t mutex_attr;
-    pthread_condattr_t cond_attr;
+
     /*assert*/
 
     RETURN_IF_BAD(g_info, 1, "g_info is NULL");
@@ -145,36 +176,140 @@ static int InitInfo(wd_info_ty *g_info)
     g_info->misses_count = 0;
     g_info->should_terminate = 0;
 
-    /* Initialize mutex attributes */
-    RETURN_IF_BAD(0 == pthread_mutexattr_init(&mutex_attr), 1, "mutexattr_init failed");
-    RETURN_IF_BAD(0 == pthread_mutexattr_setpshared(&mutex_attr, PTHREAD_PROCESS_SHARED),
-        1, "mutexattr_setpshared failed");
-
-    RETURN_IF_BAD(0 == pthread_mutexattr_setrobust(&mutex_attr, PTHREAD_MUTEX_ROBUST),
-        1, "mutexattr_setrobust failed");
-
-    /* Initialize the mutex itself */
-    RETURN_IF_BAD(pthread_mutex_init(&g_info->mutex, &mutex_attr),
-        1,"mutex_init failed" );
-
-    /* Initialize condition variable attributes */
-    RETURN_IF_BAD(0 == pthread_condattr_init(&cond_attr), 1, "condattr_init failed");
-    RETURN_IF_BAD(0 == pthread_condattr_setpshared(&cond_attr, PTHREAD_PROCESS_SHARED),
-         1, "condattr_setpshared failed");
-
-    /* Initialize the condition variable */
-    RETURN_IF_BAD(0 == pthread_cond_init(&g_info->cond_heartbeat, &cond_attr),
-        1,"cond_init failed" );
-
-    /* Clean up attributes (no longer needed) */
-    RETURN_IF_BAD(0 == pthread_mutexattr_destroy(&mutex_attr),
-        1,"mutexattr_destroy failed" );
-
-    RETURN_IF_BAD(0 == pthread_condattr_destroy(&cond_attr),
-        1,"pthread_condattr_destroy failed" );
-
     return SUCCESS;
 }
+
+/*if arriving to maximum allowing misses than kill the other proccess
+and try to revive it */
+int RevivePartner_TSK(void *parem)
+{
+    kill(g_info->partner_pid, SIGKILL);
+    RETURN_IF_BAD(-1 != (g_info->partner_pid = fork()), 1, "fork failed");
+
+    if( 0 == g_info->partner_pid )
+    {
+        /*this is the watchdog proccess*/
+        g_info->is_watchdog = 1;
+        /*execlp(/.../);  ???*/
+    }
+
+}
+
+
+static void *WatchdogThread_TH(void *arg)
+{
+    /*Signal to client that watchdog is ready*/
+    kill(g_info->partner_pid, SIGUSR1);
+
+    /* TO DO: need to implement schedular tasks */
+    return NULL;
+
+}
+
+/*client wait for watchdog */
+static void ReadySignal_HAND(int sig)
+{
+    (void)sig;
+    g_watchdog_is_ready = 1;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+Input: argv: strings of the commands of the current procces,
+    the watchdog need to run it again in order it will succeded.
+
+    
+    info - poiner to strcuct info_ty, saving inforamion on the system:
+    states, sync_object, pid,v ...
+
+max_misses- how many times can miss respponse from the client/watchdog
+
+interval_sec - how many secodns to charck that the client is alive
+
+return:
+Success - If the creations seccessed
+Failure - If there was a failure in in the creation of thr proccess's client
+
+
+*/
+
+
 /*
 
 0. If allready called brfore return succes - don't want to create
