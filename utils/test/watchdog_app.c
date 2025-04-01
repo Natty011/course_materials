@@ -25,7 +25,6 @@ int main(int argc, char** argv)
     char *new_argv[3] = {0};
     scheduler_t *sch = NULL;
     
-
     if(argc > 1 &&  (0 == strcmp(argv[1], "watchdog") ))
     {
         RunAsWatchdog();
@@ -44,12 +43,31 @@ int main(int argc, char** argv)
 
     /*fork and start watchdog*/
     RETURN_IF_BAD(-1 != (info->child_pid = fork()), 1,  "fork failed");
-    if()
-    /*prepare argv for execvp*/
-    new_argv[0] = argv[0];      /* ./watchdog_app */
-    new_argv[1] = "watchdog"; /* flag to identify WD */
-    new_argv[2] = NULL;
+    if(0 == info->child_pid)
+    {
+        /*prepare argv for execvp*/
+        new_argv[0] = argv[0];      /* ./watchdog_app */
+        new_argv[1] = "watchdog"; /* flag to identify WD process*/
+        new_argv[2] = NULL;
 
+        execvp(argv[0], new_argv);
+        RETURN_IF_BAD(FALSE, 1,  "execvp failed");
+
+    }
+
+    
+    /*
+    ADD TASKS:
+       SendSignal_TSK
+       CheckMisses_TSK
+       CheckDnrFlag_TSK
+    
+    */
+
+    /*
+    Create SchedulerTread_TH
+    join(g_wd) or detach ??
+    */    
 
 
     
@@ -58,6 +76,8 @@ int main(int argc, char** argv)
 
     return 0;
 }
+
+
 
 static void SendHeartBeat_Hand(int sig)
 {
