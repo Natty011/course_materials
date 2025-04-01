@@ -8,7 +8,16 @@
 #ifndef WATCHDOG_H      /* WATCHDOG_H */
 #define WATCHDOG_H      /* WATCHDOG_H */
 
-typedef struct wd_info wd_info_ty;
+typedef struct watchdog
+{
+    scheduler_t* sch;
+    char** argv;
+    int argc;
+    size_t allowed_misses;
+    size_t ping_frequency_seconds;
+    pid_t child_pid;
+    
+}wd_task_info_ty;
 
 /*client and watchdog save this instace struct to collet info/status on each other 
 during their communication */
