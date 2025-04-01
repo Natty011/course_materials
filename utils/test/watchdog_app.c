@@ -66,12 +66,13 @@ int main(int argc, char** argv)
 
     /*
     Create SchedulerTread_TH
-    join(g_wd) or detach ??
+    join(&g_wd) or detach(&g_wd) ?? need to check
     */    
 
 
     
-
+    /*while(!g_stop_app)*/
+        /*The job of the Application ...*/
     
 
     return 0;
