@@ -95,7 +95,6 @@ int main(int argc, char** argv)
 }
 
 
-
 static void SendHeartBeat_Hand(int sig)
 {
     assert(SIGUSR1 == sig);
@@ -106,15 +105,12 @@ static void SendHeartBeat_Hand(int sig)
 static int InitInfo(wd_task_info_ty *info, int argc, char** argv)
 {
     
-    RETURN_IF_BAD(argc < 3, FAIL, "Use:./watchdog_app.out <#freq> <#misses>");
-
-
+    RETURN_IF_BAD(argc >= 3, FAIL, "Use:./watchdog_app.out <#freq> <#misses>");
 
     info->sch = SchedulerCreate();
     if(NULL == info->sch)
     {
         free(info);
-        info = NULL;
         RETURN_IF_BAD(FALSE, FAIL, "SchedulerCreate failed");
 
     }
