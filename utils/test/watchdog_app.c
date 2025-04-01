@@ -1,19 +1,39 @@
+#define _POSIX_C_SOURCE 199309L /*struct sigaction*/
+
 #include <stdio.h>
+#include <pthread.h> /*pthread_t, */
+#include <signal.h>     /*kill, SIGUSR1 , siaction*/
 #include <stdlib.h>
 #include <unistd.h>
+#include "scheduler.h"
 #include "watchdog.h"
+#include "utils.h"
 
 volatile int g_stop_app = 0;
-/*signal handler to allow gracefull terminaion */
-StopApp_HAND(int sig)
+static volatile int g_missed_SOL = 0;
+static pthread_t g_wd = 0;
+
+int main(int argc, char** argv)
 {
-    /*change g_stop_app to true*/
-    /*return*/
+    wd_task_info_ty *info = NULL;
+    struct sigaction sa_app = {0};
+    char *new_argv[4] = {0};
+    
+    info = (wd_task_info_ty*)malloc(sizeof(*info));
+    RETURN_IF_BAD(info, 1, "malloc failed");
+
+    info->ping_frequency_seconds = (size_t)atoi(argv[1]);
+    info->allowed_misses = (size_t)atoi(argv[2]);
+
+    RETURN_IF_BAD(argc != 3, 1, "Use:./watchdog_app.out <#freq> <#misses>");
+    
+    /*prepare argv for execvp*/
+
+    return 0;
 }
 
-int main(int argc,char** argv)
-{
-     /*assert*/
+
+  /*assert*/
      /*check that argv consists a string name that is
       identical with the executable file name */
 
@@ -27,11 +47,14 @@ int main(int argc,char** argv)
 
 
     /*while(!g_stop_app)*/
-        /*do your job...*/
+        /*The job of the Application ...*/
 
      /*DNR()*/
-     
-     
-    return 0;
-}
 
+
+/*signal handler to allow gracefull terminaion */
+
+/*StopApp_HAND(int sig)*/
+
+    /*change g_stop_app to true*/
+    /*return*/
