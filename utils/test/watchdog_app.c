@@ -1,9 +1,9 @@
 #define _POSIX_C_SOURCE 199309L /*struct sigaction*/
 
 #include <stdio.h>
-#include <pthread.h> /*pthread_t, */
+#include <pthread.h>    /*pthread_t, */
 #include <signal.h>     /*kill, SIGUSR1 , siaction*/
-#include <stdlib.h>
+#include <stdlib.h>     /*atoi*/
 #include <unistd.h>
 #include "scheduler.h"
 #include "watchdog.h"
@@ -13,25 +13,37 @@ volatile int g_stop_app = 0;
 static volatile int g_missed_SOL = 0;
 static pthread_t g_wd = 0;
 
+static int InitInfo(wd_task_info_ty *info, int argc, char** argv);
+
 int main(int argc, char** argv)
 {
     wd_task_info_ty *info = NULL;
     struct sigaction sa_app = {0};
     char *new_argv[4] = {0};
     
-    info = (wd_task_info_ty*)malloc(sizeof(*info));
-    RETURN_IF_BAD(info, 1, "malloc failed");
-
-    info->ping_frequency_seconds = (size_t)atoi(argv[1]);
-    info->allowed_misses = (size_t)atoi(argv[2]);
-
-    RETURN_IF_BAD(argc != 3, 1, "Use:./watchdog_app.out <#freq> <#misses>");
+    RETURN_IF_BAD( InitInfo(info, argc, argv), 1, "InitInfo failed");
+    
     
     /*prepare argv for execvp*/
 
     return 0;
 }
 
+static int InitInfo(wd_task_info_ty *info, int argc, char** argv)
+{
+    
+    RETURN_IF_BAD(argc != 3, 1, "Use:./watchdog_app.out <#freq> <#misses>");
+
+    info = (wd_task_info_ty*)malloc(sizeof(*info));
+    RETURN_IF_BAD(info, 1, "malloc failed");
+
+    info->ping_frequency_seconds = (size_t)atoi(argv[1]);
+    info->allowed_misses = (size_t)atoi(argv[2]);
+    info->argv = argv;
+    info->argc = argc;
+
+    return 1;
+}
 
   /*assert*/
      /*check that argv consists a string name that is
