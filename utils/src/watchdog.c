@@ -1,20 +1,25 @@
 #define _POSIX_C_SOURCE 199309L /*struct sigaction*/
 
-#include <stdio.h>
+#include <stdio.h>      /* perror */
+#include <stdlib.h>     /* exit */
+#include <unistd.h>     /*getpid, fork */
+
 #include <pthread.h>    /*  */
 #include <sys/types.h>  /* getpid, */
-#include <unistd.h>     /*getpid, fork */
 #include <signal.h>     /*kill, SIGUSR1 , siaction*/
-#include <sys/types.h>
+#include <sys/types.h>  /*pid_t*/
 #include "scheduler.h"
 #include "uid.h"
 #include "watchdog.h"
 #include "utils.h"
 
-enum
+typedef enum mode
 {
-    ALLOWED_MISSES = 5
-};
+    MODE_INIT = 0,
+    MODE_NORMAL =1,
+    MODE_RECOVER = 2,
+    MODE_STOP
+}mode_t;
 
 
 typedef struct wd_info  
@@ -42,13 +47,18 @@ size_t ping_interval;
 
 }wd_info_ty;
 
-/*Shared struct */
+
 static wd_info_ty *g_info = NULL;
 static volatile sig_atomic_t g_watchdog_is_ready = 0;
+static mode_t g_mode = MODE_INIT;
+
+static int InitInfo(wd_info_ty *g_info);
+
 /*----------------
 INITIAL MODE
 -----------------*/
-static int InitInfo(wd_info_ty *g_info);
+int WaitForReady_TSK(void *param);
+int SendPing_TSK(void *param);
 
 /*----------------
 NORNAL MODE TASKS
@@ -60,20 +70,26 @@ int ResetMisses_TSK(void *param);
 int CheckTermination_TSK(void *param);
 
 /*----------------
-FAILURE MODE TASKS
+RECOVERY MODE TASKS
 -----------------*/
 int RevivePartner_TSK(void *parem);
 
 static void *WatchdogThread_TH(void *arg);
 static void ReadySignal_HAND(int sig);
 
+/*--------------------
+SWITCH MODE FUNCTIONS
+--------------------*/
+
+SchedSwitchToNoramalMode(mode_t mew_mode);
+SchedSwitchToRecoveryMode(mode_t mew_mode);
+
+
 
 int MakeMeImmortal(size_t allowed_misses, size_t ping_frequency, char** argv)
 {
     char *new_argv[] = {argv[0], "--watchdog", NULL};
-    struct sigaction
-  
-    
+      
     /*assert*/
     /*Allocate shared memory of g_info to the client and watchdog*/
     struct sigaction sig_act = {0};
