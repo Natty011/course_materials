@@ -1,6 +1,6 @@
 #define _POSIX_C_SOURCE 199309L /*struct sigaction*/
 
-#include <stdio.h>      /*perror, printf*/
+#include <stdio.h>      /*perror, printf, __atomic_store_n, __atomic_load_n */
 #include <pthread.h>    /*pthread_t, */
 #include <signal.h>     /*kill, SIGUSR1 , siaction*/
 #include <stdlib.h>     /*atoi, exit*/
@@ -16,6 +16,7 @@ static volatile int g_missed_SOL = 0;
 static pthread_t g_wd = 0;
 
 static int InitInfo(wd_task_info_ty *info, int argc, char** argv);
+static void SendHeartBeat_Hand(int sig);
 
 int main(int argc, char** argv)
 {
@@ -36,23 +37,34 @@ int main(int argc, char** argv)
     sch = info->sch;
 
    /* Setup signal handler for SIGUSR1 (first signal) */
-    sa_app.sa_handler = SignalToWd_Hand;
-    sigaction(SIGUSR1, &sa_app, NULL);
+    sa_app.sa_handler = SendHeartBeat_Hand;
+    RETURN_IF_BAD(0 != sigemptyset(&sa_app.sa_mask), 1, "sigemptyset failed");
+    RETURN_IF_BAD(0 != sigaction(SIGUSR1, &sa_app, NULL), 1, "sigaction failed");
 
 
+    /*fork and start watchdog*/
+    RETURN_IF_BAD(-1 != (info->child_pid = fork()), 1,  "fork failed");
+    if()
     /*prepare argv for execvp*/
     new_argv[0] = argv[0];      /* ./watchdog_app */
     new_argv[1] = "watchdog"; /* flag to identify WD */
     new_argv[2] = NULL;
 
 
-    
+
     
 
     
 
     return 0;
 }
+
+static void SendHeartBeat_Hand(int sig)
+{
+    assert(SIGUSR1 == sig);
+    __atomic_store_n(&g_missed_SOL, 0, __ATOMIC_SEQ_CST);
+}
+
 
 static int InitInfo(wd_task_info_ty *info, int argc, char** argv)
 {
