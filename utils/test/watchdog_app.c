@@ -41,7 +41,7 @@ int main(int argc, char** argv)
         return 0;
     }
 
-    info = (wd_task_info_ty*)malloc(sizeof(*info));
+    info = (wd_task_info_ty*)malloc(sizeof(wd_task_info_ty));
     RETURN_IF_BAD(info, FAIL, "malloc failed");
 
     
@@ -72,6 +72,7 @@ int main(int argc, char** argv)
 
 
     /*fork and start watchdog*/
+    /*----------need to be in MMI Not here!!------------------*/
     RETURN_IF_BAD(-1 != (info->child_pid = fork()), FAIL,  "fork failed");
     if(0 == info->child_pid)
     {
@@ -84,6 +85,7 @@ int main(int argc, char** argv)
         RETURN_IF_BAD(FALSE, FAIL,  "execvp failed");
 
     }
+    /*----------need to be in MMI Not here!!------------------*/
 
     
     /*
