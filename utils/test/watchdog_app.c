@@ -62,6 +62,7 @@ int main(int argc, char** argv)
     RETURN_IF_BAD(SUCCESS != ret, FAIL, "InitInfo failed");
 
     /* Set handler for SIGCHLD to cleanup Dead processes w/o become to Zombies */
+    /*signal from the system that the child process is terminated*/
     signal(SIGCHLD, ChildCleanup_HAND);
 
    /* Setup signal handler for SIGUSR1 (first signal) */
@@ -107,11 +108,28 @@ int main(int argc, char** argv)
 
     return 0;
 }
-/*prevents mass of zombies*/
+
+/*prevents mass of zombies in the process table,
+ while deads child sexist the parent collects them*/
+  
 static void ChildCleanup_HAND(int sig)
 {
     (void)sig;
-    while (waitpid(-1, NULL, WNOHANG) > 0);
+
+    pid_t pid = 0;
+    int status = 0;
+    /*WNOHANG non blocking/waiting, just check if there is dead process childs*/
+    while ((pid = waitpid(-1, &status, WNOHANG)) > 0)
+    {
+       /* printf("Child process %d cleaned up.\n", pid);*/
+    }
+    /*there is dead child proccess and failed to clean it up*/
+    if (pid == -1 && errno != ECHILD) 
+    {
+        
+        perror("waitpid failed in ChildCleanup_HAND");
+    }
+
 }
 
 
