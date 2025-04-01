@@ -19,12 +19,24 @@ int main(int argc, char** argv)
 {
     wd_task_info_ty *info = NULL;
     struct sigaction sa_app = {0};
-    char *new_argv[4] = {0};
+    char *new_argv[3] = {0};
     
+
+    if()
     RETURN_IF_BAD( InitInfo(info, argc, argv), 1, "InitInfo failed");
-    
-    
+
+   
     /*prepare argv for execvp*/
+    new_argv[0] = argv[0];      /* ./watchdog_app */
+    new_argv[1] = "watchdog"; /* flag to identify WD */
+    new_argv[2] = NULL;
+
+
+
+    /* Setup signal handler for SIGUSR1 (first signal) */
+    sa_app.
+
+    
 
     return 0;
 }
@@ -32,7 +44,7 @@ int main(int argc, char** argv)
 static int InitInfo(wd_task_info_ty *info, int argc, char** argv)
 {
     
-    RETURN_IF_BAD(argc != 3, 1, "Use:./watchdog_app.out <#freq> <#misses>");
+    RETURN_IF_BAD(argc < 3, 1, "Use:./watchdog_app.out <#freq> <#misses>");
 
     info = (wd_task_info_ty*)malloc(sizeof(*info));
     RETURN_IF_BAD(info, 1, "malloc failed");
@@ -41,6 +53,7 @@ static int InitInfo(wd_task_info_ty *info, int argc, char** argv)
     info->allowed_misses = (size_t)atoi(argv[2]);
     info->argv = argv;
     info->argc = argc;
+    info->sch = NULL;
 
     return 1;
 }
