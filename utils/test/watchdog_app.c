@@ -36,7 +36,8 @@ int main(int argc, char** argv)
     sch = info->sch;
 
    /* Setup signal handler for SIGUSR1 (first signal) */
-    sa_app.sa_handler = 
+    sa_app.sa_handler = SignalToWd_Hand;
+    sigaction(SIGUSR1, &sa_app, NULL);
 
 
     /*prepare argv for execvp*/
@@ -45,7 +46,7 @@ int main(int argc, char** argv)
     new_argv[2] = NULL;
 
 
-
+    
     
 
     
