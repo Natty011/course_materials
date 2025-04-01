@@ -1,3 +1,10 @@
+/***************************************
+ * Author : Natty
+ * Reviewer : David
+ * Date : 01 / 04 / 2025
+ * Last update: 01 / 04 / 2025
+ ***************************************/
+
 #define _POSIX_C_SOURCE 199309L /*struct sigaction*/
 
 #include <stdio.h>      /*perror, printf, __atomic_store_n, __atomic_load_n */
@@ -24,7 +31,8 @@ int main(int argc, char** argv)
     struct sigaction sa_app = {0};
     char *new_argv[3] = {0};
     scheduler_t *sch = NULL;
-    
+    int ret = SUCCESS;
+
     if(argc > 1 &&  (0 == strcmp(argv[1], "watchdog") ))
     {
         RunAsWatchdog();
@@ -32,17 +40,23 @@ int main(int argc, char** argv)
         return 0;
     }
 
+    info = (wd_task_info_ty*)malloc(sizeof(*info));
+    RETURN_IF_BAD(info, FAIL, "malloc failed");
+
     RETURN_IF_BAD( InitInfo(info, argc, argv), 1, "InitInfo failed");
     sch = info->sch;
 
+    ret = MakeMeImmortal(info->allowed_misses, info->ping_frequency_seconds, argv);
+    RETURN_IF_BAD(SUCCESS != ret, FAIL, "InitInfo failed");
+
    /* Setup signal handler for SIGUSR1 (first signal) */
     sa_app.sa_handler = SendHeartBeat_Hand;
-    RETURN_IF_BAD(0 != sigemptyset(&sa_app.sa_mask), 1, "sigemptyset failed");
-    RETURN_IF_BAD(0 != sigaction(SIGUSR1, &sa_app, NULL), 1, "sigaction failed");
+    RETURN_IF_BAD(0 != sigemptyset(&sa_app.sa_mask), FAIL, "sigemptyset failed");
+    RETURN_IF_BAD(0 != sigaction(SIGUSR1, &sa_app, NULL), FAIL, "sigaction failed");
 
 
     /*fork and start watchdog*/
-    RETURN_IF_BAD(-1 != (info->child_pid = fork()), 1,  "fork failed");
+    RETURN_IF_BAD(-1 != (info->child_pid = fork()), FAIL,  "fork failed");
     if(0 == info->child_pid)
     {
         /*prepare argv for execvp*/
@@ -51,7 +65,7 @@ int main(int argc, char** argv)
         new_argv[2] = NULL;
 
         execvp(argv[0], new_argv);
-        RETURN_IF_BAD(FALSE, 1,  "execvp failed");
+        RETURN_IF_BAD(FALSE, FAIL,  "execvp failed");
 
     }
 
@@ -75,6 +89,8 @@ int main(int argc, char** argv)
         /*The job of the Application ...*/
     
 
+    DoNotResuscitate();
+
     return 0;
 }
 
@@ -90,17 +106,16 @@ static void SendHeartBeat_Hand(int sig)
 static int InitInfo(wd_task_info_ty *info, int argc, char** argv)
 {
     
-    RETURN_IF_BAD(argc < 3, 1, "Use:./watchdog_app.out <#freq> <#misses>");
+    RETURN_IF_BAD(argc < 3, FAIL, "Use:./watchdog_app.out <#freq> <#misses>");
 
-    info = (wd_task_info_ty*)malloc(sizeof(*info));
-    RETURN_IF_BAD(info, 1, "malloc failed");
+
 
     info->sch = SchedulerCreate();
     if(NULL == info->sch)
     {
         free(info);
         info = NULL;
-        RETURN_IF_BAD(FALSE, 1, "SchedulerCreate failed");
+        RETURN_IF_BAD(FALSE, FAIL, "SchedulerCreate failed");
 
     }
 
