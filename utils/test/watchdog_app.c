@@ -12,6 +12,7 @@
 #include <signal.h>     /*kill, SIGUSR1 , siaction*/
 #include <stdlib.h>     /*atoi, exit*/
 #include <sys/types.h>  /* pid_t */
+#include <sys/wait.h>   /*waitpid*/
 
 #include <unistd.h>     /*fork*/
 #include "scheduler.h"  /*Create, */
@@ -43,16 +44,30 @@ int main(int argc, char** argv)
     info = (wd_task_info_ty*)malloc(sizeof(*info));
     RETURN_IF_BAD(info, FAIL, "malloc failed");
 
-    RETURN_IF_BAD( InitInfo(info, argc, argv), 1, "InitInfo failed");
+    
+    RETURN_IF_BAD(SUCCESS != InitInfo(info, argc, argv), FAIL, "InitInfo failed");
+    info->sch = SchedulerCreate();
+
+    if(NULL == info->sch)
+    {
+        free(info);
+        info = NULL;
+        RETURN_IF_BAD(FALSE, FAIL, "SchedulerCreate failed");
+
+    }
+
     sch = info->sch;
 
     ret = MakeMeImmortal(info->allowed_misses, info->ping_frequency_seconds, argv);
     RETURN_IF_BAD(SUCCESS != ret, FAIL, "InitInfo failed");
 
+    /* Set handler for SIGCHLD to cleanup Dead processes w/o become to Zombies */
+    signal(SIGCHLD, ChildCleanup_HAND);
+
    /* Setup signal handler for SIGUSR1 (first signal) */
     sa_app.sa_handler = SendHeartBeat_Hand;
-    RETURN_IF_BAD(0 != sigemptyset(&sa_app.sa_mask), FAIL, "sigemptyset failed");
-    RETURN_IF_BAD(0 != sigaction(SIGUSR1, &sa_app, NULL), FAIL, "sigaction failed");
+    RETURN_IF_BAD(SUCCESS != sigemptyset(&sa_app.sa_mask), FAIL, "sigemptyset failed");
+    RETURN_IF_BAD(SUCCESS != sigaction(SIGUSR1, &sa_app, NULL), FAIL, "sigaction failed");
 
 
     /*fork and start watchdog*/
@@ -71,20 +86,19 @@ int main(int argc, char** argv)
 
     
     /*
-    ADD TASKS:
+    ADD TASKS: SchedulerAdd(...);
        SendSignal_TSK
        CheckMisses_TSK
        CheckDnrFlag_TSK
+    /* Add tasks to scheduler */
     
-    */
 
     /*
-    Create SchedulerTread_TH
+    Create SchedulerTread_TH / pthread_create(...);
+
     join(&g_wd) or detach(&g_wd) ?? need to check
     */    
 
-
-    
     /*while(!g_stop_app)*/
         /*The job of the Application ...*/
     
@@ -92,6 +106,12 @@ int main(int argc, char** argv)
     DoNotResuscitate();
 
     return 0;
+}
+/*prevents mass of zombies*/
+static void ChildCleanup_HAND(int sig)
+{
+    (void)sig;
+    while (waitpid(-1, NULL, WNOHANG) > 0);
 }
 
 
@@ -104,23 +124,18 @@ static void SendHeartBeat_Hand(int sig)
 
 static int InitInfo(wd_task_info_ty *info, int argc, char** argv)
 {
-    
+    assert(NULL == info);
+
     RETURN_IF_BAD(argc >= 3, FAIL, "Use:./watchdog_app.out <#freq> <#misses>");
 
-    info->sch = SchedulerCreate();
-    if(NULL == info->sch)
-    {
-        free(info);
-        RETURN_IF_BAD(FALSE, FAIL, "SchedulerCreate failed");
-
-    }
 
     info->ping_frequency_seconds = (size_t)atoi(argv[1]);
     info->allowed_misses = (size_t)atoi(argv[2]);
     info->argv = argv;
     info->argc = argc;
+    info->sch = NULL;
 
-    return 1;
+    return SUCCESS;
 }
 
   /*assert*/
