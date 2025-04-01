@@ -1,15 +1,17 @@
 #define _POSIX_C_SOURCE 199309L /*struct sigaction*/
 
-#include <stdio.h>
+#include <stdio.h>      /*perror, printf*/
 #include <pthread.h>    /*pthread_t, */
 #include <signal.h>     /*kill, SIGUSR1 , siaction*/
-#include <stdlib.h>     /*atoi*/
-#include <unistd.h>
-#include "scheduler.h"
-#include "watchdog.h"
-#include "utils.h"
+#include <stdlib.h>     /*atoi, exit*/
+#include <sys/types.h>  /* pid_t */
 
-volatile int g_stop_app = 0;
+#include <unistd.h>     /*fork*/
+#include "scheduler.h"  /*Create, */
+#include "watchdog.h"
+#include "utils.h" /*RETURN_IF_BAD*/
+
+volatile int should_stop = 0;
 static volatile int g_missed_SOL = 0;
 static pthread_t g_wd = 0;
 
@@ -20,12 +22,23 @@ int main(int argc, char** argv)
     wd_task_info_ty *info = NULL;
     struct sigaction sa_app = {0};
     char *new_argv[3] = {0};
+    scheduler_t *sch = NULL;
     
 
-    if()
-    RETURN_IF_BAD( InitInfo(info, argc, argv), 1, "InitInfo failed");
+    if(argc > 1 &&  (0 == strcmp(argv[1], "watchdog") ))
+    {
+        RunAsWatchdog();
 
-   
+        return 0;
+    }
+
+    RETURN_IF_BAD( InitInfo(info, argc, argv), 1, "InitInfo failed");
+    sch = info->sch;
+
+   /* Setup signal handler for SIGUSR1 (first signal) */
+    sa_app.sa_handler = 
+
+
     /*prepare argv for execvp*/
     new_argv[0] = argv[0];      /* ./watchdog_app */
     new_argv[1] = "watchdog"; /* flag to identify WD */
@@ -33,8 +46,7 @@ int main(int argc, char** argv)
 
 
 
-    /* Setup signal handler for SIGUSR1 (first signal) */
-    sa_app.
+    
 
     
 
@@ -49,11 +61,19 @@ static int InitInfo(wd_task_info_ty *info, int argc, char** argv)
     info = (wd_task_info_ty*)malloc(sizeof(*info));
     RETURN_IF_BAD(info, 1, "malloc failed");
 
+    info->sch = SchedulerCreate();
+    if(NULL == info->sch)
+    {
+        free(info);
+        info = NULL;
+        RETURN_IF_BAD(FALSE, 1, "SchedulerCreate failed");
+
+    }
+
     info->ping_frequency_seconds = (size_t)atoi(argv[1]);
     info->allowed_misses = (size_t)atoi(argv[2]);
     info->argv = argv;
     info->argc = argc;
-    info->sch = NULL;
 
     return 1;
 }
