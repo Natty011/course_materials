@@ -11,14 +11,14 @@ StopApp_HAND(int sig)
     /*return*/
 }
 
-int main(argc, argv)
+int main(int argc,char** argv)
 {
      /*assert*/
      /*check that argv consists a string name that is
       identical with the executable file name */
 
      /*Register signal handler for SIGINT/SIGTERM via StopApp_HAND*/
-     
+
     /*allow_misses = 5*/
     /*ping_frequency = 2 sec*/
 
