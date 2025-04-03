@@ -35,7 +35,7 @@ int CheckDnrFlag_TSK(wd_task_info_ty *info);
 
 /* Forward declaration to avoid implicit declaration warning */
 void RunAsWatchdog(void);
-static int InitNewArgv(char *new_argv, char client_pid_str[], pid_t pid_self, char **argv );
+static int InitNewArgv(char **new_argv, char client_pid_str[], pid_t pid_self, char **argv );
 
 
 int main(int argc, char** argv)
@@ -131,10 +131,10 @@ int main(int argc, char** argv)
 
     return 0;
 }
-static int InitNewArgv(char *new_argv, char client_pid_str[], pid_t pid_self,  char **argv )
+static int InitNewArgv(char **new_argv, char client_pid_str[], pid_t pid_self,  char **argv )
 {
     /* Prepare new argv for execvp to create watchdog */
-    sprintf(client_pid_str, "%s", pid_self);
+    sprintf(client_pid_str, "%d", pid_self);
 
     puts(client_pid_str);
 
