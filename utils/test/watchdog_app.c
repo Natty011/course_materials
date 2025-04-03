@@ -172,7 +172,7 @@ static int InitInfo(wd_task_info_ty *info, int argc, char** argv)
 {
     assert(NULL != info);
 
-    RETURN_IF_BAD(argc >= 3, FAIL, "Use:./watchdog_app.out <#freq> <#misses>");
+    RETURN_IF_BAD(argc >= 3, FAIL, "Use:./watchdog_app.out <#freq_ping> <#allow_misses>");
 
 
     info->ping_frequency_seconds = (size_t)atoi(argv[1]);
@@ -222,10 +222,13 @@ int CheckMisses_TSK(void *param)
 int RevivePartner_TSK(void *param)
 {
     wd_task_info_ty *info = param;
-    
-    kill(info->child_pid, SIGKILL);
-    
+    printf("Reached before kill in RevivePartner_TSK\n");
+
+    RETURN_IF_BAD(SUCCESS ==  kill(info->child_pid, SIGKILL), FAIL, "kill in RevivePartner_TSK failed");
+    printf("Reached after kill in RevivePartner_TSK\n");
+ 
     info->child_pid = fork();
+    printf("Reached after fork in RevivePartner_TSK\n");
 
     if (0 == info->child_pid )
     {
