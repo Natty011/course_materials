@@ -27,8 +27,11 @@ int MakeMeImmortal(size_t allowed_misses, size_t ping_frequency, char **argv)
         new_argv[0] = argv[0];      /* ./watchdog_app */
         new_argv[1] = "watchdog"; /* flag to identify WD process*/
         new_argv[2] = NULL;
+        printf("Reached before execvp\n");
 
         execvp(argv[0], new_argv);
+        printf("Reached after execvp\n");
+
         perror("execvp failed");
         exit(1);
 
@@ -51,7 +54,8 @@ int DoNotResuscitate(void)
 /* Already in your app.c, but place it here if you move to final location */
 void RunAsWatchdog(void)
 {
-    printf("[RunAsWatchdog] Dummy: this is the watchdog process\n");
-    exit(0);
+    printf("[RunAsWatchdog] Starting dummy watchdog logic\n");
+    sleep(2);  /* simulate watchdog work */
+    printf("[RunAsWatchdog] Done dummy logic, exiting\n");
 }
 
