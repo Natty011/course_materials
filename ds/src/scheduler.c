@@ -13,7 +13,7 @@
 #include "pqueue.h"
 #include "task.h"
 #include "uid.h"
-
+/*
 typedef enum
 {
 
@@ -29,10 +29,10 @@ typedef enum
 {
 	FAIL_FROM_RUN = -1,	
 	FINISHED = 0,
-	SHOULD_REPEAT = 1 /* not finished */
+	SHOULD_REPEAT = 1 
 	
 }task_result_t;
-
+*/
 typedef enum 
 {
 	
@@ -56,7 +56,6 @@ struct scheduler
 static int match_func(void *check_data, void *user_param );
 static int priority_func(void *check_data, void *user_param );
 /***************************End of function declaration******************/
-
 
 /********************  SchedulerCreate  ****************************/
 scheduler_t *SchedulerCreate(void)
