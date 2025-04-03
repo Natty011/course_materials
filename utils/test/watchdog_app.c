@@ -20,7 +20,7 @@
 #include "utils.h" /*RETURN_IF_BAD*/
 
 volatile int should_stop = 0;
-static volatile int g_missed_SOL = 0;
+static volatile int g_missed_SOL = 0;/*sig_atomic_int ??? instead int !!*/
 static pthread_t g_wd = 0;
 
 static int InitInfo(wd_task_info_ty *info, int argc, char** argv);
@@ -157,6 +157,34 @@ static int InitInfo(wd_task_info_ty *info, int argc, char** argv)
 
     return SUCCESS;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
   /*assert*/
      /*check that argv consists a string name that is
