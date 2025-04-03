@@ -20,6 +20,25 @@
 #include "watchdog.h"
 #include "utils.h" /*RETURN_IF_BAD*/
 
+typedef enum
+{
+
+	OPERATION_FAIL = -3,
+	SYSTEM_FAIL = -2,
+	STOPPED = -1
+	/*SUCCESS = 0,
+	FAIL = 1*/
+		
+}status_ty;
+
+typedef enum
+{
+	FAIL_FROM_RUN = -1,	
+	FINISHED = 0,
+	SHOULD_REPEAT = 1 /* not finished */
+	
+}task_result_ty;
+
 volatile int should_stop = 0;
 static volatile sig_atomic_t g_missed_SOL = 0;
 static pthread_t g_wd = 0;
@@ -148,7 +167,7 @@ static void SendHeartBeat_Hand(int sig)
 
 static int InitInfo(wd_task_info_ty *info, int argc, char** argv)
 {
-    assert(NULL == info);
+    assert(NULL != info);
 
     RETURN_IF_BAD(argc >= 3, FAIL, "Use:./watchdog_app.out <#freq> <#misses>");
 
