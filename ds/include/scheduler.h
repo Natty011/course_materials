@@ -6,6 +6,25 @@
 
 #include "uid.h"
 
+typedef enum
+{
+
+	OPERATION_FAIL = -3,
+	SYSTEM_FAIL = -2,
+	STOPPED = -1,
+	SUCCESS = 0,
+	FAIL = 1
+		
+}status_t;
+
+typedef enum
+{
+	FAIL_FROM_RUN = -1,	
+	FINISHED = 0,
+	SHOULD_REPEAT = 1 /* not finished */
+	
+}task_result_t;
+
 typedef struct scheduler scheduler_t;
 
 /******************************************************************************
@@ -58,7 +77,7 @@ typedef struct scheduler scheduler_t;
 
 /* OLD NOTES: */
 /*scheduler_t struct status "to remove": 0 for don't remove, 1 for remove
-/******************************************************************************
+******************************************************************************
 *
 *       Description: Remove a spcific task from scheduer according to UID.
 *       Arguments: pointer to scheduler and UID of task to remove/
