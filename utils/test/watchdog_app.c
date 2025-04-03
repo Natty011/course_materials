@@ -26,7 +26,7 @@ static pthread_t g_wd = 0;
 static int InitInfo(wd_task_info_ty *info, int argc, char** argv);
 static void SendHeartBeat_Hand(int sig);
 static void *SchedulerThread_TH(void *arg);
-
+void RunAsWatchdog(void);
 
 int main(int argc, char** argv)
 {
@@ -231,3 +231,8 @@ int CheckDnrFlag_TSK(void *param)
 }
 
 
+void RunAsWatchdog(void)
+{
+    printf("[watchdog] I'm the watchdog process. No implementation yet.\n");
+    exit(0);
+}
