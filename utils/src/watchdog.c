@@ -1,74 +1,57 @@
-#define _POSIX_C_SOURCE 199309L /*struct sigaction*/
-
-#include <stdio.h>      /* perror */
-#include <stdlib.h>     /* exit */
-#include <unistd.h>     /*getpid, fork */
-
-#include <pthread.h>    /*  */
-#include <sys/types.h>  /* getpid, */
-#include <signal.h>     /*kill, SIGUSR1 , siaction*/
-#include <sys/types.h>  /*pid_t*/
-#include "scheduler.h"
-#include "uid.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/types.h>  /* pid_t */
+#include <sys/wait.h>   /*waitpid*/
+#include <assert.h>
+#include <string.h>     /*strcmp*/
+#include <unistd.h>     /*fork*/
 #include "watchdog.h"
-#include "utils.h"
+#include "utils.h" /*RETURN_IF_BAD*/
 
-
-typedef struct wd_info  
+/* Dummy implementation of MakeMeImmortal */
+int MakeMeImmortal(size_t allowed_misses, size_t ping_frequency, char **argv)
 {
+    pid_t pid_wd = -1;
+    (void)allowed_misses;
+    (void)ping_frequency;
+    (void)argv;
 
-    scheduler_t* sch;
-    char** argv;
-    int argc;
-    size_t allowed_misses;
-    size_t ping_frequency_seconds;
-    pid_t child_pid;
+    printf("[MakeMeImmortal] Dummy: initializing watchdog mechanism...\n");
 
-}wd_info_ty;
+    RETURN_IF_BAD(-1 != (pid_wd = fork()), FAIL,  "fork failed");
+    if(0 == pid_wd)
+    {
+        char *new_argv[3] ={NULL};
+        /*prepare argv for execvp*/
+        new_argv[0] = argv[0];      /* ./watchdog_app */
+        new_argv[1] = "watchdog"; /* flag to identify WD process*/
+        new_argv[2] = NULL;
 
+        execvp(argv[0], new_argv);
+        perror("execvp failed");
+        exit(1);
 
-static wd_info_ty *g_info = NULL;
+        /*RETURN_IF_BAD(FALSE, FAIL,  "execvp failed");*/
 
-static volatile int g_missed_SOL;  /* counting misses*/
-static pthread_t g_wd;              /*watchdog thread identifiar*/
-static volatile int should_stop;      /* using in DNR*/
+    }
+    /*----------need to be in MMI Not here!!------------------*/
+ 
 
-static int InitInfo(wd_info_ty *g_info);
-
-static void BeginMode(g_info)
-{
-    /*SchedulerClear(sch)*/
-    /*SchdulerAdd(sch, WaitForFirstSignal_TSK, g_info, ping_frequency_seconds)*/
-    /*ReviveMode(g_info)*/
+    return 0; /* success */
 }
 
-static void ReviveMode(g_info)
-{
-    /* WDProcessCreation():
-            1. using fork+exec
-    
-    */
-
-    /*SchdulerAdd(sch, Revive_TSK, g_info, ping_frequency_seconds)*/
-
-        
-}
-
-
-
-
-
-int MakeMeImmortal(size_t allowed_misses, size_t ping_frequency, char** argv)
-{
-    
-   
-    
-}
-
+/* Dummy implementation of DoNotResuscitate */
 int DoNotResuscitate(void)
 {
-    /*assert*/
-
+    printf("[DoNotResuscitate] Dummy: cleaning up and stopping watchdog...\n");
+    return 0; /* success */
 }
 
+/* Already in your app.c, but place it here if you move to final location */
+void RunAsWatchdog(void)
+{
+    printf("[RunAsWatchdog] Dummy: this is the watchdog process\n");
+    exit(0);
+}
 
