@@ -13,6 +13,9 @@
 int MakeMeImmortal(size_t allowed_misses, size_t ping_frequency, char **argv)
 {
     pid_t pid_wd = -1;
+    pid_t pid_wd_app = getpid();
+    printf("Current PID (pid_wd_app)in MMI before fork : %d\n", pid_wd_app);
+
     (void)allowed_misses;
     (void)ping_frequency;
     (void)argv;
@@ -59,7 +62,9 @@ int DoNotResuscitate(void)
 void RunAsWatchdog(void)
 {
     printf("[RunAsWatchdog] Starting dummy watchdog logic\n");
-    printf("Current PID in MRunAsWatchdogI before sleep : %d\n", getpid());
+    printf("Parent PID (getppid) in MRunAsWatchdogI before sleep : %d\n", getppid());
+
+    printf("Current PID (getpid) in MRunAsWatchdogI before sleep : %d\n", getpid());
 
     sleep(2);  /* simulate watchdog work */
     printf("[RunAsWatchdog] Done dummy logic, exiting\n");
