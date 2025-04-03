@@ -26,12 +26,12 @@ static pthread_t g_wd = 0;
 
 static int InitInfo(wd_task_info_ty *info, int argc, char** argv);
 static void SendHeartBeat_Hand(int sig);
-static void *SchedulerThread_TH(void *arg);
+static void *SchedulerThread_TH(wd_task_info_ty *info);
 static void ChildCleanup_HAND(int sig);
-int SendSignal_TSK(void *param);
-int CheckMisses_TSK(void *param);
-int RevivePartner_TSK(void *param);
-int CheckDnrFlag_TSK(void *param);
+int SendSignal_TSK(wd_task_info_ty *info);
+int CheckMisses_TSK(wd_task_info_ty *info);
+int RevivePartner_TSK(wd_task_info_ty *info);
+int CheckDnrFlag_TSK(wd_task_info_ty *info);
 
 
 int main(int argc, char** argv)
@@ -87,19 +87,19 @@ int main(int argc, char** argv)
     RETURN_IF_BAD(SUCCESS == ret, FAIL, "MakeMeImmortal failed");
 
     
-    ret_uid =  SchedulerAdd(sch,SendSignal_TSK, info, info->ping_frequency_seconds);
+    ret_uid =  SchedulerAdd(sch,(int (*)(void *))SendSignal_TSK, info, info->ping_frequency_seconds);
     RETURN_IF_BAD( SUCCESS == UIDIsSame(ret_uid, BADUID), FAIL, "SchedulerAdd SendSignal_TSK failed");
 
-    ret_uid = SchedulerAdd(sch, CheckMisses_TSK, info, info->ping_frequency_seconds);
+    ret_uid = SchedulerAdd(sch, (int (*)(void *))CheckMisses_TSK, info, info->ping_frequency_seconds);
 
     RETURN_IF_BAD( SUCCESS == UIDIsSame(ret_uid, BADUID), FAIL, "SchedulerAdd CheckMisses_TSK failed");
      /* Every 10 second, low delay */
-    ret_uid = SchedulerAdd(sch, CheckDnrFlag_TSK, info, 1);
+    ret_uid = SchedulerAdd(sch, (int (*)(void *))CheckDnrFlag_TSK, info, 1);
 
     RETURN_IF_BAD( SUCCESS == UIDIsSame(ret_uid, BADUID), FAIL, "SchedulerAdd CheckDnrFlag_TSK failed");
 
     RETURN_IF_BAD(SUCCESS == pthread_create(&g_wd, NULL,
-         SchedulerThread_TH, info), FAIL, "pthread_create failed");
+        (void *(*)(void *))SchedulerThread_TH, info), FAIL, "pthread_create failed");
     RETURN_IF_BAD(SUCCESS ==  pthread_detach(g_wd), FAIL, "pthread_detach failed");
 
     while (!should_stop)
@@ -113,9 +113,8 @@ int main(int argc, char** argv)
 }
 
 /* Thread routine to run the scheduler */
-static void *SchedulerThread_TH(void *arg)
+static void *SchedulerThread_TH(wd_task_info_ty *info)
 {
-    wd_task_info_ty *info = (wd_task_info_ty *)arg;
     int ret = -5;
 
     ret = SchedulerRun(info->sch);
@@ -165,18 +164,21 @@ static int InitInfo(wd_task_info_ty *info, int argc, char** argv)
     info->argv = argv;
     info->argc = argc;
     info->sch = NULL;
+    info->child_pid = getppid();
+    printf("Current PID(getppid()) of info->child_pid in InitInfo : %d\n", info->child_pid);
+    printf("Current PID( getpid()) of info->child_pid in InitInfo : %d\n", getpid());
 
     return TRUE;
 }
 
 
 /* Task 1: send signal to ־watchdog */
-int SendSignal_TSK(void *param)
-{
-    pid_t wd_pid = ((wd_task_info_ty *)param)->child_pid;
-    
-    if ( -1 == kill(wd_pid, SIGUSR1) )
+int SendSignal_TSK(wd_task_info_ty *info)
+{    
+    if ( -1 == kill(getppid(), SIGUSR1) )
     {
+        printf("Current PID( getppid()) in SendSignal_TSK : %d\n", getppid());
+
         /* if failed switch to Revive or Panic */
         return FAIL_FROM_RUN;
     }
@@ -185,9 +187,8 @@ int SendSignal_TSK(void *param)
 }
 
 /* Task 2: increment the counter and revive if pass the allowed misses */
-int CheckMisses_TSK(void *param)
+int CheckMisses_TSK(wd_task_info_ty *info)
 {
-    wd_task_info_ty *info = (wd_task_info_ty *)param;
     size_t max_misses = info->allowed_misses;
 
     int current = __atomic_add_fetch(&g_missed_SOL, 1, __ATOMIC_SEQ_CST);
@@ -196,7 +197,7 @@ int CheckMisses_TSK(void *param)
     {
         SchedulerClear(info->sch);
         /* Every 10 second, low delay */
-        SchedulerAdd(info->sch, RevivePartner_TSK, info, 1);  
+        SchedulerAdd(info->sch, (int (*)(void *))RevivePartner_TSK, info, 1);  
         return FINISHED;
     }
 
@@ -204,9 +205,8 @@ int CheckMisses_TSK(void *param)
 }
 
 /* Task 3: revive watchdog again  */
-int RevivePartner_TSK(void *param)
+int RevivePartner_TSK(wd_task_info_ty *info)
 {
-    wd_task_info_ty *info = (wd_task_info_ty *)param;
     printf("Reached before kill in RevivePartner_TSK\n");
     
     printf("Current PID: %d\n", getpid());
@@ -215,8 +215,8 @@ int RevivePartner_TSK(void *param)
     RETURN_IF_BAD(SUCCESS ==  kill(info->child_pid, SIGKILL), FAIL, "kill in RevivePartner_TSK failed");
     printf("Reached after kill in RevivePartner_TSK\n");
  
-    info->child_pid = fork();
-    printf("Reached after fork in RevivePartner_TSK\n");
+    /*info->child_pid = fork();
+    printf("Reached after fork in RevivePartner_TSK\n");*/
 
     if (0 == info->child_pid )
     {
@@ -229,9 +229,8 @@ int RevivePartner_TSK(void *param)
 }
 
 /* Task 4: stop all */
-int CheckDnrFlag_TSK(void *param)
+int CheckDnrFlag_TSK(wd_task_info_ty *info)
 {
-    wd_task_info_ty *info = (wd_task_info_ty *)param;
 
     if (should_stop)
     {
