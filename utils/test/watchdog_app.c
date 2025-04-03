@@ -14,6 +14,7 @@
 #include <sys/types.h>  /* pid_t */
 #include <sys/wait.h>   /*waitpid*/
 #include <assert.h>
+#include <string.h>     /*strcmp*/
 #include <unistd.h>     /*fork*/
 #include "scheduler.h"  /*Create, */
 #include "watchdog.h"
@@ -123,10 +124,12 @@ static void *SchedulerThread_TH(void *arg)
   
 static void ChildCleanup_HAND(int sig)
 {
-    (void)sig;
 
     pid_t pid = 0;
     int status = 0;
+
+    (void)sig;
+
     /*WNOHANG non blocking/waiting, just check if there is dead process childs*/
     while ((pid = waitpid(-1, &status, WNOHANG)) > 0)
     {
