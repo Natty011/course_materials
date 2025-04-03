@@ -58,7 +58,7 @@ int main(int argc, char** argv)
     wd_task_info_ty *info = NULL;
     struct sigaction sa_app = {0};
     struct sigaction sa_child = {0};
-
+    ilrd_uid_t uid1 = BADUID;
     scheduler_t *sch = NULL;
     int ret = SUCCESS;
 
@@ -104,7 +104,10 @@ int main(int argc, char** argv)
     RETURN_IF_BAD(SUCCESS == ret, FAIL, "MakeMeImmortal failed");
 
     
-    SchedulerAdd(sch,SendSignal_TSK, info, info->ping_frequency_seconds);
+    uid1 =  SchedulerAdd(sch,SendSignal_TSK, info, info->ping_frequency_seconds);
+    RETURN_IF_BAD( SUCCESS == UIDIsSame(uid1, BADUID), FAIL, "SchedulerAdd  SendSignal_TSK failed");
+
+
     SchedulerAdd(sch, CheckMisses_TSK, info, info->ping_frequency_seconds);
     
      /* Every 10 second, high delay */
