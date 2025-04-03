@@ -134,7 +134,8 @@ static void ChildCleanup_HAND(int sig)
 static void SendHeartBeat_Hand(int sig)
 {
     assert(SIGUSR1 == sig);
-    __sync_fetch_and_add(&g_missed_SOL, 1); 
+   /* __sync_fetch_and_add(&g_missed_SOL, 1); */
+    __atomic_store_n(&g_missed_SOL, 0, __ATOMIC_SEQ_CST);
 }
 
 
