@@ -7,7 +7,7 @@
 
 #define _POSIX_C_SOURCE 199309L /*struct sigaction*/
 
-#include <stdio.h>      /*perror, printf, __atomic_store_n, __atomic_load_n */
+#include <stdio.h>      /*perror, sprintf, printf, __atomic_store_n, __atomic_load_n */
 #include <pthread.h>    /*pthread_t, */
 #include <signal.h>     /*kill, SIGUSR1 , siaction*/
 #include <stdlib.h>     /*atoi, exit, abort*/
@@ -35,6 +35,7 @@ int CheckDnrFlag_TSK(wd_task_info_ty *info);
 
 /* Forward declaration to avoid implicit declaration warning */
 void RunAsWatchdog(void);
+static int InitNewArgv(char *new_argv, char client_pid_str[], pid_t pid_self, char **argv );
 
 
 int main(int argc, char** argv)
@@ -44,17 +45,30 @@ int main(int argc, char** argv)
     struct sigaction sa_child = {0};
     ilrd_uid_t ret_uid = BADUID;
     scheduler_t *sch = NULL;
+
+    
+    char client_pid_str[20] = {0};
+    /* argv[0] = ./watchdog_app.out, argv[1] = "watchdog", argv[2] = <client_pid>, argv[3] = NULL */
+    char *new_argv[4] = {0}; 
+    pid_t pid_self = getpid();
+
     int ret = SUCCESS;
-    printf("Current PID in main_start : %d\n", getpid());
+
+    printf("[Client] Starting main()\n");
+    printf("[Client] My PID: %d\n", pid_self);
+
+    InitNewArgv(new_argv, client_pid_str,pid_self, argv);
+    
+    printf("Current parent PID in main_start : %d\n", getppid());
+    printf("Current  PID in main_start : %d\n", getpid());
 
     if(argc > 1 &&  (0 == strcmp(argv[1], "watchdog") ))
     {
-        printf("Current PID in if(argc > 1) : %d\n", getpid());
-        printf("Current parent PID in if(argc > 1) : %d\n", getppid());
+        pid_t client_pid = (pid_t)atoi(argv[2]);
+        printf("[WD] My PID: %d, Client PID: %d\n", pid_self, client_pid);
 
-        info->child_pid = getpid();
 
-        RunAsWatchdog();
+        RunAsWatchdog(); /*client_pid*/
 
         return 0;
     }
@@ -117,6 +131,22 @@ int main(int argc, char** argv)
 
     return 0;
 }
+static int InitNewArgv(char *new_argv, char client_pid_str[], pid_t pid_self,  char **argv )
+{
+    /* Prepare new argv for execvp to create watchdog */
+    sprintf(client_pid_str, "%s", pid_self);
+
+    puts(client_pid_str);
+
+    new_argv[0] = argv[0];        /* ./watchdog_app.out */
+    new_argv[1] = "watchdog";     /* identifier */
+    new_argv[2] = client_pid_str; /* client's PID */
+    new_argv[3] = NULL;
+
+    return SUCCESS;
+}
+
+
 
 /* Thread routine to run the scheduler */
 static void *SchedulerThread_TH(wd_task_info_ty *info)
