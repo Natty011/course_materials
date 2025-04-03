@@ -19,26 +19,7 @@
 #include "scheduler.h"  /*Create, */
 #include "watchdog.h"
 #include "utils.h" /*RETURN_IF_BAD*/
-/*
-typedef enum
-{
 
-	OPERATION_FAIL = -3,
-	SYSTEM_FAIL = -2,
-	STOPPED = -1
-	SUCCESS = 0,
-	FAIL = 1
-		
-}status_ty;
-
-typedef enum
-{
-	FAIL_FROM_RUN = -1,	
-	FINISHED = 0,
-	SHOULD_REPEAT = 1 
-	
-}task_result_ty;
-*/
 volatile int should_stop = 0;
 static volatile sig_atomic_t g_missed_SOL = 0;
 static pthread_t g_wd = 0;
@@ -61,9 +42,12 @@ int main(int argc, char** argv)
     ilrd_uid_t ret_uid = BADUID;
     scheduler_t *sch = NULL;
     int ret = SUCCESS;
+    printf("Current PID in main_start : %d\n", getpid());
 
     if(argc > 1 &&  (0 == strcmp(argv[1], "watchdog") ))
     {
+        printf("Current PID in if(argc > 1) : %d\n", getpid());
+
         RunAsWatchdog();
 
         return 0;
@@ -109,8 +93,8 @@ int main(int argc, char** argv)
     ret_uid = SchedulerAdd(sch, CheckMisses_TSK, info, info->ping_frequency_seconds);
 
     RETURN_IF_BAD( SUCCESS == UIDIsSame(ret_uid, BADUID), FAIL, "SchedulerAdd CheckMisses_TSK failed");
-     /* Every 10 second, high delay */
-    ret_uid = SchedulerAdd(sch, CheckDnrFlag_TSK, info, 10);
+     /* Every 10 second, low delay */
+    ret_uid = SchedulerAdd(sch, CheckDnrFlag_TSK, info, 1);
 
     RETURN_IF_BAD( SUCCESS == UIDIsSame(ret_uid, BADUID), FAIL, "SchedulerAdd CheckDnrFlag_TSK failed");
 
@@ -132,8 +116,10 @@ int main(int argc, char** argv)
 static void *SchedulerThread_TH(void *arg)
 {
     wd_task_info_ty *info = (wd_task_info_ty *)arg;
+    int ret = -5;
 
-    SchedulerRun(info->sch);
+    ret = SchedulerRun(info->sch);
+    printf("ret SchedulerRun: %d\n", ret);
 
     SchedulerDestroy(info->sch);
 
@@ -173,7 +159,6 @@ static int InitInfo(wd_task_info_ty *info, int argc, char** argv)
     assert(NULL != info);
 
     RETURN_IF_BAD(argc >= 3, FAIL, "Use:./watchdog_app.out <#freq_ping> <#allow_misses>");
-
 
     info->ping_frequency_seconds = (size_t)atoi(argv[1]);
     info->allowed_misses = (size_t)atoi(argv[2]);
@@ -221,8 +206,11 @@ int CheckMisses_TSK(void *param)
 /* Task 3: revive watchdog again  */
 int RevivePartner_TSK(void *param)
 {
-    wd_task_info_ty *info = param;
+    wd_task_info_ty *info = (wd_task_info_ty *)param;
     printf("Reached before kill in RevivePartner_TSK\n");
+    
+    printf("Current PID: %d\n", getpid());
+    printf("Child PID (to kill): %d\n", info->child_pid);
 
     RETURN_IF_BAD(SUCCESS ==  kill(info->child_pid, SIGKILL), FAIL, "kill in RevivePartner_TSK failed");
     printf("Reached after kill in RevivePartner_TSK\n");
