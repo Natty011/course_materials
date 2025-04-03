@@ -19,15 +19,15 @@
 #include "scheduler.h"  /*Create, */
 #include "watchdog.h"
 #include "utils.h" /*RETURN_IF_BAD*/
-
+/*
 typedef enum
 {
 
 	OPERATION_FAIL = -3,
 	SYSTEM_FAIL = -2,
 	STOPPED = -1
-	/*SUCCESS = 0,
-	FAIL = 1*/
+	SUCCESS = 0,
+	FAIL = 1
 		
 }status_ty;
 
@@ -35,10 +35,10 @@ typedef enum
 {
 	FAIL_FROM_RUN = -1,	
 	FINISHED = 0,
-	SHOULD_REPEAT = 1 /* not finished */
+	SHOULD_REPEAT = 1 
 	
 }task_result_ty;
-
+*/
 volatile int should_stop = 0;
 static volatile sig_atomic_t g_missed_SOL = 0;
 static pthread_t g_wd = 0;
@@ -59,7 +59,6 @@ int main(int argc, char** argv)
     struct sigaction sa_app = {0};
     struct sigaction sa_child = {0};
 
-    char *new_argv[3] = {0};
     scheduler_t *sch = NULL;
     int ret = SUCCESS;
 
@@ -204,7 +203,7 @@ int CheckMisses_TSK(void *param)
 
     int current = __atomic_add_fetch(&g_missed_SOL, 1, __ATOMIC_SEQ_CST);
 
-    if (current > max_misses)
+    if (current > (int)max_misses)
     {
         SchedulerClear(info->sch);
         /* Every 10 second, low delay */
