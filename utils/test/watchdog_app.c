@@ -13,7 +13,7 @@
 #include <stdlib.h>     /*atoi, exit*/
 #include <sys/types.h>  /* pid_t */
 #include <sys/wait.h>   /*waitpid*/
-
+#include <assert.h>
 #include <unistd.h>     /*fork*/
 #include "scheduler.h"  /*Create, */
 #include "watchdog.h"
@@ -26,7 +26,12 @@ static pthread_t g_wd = 0;
 static int InitInfo(wd_task_info_ty *info, int argc, char** argv);
 static void SendHeartBeat_Hand(int sig);
 static void *SchedulerThread_TH(void *arg);
-void RunAsWatchdog(void);
+static void ChildCleanup_HAND(int sig);
+int SendSignal_TSK(void *param);
+int CheckMisses_TSK(void *param);
+int RevivePartner_TSK(void *param);
+int CheckDnrFlag_TSK(void *param);
+
 
 int main(int argc, char** argv)
 {
@@ -155,14 +160,6 @@ static int InitInfo(wd_task_info_ty *info, int argc, char** argv)
 }
 
 
-
-/* Signal handler – resets counter */
-void Signal_HAND(int sig)
-{
-    assert(sig == SIGUSR1);
-    __atomic_store_n(&g_missed_SOL, 0, __ATOMIC_SEQ_CST);
-}
-
 /* Task 1: send signal to ־watchdog */
 int SendSignal_TSK(void *param)
 {
@@ -229,9 +226,3 @@ int CheckDnrFlag_TSK(void *param)
     return SHOULD_REPEAT;
 }
 
-
-void RunAsWatchdog(void)
-{
-    printf("[watchdog] I'm the watchdog process. No implementation yet.\n");
-    exit(0);
-}
