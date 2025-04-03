@@ -73,7 +73,7 @@ int main(int argc, char** argv)
     RETURN_IF_BAD(info, FAIL, "malloc failed");
 
     
-    RETURN_IF_BAD(SUCCESS != InitInfo(info, argc, argv), FAIL, "InitInfo failed");
+    RETURN_IF_BAD(TRUE == InitInfo(info, argc, argv), FAIL, "InitInfo failed");
     info->sch = SchedulerCreate();
 
     if(NULL == info->sch)
@@ -89,19 +89,19 @@ int main(int argc, char** argv)
 
      /* Setup signal handler for SIGUSR1 (first signal) */
     sa_app.sa_handler = SendHeartBeat_Hand; /* תחסום את הסיגנלים חוץ מסיגיוסר*/
-    RETURN_IF_BAD(SUCCESS != sigemptyset(&sa_app.sa_mask), FAIL, "sigemptyset failed");
-    RETURN_IF_BAD(SUCCESS != sigaction(SIGUSR1, &sa_app, NULL), FAIL, "sigaction failed");
+    RETURN_IF_BAD(SUCCESS == sigemptyset(&sa_app.sa_mask), FAIL, "sigemptyset sa_app failed");
+    RETURN_IF_BAD(SUCCESS == sigaction(SIGUSR1, &sa_app, NULL), FAIL, "sigaction failed");
 
      /* Set handler for SIGCHLD to cleanup Dead processes w/o become to Zombies */
     /*signal from the system that the child process is terminated*/
 
     sa_child.sa_handler = ChildCleanup_HAND;
-    RETURN_IF_BAD(SUCCESS !=  sigemptyset(&sa_child.sa_mask), FAIL, "sigemptyset failed");
-    RETURN_IF_BAD(SUCCESS != sigaction(SIGCHLD, &sa_child, NULL), FAIL, "sigaction failed");
+    RETURN_IF_BAD(SUCCESS ==  sigemptyset(&sa_child.sa_mask), FAIL, "sigemptyset sa_child failed");
+    RETURN_IF_BAD(SUCCESS == sigaction(SIGCHLD, &sa_child, NULL), FAIL, "sigaction failed");
 
      
     ret = MakeMeImmortal(info->allowed_misses, info->ping_frequency_seconds, argv);
-    RETURN_IF_BAD(SUCCESS != ret, FAIL, "InitInfo failed");
+    RETURN_IF_BAD(SUCCESS == ret, FAIL, "MakeMeImmortal failed");
 
     
     SchedulerAdd(sch,SendSignal_TSK, info, info->ping_frequency_seconds);
@@ -110,9 +110,9 @@ int main(int argc, char** argv)
      /* Every 10 second, high delay */
     SchedulerAdd(sch, CheckDnrFlag_TSK, info, 10); 
 
-    RETURN_IF_BAD(SUCCESS != pthread_create(&g_wd, NULL,
+    RETURN_IF_BAD(SUCCESS == pthread_create(&g_wd, NULL,
          SchedulerThread_TH, info), FAIL, "pthread_create failed");
-    RETURN_IF_BAD(SUCCESS !=  pthread_detach(g_wd), FAIL, "pthread_detach failed");
+    RETURN_IF_BAD(SUCCESS ==  pthread_detach(g_wd), FAIL, "pthread_detach failed");
 
     while (!should_stop)
     {
@@ -177,7 +177,7 @@ static int InitInfo(wd_task_info_ty *info, int argc, char** argv)
     info->argc = argc;
     info->sch = NULL;
 
-    return SUCCESS;
+    return TRUE;
 }
 
 
@@ -223,7 +223,7 @@ int RevivePartner_TSK(void *param)
     
     info->child_pid = fork();
 
-    if (info->child_pid == 0)
+    if (0 == info->child_pid )
     {
         execvp(info->argv[0], info->argv);
         perror("execvp");
