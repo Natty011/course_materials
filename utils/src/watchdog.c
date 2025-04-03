@@ -18,6 +18,7 @@ int MakeMeImmortal(size_t allowed_misses, size_t ping_frequency, char **argv)
     (void)argv;
 
     printf("[MakeMeImmortal] Dummy: initializing watchdog mechanism...\n");
+    printf("Current PID in MMI before fork : %d\n", getpid());
 
     RETURN_IF_BAD(-1 != (pid_wd = fork()), FAIL,  "fork failed");
     if(0 == pid_wd)
@@ -28,6 +29,7 @@ int MakeMeImmortal(size_t allowed_misses, size_t ping_frequency, char **argv)
         new_argv[1] = "watchdog"; /* flag to identify WD process*/
         new_argv[2] = NULL;
         printf("Reached before execvp\n");
+        printf("Current PID in MMI before execvp : %d\n", getpid());
 
         execvp(argv[0], new_argv);
         printf("Reached after execvp\n");
@@ -39,7 +41,8 @@ int MakeMeImmortal(size_t allowed_misses, size_t ping_frequency, char **argv)
 
     }
     /*----------need to be in MMI Not here!!------------------*/
- 
+    printf("Current PID in MMI after if(0 == pid_wd) : %d\n", getpid());
+    
 
     return 0; /* success */
 }
@@ -48,6 +51,7 @@ int MakeMeImmortal(size_t allowed_misses, size_t ping_frequency, char **argv)
 int DoNotResuscitate(void)
 {
     printf("[DoNotResuscitate] Dummy: cleaning up and stopping watchdog...\n");
+
     return 0; /* success */
 }
 
@@ -55,6 +59,8 @@ int DoNotResuscitate(void)
 void RunAsWatchdog(void)
 {
     printf("[RunAsWatchdog] Starting dummy watchdog logic\n");
+    printf("Current PID in MRunAsWatchdogI before sleep : %d\n", getpid());
+
     sleep(2);  /* simulate watchdog work */
     printf("[RunAsWatchdog] Done dummy logic, exiting\n");
 }
