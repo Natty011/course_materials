@@ -58,7 +58,7 @@ int main(int argc, char** argv)
     wd_task_info_ty *info = NULL;
     struct sigaction sa_app = {0};
     struct sigaction sa_child = {0};
-    ilrd_uid_t uid1 = BADUID;
+    ilrd_uid_t ret_uid = BADUID;
     scheduler_t *sch = NULL;
     int ret = SUCCESS;
 
@@ -104,14 +104,16 @@ int main(int argc, char** argv)
     RETURN_IF_BAD(SUCCESS == ret, FAIL, "MakeMeImmortal failed");
 
     
-    uid1 =  SchedulerAdd(sch,SendSignal_TSK, info, info->ping_frequency_seconds);
-    RETURN_IF_BAD( SUCCESS == UIDIsSame(uid1, BADUID), FAIL, "SchedulerAdd  SendSignal_TSK failed");
+    ret_uid =  SchedulerAdd(sch,SendSignal_TSK, info, info->ping_frequency_seconds);
+    RETURN_IF_BAD( SUCCESS == UIDIsSame(ret_uid, BADUID), FAIL, "SchedulerAdd SendSignal_TSK failed");
 
+    ret_uid = SchedulerAdd(sch, CheckMisses_TSK, info, info->ping_frequency_seconds);
 
-    SchedulerAdd(sch, CheckMisses_TSK, info, info->ping_frequency_seconds);
-    
+    RETURN_IF_BAD( SUCCESS == UIDIsSame(ret_uid, BADUID), FAIL, "SchedulerAdd CheckMisses_TSK failed");
      /* Every 10 second, high delay */
-    SchedulerAdd(sch, CheckDnrFlag_TSK, info, 10); 
+    ret_uid = SchedulerAdd(sch, CheckDnrFlag_TSK, info, 10);
+
+    RETURN_IF_BAD( SUCCESS == UIDIsSame(ret_uid, BADUID), FAIL, "SchedulerAdd CheckDnrFlag_TSK failed");
 
     RETURN_IF_BAD(SUCCESS == pthread_create(&g_wd, NULL,
          SchedulerThread_TH, info), FAIL, "pthread_create failed");
