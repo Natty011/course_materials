@@ -99,7 +99,6 @@ int main(int argc, char** argv)
     RETURN_IF_BAD(SUCCESS ==  sigemptyset(&sa_child.sa_mask), FAIL, "sigemptyset sa_child failed");
     RETURN_IF_BAD(SUCCESS == sigaction(SIGCHLD, &sa_child, NULL), FAIL, "sigaction failed");
 
-     
     ret = MakeMeImmortal(info->allowed_misses, info->ping_frequency_seconds, argv);
     RETURN_IF_BAD(SUCCESS == ret, FAIL, "MakeMeImmortal failed");
 
