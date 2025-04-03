@@ -1,6 +1,6 @@
 /***************************************
  * Author : Natty
- * Reviewer : David
+ * Reviewer : 
  * Date : 01 / 04 / 2025
  * Last update: 01 / 04 / 2025
  ***************************************/
@@ -32,6 +32,10 @@ int SendSignal_TSK(wd_task_info_ty *info);
 int CheckMisses_TSK(wd_task_info_ty *info);
 int RevivePartner_TSK(wd_task_info_ty *info);
 int CheckDnrFlag_TSK(wd_task_info_ty *info);
+
+/* Forward declaration to avoid implicit declaration warning */
+void RunAsWatchdog(void);
+
 
 int main(int argc, char** argv)
 {
