@@ -10,7 +10,7 @@
 #include <stdio.h>      /*perror, printf, __atomic_store_n, __atomic_load_n */
 #include <pthread.h>    /*pthread_t, */
 #include <signal.h>     /*kill, SIGUSR1 , siaction*/
-#include <stdlib.h>     /*atoi, exit*/
+#include <stdlib.h>     /*atoi, exit, abort*/
 #include <sys/types.h>  /* pid_t */
 #include <sys/wait.h>   /*waitpid*/
 #include <assert.h>
@@ -33,7 +33,6 @@ int CheckMisses_TSK(wd_task_info_ty *info);
 int RevivePartner_TSK(wd_task_info_ty *info);
 int CheckDnrFlag_TSK(wd_task_info_ty *info);
 
-
 int main(int argc, char** argv)
 {
     wd_task_info_ty *info = NULL;
@@ -47,6 +46,9 @@ int main(int argc, char** argv)
     if(argc > 1 &&  (0 == strcmp(argv[1], "watchdog") ))
     {
         printf("Current PID in if(argc > 1) : %d\n", getpid());
+        printf("Current parent PID in if(argc > 1) : %d\n", getppid());
+
+        info->child_pid = getpid();
 
         RunAsWatchdog();
 
@@ -164,9 +166,9 @@ static int InitInfo(wd_task_info_ty *info, int argc, char** argv)
     info->argv = argv;
     info->argc = argc;
     info->sch = NULL;
-    info->child_pid = getppid();
+    /*info->child_pid = getppid();
     printf("Current PID(getppid()) of info->child_pid in InitInfo : %d\n", info->child_pid);
-    printf("Current PID( getpid()) of info->child_pid in InitInfo : %d\n", getpid());
+    printf("Current PID( getpid()) of info->child_pid in InitInfo : %d\n", getpid());*/
 
     return TRUE;
 }
@@ -175,12 +177,28 @@ static int InitInfo(wd_task_info_ty *info, int argc, char** argv)
 /* Task 1: send signal to ־watchdog */
 int SendSignal_TSK(wd_task_info_ty *info)
 {    
-    if ( -1 == kill(getppid(), SIGUSR1) )
+    int ret = 0;
+    if ( -1 == (ret = kill(info->child_pid, SIGUSR1) ) )
     {
         printf("Current PID( getppid()) in SendSignal_TSK : %d\n", getppid());
+        /*if the partner procces does not exist*/
+        if(ESRCH == errno)
+        {
+            /*revive new wd */
+            execvp(info->argv[0], info->argv);
+            perror("execvp");
+            exit(1);
+
+        }
+
+        else
+        {
+            perror("abort executed -> check core file");
+            abort();
+        }
 
         /* if failed switch to Revive or Panic */
-        return FAIL_FROM_RUN;
+        return FINISHED;
     }
 
     return SHOULD_REPEAT;
@@ -212,18 +230,17 @@ int RevivePartner_TSK(wd_task_info_ty *info)
     printf("Current PID: %d\n", getpid());
     printf("Child PID (to kill): %d\n", info->child_pid);
 
-    RETURN_IF_BAD(SUCCESS ==  kill(info->child_pid, SIGKILL), FAIL, "kill in RevivePartner_TSK failed");
+    /*RETURN_IF_BAD(SUCCESS ==  kill(info->child_pid, SIGKILL), FAIL, "kill in RevivePartner_TSK failed");*/
     printf("Reached after kill in RevivePartner_TSK\n");
  
     /*info->child_pid = fork();
     printf("Reached after fork in RevivePartner_TSK\n");*/
 
-    if (0 == info->child_pid )
-    {
+   
         execvp(info->argv[0], info->argv);
         perror("execvp");
         exit(1);
-    }
+    
 
     return FINISHED;
 }
