@@ -16,6 +16,8 @@
 #include "watchdog.h"
 #include "utils.h" /*RETURN_IF_BAD*/
 
+extern int putenv(char *);
+
 /* Dummy implementation of MakeMeImmortal */
 int MakeMeImmortal(size_t allowed_misses, size_t ping_frequency, char **argv)
 {
