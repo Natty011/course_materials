@@ -38,6 +38,7 @@ void RunAsWatchdog(pid_t client_pid);
 static int InitNewArgv(char **new_argv, char client_pid_str[], pid_t pid_self, char **argv );
 static pid_t GetWatchdogPIDFromEnv(void);
 
+
 int main(int argc, char** argv)
 {
     wd_task_info_ty *info = NULL;
