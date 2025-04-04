@@ -109,7 +109,6 @@ int main(int argc, char** argv)
     RETURN_IF_BAD(SUCCESS == ret, FAIL, "MakeMeImmortal failed");
 
 
-    info->child_pid = GetWatchdogPIDFromEnv();
 
 
     ret_uid =  SchedulerAdd(sch,(int (*)(void *))SendSignal_TSK, info, info->ping_frequency_seconds);
@@ -125,6 +124,7 @@ int main(int argc, char** argv)
 
     RETURN_IF_BAD(SUCCESS == pthread_create(&g_wd, NULL,
         (void *(*)(void *))SchedulerThread_TH, info), FAIL, "pthread_create failed");
+
 
      puts("lalalalalalal");  
     RETURN_IF_BAD(SUCCESS ==  pthread_detach(g_wd), FAIL, "pthread_detach failed");
@@ -208,10 +208,7 @@ static int InitInfo(wd_task_info_ty *info, int argc, char** argv)
     info->argv = argv;
     info->argc = argc;
     info->sch = NULL;
-    /*info->child_pid = getppid();
-    printf("Current PID(getppid()) of info->child_pid in InitInfo : %d\n", info->child_pid);
-    printf("Current PID( getpid()) of info->child_pid in InitInfo : %d\n", getpid());*/
-
+   
     return TRUE;
 }
 
@@ -220,6 +217,12 @@ static int InitInfo(wd_task_info_ty *info, int argc, char** argv)
 int SendSignal_TSK(wd_task_info_ty *info)
 {    
     int ret = 0;
+
+    if (0 == info->child_pid)
+    {
+        info->child_pid = GetWatchdogPIDFromEnv();
+    }
+    
     if ( -1 == (ret = kill(info->child_pid, SIGUSR1) ) )
     {
         printf("Current PID( getppid()) in SendSignal_TSK : %d\n", getppid());
@@ -236,7 +239,7 @@ int SendSignal_TSK(wd_task_info_ty *info)
         else
         {
             perror("abort executed -> check core file");
-            abort();
+           /* abort();*/
         }
 
         /* if failed switch to Revive or Panic */
@@ -272,16 +275,12 @@ int RevivePartner_TSK(wd_task_info_ty *info)
     printf("Current PID: %d\n", getpid());
     printf("Child PID (to kill): %d\n", info->child_pid);
 
-    /*RETURN_IF_BAD(SUCCESS ==  kill(info->child_pid, SIGKILL), FAIL, "kill in RevivePartner_TSK failed");*/
     printf("Reached after kill in RevivePartner_TSK\n");
  
-    /*info->child_pid = GetWatchdogPIDFromEnv fork();
-    printf("Reached after fork in RevivePartner_TSK\n");*/
 
-   
-        execvp(info->argv[0], info->argv);
-        perror("execvp");
-        exit(1);
+    execvp(info->argv[0], info->argv);
+    perror("execvp");
+    exit(1);
     
 
     return FINISHED;
@@ -308,7 +307,7 @@ static pid_t GetWatchdogPIDFromEnv(void)
     if (NULL == wd_pid_str)
     {
         perror("WD_PID not found");
-        return -1;
+        return FAIL;
     }
     printf("Got WD PID from env: %d\n",(pid_t)atoi(wd_pid_str));
 
