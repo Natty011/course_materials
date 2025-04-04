@@ -36,7 +36,7 @@ int CheckDnrFlag_TSK(wd_task_info_ty *info);
 /* Forward declaration to avoid implicit declaration warning */
 void RunAsWatchdog(pid_t client_pid);
 static int InitNewArgv(char **new_argv, char client_pid_str[], pid_t pid_self, char **argv );
-
+static pid_t GetWatchdogPIDFromEnv(void);
 
 int main(int argc, char** argv)
 {
@@ -48,7 +48,6 @@ int main(int argc, char** argv)
 
     
     char client_pid_str[20] = {0};
-    char *wd_pid_str = NULL;
 
     /* argv[0] = ./watchdog_app.out, argv[1] = "watchdog", argv[2] = <client_pid>, argv[3] = NULL */
     char *new_argv[4] = {0}; 
@@ -108,17 +107,10 @@ int main(int argc, char** argv)
     ret = MakeMeImmortal(info->allowed_misses, info->ping_frequency_seconds, new_argv);
     RETURN_IF_BAD(SUCCESS == ret, FAIL, "MakeMeImmortal failed");
 
-    wd_pid_str = getenv("WD_PID");
-    if (NULL == wd_pid_str)
-    {
-        /* המשתנה לא קיים */
-        perror("WD_PID not found");
-    }
-    else
-    {
-        info->child_pid =  (pid_t)atoi(wd_pid_str);
-        printf("Got WD PID from env: %d\n", info->child_pid);
-    }
+
+    info->child_pid = GetWatchdogPIDFromEnv();
+
+
     ret_uid =  SchedulerAdd(sch,(int (*)(void *))SendSignal_TSK, info, info->ping_frequency_seconds);
     RETURN_IF_BAD( SUCCESS == UIDIsSame(ret_uid, BADUID), FAIL, "SchedulerAdd SendSignal_TSK failed");
 
@@ -282,7 +274,7 @@ int RevivePartner_TSK(wd_task_info_ty *info)
     /*RETURN_IF_BAD(SUCCESS ==  kill(info->child_pid, SIGKILL), FAIL, "kill in RevivePartner_TSK failed");*/
     printf("Reached after kill in RevivePartner_TSK\n");
  
-    /*info->child_pid = fork();
+    /*info->child_pid = GetWatchdogPIDFromEnv fork();
     printf("Reached after fork in RevivePartner_TSK\n");*/
 
    
@@ -307,3 +299,17 @@ int CheckDnrFlag_TSK(wd_task_info_ty *info)
     return SHOULD_REPEAT;
 }
 
+/* Returns WD PID from environment or -1 on failure */
+static pid_t GetWatchdogPIDFromEnv(void)
+{
+    char *wd_pid_str = getenv("WD_PID");
+
+    if (NULL == wd_pid_str)
+    {
+        perror("WD_PID not found");
+        return -1;
+    }
+    printf("Got WD PID from env: %d\n",(pid_t)atoi(wd_pid_str));
+
+    return (pid_t)atoi(wd_pid_str);
+}
