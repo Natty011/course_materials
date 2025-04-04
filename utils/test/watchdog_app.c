@@ -34,7 +34,7 @@ int RevivePartner_TSK(wd_task_info_ty *info);
 int CheckDnrFlag_TSK(wd_task_info_ty *info);
 
 /* Forward declaration to avoid implicit declaration warning */
-void RunAsWatchdog(void);
+void RunAsWatchdog(pid_t client_pid);
 static int InitNewArgv(char **new_argv, char client_pid_str[], pid_t pid_self, char **argv );
 
 
@@ -68,7 +68,7 @@ int main(int argc, char** argv)
         printf("[WD] My PID: %d, Client PID: %d\n", pid_self, client_pid);
 
 
-        RunAsWatchdog(); /*client_pid*/
+        RunAsWatchdog(client_pid); /*client_pid*/
 
         return 0;
     }
@@ -103,9 +103,8 @@ int main(int argc, char** argv)
     RETURN_IF_BAD(SUCCESS ==  sigemptyset(&sa_child.sa_mask), FAIL, "sigemptyset sa_child failed");
     RETURN_IF_BAD(SUCCESS == sigaction(SIGCHLD, &sa_child, NULL), FAIL, "sigaction failed");
 
-    ret = MakeMeImmortal(info->allowed_misses, info->ping_frequency_seconds, argv);
+    ret = MakeMeImmortal(info->allowed_misses, info->ping_frequency_seconds, new_argv);
     RETURN_IF_BAD(SUCCESS == ret, FAIL, "MakeMeImmortal failed");
-
     
     ret_uid =  SchedulerAdd(sch,(int (*)(void *))SendSignal_TSK, info, info->ping_frequency_seconds);
     RETURN_IF_BAD( SUCCESS == UIDIsSame(ret_uid, BADUID), FAIL, "SchedulerAdd SendSignal_TSK failed");
@@ -120,7 +119,10 @@ int main(int argc, char** argv)
 
     RETURN_IF_BAD(SUCCESS == pthread_create(&g_wd, NULL,
         (void *(*)(void *))SchedulerThread_TH, info), FAIL, "pthread_create failed");
+
+     puts("lalalalalalal");  
     RETURN_IF_BAD(SUCCESS ==  pthread_detach(g_wd), FAIL, "pthread_detach failed");
+    puts("babababababa");  
 
     while (!should_stop)
     {
@@ -139,7 +141,7 @@ static int InitNewArgv(char **new_argv, char client_pid_str[], pid_t pid_self,  
     puts(client_pid_str);
 
     new_argv[0] = argv[0];        /* ./watchdog_app.out */
-    new_argv[1] = "watchdog";     /* identifier */
+    new_argv[1] = "watchdog";     /* identifier for WD process*/
     new_argv[2] = client_pid_str; /* client's PID */
     new_argv[3] = NULL;
 
