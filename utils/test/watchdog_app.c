@@ -10,7 +10,7 @@
 #include <stdio.h>      /*perror, sprintf, printf, __atomic_store_n, __atomic_load_n */
 #include <pthread.h>    /*pthread_t, */
 #include <signal.h>     /*kill, SIGUSR1 , siaction*/
-#include <stdlib.h>     /*atoi, exit, abort*/
+#include <stdlib.h>     /*atoi, exit, abort, getenv*/
 #include <sys/types.h>  /* pid_t */
 #include <sys/wait.h>   /*waitpid*/
 #include <assert.h>
@@ -48,6 +48,8 @@ int main(int argc, char** argv)
 
     
     char client_pid_str[20] = {0};
+    char *wd_pid_str = NULL;
+
     /* argv[0] = ./watchdog_app.out, argv[1] = "watchdog", argv[2] = <client_pid>, argv[3] = NULL */
     char *new_argv[4] = {0}; 
     pid_t pid_self = getpid();
@@ -105,7 +107,18 @@ int main(int argc, char** argv)
 
     ret = MakeMeImmortal(info->allowed_misses, info->ping_frequency_seconds, new_argv);
     RETURN_IF_BAD(SUCCESS == ret, FAIL, "MakeMeImmortal failed");
-    
+
+    wd_pid_str = getenv("WD_PID");
+    if (NULL == wd_pid_str)
+    {
+        /* המשתנה לא קיים */
+        perror("WD_PID not found");
+    }
+    else
+    {
+        info->child_pid =  (pid_t)atoi(wd_pid_str);
+        printf("Got WD PID from env: %d\n", info->child_pid);
+    }
     ret_uid =  SchedulerAdd(sch,(int (*)(void *))SendSignal_TSK, info, info->ping_frequency_seconds);
     RETURN_IF_BAD( SUCCESS == UIDIsSame(ret_uid, BADUID), FAIL, "SchedulerAdd SendSignal_TSK failed");
 
