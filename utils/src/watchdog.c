@@ -18,7 +18,7 @@
 
 
 /*extern int putenv(char *wd_pid_str);*/
-static char wd_pid_str[64] = {0};
+/*static char wd_pid_str[64] = {0};*/
 pid_t g_wd_pid; /*extern*/ 
 /* Dummy implementation of MakeMeImmortal */
 int MakeMeImmortal(size_t allowed_misses, size_t ping_frequency, char **argv)
@@ -68,7 +68,7 @@ int MakeMeImmortal(size_t allowed_misses, size_t ping_frequency, char **argv)
     /*----------need to be in MMI Not here!!------------------*/
 
     g_wd_pid = pid_wd;
-    printf("[WD] My PID afterfork in MMI - g_wd_pid: %d, Client PID: %d\n", g_wd_pid, getpid);
+    printf("[WD] My PID afterfork in MMI - g_wd_pid: %d, Client PID: %d\n", g_wd_pid, getpid());
 
     printf("Current PID in MMI after if(0 == pid_wd) : %d\n", getpid());
     
