@@ -7,8 +7,6 @@
 
 #ifndef WATCHDOG_H      /* WATCHDOG_H */
 #define WATCHDOG_H      /* WATCHDOG_H */
-#include "scheduler.h"  /*Create, */
-
 
 /*client and watchdog save this instace struct to collet info/status on each other 
 during their communication */
