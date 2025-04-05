@@ -16,9 +16,13 @@
 #define SUCCESS (0)
 #define FAIL    (1)
 
+/*
+int x = 42;
+PRINT_IF_DEBUG("x is %d", x);
+*/
 #ifndef NDEBUG
 	#define PRINT_IF_DEBUG(fmt, ...) \
-		fprintf(stderr, "[DEBUG] " fmt "\n", ##__VA_ARGS__)
+		fprintf(stderr, "[DEBUG] " fmt " (line %d)\n", ##__VA_ARGS__, __LINE__)
 #else
 	#define PRINT_IF_DEBUG(fmt, ...) ((void)0)
 #endif
@@ -27,14 +31,14 @@
 #define RETURN_IF_BAD(cond, ret_val, msg) \
     if (!(cond))                          \
     {                                     \
-        perror(msg);                      \
+		fprintf(stderr, "[ERROR] %s failed (line %d): %s\n", __func__, __LINE__, msg); \                      
         return (ret_val);                 \
 	}
 /* Exits the program if 'cond' is false, prints msg */
 #define EXIT_IF_BAD(cond, msg)   \
     if (!(cond))                 \
     {                            \
-        perror(msg);             \
+		fprintf(stderr, "[ABORT] %s failed (line %d): %s\n", __func__, __LINE__, msg); \
         exit(FAIL);              \
     }
 
@@ -42,7 +46,7 @@
 #define ABORT_IF_BAD(cond, msg) \
     if (!(cond))                \
     {                           \
-        perror(msg);            \
+        fprintf(stderr, "[EXIT] %s failed (line %d): %s\n", __func__, __LINE__, msg); \
         abort();                \
     }
 
