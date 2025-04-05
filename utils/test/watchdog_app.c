@@ -1,308 +1,199 @@
 /***************************************
  * Author : Natty
- * Reviewer : 
+ * Reviewer :
  * Date : 01 / 04 / 2025
- * Last update: 05 / 04 / 2025
+ * Last update: 06 / 04 / 2025
  ***************************************/
 
-#define _POSIX_C_SOURCE 199309L /*struct sigaction*/
-
-#include <stdio.h>      /*perror, sprintf, printf, __atomic_store_n, __atomic_load_n */
-#include <pthread.h>    /*pthread_t, */
-#include <signal.h>     /*kill, SIGUSR1 , siaction*/
-#include <stdlib.h>     /*atoi, exit, abort*/
-#include <sys/types.h>  /* pid_t */
-#include <sys/wait.h>   /*waitpid*/
-#include <assert.h>
-#include <string.h>     /*strcmp*/
-#include <unistd.h>     /*fork*/
-#include "scheduler.h"  /*Create, */
-#include "watchdog.h"
-#include "utils.h" /*RETURN_IF_BAD*/
-
-volatile int should_stop = 0;
-static volatile sig_atomic_t g_missed_SOL = 0;
-static pthread_t g_wd = 0;
-extern pid_t g_wd_pid;
-
-static int InitInfo(wd_task_info_ty *info, int argc, char** argv);
-static void SendHeartBeat_Hand(int sig);
-static void *SchedulerThread_TH(wd_task_info_ty *info);
-static void ChildCleanup_HAND(int sig);
-int SendSignal_TSK(wd_task_info_ty *info);
-int CheckMisses_TSK(wd_task_info_ty *info);
-int RevivePartner_TSK(wd_task_info_ty *info);
-int CheckDnrFlag_TSK(wd_task_info_ty *info);
-
-/* Forward declaration to avoid implicit declaration warning */
-void RunAsWatchdog(pid_t client_pid);
-static int InitNewArgv(char **new_argv, char client_pid_str[], pid_t pid_self, char **argv );
-
-
-int main(int argc, char** argv)
-{
-    wd_task_info_ty *info = NULL;
-    struct sigaction sa_app = {0};
-    struct sigaction sa_child = {0};
-    ilrd_uid_t ret_uid = BADUID;
-    scheduler_t *sch = NULL;
-
-    
-    char client_pid_str[20] = {0};
-
-    /* argv[0] = ./watchdog_app.out, argv[1] = "watchdog", argv[2] = <client_pid>, argv[3] = NULL */
-    char *new_argv[4] = {0}; 
-    pid_t pid_self = getpid();
-
-    int ret = SUCCESS;
-
-    printf("WD_APP: [Client] Starting main()\n");
-    printf("WD_APP: [Client] My PID: %d\n", pid_self);
-
-    InitNewArgv(new_argv, client_pid_str,pid_self, argv);
-    
-    printf("WD_APP: Current parent PID in main_start : %d\n", getppid());
-    printf("WD_APP: Current  PID in main_start : %d\n", getpid());
-
-    if(argc > 1 &&  (0 == strcmp(argv[1], "watchdog") ))
-    {
-        pid_t client_pid = (pid_t)atoi(argv[2]);
-        printf("WD_APP: [WD] My PID: %d, Client PID: %d\n", pid_self, client_pid);
-
-
-        RunAsWatchdog(client_pid); /*client_pid*/
-
-        return 0;
-    }
-
-    info = (wd_task_info_ty*)malloc(sizeof(wd_task_info_ty));
-    RETURN_IF_BAD(info, FAIL, "malloc failed");
-
-    
-    RETURN_IF_BAD(TRUE == InitInfo(info, argc, argv), FAIL, "InitInfo failed");
-    info->sch = SchedulerCreate();
-
-    if(NULL == info->sch)
-    {
-        free(info);
-        info = NULL;
-        RETURN_IF_BAD(FALSE, FAIL, "SchedulerCreate failed");
-
-    }
-
-    sch = info->sch;
-
-
-     /* Setup signal handler for SIGUSR1 (first signal) */
-    sa_app.sa_handler = SendHeartBeat_Hand; /* תחסום את הסיגנלים חוץ מסיגיוסר*/
-    RETURN_IF_BAD(SUCCESS == sigemptyset(&sa_app.sa_mask), FAIL, "sigemptyset sa_app failed");
-    RETURN_IF_BAD(SUCCESS == sigaction(SIGUSR1, &sa_app, NULL), FAIL, "sigaction failed");
-
-     /* Set handler for SIGCHLD to cleanup Dead processes w/o become to Zombies */
-    /*signal from the system that the child process is terminated*/
-
-    sa_child.sa_handler = ChildCleanup_HAND;
-    RETURN_IF_BAD(SUCCESS ==  sigemptyset(&sa_child.sa_mask), FAIL, "sigemptyset sa_child failed");
-    RETURN_IF_BAD(SUCCESS == sigaction(SIGCHLD, &sa_child, NULL), FAIL, "sigaction failed");
-
-    ret = MakeMeImmortal(info->allowed_misses, info->ping_frequency_seconds, new_argv);
-    RETURN_IF_BAD(SUCCESS == ret, FAIL, "MakeMeImmortal failed");
-
-    info->child_pid = g_wd_pid;
-    printf("WD_APP: [WD] My PID after MMI in clent- g_wd_pid: %d, Client PID: %d\n", info->child_pid, pid_self);
-
-
-
-
-    ret_uid =  SchedulerAdd(sch,(int (*)(void *))SendSignal_TSK, info, info->ping_frequency_seconds);
-    RETURN_IF_BAD( SUCCESS == UIDIsSame(ret_uid, BADUID), FAIL, "SchedulerAdd SendSignal_TSK failed");
-
-    ret_uid = SchedulerAdd(sch, (int (*)(void *))CheckMisses_TSK, info, info->ping_frequency_seconds);
-
-    RETURN_IF_BAD( SUCCESS == UIDIsSame(ret_uid, BADUID), FAIL, "SchedulerAdd CheckMisses_TSK failed");
-     /* Every 10 second, low delay */
-    ret_uid = SchedulerAdd(sch, (int (*)(void *))CheckDnrFlag_TSK, info, 1);
-
-    RETURN_IF_BAD( SUCCESS == UIDIsSame(ret_uid, BADUID), FAIL, "SchedulerAdd CheckDnrFlag_TSK failed");
-
-    RETURN_IF_BAD(SUCCESS == pthread_create(&g_wd, NULL,
-        (void *(*)(void *))SchedulerThread_TH, info), FAIL, "pthread_create failed");
-
-
-    RETURN_IF_BAD(SUCCESS ==  pthread_detach(g_wd), FAIL, "pthread_detach failed");
-
-    puts("WD_APP:--------------BEFORE while (!should_stop) ---------------------");  
-
-    while (!should_stop)
-    {
-        pause();
-    }
-
-    DoNotResuscitate();  
-    puts("WD_APP:--------------END OF WD_APP ---------------------------------");  
-
-    return 0;
-}
-static int InitNewArgv(char **new_argv, char client_pid_str[], pid_t pid_self,  char **argv )
-{
-    /* Prepare new argv for execvp to create watchdog */
-    sprintf(client_pid_str, "%d", pid_self);
-    printf("WD_APP.C: client_pid_str(pid_self) PID in InitNewArgv: %s, getppid PID: %d\n", client_pid_str, getppid());
-
-    new_argv[0] = argv[0];        /* ./watchdog_app.out */
-    new_argv[1] = "watchdog";     /* identifier for WD process*/
-    new_argv[2] = client_pid_str; /* client's PID */
-    new_argv[3] = NULL;
-
-    return SUCCESS;
-}
-
-
-
-/* Thread routine to run the scheduler */
-static void *SchedulerThread_TH(wd_task_info_ty *info)
-{
-    int ret = -5;
-
-    ret = SchedulerRun(info->sch);
-    printf("WD_APP: ret SchedulerRun: %d\n", ret);
-
-    SchedulerDestroy(info->sch);
-
-    return NULL;
-}
-  
-
-/*prevents mass of zombies in the process table,
- while deads child sexist the parent collects them*/
-  
-static void ChildCleanup_HAND(int sig)
-{
-
-    pid_t pid = 0;
-    int status = 0;
-
-    (void)sig;
-
-    /*WNOHANG non blocking/waiting, just check if there is dead process childs*/
-    while ((pid = waitpid(-1, &status, WNOHANG)) > 0)
-    {
-       /* printf("Child process %d cleaned up.\n", pid);*/
-    }
-
-}
-
-
-static void SendHeartBeat_Hand(int sig)
-{
-    assert(SIGUSR1 == sig);
-    __sync_fetch_and_add(&g_missed_SOL, 1); 
-}
-
-
-static int InitInfo(wd_task_info_ty *info, int argc, char** argv)
-{
-    assert(NULL != info);
-
-    RETURN_IF_BAD(argc >= 3, FAIL, "Use:./watchdog_app.out <#freq_ping> <#allow_misses>");
-
-    info->ping_frequency_seconds = (size_t)atoi(argv[1]);
-    info->allowed_misses = (size_t)atoi(argv[2]);
-    info->argv = argv;
-    info->argc = argc;
-    info->sch = NULL;
-   
-    return TRUE;
-}
-
-
-/* Task 1: send signal to ־watchdog */
-int SendSignal_TSK(wd_task_info_ty *info)
-{    
-    int ret = 0;
-    printf("WD_APP: Current PID( g_wd_pid) in before 'if' SendSignal_TSK : %d\n", g_wd_pid);
-
-    if (0 == info->child_pid)
-    {
-        info->child_pid = g_wd_pid;
-        printf("WD_APP: Current PID( g_wd_pid) in SendSignal_TSK : %d\n", g_wd_pid);
-    }
-
-    if ( -1 == (ret = kill(info->child_pid, SIGUSR1) ) )
-    {
-        printf("WD_APP: Current PID( getppid()) in SendSignal_TSK : %d\n", getppid());
-        /*if the partner procces does not exist*/
-        if(ESRCH == errno)
-        {
-            /*revive new wd */
-            printf("WD_APP: Current PID( getpid()) in SendSignal_TSK(revive) : %d\n", getpid());
-
-            execvp(info->argv[0], info->argv);
-            perror("execvp");
-            exit(1);
-
-        }
-
-        else
-        {
-            perror("WD_APP: abort executed -> check core file");
-           /* abort();*/
-        }
-
-        /* if failed switch to Revive or Panic */
-        return FINISHED;
-    }
-
-    return SHOULD_REPEAT;
-}
-
-/* Task 2: increment the counter and revive if pass the allowed misses */
-int CheckMisses_TSK(wd_task_info_ty *info)
-{
-    size_t max_misses = info->allowed_misses;
-
-    int current = __atomic_add_fetch(&g_missed_SOL, 1, __ATOMIC_SEQ_CST);
-
-    if (current > (int)max_misses)
-    {
-        SchedulerClear(info->sch);
-        /* Every 10 second, low delay */
-        SchedulerAdd(info->sch, (int (*)(void *))RevivePartner_TSK, info, 1);  
-        return FINISHED;
-    }
-
-    return SHOULD_REPEAT;
-}
-
-/* Task 3: revive watchdog again  */
-int RevivePartner_TSK(wd_task_info_ty *info)
-{
-    printf("WD_APP: Reached before kill in RevivePartner_TSK\n");
-    
-    printf("WD_APP: Current PID: %d\n", getpid());
-    printf("WD_APP: Child PID (to kill): %d\n", info->child_pid);
-
-    printf("WD_APP: Reached after kill in RevivePartner_TSK\n");
+ #define _POSIX_C_SOURCE 199309L /* struct sigaction */
+
+ #include <stdio.h>      /* perror, sprintf, printf */
+ #include <stdlib.h>     /* atoi, exit, abort */
+ #include <unistd.h>     /* fork, execvp, getpid */
+ #include <sys/types.h>  /* pid_t */
+ #include <sys/wait.h>   /* waitpid */
+ #include <pthread.h>    /* pthread_create, pthread_detach */
+ #include <signal.h>     /* sigaction, SIGUSR1 */
+ #include <string.h>     /* strcmp */
+ #include <assert.h>
  
-
-    execvp(info->argv[0], info->argv);
-    perror("execvp");
-    exit(1);
-    
-
-    return FINISHED;
-}
-
-/* Task 4: stop all */
-int CheckDnrFlag_TSK(wd_task_info_ty *info)
-{
-    printf("WD_APP: Reached before in CheckDnrFlag_TSK\n");
-
-    if (should_stop)
-    {
-        SchedulerStop(info->sch);
-        return FINISHED;
+ #include "scheduler.h"
+ #include "watchdog.h"
+ #include "utils.h"
+ 
+ /* ------------------ Global Variables ------------------ */
+ volatile int g_should_stop = 0;
+ static volatile sig_atomic_t g_missed_SOL = 0;
+ static pthread_t g_wd_thread = 0;
+ extern pid_t g_wd_pid;
+ 
+ /* ------------------ Struct Definition ------------------ */
+ typedef struct wd_task_info
+ {
+     size_t allowed_misses;
+     size_t ping_frequency;
+     char **argv;
+     int argc;
+     scheduler_t *sch;
+     pid_t child_pid;
+ } wd_task_info_ty;
+ 
+ /* ------------------ Forward Declarations ------------------ */
+ static int InitInfo(wd_task_info_ty *info, int argc, char **argv);
+ static int SetupSignalHandlers(void);
+ static int SetupScheduler(wd_task_info_ty *info);
+ static void *SchedulerThread_TH(wd_task_info_ty *info);
+ static void HeartbeatHandler_HAND(int sig);
+ static void CleanupDeadChildren_HAND(int sig);
+ 
+ static int SendSignal_TSK(wd_task_info_ty *info);
+ static int CheckMisses_TSK(wd_task_info_ty *info);
+ static int CheckDnrFlag_TSK(wd_task_info_ty *info);
+ 
+ /* ------------------ Main ------------------ */
+ int main(int argc, char **argv)
+ {
+     wd_task_info_ty info = {0};
+     int ret = 0;
+ 
+     assert(argc >= 4);
+ 
+     EXIT_IF_BAD(SUCCESS == InitInfo(&info, argc, argv), "InitInfo failed");
+     EXIT_IF_BAD(SUCCESS == SetupSignalHandlers(), "SetupSignalHandlers failed");
+     EXIT_IF_BAD(SUCCESS == SetupScheduler(&info), "SetupScheduler failed");
+ 
+     EXIT_IF_BAD(SUCCESS == pthread_create(&g_wd_thread, NULL,
+         (void *(*)(void *))SchedulerThread_TH, &info), "pthread_create failed");
+ 
+     EXIT_IF_BAD(SUCCESS == pthread_detach(g_wd_thread), "pthread_detach failed");
+ 
+     puts("WD_APP: --------------BEFORE while (!should_stop) ---------------------");
+ 
+     while (!g_should_stop)
+     {
+         pause();
+     }
+ 
+     return 0;
+ }
+ 
+ /* ------------------ Initialization ------------------ */
+ static int InitInfo(wd_task_info_ty *info, int argc, char **argv)
+ {
+     assert(NULL != info);
+ 
+     info->ping_frequency = (size_t)atoi(argv[1]);
+     info->allowed_misses = (size_t)atoi(argv[2]);
+     info->argv = argv;
+     info->argc = argc;
+     info->sch = SchedulerCreate();
+     EXIT_IF_BAD(NULL != info->sch, "SchedulerCreate failed");
+ 
+     info->child_pid = g_wd_pid; /* wd_pid */
+ 
+     return SUCCESS;
+ }
+ 
+ static int SetupSignalHandlers(void)
+ {
+     struct sigaction sa_usr1 = {0};
+     struct sigaction sa_chld = {0};
+ 
+     sa_usr1.sa_handler = HeartbeatHandler_HAND;
+     EXIT_IF_BAD(SUCCESS == sigemptyset(&sa_usr1.sa_mask), "sigemptyset failed");
+     EXIT_IF_BAD(SUCCESS == sigaction(SIGUSR1, &sa_usr1, NULL), "sigaction failed");
+ 
+     sa_chld.sa_handler = CleanupDeadChildren_HAND;
+     EXIT_IF_BAD(SUCCESS == sigemptyset(&sa_chld.sa_mask), "sigemptyset failed");
+     EXIT_IF_BAD(SUCCESS == sigaction(SIGCHLD, &sa_chld, NULL), "sigaction failed");
+ 
+     return SUCCESS;
+ }
+ 
+ static int SetupScheduler(wd_task_info_ty *info)
+ {
+     ilrd_uid_t uid = {0};
+ 
+     uid = SchedulerAdd(info->sch, (int (*)(void *))SendSignal_TSK, info, info->ping_frequency);
+     EXIT_IF_BAD(FALSE == UIDIsSame(uid, BADUID), "Add SendSignal_TSK failed");
+ 
+     uid = SchedulerAdd(info->sch, (int (*)(void *))CheckMisses_TSK, info, info->ping_frequency);
+     EXIT_IF_BAD(FALSE == UIDIsSame(uid, BADUID), "Add CheckMisses_TSK failed");
+ 
+     uid = SchedulerAdd(info->sch, (int (*)(void *))CheckDnrFlag_TSK, info, 1);
+     EXIT_IF_BAD(FALSE == UIDIsSame(uid, BADUID), "Add CheckDnrFlag_TSK failed");
+ 
+     return SUCCESS;
+ }
+ 
+ /* ------------------ Tasks ------------------ */
+ static int SendSignal_TSK(wd_task_info_ty *info)
+ {
+     int kill_res = kill(info->child_pid, SIGUSR1);
+ 
+     if (-1 == kill_res)
+     {
+         if (ESRCH == errno)
+         {
+             execvp(info->argv[3], info->argv + 3);  /*revive the client app*/
+             perror("execvp failed");
+             exit(1);
+         }
+         else
+         {
+             ABORT_IF_BAD(FALSE,"abort executed -> check core file");
+         }
+     }
+ 
+     return SHOULD_REPEAT;
+ }
+ 
+ static int CheckMisses_TSK(wd_task_info_ty *info)
+ {
+     int count = __atomic_add_fetch(&g_missed_SOL, 1, __ATOMIC_SEQ_CST);
+ 
+     if ((size_t)count > info->allowed_misses)
+     {
+         SchedulerClear(info->sch);
+         SchedulerAdd(info->sch, SendSignal_TSK, info, 1);
+         return FINISHED;
+     }
+ 
+     return SHOULD_REPEAT;
+ }
+ 
+ static int CheckDnrFlag_TSK(wd_task_info_ty *info)
+ {
+ 
+     if (g_should_stop)
+     {
+         SchedulerStop(info->sch);
+         return FINISHED;
+     }
+ 
+     return SHOULD_REPEAT;
+ }
+ 
+ /* ------------------ Handlers ------------------ */
+ static void HeartbeatHandler_HAND(int sig)
+ {
+     assert(SIGUSR1 == sig);
+     __sync_lock_test_and_set(&g_missed_SOL, 0); /*reset the misses counter*/
     }
-
-    return SHOULD_REPEAT;
-}
+ 
+ static void CleanupDeadChildren_HAND(int sig)
+ {
+     (void)sig;
+     int status = 0;
+     while (waitpid(-1, &status, WNOHANG) > 0);
+ }
+ 
+ /* ------------------ Thread ------------------ */
+ static void *SchedulerThread_TH(wd_task_info_ty *info)
+ {
+     int ret = SchedulerRun(info->sch);
+     PRINT_IF_DEBUG("WD_APP: Scheduler finished with code: %d\n", ret);
+     SchedulerDestroy(info->sch);
+     return NULL;
+ }
+ 
