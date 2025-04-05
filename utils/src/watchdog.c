@@ -16,6 +16,7 @@
 #include "watchdog.h"
 #include "utils.h" /*RETURN_IF_BAD*/
 
+
 extern int putenv(char *wd_pid_str);
 static char wd_pid_str[64] = {0};
 pid_t g_wd_pid; /*extern*/ 
