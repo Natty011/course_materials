@@ -103,7 +103,7 @@ int MakeMeImmortal(size_t allowed_misses, size_t ping_frequency, int argc, char 
     info->argv = argv;
     info->argc = argc;
 
-    SchedulerSwitchMode(info, 0); /* BEGIN mode */
+    SchedulerSwitchMode(info, BEGINE_MODE); /* BEGIN mode */
 
 
     RETURN_IF_BAD(SUCCESS == pthread_create(&tid, NULL, (void *(*)(void *))SchedulerThread_TH, info),
@@ -206,19 +206,29 @@ static int RevivePartner_TSK(wd_internal_info_ty *info)
 
     info->partner_pid = child_pid;  /* watchdog  pid */
 
-    SchedulerSwitchMode(info, 2); /* Go back to routine */
+    SchedulerSwitchMode(info, ROUTINE_MODE); /* Go back to routine */
 
     return FINISHED;
 }
 
 static int IsPartnerAlive_TSK(wd_internal_info_ty *info)
 {
-    if (kill(info->partner_pid, 0) == -1 && errno == ESRCH)
-    {
-        SchedulerSwitchMode(info, 1); /* revive */
-        return FINISHED;
-    }
+    
+    int ret = kill(info->partner_pid, SIGUSR1);
 
+    if ( -1 == ret )
+    { 
+        if(errno == ESRCH)
+        {
+            SchedulerSwitchMode(info, REVIVE_MODE); /* revive */
+            return FINISHED;
+        }
+
+        else
+        {
+            ABORT_IF_BAD(FALSE,"abort executed -> check core file");
+        }
+    }   
     return SHOULD_REPEAT;
 }
 
@@ -230,7 +240,7 @@ static int SendSignal_TSK(wd_internal_info_ty *info)
     {
         if (ESRCH == errno)
         {
-            SchedulerSwitchMode(info, 1);
+            SchedulerSwitchMode(info, REVIVE_MODE);
             return FINISHED;
         }
         else
@@ -247,7 +257,7 @@ static int CheckMisses_TSK(wd_internal_info_ty *info)
     int current = 0;
     if (g_missed > (int)info->allowed_misses)
     {
-        SchedulerSwitchMode(info, 1);
+        SchedulerSwitchMode(info, REVIVE_MODE);
         return FINISHED;
     }
     current = __sync_add_and_fetch(&g_missed, 1);
@@ -261,7 +271,7 @@ static int CheckDnrFlag_TSK(wd_internal_info_ty *info)
 {
     if (g_should_stop)
     {
-        SchedulerSwitchMode(info, 3);
+        SchedulerSwitchMode(info, DESTROY_MODE);
         return FINISHED;
     }
 
