@@ -23,7 +23,7 @@
 volatile int should_stop = 0;
 static volatile sig_atomic_t g_missed_SOL = 0;
 static pthread_t g_wd = 0;
-
+extern pid_t g_wd_pid;
 static int InitInfo(wd_task_info_ty *info, int argc, char** argv);
 static void SendHeartBeat_Hand(int sig);
 static void *SchedulerThread_TH(wd_task_info_ty *info);
@@ -107,6 +107,9 @@ int main(int argc, char** argv)
 
     ret = MakeMeImmortal(info->allowed_misses, info->ping_frequency_seconds, new_argv);
     RETURN_IF_BAD(SUCCESS == ret, FAIL, "MakeMeImmortal failed");
+
+    info->child_pid = g_wd_pid;
+    printf("[WD] My PID after MMI in clent- g_wd_pid: %d, Client PID: %d\n", info->child_pid, pid_self);
 
 
 
@@ -220,9 +223,10 @@ int SendSignal_TSK(wd_task_info_ty *info)
 
     if (0 == info->child_pid)
     {
-        info->child_pid = GetWatchdogPIDFromEnv();
+        info->child_pid = g_wd_pid;
+        printf("Current PID( g_wd_pid) in SendSignal_TSK : %d\n", g_wd_pid);
     }
-    
+
     if ( -1 == (ret = kill(info->child_pid, SIGUSR1) ) )
     {
         printf("Current PID( getppid()) in SendSignal_TSK : %d\n", getppid());
