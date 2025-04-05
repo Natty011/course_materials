@@ -17,7 +17,7 @@
 #include "utils.h" /*RETURN_IF_BAD*/
 
 
-extern int putenv(char *wd_pid_str);
+/*extern int putenv(char *wd_pid_str);*/
 static char wd_pid_str[64] = {0};
 pid_t g_wd_pid; /*extern*/ 
 /* Dummy implementation of MakeMeImmortal */
@@ -38,14 +38,14 @@ int MakeMeImmortal(size_t allowed_misses, size_t ping_frequency, char **argv)
 
     if(0 == pid_wd)
     {
-        sprintf(wd_pid_str, "WD_PID=%d", getpid());
+        /*sprintf(wd_pid_str, "WD_PID=%d", getpid());
         puts(wd_pid_str);
 
         if (0 != putenv(wd_pid_str))
         {
             perror("putenv failed");
             return 1;
-        }
+        }*/
 
         /*prepare argv for execvp*/
        /* new_argv[0] = argv[0]; */     /* ./watchdog_app */
