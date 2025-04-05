@@ -1,83 +1,283 @@
+
 /***************************************
- * Author : Natty
- * Reviewer : 
- * Date : 01 / 04 / 2025
- * Last update: 05 / 04 / 2025
+ * Author : Final Project - Watchdog
+ * Date : 2025-04-05
+ * Description : Implementation of the watchdog logic using scheduler tasks
  ***************************************/
 
-#include <stdio.h> 
-#include <stdlib.h>     /*  */
-#include <unistd.h>
-#include <sys/types.h>  /* pid_t */
-#include <sys/wait.h>   /*waitpid*/
+#define _POSIX_C_SOURCE 200809L /* sigaction, kill, fork, execvp */
+
+#include <stdio.h>      /* printf, perror */
+#include <stdlib.h>     /* exit, malloc */
+#include <unistd.h>     /* fork, execvp, getpid, getppid */
+#include <pthread.h>    /* pthread_create, pthread_detach */
 #include <assert.h>
-#include <string.h>     /*strcmp*/
-#include <unistd.h>     /*fork*/
+#include <signal.h>     /* sigaction, kill */
+#include <errno.h>
+#include <string.h>     /* strcmp */
+#include <sys/types.h>
+#include <sys/wait.h>
+
+#include "scheduler.h"
 #include "watchdog.h"
-#include "utils.h" /*RETURN_IF_BAD*/
+#include "utils.h"
 
+pid_t g_wd_pid = 0; /*extern*/ 
+/* ---------------------- Struct Definition ---------------------- */
 
-pid_t g_wd_pid; /*extern*/ 
-
- /*prepare argv for execvp*/
-       /* new_argv[0] = argv[0]; */     /* ./watchdog_app */
-        /*new_argv[1] = "watchdog";*/ /* flag to identify WD process*/
-        /*new_argv[2] = client_pid_str;*/ /* client's PID */
-       /* new_argv[3] = NULL;*/
-/* argv[0] = ./watchdog_app.out, argv[1] = "watchdog", argv[2] = <client_pid>, argv[3] = NULL */
-
- /* Dummy implementation of MakeMeImmortal */      
-int MakeMeImmortal(size_t allowed_misses, size_t ping_frequency, char **argv)
+typedef struct wd_internal_info
 {
-    pid_t pid_wd = -1;
-    pid_t pid_wd_app = getpid();
-    printf("WD.c: Current PID (pid_wd_app)in MMI before fork : %d\n", pid_wd_app);
+    scheduler_t *sched;
+    size_t ping_frequency;
+    size_t allowed_misses;
+    pid_t partner_pid;
+    char **argv;
+    int argc;
+} wd_internal_info_ty;
 
-    (void)allowed_misses;
-    (void)ping_frequency;
-    (void)argv;
 
-    printf("WD.c:[MakeMeImmortal] Dummy: initializing watchdog mechanism...\n");
-    printf("WD.c: Current PID in MMI before fork : %d\n", getpid());
+/* Enum for operational modes */
+typedef enum mode
+{
+    BEGINE_MODE = 0,
+    REVIVE_MODE = 1,
+    ROUTINE_MODE = 2,
+    DESTROY_MODE = 3
+} wd_mode_t;
 
-    RETURN_IF_BAD(-1 != (pid_wd = fork()), FAIL,  "fork failed");
+/* ---------------------- Global ---------------------- */
 
-    if(0 == pid_wd)
-    {
+static volatile sig_atomic_t g_should_stop = 0;
+static volatile sig_atomic_t g_missed = 0;
 
-        printf("WD.c: Reached before execvp\n");
-        printf("WD.c: Current PID in MMI before execvp : %d\n", getpid());
+/* ---------------------- Forward Declarations ---------------------- */
 
-        execvp(argv[0], argv);
-        printf("WD.c: Reached after execvp\n");
+static void HeartbeatHandler_HAND(int sig);
+static void SigchldHandler_HAND(int sig);
+static void *SchedulerThread_TH(wd_internal_info_ty *info);
+static void BeginMode(wd_internal_info_ty *info);
+static void ReviveMode(wd_internal_info_ty *info);
+static void RoutineMode(wd_internal_info_ty *info);
+static void DestroyMode(wd_internal_info_ty *info);
+static void SchedulerSwitchMode(wd_internal_info_ty *info, int mode);
 
-        perror("WD.c: execvp failed");
-        exit(1);
+static int WaitForFirstSignal_TSK(wd_internal_info_ty *info);
+static int RevivePartner_TSK(wd_internal_info_ty *info);
+static int IsPartnerAlive_TSK(wd_internal_info_ty *info);
+static int SendSignal_TSK(wd_internal_info_ty *info);
+static int CheckMisses_TSK(wd_internal_info_ty *info);
+static int CheckDnrFlag_TSK(wd_internal_info_ty *info);
 
-        /*RETURN_IF_BAD(FALSE, FAIL,  "execvp failed");*/
-    }
-    /*----------need to be in MMI Not here!!------------------*/
+/* ---------------------- Implementation ---------------------- */
 
-    g_wd_pid = pid_wd;
-    printf("WD.c: [WD] My PID(g_wd_pid) after fork in MMI: %d, Client PID: %d\n", g_wd_pid, getpid());
-    
+int MakeMeImmortal(size_t allowed_misses, size_t ping_frequency, int argc, char **argv)
+{
+    pid_t child_pid = -1;
+    wd_internal_info_ty *info = NULL;
+    struct sigaction sa = {0};
+    pthread_t tid = 0;
 
-    return 0; /* success */
+    assert(argc >= 4);
+
+    g_wd_pid = getpid();
+    child_pid = (pid_t)atoi(argv[0]);
+
+    /* signal handlers */
+    sa.sa_handler = HeartbeatHandler_HAND;
+    RETURN_IF_BAD(SUCCESS == sigemptyset(&sa.sa_mask) , FAIL, "sigemptyset failed");
+    RETURN_IF_BAD(SUCCESS == sigaction(SIGUSR1, &sa, NULL), FAIL, "sigaction failed");
+
+    sa.sa_handler = SigchldHandler_HAND;
+    RETURN_IF_BAD(SUCCESS == sigemptyset(&sa.sa_mask), FAIL, "sigemptyset failed");
+    RETURN_IF_BAD(SUCCESS == sigaction(SIGCHLD, &sa, NULL), FAIL, "sigaction failed");
+
+    info = (wd_internal_info_ty *)malloc(sizeof(wd_internal_info_ty));
+    RETURN_IF_BAD(info, FAIL, "malloc failed");
+
+    info->sched = SchedulerCreate();
+    RETURN_IF_BAD(info->sched, FAIL, "SchedulerCreate failed");
+
+    info->allowed_misses = allowed_misses;
+    info->ping_frequency = ping_frequency;
+    info->partner_pid = child_pid;
+    info->argv = argv;
+    info->argc = argc;
+
+    SchedulerSwitchMode(info, 0); /* BEGIN mode */
+
+
+    RETURN_IF_BAD(SUCCESS == pthread_create(&tid, NULL, (void *(*)(void *))SchedulerThread_TH, info),
+                FAIL, "pthread_create failed");
+    RETURN_IF_BAD(SUCCESS == pthread_detach(tid), FAIL, "pthread_detach failed");
+
+
+    return SUCCESS;
 }
 
-/* Dummy implementation of DoNotResuscitate */
 int DoNotResuscitate(void)
 {
-    printf("WD.c: [DoNotResuscitate] Dummy: cleaning up and stopping watchdog...\n");
-
-    return 0; /* success */
+    g_should_stop = 1;
+    return SUCCESS;
 }
 
-/* Already in your app.c, but place it here if you move to final location */
-void RunAsWatchdog(pid_t client_pid)
+/* ---------------------- Scheduler Thread ---------------------- */
+
+static void *SchedulerThread_TH(wd_internal_info_ty *info)
 {
-    
-    printf("WD.c: [RunAsWatchdog] Got client PID : %d\n", client_pid);
-    
+    SchedulerRun(info->sched);
+    SchedulerDestroy(info->sched);
+    free(info);
+    return NULL;
 }
 
+/* ---------------------- Modes ---------------------- */
+
+static void BeginMode(wd_internal_info_ty *info)
+{
+    SchedulerClear(info->sched);
+    SchedulerAdd(info->sched, (int (*)(void *))WaitForFirstSignal_TSK, info, info->ping_frequency);
+}
+
+static void ReviveMode(wd_internal_info_ty *info)
+{
+    SchedulerClear(info->sched);
+    SchedulerAdd(info->sched, (int (*)(void *))RevivePartner_TSK, info, 1);
+}
+
+static void RoutineMode(wd_internal_info_ty *info)
+{
+    SchedulerClear(info->sched);
+    SchedulerAdd(info->sched, (int (*)(void *))IsPartnerAlive_TSK, info, info->ping_frequency);
+    SchedulerAdd(info->sched, (int (*)(void *))SendSignal_TSK, info, info->ping_frequency);
+    SchedulerAdd(info->sched, (int (*)(void *))CheckMisses_TSK, info, info->ping_frequency);
+    SchedulerAdd(info->sched, (int (*)(void *))CheckDnrFlag_TSK, info, 1);
+}
+
+static void DestroyMode(wd_internal_info_ty *info)
+{
+    kill(info->partner_pid, SIGKILL);
+    SchedulerStop(info->sched);
+}
+
+static void SchedulerSwitchMode(wd_internal_info_ty *info, int mode)
+{
+    switch (mode)
+    {
+        case 0:
+            BeginMode(info);
+            break;
+        case 1:
+            ReviveMode(info);
+            break;
+        case 2:
+            RoutineMode(info);
+            break;
+        case 3:
+            DestroyMode(info);
+            break;
+    }
+}
+
+/* ---------------------- Tasks ---------------------- */
+
+static int WaitForFirstSignal_TSK(wd_internal_info_ty *info)
+{
+    if(g_missed < (int)info->allowed_misses) 
+    {
+        SchedulerSwitchMode(info, ROUTINE_MODE);
+        return FINISHED;
+    }
+    
+    return SHOULD_REPEAT;
+}
+
+static int RevivePartner_TSK(wd_internal_info_ty *info)
+{
+    pid_t child_pid = fork();
+
+    RETURN_IF_BAD(child_pid >= 0, FINISHED, "fork failed");
+
+    if (0 == child_pid)
+    {
+        execvp(info->argv[0], info->argv);  /*revive watchdog_app.out*/
+        perror("execvp failed");
+        exit(1);
+    }
+
+    info->partner_pid = child_pid;  /* watchdog  pid */
+
+    SchedulerSwitchMode(info, 2); /* Go back to routine */
+
+    return FINISHED;
+}
+
+static int IsPartnerAlive_TSK(wd_internal_info_ty *info)
+{
+    if (kill(info->partner_pid, 0) == -1 && errno == ESRCH)
+    {
+        SchedulerSwitchMode(info, 1); /* revive */
+        return FINISHED;
+    }
+
+    return SHOULD_REPEAT;
+}
+
+static int SendSignal_TSK(wd_internal_info_ty *info)
+{
+    int kill_res = kill(info->partner_pid, SIGUSR1);
+
+    if (-1 == kill_res)
+    {
+        if (ESRCH == errno)
+        {
+            SchedulerSwitchMode(info, 1);
+            return FINISHED;
+        }
+        else
+        {
+            ABORT_IF_BAD(FALSE,"abort executed -> check core file");
+        }
+    }
+
+    return SHOULD_REPEAT;
+}
+
+static int CheckMisses_TSK(wd_internal_info_ty *info)
+{
+    int current = 0;
+    if (g_missed > (int)info->allowed_misses)
+    {
+        SchedulerSwitchMode(info, 1);
+        return FINISHED;
+    }
+    current = __sync_add_and_fetch(&g_missed, 1);
+    PRINT_IF_DEBUG("[wd] value of g_missed =%d ", current);
+
+
+    return SHOULD_REPEAT;
+}
+
+static int CheckDnrFlag_TSK(wd_internal_info_ty *info)
+{
+    if (g_should_stop)
+    {
+        SchedulerSwitchMode(info, 3);
+        return FINISHED;
+    }
+
+    return SHOULD_REPEAT;
+}
+
+/* ---------------------- Signal Handlers ---------------------- */
+
+static void HeartbeatHandler_HAND(int sig)
+{
+    assert(SIGUSR1 == sig);
+    __sync_lock_test_and_set(&g_missed, 0); /*reset the misses counter*/
+}
+
+static void SigchldHandler_HAND(int sig)
+{
+    (void)sig;
+    while (waitpid(-1, NULL, WNOHANG) > 0) {}
+}
