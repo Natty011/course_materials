@@ -25,6 +25,7 @@ static volatile sig_atomic_t g_missed_SOL = 0;
 static pthread_t g_wd = 0;
 extern pid_t g_wd_pid;
 
+
 static int InitInfo(wd_task_info_ty *info, int argc, char** argv);
 static void SendHeartBeat_Hand(int sig);
 static void *SchedulerThread_TH(wd_task_info_ty *info);
