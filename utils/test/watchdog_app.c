@@ -2,7 +2,7 @@
  * Author : Natty
  * Reviewer : 
  * Date : 01 / 04 / 2025
- * Last update: 01 / 04 / 2025
+ * Last update: 05 / 04 / 2025
  ***************************************/
 
 #define _POSIX_C_SOURCE 199309L /*struct sigaction*/
@@ -10,7 +10,7 @@
 #include <stdio.h>      /*perror, sprintf, printf, __atomic_store_n, __atomic_load_n */
 #include <pthread.h>    /*pthread_t, */
 #include <signal.h>     /*kill, SIGUSR1 , siaction*/
-#include <stdlib.h>     /*atoi, exit, abort, getenv*/
+#include <stdlib.h>     /*atoi, exit, abort*/
 #include <sys/types.h>  /* pid_t */
 #include <sys/wait.h>   /*waitpid*/
 #include <assert.h>
@@ -37,7 +37,6 @@ int CheckDnrFlag_TSK(wd_task_info_ty *info);
 /* Forward declaration to avoid implicit declaration warning */
 void RunAsWatchdog(pid_t client_pid);
 static int InitNewArgv(char **new_argv, char client_pid_str[], pid_t pid_self, char **argv );
-/*static pid_t GetWatchdogPIDFromEnv(void);*/
 
 
 int main(int argc, char** argv)
@@ -57,18 +56,18 @@ int main(int argc, char** argv)
 
     int ret = SUCCESS;
 
-    printf("[Client] Starting main()\n");
-    printf("[Client] My PID: %d\n", pid_self);
+    printf("WD_APP: [Client] Starting main()\n");
+    printf("WD_APP: [Client] My PID: %d\n", pid_self);
 
     InitNewArgv(new_argv, client_pid_str,pid_self, argv);
     
-    printf("Current parent PID in main_start : %d\n", getppid());
-    printf("Current  PID in main_start : %d\n", getpid());
+    printf("WD_APP: Current parent PID in main_start : %d\n", getppid());
+    printf("WD_APP: Current  PID in main_start : %d\n", getpid());
 
     if(argc > 1 &&  (0 == strcmp(argv[1], "watchdog") ))
     {
         pid_t client_pid = (pid_t)atoi(argv[2]);
-        printf("[WD] My PID: %d, Client PID: %d\n", pid_self, client_pid);
+        printf("WD_APP: [WD] My PID: %d, Client PID: %d\n", pid_self, client_pid);
 
 
         RunAsWatchdog(client_pid); /*client_pid*/
@@ -110,7 +109,7 @@ int main(int argc, char** argv)
     RETURN_IF_BAD(SUCCESS == ret, FAIL, "MakeMeImmortal failed");
 
     info->child_pid = g_wd_pid;
-    printf("[WD] My PID after MMI in clent- g_wd_pid: %d, Client PID: %d\n", info->child_pid, pid_self);
+    printf("WD_APP: [WD] My PID after MMI in clent- g_wd_pid: %d, Client PID: %d\n", info->child_pid, pid_self);
 
 
 
@@ -130,16 +129,17 @@ int main(int argc, char** argv)
         (void *(*)(void *))SchedulerThread_TH, info), FAIL, "pthread_create failed");
 
 
-     puts("lalalalalalal");  
     RETURN_IF_BAD(SUCCESS ==  pthread_detach(g_wd), FAIL, "pthread_detach failed");
-    puts("babababababa");  
+
+    puts("WD_APP:--------------BEFORE while (!should_stop) ---------------------");  
 
     while (!should_stop)
     {
         pause();
     }
 
-    DoNotResuscitate();
+    DoNotResuscitate();  
+    puts("WD_APP:--------------END OF WD_APP ---------------------------------");  
 
     return 0;
 }
@@ -147,8 +147,7 @@ static int InitNewArgv(char **new_argv, char client_pid_str[], pid_t pid_self,  
 {
     /* Prepare new argv for execvp to create watchdog */
     sprintf(client_pid_str, "%d", pid_self);
-
-    puts(client_pid_str);
+    printf("WD_APP.C: client_pid_str(pid_self) PID in InitNewArgv: %s, getppid PID: %d\n", client_pid_str, getppid());
 
     new_argv[0] = argv[0];        /* ./watchdog_app.out */
     new_argv[1] = "watchdog";     /* identifier for WD process*/
@@ -166,7 +165,7 @@ static void *SchedulerThread_TH(wd_task_info_ty *info)
     int ret = -5;
 
     ret = SchedulerRun(info->sch);
-    printf("ret SchedulerRun: %d\n", ret);
+    printf("WD_APP: ret SchedulerRun: %d\n", ret);
 
     SchedulerDestroy(info->sch);
 
@@ -221,21 +220,23 @@ static int InitInfo(wd_task_info_ty *info, int argc, char** argv)
 int SendSignal_TSK(wd_task_info_ty *info)
 {    
     int ret = 0;
-    printf("Current PID( g_wd_pid) in before 'if' SendSignal_TSK : %d\n", g_wd_pid);
+    printf("WD_APP: Current PID( g_wd_pid) in before 'if' SendSignal_TSK : %d\n", g_wd_pid);
 
     if (0 == info->child_pid)
     {
         info->child_pid = g_wd_pid;
-        printf("Current PID( g_wd_pid) in SendSignal_TSK : %d\n", g_wd_pid);
+        printf("WD_APP: Current PID( g_wd_pid) in SendSignal_TSK : %d\n", g_wd_pid);
     }
 
     if ( -1 == (ret = kill(info->child_pid, SIGUSR1) ) )
     {
-        printf("Current PID( getppid()) in SendSignal_TSK : %d\n", getppid());
+        printf("WD_APP: Current PID( getppid()) in SendSignal_TSK : %d\n", getppid());
         /*if the partner procces does not exist*/
         if(ESRCH == errno)
         {
             /*revive new wd */
+            printf("WD_APP: Current PID( getpid()) in SendSignal_TSK(revive) : %d\n", getpid());
+
             execvp(info->argv[0], info->argv);
             perror("execvp");
             exit(1);
@@ -244,7 +245,7 @@ int SendSignal_TSK(wd_task_info_ty *info)
 
         else
         {
-            perror("abort executed -> check core file");
+            perror("WD_APP: abort executed -> check core file");
            /* abort();*/
         }
 
@@ -276,12 +277,12 @@ int CheckMisses_TSK(wd_task_info_ty *info)
 /* Task 3: revive watchdog again  */
 int RevivePartner_TSK(wd_task_info_ty *info)
 {
-    printf("Reached before kill in RevivePartner_TSK\n");
+    printf("WD_APP: Reached before kill in RevivePartner_TSK\n");
     
-    printf("Current PID: %d\n", getpid());
-    printf("Child PID (to kill): %d\n", info->child_pid);
+    printf("WD_APP: Current PID: %d\n", getpid());
+    printf("WD_APP: Child PID (to kill): %d\n", info->child_pid);
 
-    printf("Reached after kill in RevivePartner_TSK\n");
+    printf("WD_APP: Reached after kill in RevivePartner_TSK\n");
  
 
     execvp(info->argv[0], info->argv);
@@ -295,6 +296,7 @@ int RevivePartner_TSK(wd_task_info_ty *info)
 /* Task 4: stop all */
 int CheckDnrFlag_TSK(wd_task_info_ty *info)
 {
+    printf("WD_APP: Reached before in CheckDnrFlag_TSK\n");
 
     if (should_stop)
     {
@@ -304,20 +306,3 @@ int CheckDnrFlag_TSK(wd_task_info_ty *info)
 
     return SHOULD_REPEAT;
 }
-
-/* Returns WD PID from environment or -1 on failure */
-/*
-static pid_t GetWatchdogPIDFromEnv(void)
-{
-    char *wd_pid_str = getenv("WD_PID");
-
-    if (NULL == wd_pid_str)
-    {
-        perror("WD_PID not found");
-        return FAIL;
-    }
-    printf("Got WD PID from env: %d\n",(pid_t)atoi(wd_pid_str));
-
-    return (pid_t)atoi(wd_pid_str);
-}
-*/
