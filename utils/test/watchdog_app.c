@@ -24,6 +24,7 @@ volatile int should_stop = 0;
 static volatile sig_atomic_t g_missed_SOL = 0;
 static pthread_t g_wd = 0;
 extern pid_t g_wd_pid;
+
 static int InitInfo(wd_task_info_ty *info, int argc, char** argv);
 static void SendHeartBeat_Hand(int sig);
 static void *SchedulerThread_TH(wd_task_info_ty *info);
@@ -36,7 +37,7 @@ int CheckDnrFlag_TSK(wd_task_info_ty *info);
 /* Forward declaration to avoid implicit declaration warning */
 void RunAsWatchdog(pid_t client_pid);
 static int InitNewArgv(char **new_argv, char client_pid_str[], pid_t pid_self, char **argv );
-static pid_t GetWatchdogPIDFromEnv(void);
+/*static pid_t GetWatchdogPIDFromEnv(void);*/
 
 
 int main(int argc, char** argv)
@@ -304,6 +305,7 @@ int CheckDnrFlag_TSK(wd_task_info_ty *info)
 }
 
 /* Returns WD PID from environment or -1 on failure */
+/*
 static pid_t GetWatchdogPIDFromEnv(void)
 {
     char *wd_pid_str = getenv("WD_PID");
@@ -317,3 +319,4 @@ static pid_t GetWatchdogPIDFromEnv(void)
 
     return (pid_t)atoi(wd_pid_str);
 }
+*/
