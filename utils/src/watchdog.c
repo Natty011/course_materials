@@ -63,7 +63,6 @@ int MakeMeImmortal(size_t allowed_misses, size_t ping_frequency, char **argv)
         exit(1);
 
         /*RETURN_IF_BAD(FALSE, FAIL,  "execvp failed");*/
-
     }
     /*----------need to be in MMI Not here!!------------------*/
 
