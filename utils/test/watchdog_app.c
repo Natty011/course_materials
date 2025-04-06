@@ -67,12 +67,12 @@ int main(int argc, char **argv)
     EXIT_IF_BAD(SUCCESS == pthread_detach(g_wd_thread), "pthread_detach failed");
 
     puts("WD_APP: --------------BEFORE while (!should_stop) ---------------------");
-    /*  
+      
     while (!g_should_stop)
     {
         pause();
     }
-    */
+    
     return 0;
 }
 
