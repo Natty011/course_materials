@@ -82,6 +82,8 @@ int MakeMeImmortal(size_t allowed_misses, size_t ping_frequency, int argc, char 
 
     g_wd_pid = getpid();
     child_pid = (pid_t)atoi(argv[0]);
+    printf("[DEBUG] got SIGUSR1 at %s:%d\n", __FILE__, __LINE__);
+    PRINT_IF_DEBUG("[wd(MMI)] value of child_pid =%d ", child_pid);
 
     /* signal handlers */
     sa.sa_handler = HeartbeatHandler_HAND;
@@ -187,8 +189,11 @@ static void SchedulerSwitchMode(wd_internal_info_ty *info, int mode)
 
 static int WaitForFirstSignal_TSK(wd_internal_info_ty *info)
 {
+    PRINT_IF_DEBUG("[wd(WaitForFirstSignal_TSK)] value of (int)info->allowed_misses =%d ", (int)info->allowed_misses);
+
     if(g_missed < (int)info->allowed_misses) 
     {
+        PRINT_IF_DEBUG("[wd(WaitForFirstSignal_TSK)] value of g_missed =%d ", g_missed);
         SchedulerSwitchMode(info, ROUTINE_MODE);
         return FINISHED;
     }
@@ -210,6 +215,7 @@ static int RevivePartner_TSK(wd_internal_info_ty *info)
     }
 
     info->partner_pid = child_pid;  /* watchdog  pid */
+    PRINT_IF_DEBUG("[wd(RevivePartner_TSK)] value of info->partner_pid =%d ", info->partner_pid);
 
     SchedulerSwitchMode(info, ROUTINE_MODE); /* Go back to routine */
 
@@ -219,9 +225,12 @@ static int RevivePartner_TSK(wd_internal_info_ty *info)
 static int IsPartnerAlive_TSK(wd_internal_info_ty *info)
 {
     
-    int ret = kill(info->partner_pid, 0);
+    int kill_ret = kill(info->partner_pid, 0);
+    PRINT_IF_DEBUG("[wd(IsPartnerAlive_TSK)] value of info->partner_pid =%d ", info->partner_pid);
 
-    if ( -1 == ret )
+    PRINT_IF_DEBUG("[wd(IsPartnerAlive_TSK)] value of kill_ret =%d ", kill_ret);
+
+    if ( -1 == kill_ret )
     { 
         if(errno == ESRCH)
         {
@@ -240,6 +249,7 @@ static int IsPartnerAlive_TSK(wd_internal_info_ty *info)
 static int SendSignal_TSK(wd_internal_info_ty *info)
 {
     int kill_res = kill(info->partner_pid, SIGUSR1);
+    PRINT_IF_DEBUG("[wd(SendSignal_TSK)] value of kill_res =%d ", kill_res);
 
     if (-1 == kill_res)
     {
@@ -298,7 +308,11 @@ static int CheckDnrFlag_TSK(wd_internal_info_ty *info)
 static void HeartbeatHandler_HAND(int sig)
 {
     assert(SIGUSR1 == sig);
+    PRINT_IF_DEBUG("[wd(HeartbeatHandler_HAND)] value of g_missed =%d ", g_missed);
+
     __sync_lock_test_and_set(&g_missed, 0); /*reset the misses counter*/
+    printf("WD: [HeartbeatHandler_HAND] got SIGUSR1 at %s:%d\n", __FILE__, __LINE__);
+
 }
 
 static void SigchldHandler_HAND(int sig)
