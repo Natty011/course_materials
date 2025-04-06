@@ -93,8 +93,12 @@ static int InitInfo(wd_task_info_ty *info, int argc, char **argv)
 
     info->ping_frequency = (size_t)atoi(argv[1]);
     info->allowed_misses = (size_t)atoi(argv[2]);
-    info->child_pid = atoi(argv[4]); /*pid_of the client app: wd_test.out*/
+    /*EXIT_IF_BAD(argc >= 5, "Not enough arguments – expected argv[4] to be client PID");*/
 
+    if(argc >= 5)
+    {
+        info->child_pid = atoi(argv[4]); /*pid_of the client app: wd_test.out*/
+    }
     info->argv = argv;
     info->argc = argc;
     info->sch = SchedulerCreate();
@@ -141,7 +145,18 @@ static int SetupScheduler(wd_task_info_ty *info)
 /* ------------------ Tasks ------------------ */
 static int SendSignal_TSK(wd_task_info_ty *info)
 {
-    int kill_res = kill(info->child_pid, SIGUSR1);
+    int kill_res = -1;
+
+    if (0 == info->child_pid)   /*revive for the first time*/
+    {
+        fprintf(stderr, "[wd_app](SendSignal_TSK) no child yet, reviving: %s\n", info->argv[3]);
+
+        execvp(info->argv[3], info->argv + 3);  /* revive client for first time */
+        perror("execvp failed");
+        exit(1);
+    }
+
+    kill_res = kill(info->child_pid, SIGUSR1);
     PRINT_IF_DEBUG("[wd_app](SendSignal_TSK) value of kill_res =%d ", kill_res);
 
     if (-1 == kill_res)
@@ -211,7 +226,11 @@ static void CleanupDeadChildren_HAND(int sig)
 /* ------------------ Thread ------------------ */
 static void *SchedulerThread_TH(wd_task_info_ty *info)
 {
-    int ret = SchedulerRun(info->sch);
+    
+    int ret = -5;
+    fprintf(stderr, "[wd_app][wd_thread] argv[3] = %s\n", info->argv[3]);
+
+    ret = SchedulerRun(info->sch);
     PRINT_IF_DEBUG("[wd_app]: Scheduler finished with code: %d\n", ret);
     SchedulerDestroy(info->sch);
     return NULL;
