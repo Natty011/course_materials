@@ -10,7 +10,9 @@ static volatile sig_atomic_t g_should_stop = 0;
 int main(int argc, char *argv[])
 {
     int i = 0;
-    assert(argc >= 4);
+    printf("[wd_test] argc= %d \n", argc);
+
+    assert(argc >= 3);
 
     fprintf(stderr, "[CLIENT] (pid: %d)\n", getpid());
 
