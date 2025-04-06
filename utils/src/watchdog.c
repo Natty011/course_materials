@@ -23,7 +23,7 @@
 #include "watchdog.h"
 #include "utils.h"
 
-pid_t g_wd_pid = 0; /*extern*/ 
+/*pid_t g_wd_pid = 0*/; /*extern*/ 
 /* ---------------------- Struct Definition ---------------------- */
 
 typedef struct wd_internal_info
@@ -90,9 +90,8 @@ int MakeMeImmortal(size_t allowed_misses, size_t ping_frequency, int argc, char 
     }
     puts("[WD LIB] inside MakeMeImmortal()");
 
-    g_wd_pid = getpid();
+    child_pid = getpid();  /*pid_of the client app: wd_test.out*/
     
-    child_pid = getppid(); 
     printf("[WD(MMI)] got SIGUSR1 at %s:%d\n", __FILE__, __LINE__);
     PRINT_IF_DEBUG("[WD(MMI)] value of child_pid =%d ", child_pid);
 
@@ -195,7 +194,7 @@ static void DestroyMode(wd_internal_info_ty *info)
 
     SchedulerStop(info->sched);
 
-    free(info->argv[info->argc - 1]); /* pid_str */
+    free(info->argv[info->argc - 1]); /* malloc of pid_str of wd */
     free(info->argv);                 /**/
     free(info);
 }
