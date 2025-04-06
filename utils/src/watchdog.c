@@ -79,6 +79,7 @@ int MakeMeImmortal(size_t allowed_misses, size_t ping_frequency, int argc, char 
     pthread_t tid = 0;
 
     assert(argc >= 4);
+    puts("[WD LIB] inside MakeMeImmortal()");
 
     g_wd_pid = getpid();
     child_pid = (pid_t)atoi(argv[0]);
@@ -209,6 +210,8 @@ static int RevivePartner_TSK(wd_internal_info_ty *info)
 
     if (0 == child_pid)
     {
+        printf("[WD LIB](RevivePartner_TSK) fork result(child_pid): %d (my pid: %d)\n", child_pid, getpid());
+
         execvp(info->argv[0], info->argv);  /*revive watchdog_app.out*/
         perror("execvp failed");
         exit(1);
