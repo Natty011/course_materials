@@ -77,14 +77,19 @@ int MakeMeImmortal(size_t allowed_misses, size_t ping_frequency, int argc, char 
     wd_internal_info_ty *info = NULL;
     struct sigaction sa = {0};
     pthread_t tid = 0;
-
+    int i = 0;
     assert(argc >= 4);
+
+    for(i = 0; argv[i] != NULL; ++i)
+    {
+        fprintf(stderr, "[wd](MMI) argv[%d] = %s\n", i, argv[i]);
+    }
     puts("[WD LIB] inside MakeMeImmortal()");
 
     g_wd_pid = getpid();
     child_pid = (pid_t)atoi(argv[0]);
-    printf("[DEBUG] got SIGUSR1 at %s:%d\n", __FILE__, __LINE__);
-    PRINT_IF_DEBUG("[wd(MMI)] value of child_pid =%d ", child_pid);
+    printf("[WD(MMI)] got SIGUSR1 at %s:%d\n", __FILE__, __LINE__);
+    PRINT_IF_DEBUG("[WD(MMI)] value of child_pid =%d ", child_pid);
 
     /* signal handlers */
     sa.sa_handler = HeartbeatHandler_HAND;
@@ -205,12 +210,15 @@ static int WaitForFirstSignal_TSK(wd_internal_info_ty *info)
 static int RevivePartner_TSK(wd_internal_info_ty *info)
 {
     pid_t child_pid = fork();
+    fprintf(stderr, "[WD](RevivePartner_TSK) child_pid after fork: %d\n", child_pid);
 
     RETURN_IF_BAD(child_pid >= 0, FINISHED, "fork failed");
 
     if (0 == child_pid)
     {
         printf("[WD LIB](RevivePartner_TSK) fork result(child_pid): %d (my pid: %d)\n", child_pid, getpid());
+
+        fprintf(stderr, "[WD](RevivePartner_TSK) about to exec: info->argv[0]: %s\n", info->argv[0]);
 
         execvp(info->argv[0], info->argv);  /*revive watchdog_app.out*/
         perror("execvp failed");
