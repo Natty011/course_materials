@@ -5,73 +5,34 @@
 
 #include "watchdog.h"
 
-
 static volatile sig_atomic_t g_should_stop = 0;
-/*
-static void StopHandler(int sig)
-{
-    (void)sig;
-    g_should_stop = 1;
-}
 
-static void PingHandler(int sig)
-{
-    (void)sig;
-    printf("[client] Got SIGUSR1 from watchdog\n");
-}
-*/
 int main(int argc, char *argv[])
 {
-    int status = 0;
-    size_t ping_frequency = 0;
-    size_t allowed_misses = 0;
     int i = 0;
-    if (argc < 3)
+
+    for (i = 0; i < argc; ++i)
     {
-        fprintf(stderr, "Usage: %s <ping_frequency> <allowed_misses>\n", argv[0]);
-        return 1;
+        printf("[wd_test] argv[%d] = %s\n", i, argv[i]);
     }
-
-    /* Parse command-line arguments */
-    ping_frequency = (size_t)atoi(argv[1]);
-    allowed_misses = (size_t)atoi(argv[2]);
-
-    for (i = 0; argv[i] != NULL; ++i)
-    {
-        fprintf(stderr, "[wd_test] argv[%d] = %s\n", i, argv[i]);
-    }
-
-    /* Signal handlers */
-    /*signal(SIGINT, StopHandler);
-    signal(SIGTERM, StopHandler);
-    signal(SIGUSR1, PingHandler);*/
 
     printf("[client] Calling MakeMeImmortal...\n");
-    puts("[TEST] about to enter MMI");
-
-    /* Connect to watchdog */
-    status = MakeMeImmortal(allowed_misses, ping_frequency, argc, argv);
-    if (0 != status)
-    {
-        fprintf(stderr, "MakeMeImmortal failed\n");
-        return 1;
-    }
+    MakeMeImmortal((size_t)atoi(argv[1]), (size_t)atoi(argv[2]), argc, argv);
 
     printf("[client] Running main loop.\n");
 
-    while (!g_should_stop)
+    for (i = 0; i < 5; ++i)
     {
-        printf("[client] Still alive!\n");
+        
+        fprintf(stderr, "[CLIENT] Killed watchdog_app (pid: %d)\n", getppid());
+
+        kill(getppid(), SIGKILL); /* simulate crash of the WD_APP */
+
+        /*printf("[client] Still alive! (%d)\n", i + 1);*/
         sleep(1);
     }
 
-    printf("[client] Calling DoNotResuscitate...\n");
-    status = DoNotResuscitate();
-    if (0 != status)
-    {
-        fprintf(stderr, "DoNotResuscitate failed\n");
-    }
-
-    printf("[client] Exiting gracefully.\n");
-    return status;
+    printf("[client] Simulating crash with exit(1)...\n");
+    exit(1); /* simulate crash */
 }
+
