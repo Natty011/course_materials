@@ -67,12 +67,16 @@ int main(int argc, char **argv)
     EXIT_IF_BAD(SUCCESS == pthread_detach(g_wd_thread), "pthread_detach failed");
 
     puts("WD_APP: --------------BEFORE while (!should_stop) ---------------------");
-      
+     
     while (!g_should_stop)
     {
+        puts("WD_APP: --------------IN while (!should_stop) ---------------------");
         pause();
     }
     
+
+    puts("WD_APP: --------------After while (!should_stop) ---------------------");
+
     return 0;
 }
 
@@ -181,6 +185,8 @@ static void HeartbeatHandler_HAND(int sig)
 {
     assert(SIGUSR1 == sig);
     __sync_lock_test_and_set(&g_missed_SOL, 0); /*reset the misses counter*/
+    printf("WD_APP: [HeartbeatHandler_HAND] got SIGUSR1 at %s:%d\n", __FILE__, __LINE__);
+
 }
 
 static void CleanupDeadChildren_HAND(int sig)
