@@ -72,16 +72,16 @@ int main(int argc, char **argv)
         fprintf(stderr, "[wd_app](main) argv[%d] = %s\n", i, argv[i]);
     }
 
-    puts("WD_APP: --------------BEFORE while (!should_stop) ---------------------");
+    puts("[wd_app]: --------------BEFORE while (!should_stop) ---------------------");
      
     while (!g_should_stop)
     {
-        puts("WD_APP: --------------IN while (!should_stop) ---------------------");
+        puts("[wd_app]: --------------IN while (!should_stop) ---------------------");
         pause();
     }
     
 
-    puts("WD_APP: --------------After while (!should_stop) ---------------------");
+    puts("[wd_app]: --------------After while (!should_stop) ---------------------");
 
     return 0;
 }
@@ -147,7 +147,7 @@ static int SendSignal_TSK(wd_task_info_ty *info)
     {
         if (ESRCH == errno)
         {
-            fprintf(stderr, "[WD_app](SendSignal_TSK) about to exec: %s\n", info->argv[3]);
+            fprintf(stderr, "[wd_app](SendSignal_TSK) about to exec: %s\n", info->argv[3]);
 
             execvp(info->argv[3], info->argv + 3);  /*revive the client app*/
             perror("execvp failed");
@@ -196,7 +196,7 @@ static void HeartbeatHandler_HAND(int sig)
 {
     assert(SIGUSR1 == sig);
     __sync_lock_test_and_set(&g_missed_SOL, 0); /*reset the misses counter*/
-    printf("WD_APP: [HeartbeatHandler_HAND] got SIGUSR1 at %s:%d\n", __FILE__, __LINE__);
+    printf("[wd_app]: [HeartbeatHandler_HAND] got SIGUSR1 at %s:%d\n", __FILE__, __LINE__);
 
 }
 
@@ -211,7 +211,7 @@ static void CleanupDeadChildren_HAND(int sig)
 static void *SchedulerThread_TH(wd_task_info_ty *info)
 {
     int ret = SchedulerRun(info->sch);
-    PRINT_IF_DEBUG("WD_APP: Scheduler finished with code: %d\n", ret);
+    PRINT_IF_DEBUG("[wd_app]: Scheduler finished with code: %d\n", ret);
     SchedulerDestroy(info->sch);
     return NULL;
 }
