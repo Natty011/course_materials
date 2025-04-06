@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <signal.h>
-
+#include <assert.h>
 #include "watchdog.h"
 
 static volatile sig_atomic_t g_should_stop = 0;
@@ -10,6 +10,9 @@ static volatile sig_atomic_t g_should_stop = 0;
 int main(int argc, char *argv[])
 {
     int i = 0;
+    assert(argc >= 4);
+
+    fprintf(stderr, "[CLIENT] (pid: %d)\n", getpid());
 
     for (i = 0; i < argc; ++i)
     {
@@ -26,9 +29,9 @@ int main(int argc, char *argv[])
         
         fprintf(stderr, "[CLIENT] Killed watchdog_app (pid: %d)\n", getppid());
 
-        kill(getppid(), SIGKILL); /* simulate crash of the WD_APP */
+        /*kill(getppid(), SIGKILL); *//* simulate crash of the WD_APP */
 
-        /*printf("[client] Still alive! (%d)\n", i + 1);*/
+        printf("[client] Still alive! (%d)\n", i + 1);
         sleep(1);
     }
 
