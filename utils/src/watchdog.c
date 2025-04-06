@@ -125,9 +125,13 @@ int DoNotResuscitate(void)
 
 static void *SchedulerThread_TH(wd_internal_info_ty *info)
 {
+    /*copy info to local struct and then release info struct by free
+        such as line 132... but way to do so? the constrain...
+        dont know how much bytes need to copy... need to solve it....*/
+
+    TO DO: COPY     free(info) to local struct and free info    
     SchedulerRun(info->sched);
     SchedulerDestroy(info->sched);
-    free(info);
     return NULL;
 }
 
@@ -258,6 +262,8 @@ static int CheckMisses_TSK(wd_internal_info_ty *info)
     int current = 0;
     if (g_missed > (int)info->allowed_misses)
     {
+        
+        TO DO: SEND SIKKILL BEFORE REVIVE
         SchedulerSwitchMode(info, REVIVE_MODE);
         return FINISHED;
     }
