@@ -68,6 +68,7 @@ static int IsPartnerAlive_TSK(wd_internal_info_ty *info);
 static int SendSignal_TSK(wd_internal_info_ty *info);
 static int CheckMisses_TSK(wd_internal_info_ty *info);
 static int CheckDnrFlag_TSK(wd_internal_info_ty *info);
+/*static char **CopyArgvWithPid(char **argv, int argc, pid_t pid);*/
 
 /* ---------------------- Implementation ---------------------- */
 
@@ -78,6 +79,9 @@ int MakeMeImmortal(size_t allowed_misses, size_t ping_frequency, int argc, char 
     struct sigaction sa = {0};
     pthread_t tid = 0;
     int i = 0;
+    char **argv_copy = NULL;
+    char *pid_str = NULL;
+
     assert(argc >= 4);
 
     for(i = 0; argv[i] != NULL; ++i)
@@ -87,7 +91,8 @@ int MakeMeImmortal(size_t allowed_misses, size_t ping_frequency, int argc, char 
     puts("[WD LIB] inside MakeMeImmortal()");
 
     g_wd_pid = getpid();
-    child_pid = (pid_t)atoi(argv[0]);
+    
+    child_pid = getppid(); 
     printf("[WD(MMI)] got SIGUSR1 at %s:%d\n", __FILE__, __LINE__);
     PRINT_IF_DEBUG("[WD(MMI)] value of child_pid =%d ", child_pid);
 
@@ -109,8 +114,26 @@ int MakeMeImmortal(size_t allowed_misses, size_t ping_frequency, int argc, char 
     info->allowed_misses = allowed_misses;
     info->ping_frequency = ping_frequency;
     info->partner_pid = child_pid;
-    info->argv = argv;
-    info->argc = argc;
+    
+    /* Copy argv and append watchdog_app PID to the end */
+    argv_copy = (char **)malloc((argc + 2) * sizeof(char *));
+    pid_str = (char *)malloc(20); /* store the watchdog_app PID as string */
+
+    RETURN_IF_BAD(argv_copy, FAIL, "malloc for argv_copy failed");
+    RETURN_IF_BAD(pid_str, FAIL, "malloc for pid_str failed");
+
+    for (i = 0; i < argc; ++i)
+    {
+        argv_copy[i] = argv[i];
+    }
+
+    sprintf(pid_str, "%d", child_pid);
+    argv_copy[argc] = pid_str;
+    argv_copy[argc + 1] = NULL;
+
+    info->argv = argv_copy;
+    info->argc = argc + 1;
+    PRINT_IF_DEBUG("[WD(MMI)] value of pid_str =%s", pid_str);
 
     SchedulerSwitchMode(info, BEGINE_MODE); /* BEGIN mode */
 
@@ -169,8 +192,15 @@ static void RoutineMode(wd_internal_info_ty *info)
 static void DestroyMode(wd_internal_info_ty *info)
 {
     kill(info->partner_pid, SIGKILL);
+
     SchedulerStop(info->sched);
+
+    free(info->argv[info->argc - 1]); /* pid_str */
+    free(info->argv);                 /**/
+    free(info);
 }
+
+
 
 static void SchedulerSwitchMode(wd_internal_info_ty *info, int mode)
 {
