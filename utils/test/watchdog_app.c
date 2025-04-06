@@ -25,7 +25,7 @@
 volatile int g_should_stop = 0;
 static volatile sig_atomic_t g_missed_SOL = 0;
 static pthread_t g_wd_thread = 0;
-extern pid_t g_wd_pid;
+/*extern pid_t g_wd_pid;*/
 
 /* ------------------ Struct Definition ------------------ */
 typedef struct wd_task_info
@@ -93,12 +93,13 @@ static int InitInfo(wd_task_info_ty *info, int argc, char **argv)
 
     info->ping_frequency = (size_t)atoi(argv[1]);
     info->allowed_misses = (size_t)atoi(argv[2]);
+    info->child_pid = atoi(argv[4]); /*pid_of the client app: wd_test.out*/
+
     info->argv = argv;
     info->argc = argc;
     info->sch = SchedulerCreate();
     EXIT_IF_BAD(NULL != info->sch, "SchedulerCreate failed");
 
-    info->child_pid = g_wd_pid; /* wd_pid */
     PRINT_IF_DEBUG("[wd_app](InitInfo) value of info->child_pid =%d ", info->child_pid);
 
 
