@@ -55,7 +55,7 @@ int main(int argc, char **argv)
 {
     wd_task_info_ty info = {0};
     int i = 0;
-    assert(argc >= 4);
+    assert(argc >= 3);
     PRINT_IF_DEBUG("[wd_app](main) value of getpid =%d ", getpid());
 
     EXIT_IF_BAD(SUCCESS == InitInfo(&info, argc, argv), "InitInfo failed");
