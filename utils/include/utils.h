@@ -29,7 +29,7 @@ PRINT_IF_DEBUG("x is %d", x);
 #define RETURN_IF_BAD(cond, ret_val, msg) \
     if (!(cond))                          \
     {                                     \
-		fprintf(stderr, "[ERROR] at line %d: %s\n", __LINE__, msg);\                     
+		fprintf(stderr, "[ERROR] at line %d: %s\n", __LINE__, msg); \
         return (ret_val);                 \
 	}
 /* Exits the program if 'cond' is false, prints msg */
