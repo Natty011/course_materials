@@ -129,7 +129,7 @@ static void *SchedulerThread_TH(wd_internal_info_ty *info)
         such as line 132... but way to do so? the constrain...
         dont know how much bytes need to copy... need to solve it....*/
 
-    TO DO: COPY     free(info) to local struct and free info    
+    /*TO DO: COPY     free(info) to local struct and free info  */  
     SchedulerRun(info->sched);
     SchedulerDestroy(info->sched);
     return NULL;
@@ -260,13 +260,21 @@ static int SendSignal_TSK(wd_internal_info_ty *info)
 static int CheckMisses_TSK(wd_internal_info_ty *info)
 {
     int current = 0;
+
     if (g_missed > (int)info->allowed_misses)
     {
-        
-        TO DO: SEND SIKKILL BEFORE REVIVE
-        SchedulerSwitchMode(info, REVIVE_MODE);
-        return FINISHED;
-    }
+        /*TO DO: SEND SIKKILL BEFORE REVIVE*/
+        int ret = kill(info->partner_pid, SIGKILL);
+
+        if (-1 == ret)
+        {
+            if (ESRCH == errno)
+            {
+                SchedulerSwitchMode(info, REVIVE_MODE);
+                return FINISHED;
+            }
+        }
+    }    
     current = __sync_add_and_fetch(&g_missed, 1);
     PRINT_IF_DEBUG("[wd] value of g_missed =%d ", current);
 
