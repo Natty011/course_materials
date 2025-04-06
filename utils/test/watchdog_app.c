@@ -54,9 +54,9 @@ static int CheckDnrFlag_TSK(wd_task_info_ty *info);
 int main(int argc, char **argv)
 {
     wd_task_info_ty info = {0};
-
+    int i = 0;
     assert(argc >= 4);
-    PRINT_IF_DEBUG("[wd_app] value of getpif =%d ", getpid());
+    PRINT_IF_DEBUG("[wd_app](main) value of getpid =%d ", getpid());
 
     EXIT_IF_BAD(SUCCESS == InitInfo(&info, argc, argv), "InitInfo failed");
     EXIT_IF_BAD(SUCCESS == SetupSignalHandlers(), "SetupSignalHandlers failed");
@@ -66,6 +66,11 @@ int main(int argc, char **argv)
         (void *(*)(void *))SchedulerThread_TH, &info), "pthread_create failed");
 
     EXIT_IF_BAD(SUCCESS == pthread_detach(g_wd_thread), "pthread_detach failed");
+
+    for (i = 0; argv[i] != NULL; ++i)
+    {
+        fprintf(stderr, "[wd_app](main) argv[%d] = %s\n", i, argv[i]);
+    }
 
     puts("WD_APP: --------------BEFORE while (!should_stop) ---------------------");
      
@@ -136,11 +141,14 @@ static int SetupScheduler(wd_task_info_ty *info)
 static int SendSignal_TSK(wd_task_info_ty *info)
 {
     int kill_res = kill(info->child_pid, SIGUSR1);
+    PRINT_IF_DEBUG("[wd_app](SendSignal_TSK) value of kill_res =%d ", kill_res);
 
     if (-1 == kill_res)
     {
         if (ESRCH == errno)
         {
+            fprintf(stderr, "[WD_app](SendSignal_TSK) about to exec: %s\n", info->argv[3]);
+
             execvp(info->argv[3], info->argv + 3);  /*revive the client app*/
             perror("execvp failed");
             exit(1);
