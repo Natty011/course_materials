@@ -3,6 +3,7 @@ ROOT := ..
 CC = gcc
 
 SRC_PATH = $(ROOT)/src/
+TEST_PATH = ../test
 HEAD_PATH = $(ROOT)/include/
 DS_SRC_PATH = $(ROOT)/../ds/src/
 DS_INC_PATH = $(ROOT)/../ds/include/
@@ -85,7 +86,21 @@ $(DEBUG_DIR)/$(LIB_NAME)_debug.so: \
 
 -include $(wildcard $(DEBUG_DIR)/*.d) $(wildcard $(RELEASE_DIR)/*.d)
 
+
+bin/debug/wd_test.out: test/wd_test.c bin/debug/watchdog.o bin/debug/utils.o
+	gcc -ansi -pedantic-errors -Wall -Wextra -pthread -o $@ $^
+
+
 clean:
 	rm -f $(DEBUG_DIR)/*.o $(DEBUG_DIR)/*.d $(DEBUG_DIR)/*.out $(DEBUG_DIR)/*.so \
 	      $(RELEASE_DIR)/*.o $(RELEASE_DIR)/*.d $(RELEASE_DIR)/*.out $(RELEASE_DIR)/*.so
+
+
+
+#bin/debug/watchdog_test.out: src/wd_test.c
+#	gcc -ansi -pedantic-errors -Wall -Wextra src/wd_test.c -Lbin/debug -lwd -o bin/debug/watchdog_test.out
+
+
+#wd_test.out: wd_test.c watchdog.o utils.o
+#	gcc -ansi -pedantic-errors -Wall -Wextra -pthread -o $@ $^
 
