@@ -1,8 +1,9 @@
 
 /***************************************
- * Author : Final Project - Watchdog
- * Date : 2025-04-05
- * Description : Implementation of the watchdog logic using scheduler tasks
+ * Author : Natty
+ * Reviewer :
+ * Date : 01 / 04 / 2025
+ * Last update: 06 / 04 / 2025
  ***************************************/
 
 #define _POSIX_C_SOURCE 200809L /* sigaction, kill, fork, execvp */
