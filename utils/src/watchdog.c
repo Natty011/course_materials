@@ -23,7 +23,7 @@
 #include "watchdog.h"
 #include "utils.h"
 
-/*pid_t g_wd_pid = 0*/; /*extern*/ 
+/*pid_t g_wd_pid = 0; *//*extern*/ 
 /* ---------------------- Struct Definition ---------------------- */
 
 typedef struct wd_internal_info
@@ -121,10 +121,7 @@ int MakeMeImmortal(size_t allowed_misses, size_t ping_frequency, int argc, char 
     RETURN_IF_BAD(argv_copy, FAIL, "malloc for argv_copy failed");
     RETURN_IF_BAD(pid_str, FAIL, "malloc for pid_str failed");
 
-    for (i = 0; i < argc; ++i)
-    {
-        argv_copy[i] = argv[i];
-    }
+    
 
     sprintf(pid_str, "%d", child_pid);
     argv_copy[argc] = pid_str;
@@ -136,7 +133,12 @@ int MakeMeImmortal(size_t allowed_misses, size_t ping_frequency, int argc, char 
 
     SchedulerSwitchMode(info, BEGINE_MODE); /* BEGIN mode */
 
+    for (i = 0; i < argc; ++i)
+    {
+        argv_copy[i] = argv[i];
+        fprintf(stderr, "[MMI DEBUG] info->argv[%d] = %s\n", i, info->argv[i]);
 
+    }
     RETURN_IF_BAD(SUCCESS == pthread_create(&tid, NULL, (void *(*)(void *))SchedulerThread_TH, info),
                 FAIL, "pthread_create failed");
     RETURN_IF_BAD(SUCCESS == pthread_detach(tid), FAIL, "pthread_detach failed");
@@ -159,7 +161,10 @@ static void *SchedulerThread_TH(wd_internal_info_ty *info)
         such as line 132... but way to do so? the constrain...
         dont know how much bytes need to copy... need to solve it....*/
 
-    /*TO DO: COPY     free(info) to local struct and free info  */  
+    /*TO DO: COPY     free(info) to local struct and free info  */ 
+    
+    fprintf(stderr, "[wd_app][wd_thread] argv[3] = %s\n", info->argv[3]);
+
     SchedulerRun(info->sched);
     SchedulerDestroy(info->sched);
     return NULL;
