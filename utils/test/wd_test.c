@@ -37,11 +37,12 @@ int main(int argc, char *argv[])
     allowed_misses = (size_t)atoi(argv[2]);
 
     /* Signal handlers */
-    signal(SIGINT, StopHandler);
+    /*signal(SIGINT, StopHandler);
     signal(SIGTERM, StopHandler);
-    signal(SIGUSR1, PingHandler);
+    signal(SIGUSR1, PingHandler);*/
 
     printf("[client] Calling MakeMeImmortal...\n");
+    puts("[TEST] about to enter MMI");
 
     /* Connect to watchdog */
     status = MakeMeImmortal(allowed_misses, ping_frequency, argc, argv);
