@@ -41,7 +41,7 @@ LIB_NAME = libwatchdog
 
 all: release debug
 
-debug: $(DEBUG_DIR)/watchdog_app.out $(DEBUG_DIR)/wd_test.out
+debug: $(DEBUG_DIR)/watchdog_app.out $(DEBUG_DIR)/wd_test.out $(DEBUG_DIR)/wd_test.out
 
 release: prepare $(RELEASE_DIR)/$(LIB_NAME)_release.so $(RELEASE_OBJS) $(RELEASE_TARGETS)
 
@@ -99,5 +99,6 @@ clean:
 $(DEBUG_DIR)/wd_test.o: $(TEST_PATH)/wd_test.c | prepare
 	$(CC) $(CFLAGS) $(DEBUG) $(CPPFLAGS) -MMD -MP -MF $(patsubst %.o,%.d,$@) -c $< -o $@
 
-$(DEBUG_DIR)/wd_test.out: $(DEBUG_DIR)/wd_test.o $(DEBUG_DIR)/watchdog.o $(DEBUG_DIR)/libwatchdog_debug.so
-	$(CC) $(CFLAGS) $(DEBUG) $(CPPFLAGS) -pthread -o $@ $^ -L$(abspath $(DEBUG_DIR)) -l:libwatchdog_debug.so -Wl,-rpath=$(abspath $(DEBUG_DIR))
+$(DEBUG_DIR)/wd_test.out: $(DEBUG_DIR)/wd_test.o $(DEBUG_DIR)/libwatchdog_debug.so
+	$(CC) -o $@ $^ -L$(abspath $(DEBUG_DIR)) -l:libwatchdog_debug.so -Wl,-rpath=$(abspath $(DEBUG_DIR)) -pthread
+
