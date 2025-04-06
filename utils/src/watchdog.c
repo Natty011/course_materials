@@ -214,7 +214,7 @@ static int RevivePartner_TSK(wd_internal_info_ty *info)
 static int IsPartnerAlive_TSK(wd_internal_info_ty *info)
 {
     
-    int ret = kill(info->partner_pid, SIGUSR1);
+    int ret = kill(info->partner_pid, 0);
 
     if ( -1 == ret )
     { 
