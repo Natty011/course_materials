@@ -41,7 +41,7 @@ LIB_NAME = libwatchdog
 
 all: release debug
 
-debug: prepare $(DEBUG_DIR)/$(LIB_NAME)_debug.so $(DEBUG_OBJS) $(DEBUG_TARGETS)
+debug: $(DEBUG_DIR)/watchdog_app.out $(DEBUG_DIR)/wd_test.out
 
 release: prepare $(RELEASE_DIR)/$(LIB_NAME)_release.so $(RELEASE_OBJS) $(RELEASE_TARGETS)
 
@@ -87,20 +87,17 @@ $(DEBUG_DIR)/$(LIB_NAME)_debug.so: \
 -include $(wildcard $(DEBUG_DIR)/*.d) $(wildcard $(RELEASE_DIR)/*.d)
 
 
-bin/debug/wd_test.out: test/wd_test.c bin/debug/watchdog.o bin/debug/utils.o
-	gcc -ansi -pedantic-errors -Wall -Wextra -pthread -o $@ $^
-
-
 clean:
 	rm -f $(DEBUG_DIR)/*.o $(DEBUG_DIR)/*.d $(DEBUG_DIR)/*.out $(DEBUG_DIR)/*.so \
 	      $(RELEASE_DIR)/*.o $(RELEASE_DIR)/*.d $(RELEASE_DIR)/*.out $(RELEASE_DIR)/*.so
 
 
 
-#bin/debug/watchdog_test.out: src/wd_test.c
-#	gcc -ansi -pedantic-errors -Wall -Wextra src/wd_test.c -Lbin/debug -lwd -o bin/debug/watchdog_test.out
 
+# ---- wd_test build rules ----
 
-#wd_test.out: wd_test.c watchdog.o utils.o
-#	gcc -ansi -pedantic-errors -Wall -Wextra -pthread -o $@ $^
+$(DEBUG_DIR)/wd_test.o: $(TEST_PATH)/wd_test.c | prepare
+	$(CC) $(CFLAGS) $(DEBUG) $(CPPFLAGS) -MMD -MP -MF $(patsubst %.o,%.d,$@) -c $< -o $@
 
+$(DEBUG_DIR)/wd_test.out: $(DEBUG_DIR)/wd_test.o $(DEBUG_DIR)/watchdog.o $(DEBUG_DIR)/libwatchdog_debug.so
+	$(CC) $(CFLAGS) $(DEBUG) $(CPPFLAGS) -pthread -o $@ $^ -L$(abspath $(DEBUG_DIR)) -l:libwatchdog_debug.so -Wl,-rpath=$(abspath $(DEBUG_DIR))
