@@ -56,6 +56,7 @@ int main(int argc, char **argv)
     wd_task_info_ty info = {0};
 
     assert(argc >= 4);
+    PRINT_IF_DEBUG("[wd_app] value of getpif =%d ", getpid());
 
     EXIT_IF_BAD(SUCCESS == InitInfo(&info, argc, argv), "InitInfo failed");
     EXIT_IF_BAD(SUCCESS == SetupSignalHandlers(), "SetupSignalHandlers failed");
@@ -93,6 +94,8 @@ static int InitInfo(wd_task_info_ty *info, int argc, char **argv)
     EXIT_IF_BAD(NULL != info->sch, "SchedulerCreate failed");
 
     info->child_pid = g_wd_pid; /* wd_pid */
+    PRINT_IF_DEBUG("[wd_app](InitInfo) value of info->child_pid =%d ", info->child_pid);
+
 
     return SUCCESS;
 }
