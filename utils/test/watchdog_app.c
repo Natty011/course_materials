@@ -27,6 +27,7 @@ static volatile sig_atomic_t g_missed_SOL = 0;
 static pthread_t g_wd_thread = 0;
 /*extern pid_t g_wd_pid;*/
 
+
 /* ------------------ Struct Definition ------------------ */
 typedef struct wd_task_info
 {
@@ -50,6 +51,8 @@ static int SendSignal_TSK(wd_task_info_ty *info);
 static int CheckMisses_TSK(wd_task_info_ty *info);
 static int CheckDnrFlag_TSK(wd_task_info_ty *info);
 
+static int ResetSignalMask(void);
+
 /* ------------------ Main ------------------ */
 int main(int argc, char **argv)
 {
@@ -63,7 +66,7 @@ int main(int argc, char **argv)
     EXIT_IF_BAD(SUCCESS == SetupScheduler(&info), "SetupScheduler failed");
 
     EXIT_IF_BAD(SUCCESS == pthread_create(&g_wd_thread, NULL,
-        (void *(*)(void *))SchedulerThread_TH, &info), "pthread_create failed");
+        (th_func_ptr)SchedulerThread_TH, &info), "pthread_create failed");
 
     EXIT_IF_BAD(SUCCESS == pthread_detach(g_wd_thread), "pthread_detach failed");
 
@@ -133,13 +136,13 @@ static int SetupScheduler(wd_task_info_ty *info)
 {
     ilrd_uid_t uid = {0};
 
-    uid = SchedulerAdd(info->sch, (int (*)(void *))SendSignal_TSK, info, info->ping_frequency);
+    uid = SchedulerAdd(info->sch, (task_func_ptr)SendSignal_TSK, info, info->ping_frequency);
     EXIT_IF_BAD(FALSE == UIDIsSame(uid, BADUID), "Add SendSignal_TSK failed");
 
-    uid = SchedulerAdd(info->sch, (int (*)(void *))CheckMisses_TSK, info, info->ping_frequency);
+    uid = SchedulerAdd(info->sch, (task_func_ptr)CheckMisses_TSK, info, info->ping_frequency);
     EXIT_IF_BAD(FALSE == UIDIsSame(uid, BADUID), "Add CheckMisses_TSK failed");
 
-    uid = SchedulerAdd(info->sch, (int (*)(void *))CheckDnrFlag_TSK, info, 1);
+    uid = SchedulerAdd(info->sch, (task_func_ptr)CheckDnrFlag_TSK, info, 1);
     EXIT_IF_BAD(FALSE == UIDIsSame(uid, BADUID), "Add CheckDnrFlag_TSK failed");
 
     return SUCCESS;
@@ -152,11 +155,12 @@ static int SendSignal_TSK(wd_task_info_ty *info)
 
     if (0 == info->child_pid)   /*revive for the first time*/
     {
+        
         fprintf(stderr, "[wd_app](SendSignal_TSK) no child yet, reviving: %s, line =%d \n", info->argv[3], __LINE__);
-        /*info->argv + 3 to info->argv*/
-        execvp(info->argv[0], info->argv);
+       
+        RETURN_IF_BAD(SUCCESS == ResetSignalMask(), FAIL, "ResetSignalMask failed");
 
-        /*execvp(info->argv[3], info->argv + 3); */ /*  revive client for first time */
+        execvp(info->argv[3], info->argv + 3);  /*  revive client for first time */
         perror("execvp failed");
         exit(1);
     }
@@ -170,10 +174,9 @@ static int SendSignal_TSK(wd_task_info_ty *info)
         {
             fprintf(stderr, "[wd_app](SendSignal_TSK) about to exec: %s\n", info->argv[3]);
             
-            /*info->argv + 3 to info->argv*/
-            execvp(info->argv[0], info->argv);
+            RETURN_IF_BAD(SUCCESS == ResetSignalMask(), FAIL, "ResetSignalMask failed");
 
-            /*execvp(info->argv[3], info->argv + 3 );*/  /*revive the client app*/
+            execvp(info->argv[3], info->argv + 3 );  /*revive the client app*/
             perror("execvp failed");
             exit(1);
         }
@@ -193,7 +196,7 @@ static int CheckMisses_TSK(wd_task_info_ty *info)
     if ((size_t)g_missed_SOL > info->allowed_misses)
     {
         SchedulerClear(info->sch);
-        SchedulerAdd(info->sch, (int (*)(void *))SendSignal_TSK, info, 1);
+        SchedulerAdd(info->sch, (task_func_ptr)SendSignal_TSK, info, 1);
         return FINISHED;
     }
 
@@ -236,10 +239,28 @@ static void *SchedulerThread_TH(wd_task_info_ty *info)
 {
     
     int ret = -5;
+    sigset_t set;
+
     fprintf(stderr, "[wd_app][wd_thread] argv[3] = %s\n", info->argv[3]);
+
+    RETURN_IF_BAD(SUCCESS == sigemptyset(&set), FAIL, "sigemptyset failed");
+    RETURN_IF_BAD(SUCCESS == sigaddset(&set, SIGUSR1), FAIL, "sigaddset failed");
+    RETURN_IF_BAD(SUCCESS == sigprocmask(SIG_UNBLOCK, &set, NULL), FAIL, "sigprocmask failed");
 
     ret = SchedulerRun(info->sch);
     PRINT_IF_DEBUG("[wd_app]: Scheduler finished with code: %d\n", ret);
     SchedulerDestroy(info->sch);
     return NULL;
 }
+
+
+static int ResetSignalMask(void)
+{
+    sigset_t set;
+
+    RETURN_IF_BAD(SUCCESS == sigemptyset(&set), FAIL, "sigemptyset failed");
+    RETURN_IF_BAD(SUCCESS == sigprocmask(SIG_SETMASK, &set, NULL), FAIL, "sigprocmask failed");
+    
+    return 0;
+}
+
