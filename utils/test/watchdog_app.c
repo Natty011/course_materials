@@ -191,9 +191,8 @@ static int SendSignal_TSK(wd_task_info_ty *info)
         printf("[wd_app](SendSignal_TSK(0 == info->child_pid):info->argv[3]: %s\n", info->argv[3]);
 
         RETURN_IF_BAD(SUCCESS == ResetSignalMask(), FAIL, "ResetSignalMask failed");
-        /*execvp(info->argv[3], info->argv + 3);*/
-        execvp(info->argv[3], info->argv );
-        /*execvp(info->argv[3], info->argv); */ /*  revive client for first time */
+
+        execvp(info->argv[0], info->argv ); /*  revive client for first time */
         perror("execvp failed");
         exit(1);
     }
@@ -204,17 +203,17 @@ static int SendSignal_TSK(wd_task_info_ty *info)
 
     if (-1 == kill_res)
     {
+        printf("[wd_app](SendSignal_TSK(-1 == kill_res)info->argv[0]: %s\n", info->argv[0]);
         printf("[wd_app](SendSignal_TSK(-1 == kill_res)info->argv[3]: %s\n", info->argv[3]);
 
         if (ESRCH == errno)
         {
-            printf("[wd_app](SendSignal_TSK) about to execinfo->argv[3]: %s\n", info->argv[3]);
+            printf("[wd_app](SendSignal_TSK)(ESRCH == errno) about to execinfo->argv[3]: %s\n", info->argv[3]);
             
             RETURN_IF_BAD(SUCCESS == ResetSignalMask(), FAIL, "ResetSignalMask failed");
-            /*execvp(info->argv[3], info->argv + 3);*/
-            execvp(info->argv[3], info->argv  );
 
-            /*execvp(info->argv[3], info->argv ); */ /*revive the client app*/
+            execvp(info->argv[0], info->argv  ); /*revive the client app*/
+
             perror("execvp failed");
             exit(1);
         }
