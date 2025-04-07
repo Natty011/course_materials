@@ -18,6 +18,7 @@
 #include <string.h>     /* strcmp */
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <semaphore.h>
 
 #include "scheduler.h"
 #include "watchdog.h"
@@ -50,6 +51,7 @@ typedef enum mode
 
 static volatile sig_atomic_t g_should_stop = 0;
 static volatile sig_atomic_t g_missed = 0;
+extern sem_t g_sem = {0};
 
 /* ---------------------- Forward Declarations ---------------------- */
 
@@ -78,11 +80,13 @@ int MakeMeImmortal(size_t allowed_misses, size_t ping_frequency, int argc, char 
     wd_internal_info_ty *info = NULL;
     struct sigaction sa = {0};
     pthread_t tid = 0;
+    int th_create_stat = 0;
+    int retry_tid_creat = 0;
     int i = 0;
     char **argv_copy = NULL;
     char *pid_str = NULL;
 
-    assert(argc >= 4);
+    /*assert(argc >= 4);*/
 
     /* signal handlers */
     sa.sa_handler = HeartbeatHandler_HAND;
@@ -151,11 +155,26 @@ int MakeMeImmortal(size_t allowed_misses, size_t ping_frequency, int argc, char 
 
     SchedulerSwitchMode(info, BEGINE_MODE); /* BEGIN mode */
 
-    
-    RETURN_IF_BAD(SUCCESS == pthread_create(&tid, NULL, (void *(*)(void *))SchedulerThread_TH, info),
-                FAIL, "pthread_create failed");
+    do
+    {
+        th_create_stat = pthread_create(&tid, NULL, (void *(*)(void *))SchedulerThread_TH, info);
+        
+        if (th_create_stat && errno != EAGAIN)
+        {
+            free(info->argv[info->argc - 1]); /* malloc of pid_str of wd */
+            free(info->argv);        
+            free(info);
+            RETURN_IF_BAD(0 == th_create_stat, -1, "pthread_create fail");
+        }
+
+        ++retry_tid_creat;
+
+    } while (th_create_stat && retry_tid_creat < 5);
+
     RETURN_IF_BAD(SUCCESS == pthread_detach(tid), FAIL, "pthread_detach failed");
 
+    /* Signal that watchdog is ready */
+    RETURN_IF_BAD(SUCCESS == sem_post(&g_sem), FAIL, "sem_post fail");
 
     return SUCCESS;
 }
@@ -259,7 +278,7 @@ static int RevivePartner_TSK(wd_internal_info_ty *info)
     pid_t child_pid = fork();
     fprintf(stderr, "[WD](RevivePartner_TSK) child_pid after fork: %d\n", child_pid);
 
-    RETURN_IF_BAD(child_pid >= 0, FINISHED, "fork failed");
+    /*RETURN_IF_BAD(child_pid >= 0, FINISHED, "fork failed");*/
 
     if (0 == child_pid)
     {
