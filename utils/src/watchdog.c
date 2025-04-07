@@ -101,7 +101,7 @@ int MakeMeImmortal(size_t allowed_misses, size_t ping_frequency, int argc, char 
 
     for(i = 0; argv[i] != NULL; ++i)
     {
-        fprintf(stderr, "[wd](MMI) argv[%d] = %s\n", i, argv[i]);
+        printf("[wd](MMI) argv[%d] = %s\n", i, argv[i]);
     }
     puts("[WD LIB] inside MakeMeImmortal()");
 
@@ -132,6 +132,11 @@ int MakeMeImmortal(size_t allowed_misses, size_t ping_frequency, int argc, char 
     argv_copy[2] = argv[2];   /* ping_frequency */
     argv_copy[3] = argv[0];   /* ./wd_test.out */
 
+    /*argv_copy[0] = argv[0];*/   /* "./wd_test.out" */
+    /*argv_copy[1] = argv[1];*/   /* "3" */
+    /*argv_copy[2] = argv[2];*/   /* "2" */
+    /*argv_copy[3] = argv[3];*/   /* "./watchdog_app.out" */
+
     sprintf(pid_str, "%d", child_pid);
 
     argv_copy[4] = pid_str; /*pid_of the client app: wd_test.out*/
@@ -147,7 +152,7 @@ int MakeMeImmortal(size_t allowed_misses, size_t ping_frequency, int argc, char 
     for (i = 0; i < info->argc; ++i)
     {
         /*argv_copy[i] = argv[i];*/
-        fprintf(stderr, "[MMI DEBUG] info->argv[%d] = %s\n", i, info->argv[i]);
+        printf("[MMI DEBUG] info->argv[%d] = %s\n", i, info->argv[i]);
     }
 
     PRINT_IF_DEBUG("[WD(MMI)] value of pid_str =%s", pid_str);
@@ -304,7 +309,7 @@ static int WaitForFirstSignal_TSK(wd_internal_info_ty *info)
 static int RevivePartner_TSK(wd_internal_info_ty *info)
 {
     pid_t child_pid = fork();
-    fprintf(stderr, "[WD](RevivePartner_TSK) child_pid after fork: %d\n", child_pid);
+    printf("[WD](RevivePartner_TSK) child_pid after fork: %d, line: %d\n", child_pid, __LINE__);
 
     RETURN_IF_BAD(child_pid >= 0, FINISHED, "fork failed");
 
@@ -312,7 +317,7 @@ static int RevivePartner_TSK(wd_internal_info_ty *info)
     {
         printf("[WD LIB](RevivePartner_TSK) fork result(child_pid): %d (my pid: %d)\n", child_pid, getpid());
 
-        fprintf(stderr, "[WD](RevivePartner_TSK) about to exec: info->argv[0]: %s\n", info->argv[0]);
+        printf("[WD](RevivePartner_TSK) about to exec: info->argv[0]: %s\n", info->argv[0]);
 
         execvp(info->argv[0], info->argv);  /*revive watchdog_app.out*/
         perror("execvp failed");
