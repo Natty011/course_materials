@@ -220,10 +220,10 @@ static void *SchedulerThread_TH(wd_internal_info_ty *info)
 
     /*TO DO: COPY     free(info) to local struct and free info  */ 
     sigset_t set;
-    
-    RETURN_IF_BAD(SUCCESS == sigemptyset(&set), FAIL, "sigemptyset failed");
-    RETURN_IF_BAD(SUCCESS == sigaddset(&set, SIGUSR1), FAIL, "sigaddset failed");
-    RETURN_IF_BAD(SUCCESS == sigprocmask(SIG_UNBLOCK, &set, NULL), FAIL, "sigprocmask failed");
+
+    RETURN_IF_BAD(SUCCESS == sigemptyset(&set), NULL, "sigemptyset failed");
+    RETURN_IF_BAD(SUCCESS == sigaddset(&set, SIGUSR1), NULL, "sigaddset failed");
+    RETURN_IF_BAD(SUCCESS == sigprocmask(SIG_UNBLOCK, &set, NULL), NULL, "sigprocmask failed");
 
     fprintf(stderr, "[wd][wd_thread] argv[3] = %s\n", info->argv[3]);
 
