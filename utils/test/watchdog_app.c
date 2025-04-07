@@ -165,6 +165,7 @@ static int SendSignal_TSK(wd_task_info_ty *info)
         exit(1);
     }
 
+    
     kill_res = kill(info->child_pid, SIGUSR1);
     PRINT_IF_DEBUG("[wd_app](SendSignal_TSK) value of kill_res =%d ", kill_res);
 
