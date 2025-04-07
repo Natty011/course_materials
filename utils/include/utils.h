@@ -22,21 +22,21 @@ PRINT_IF_DEBUG("x is %d", x);
 */
 #ifndef NDEBUG
 	#define PRINT_IF_DEBUG(fmt, val) \
-		fprintf(stderr, "[DEBUG] " fmt " at line %d:\n",val,  __LINE__)
+		fprintf(stdout, "" fmt " at line %d:\n",val,  __LINE__)
 #endif
 
 /* Returns 'ret_val' if 'cond' is false, prints msg to stderr */
 #define RETURN_IF_BAD(cond, ret_val, msg) \
     if (!(cond))                          \
     {                                     \
-		fprintf(stderr, "[ERROR] at line %d: %s\n", __LINE__, msg); \
+		fprintf(stdout, "[ERROR] at line %d: %s\n", __LINE__, msg); \
         return (ret_val);                 \
 	}
 /* Exits the program if 'cond' is false, prints msg */
 #define EXIT_IF_BAD(cond, msg)   \
     if (!(cond))                 \
     {                            \
-		fprintf(stderr, "[ABORT] at line %d: %s\n", __LINE__, msg); \
+		fprintf(stdout, "[ABORT] at line %d: %s\n", __LINE__, msg); \
         exit(FAIL);              \
     }
 
@@ -44,7 +44,7 @@ PRINT_IF_DEBUG("x is %d", x);
 #define ABORT_IF_BAD(cond, msg) \
     if (!(cond))                \
     {                           \
-        fprintf(stderr, "[EXIT] at line %d: %s\n", __LINE__, msg); \
+        fprintf(stdout, "[EXIT] at line %d: %s\n", __LINE__, msg); \
         abort();                \
     }
 
