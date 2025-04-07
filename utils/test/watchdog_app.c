@@ -72,7 +72,7 @@ int main(int argc, char **argv)
 
     for (i = 0; argv[i] != NULL; ++i)
     {
-        fprintf(stderr, "[wd_app](main) argv[%d] = %s\n", i, argv[i]);
+        printf("[wd_app](main) argv[%d] = %s\n", i, argv[i]);
     }
 
     puts("[wd_app]: --------------BEFORE while (!should_stop) ---------------------");
@@ -152,32 +152,41 @@ static int SetupScheduler(wd_task_info_ty *info)
 static int SendSignal_TSK(wd_task_info_ty *info)
 {
     int kill_res = -1;
+    printf("[wd_app](SendSignal_TSK(info->argv[0]): %s\n", info->argv[0]);
+
+    printf("[wd_app](SendSignal_TSK(info->argv[3]): %s\n", info->argv[3]);
 
     if (0 == info->child_pid)   /*revive for the first time*/
     {
         
-        fprintf(stderr, "[wd_app](SendSignal_TSK) no child yet, reviving: %s, line =%d \n", info->argv[3], __LINE__);
-       
-        RETURN_IF_BAD(SUCCESS == ResetSignalMask(), FAIL, "ResetSignalMask failed");
+        printf("[wd_app](SendSignal_TSK) no child yet, reviving:info->argv[3]: %s, line =%d \n", info->argv[3], __LINE__);
+        printf("[wd_app](SendSignal_TSK(0 == info->child_pid):info->argv[3]: %s\n", info->argv[3]);
 
-        execvp(info->argv[3], info->argv + 3);  /*  revive client for first time */
+        RETURN_IF_BAD(SUCCESS == ResetSignalMask(), FAIL, "ResetSignalMask failed");
+        /*execvp(info->argv[3], info->argv + 3);*/
+        execvp(info->argv[0], info->argv);
+        /*execvp(info->argv[3], info->argv); */ /*  revive client for first time */
         perror("execvp failed");
         exit(1);
     }
 
-    
+
     kill_res = kill(info->child_pid, SIGUSR1);
     PRINT_IF_DEBUG("[wd_app](SendSignal_TSK) value of kill_res =%d ", kill_res);
 
     if (-1 == kill_res)
     {
+        printf("[wd_app](SendSignal_TSK(-1 == kill_res)info->argv[3]: %s\n", info->argv[3]);
+
         if (ESRCH == errno)
         {
-            fprintf(stderr, "[wd_app](SendSignal_TSK) about to exec: %s\n", info->argv[3]);
+            printf("[wd_app](SendSignal_TSK) about to execinfo->argv[3]: %s\n", info->argv[3]);
             
             RETURN_IF_BAD(SUCCESS == ResetSignalMask(), FAIL, "ResetSignalMask failed");
+            /*execvp(info->argv[3], info->argv + 3);*/
+            execvp(info->argv[0], info->argv);
 
-            execvp(info->argv[3], info->argv + 3 );  /*revive the client app*/
+            /*execvp(info->argv[3], info->argv ); */ /*revive the client app*/
             perror("execvp failed");
             exit(1);
         }
@@ -242,7 +251,7 @@ static void *SchedulerThread_TH(wd_task_info_ty *info)
     int ret = -5;
     sigset_t set;
 
-    fprintf(stderr, "[wd_app][wd_thread] argv[3] = %s\n", info->argv[3]);
+    printf("[wd_app][wd_thread] argv[3] = %s\n", info->argv[3]);
 
     RETURN_IF_BAD(SUCCESS == sigemptyset(&set), NULL, "sigemptyset failed");
     RETURN_IF_BAD(SUCCESS == sigaddset(&set, SIGUSR1), NULL, "sigaddset failed");
