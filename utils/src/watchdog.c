@@ -291,7 +291,14 @@ static void SchedulerSwitchMode(wd_internal_info_ty *info, int mode)
 /* ---------------------- Tasks ---------------------- */
 
 static int WaitForFirstSignal_TSK(wd_internal_info_ty *info)
-{
+{    
+    if (0 == info->partner_pid)
+    {
+        printf("[WD] No partner_pid, switching to REVIVE_MODE...\n");
+        SchedulerSwitchMode(info, REVIVE_MODE);
+        return FINISHED;
+    }
+    
     PRINT_IF_DEBUG("[wd(WaitForFirstSignal_TSK)] value of (int)info->allowed_misses =%d ", (int)info->allowed_misses);
 
     if(g_missed < (int)info->allowed_misses) 
