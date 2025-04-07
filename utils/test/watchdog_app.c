@@ -15,6 +15,7 @@
 #include <pthread.h>    /* pthread_create, pthread_detach */
 #include <signal.h>     /* sigaction, SIGUSR1 */
 #include <string.h>     /* strcmp */
+#include <semaphore.h>  /*post, wait */
 #include <assert.h>
 
 #include "scheduler.h"
@@ -25,7 +26,7 @@
 volatile int g_should_stop = 0;
 static volatile sig_atomic_t g_missed_SOL = 0;
 static pthread_t g_wd_thread = 0;
-/*extern pid_t g_wd_pid;*/
+extern sem_t g_sem;
 
 
 /* ------------------ Struct Definition ------------------ */
@@ -241,7 +242,7 @@ static int SendSignal_TSK(wd_task_info_ty *info)
         }
         else
         {
-            
+            FreeInfoResources(info);
             ABORT_IF_BAD(FALSE, "partner killed failed unexpectedly: abort executed -> check core file");
         }
     }
@@ -317,6 +318,9 @@ static void *SchedulerThread_TH(wd_task_info_ty *info)
     
     int ret = -5;
     sigset_t set;
+
+    EXIT_IF_BAD(SUCCESS == sem_post(&g_sem), "sem_post failed");
+
 
     printf("[wd_app][wd_thread] argv[3] = %s\n", info->argv[3]);
 
