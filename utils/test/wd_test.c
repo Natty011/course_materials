@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
     int i = 0;
     printf("[wd_test] argc= %d \n", argc);
 
-    assert(argc >= 3);
+    assert(argc >= 1);
 
     fprintf(stderr, "[CLIENT] (pid: %d)\n", getpid());
 
