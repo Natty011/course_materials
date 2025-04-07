@@ -36,7 +36,7 @@ typedef struct wd_task_info
     char **argv;
     int argc;
     scheduler_t *sch;
-    pid_t child_pid;
+    pid_t partner_pid;
 } wd_task_info_ty;
 
 /* ------------------ Forward Declarations ------------------ */
@@ -92,25 +92,53 @@ int main(int argc, char **argv)
 /* ------------------ Initialization ------------------ */
 static int InitInfo(wd_task_info_ty *info, int argc, char **argv)
 {
-    assert(NULL != info);
+    char **argv_copy = NULL;
+    char *pid_str = NULL;
+    pid_t child_pid = getpid();
+    int i = 0;
 
+    assert(NULL != info);
+    assert(argc >= 4);
+
+    /* Allocate and build argv_copy for partner revival */
+    argv_copy = (char **)malloc(6 * sizeof(char *));
+    pid_str = (char *)malloc(20);
+
+    if(!argv_copy || !pid_str)
+    {
+        free(argv_copy);
+        free(pid_str);
+
+        RETURN_IF_BAD(argv_copy, FAIL, "[wd_app] malloc for argv_copy failed");
+        RETURN_IF_BAD(pid_str, FAIL, "[wd_app] malloc for pid_str failed");
+    }
+
+    argv_copy[0] = argv[3];          /* ./wd_test.out */
+    argv_copy[1] = argv[1];          /* 20 */
+    argv_copy[2] = argv[2];          /* 3 */
+    argv_copy[3] = argv[0];          /* ./watchdog_app.out */
+    sprintf(pid_str, "%d", child_pid);
+    argv_copy[4] = pid_str;          /* my pid */
+    argv_copy[5] = NULL;
+
+    info->argv = argv_copy;
+    info->argc = 5;
     info->ping_frequency = (size_t)atoi(argv[1]);
     info->allowed_misses = (size_t)atoi(argv[2]);
+    info->partner_pid = (argc >= 5) ? atoi(argv[4]) : 0 ;   
+
     /*EXIT_IF_BAD(argc >= 5, "Not enough arguments – expected argv[4] to be client PID");*/
-    PRINT_IF_DEBUG("[wd_app](InitInfo) value of info->child_pid =%d ", info->child_pid);
-    PRINT_IF_DEBUG("[wd_app](InitInfo) value of argc =%d ", argc);
-
-    if(argc >= 5)
-    {
-        info->child_pid = atoi(argv[4]); /*pid_of the client app: wd_test.out*/
-
-    }
-    info->argv = argv;
-    info->argc = argc;
+    
     info->sch = SchedulerCreate();
     EXIT_IF_BAD(NULL != info->sch, "SchedulerCreate failed");
 
-    PRINT_IF_DEBUG("[wd_app](InitInfo) value of info->child_pid =%d ", info->child_pid);
+    for (i = 0; i < info->argc; ++i)
+    {
+        printf("[wd_app](InitInfo) info->argv[%d] = %s\n", i, info->argv[i]);
+    }
+
+    PRINT_IF_DEBUG("[wd_app](InitInfo) value of info->partner_pid =%d ", info->partner_pid);
+    PRINT_IF_DEBUG("[wd_app](InitInfo) value of argc =%d ", argc);
 
 
     return SUCCESS;
@@ -156,7 +184,7 @@ static int SendSignal_TSK(wd_task_info_ty *info)
 
     printf("[wd_app](SendSignal_TSK(info->argv[3]): %s\n", info->argv[3]);
 
-    if (0 == info->child_pid)   /*revive for the first time*/
+    if (0 == info->partner_pid)   /*revive for the first time*/
     {
         
         printf("[wd_app](SendSignal_TSK) no child yet, reviving:info->argv[3]: %s, line =%d \n", info->argv[3], __LINE__);
@@ -164,14 +192,14 @@ static int SendSignal_TSK(wd_task_info_ty *info)
 
         RETURN_IF_BAD(SUCCESS == ResetSignalMask(), FAIL, "ResetSignalMask failed");
         /*execvp(info->argv[3], info->argv + 3);*/
-        execvp(info->argv[3], info->argv);
+        execvp(info->argv[3], info->argv );
         /*execvp(info->argv[3], info->argv); */ /*  revive client for first time */
         perror("execvp failed");
         exit(1);
     }
 
 
-    kill_res = kill(info->child_pid, SIGUSR1);
+    kill_res = kill(info->partner_pid, SIGUSR1);
     PRINT_IF_DEBUG("[wd_app](SendSignal_TSK) value of kill_res =%d ", kill_res);
 
     if (-1 == kill_res)
@@ -184,7 +212,7 @@ static int SendSignal_TSK(wd_task_info_ty *info)
             
             RETURN_IF_BAD(SUCCESS == ResetSignalMask(), FAIL, "ResetSignalMask failed");
             /*execvp(info->argv[3], info->argv + 3);*/
-            execvp(info->argv[3], info->argv);
+            execvp(info->argv[3], info->argv  );
 
             /*execvp(info->argv[3], info->argv ); */ /*revive the client app*/
             perror("execvp failed");
