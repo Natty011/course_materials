@@ -288,6 +288,7 @@ static void SchedulerSwitchMode(wd_internal_info_ty *info, int mode)
     }
 }
 
+
 /* ---------------------- Tasks ---------------------- */
 
 static int WaitForFirstSignal_TSK(wd_internal_info_ty *info)
