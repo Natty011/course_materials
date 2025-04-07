@@ -243,9 +243,9 @@ static void *SchedulerThread_TH(wd_task_info_ty *info)
 
     fprintf(stderr, "[wd_app][wd_thread] argv[3] = %s\n", info->argv[3]);
 
-    RETURN_IF_BAD(SUCCESS == sigemptyset(&set), FAIL, "sigemptyset failed");
-    RETURN_IF_BAD(SUCCESS == sigaddset(&set, SIGUSR1), FAIL, "sigaddset failed");
-    RETURN_IF_BAD(SUCCESS == sigprocmask(SIG_UNBLOCK, &set, NULL), FAIL, "sigprocmask failed");
+    RETURN_IF_BAD(SUCCESS == sigemptyset(&set), NULL, "sigemptyset failed");
+    RETURN_IF_BAD(SUCCESS == sigaddset(&set, SIGUSR1), NULL, "sigaddset failed");
+    RETURN_IF_BAD(SUCCESS == sigprocmask(SIG_UNBLOCK, &set, NULL), NULL, "sigprocmask failed");
 
     ret = SchedulerRun(info->sch);
     PRINT_IF_DEBUG("[wd_app]: Scheduler finished with code: %d\n", ret);
