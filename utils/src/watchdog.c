@@ -84,6 +84,15 @@ int MakeMeImmortal(size_t allowed_misses, size_t ping_frequency, int argc, char 
 
     assert(argc >= 4);
 
+    /* signal handlers */
+    sa.sa_handler = HeartbeatHandler_HAND;
+    RETURN_IF_BAD(SUCCESS == sigemptyset(&sa.sa_mask) , FAIL, "sigemptyset failed");
+    RETURN_IF_BAD(SUCCESS == sigaction(SIGUSR1, &sa, NULL), FAIL, "sigaction failed");
+
+    sa.sa_handler = SigchldHandler_HAND;
+    RETURN_IF_BAD(SUCCESS == sigemptyset(&sa.sa_mask), FAIL, "sigemptyset failed");
+    RETURN_IF_BAD(SUCCESS == sigaction(SIGCHLD, &sa, NULL), FAIL, "sigaction failed");
+
     for(i = 0; argv[i] != NULL; ++i)
     {
         fprintf(stderr, "[wd](MMI) argv[%d] = %s\n", i, argv[i]);
@@ -95,43 +104,38 @@ int MakeMeImmortal(size_t allowed_misses, size_t ping_frequency, int argc, char 
     printf("[WD(MMI)] got SIGUSR1 at %s:%d\n", __FILE__, __LINE__);
     PRINT_IF_DEBUG("[WD(MMI)] value of child_pid =%d ", child_pid);
 
-    /* signal handlers */
-    sa.sa_handler = HeartbeatHandler_HAND;
-    RETURN_IF_BAD(SUCCESS == sigemptyset(&sa.sa_mask) , FAIL, "sigemptyset failed");
-    RETURN_IF_BAD(SUCCESS == sigaction(SIGUSR1, &sa, NULL), FAIL, "sigaction failed");
-
-    sa.sa_handler = SigchldHandler_HAND;
-    RETURN_IF_BAD(SUCCESS == sigemptyset(&sa.sa_mask), FAIL, "sigemptyset failed");
-    RETURN_IF_BAD(SUCCESS == sigaction(SIGCHLD, &sa, NULL), FAIL, "sigaction failed");
 
     info = (wd_internal_info_ty *)malloc(sizeof(wd_internal_info_ty));
     RETURN_IF_BAD(info, FAIL, "malloc failed");
 
-    info->sched = SchedulerCreate();
-    RETURN_IF_BAD(info->sched, FAIL, "SchedulerCreate failed");
-
-    info->allowed_misses = allowed_misses;
-    info->ping_frequency = ping_frequency;
-    info->partner_pid = child_pid;
-    
     /* Copy argv and append watchdog_app PID to the end */
-    argv_copy = (char **)malloc((argc + 2) * sizeof(char *));
+    argv_copy = (char **)malloc( 6 * sizeof(char *));
     pid_str = (char *)malloc(20); /* store the watchdog_app PID as string */
 
-    RETURN_IF_BAD(argv_copy, FAIL, "malloc for argv_copy failed");
-    RETURN_IF_BAD(pid_str, FAIL, "malloc for pid_str failed");
+    if(!argv_copy || !pid_str)
+    {
+        free(argv_copy);
+        free(pid_str);
 
-    
+        RETURN_IF_BAD(argv_copy, FAIL, "malloc for argv_copy failed");
+        RETURN_IF_BAD(pid_str, FAIL, "malloc for pid_str failed");
+    }
+
+    argv_copy[0] = argv[3];   /* ./wd_test.out */
+    argv_copy[1] = argv[1];   /* allowed_misses */
+    argv_copy[2] = argv[2];   /* ping_frequency */
+    argv_copy[3] = argv[0];   /* ./watchdog_app.out */
 
     sprintf(pid_str, "%d", child_pid);
-    argv_copy[argc] = pid_str;
-    argv_copy[argc + 1] = NULL;
 
+    argv_copy[4] = pid_str; /*pid_of the client app: wd_test.out*/
+    
+    info->allowed_misses = allowed_misses;
+    info->ping_frequency = ping_frequency;
+    info->partner_pid = child_pid;   /*pid_of the client app: wd_test.out*/
+    
     info->argv = argv_copy;
-    info->argc = argc + 1;
-    PRINT_IF_DEBUG("[WD(MMI)] value of pid_str =%s", pid_str);
-
-    SchedulerSwitchMode(info, BEGINE_MODE); /* BEGIN mode */
+    info->argc = argc + 1; /* 5 */
 
     for (i = 0; i < argc; ++i)
     {
@@ -139,6 +143,16 @@ int MakeMeImmortal(size_t allowed_misses, size_t ping_frequency, int argc, char 
         fprintf(stderr, "[MMI DEBUG] info->argv[%d] = %s\n", i, info->argv[i]);
 
     }
+
+
+    PRINT_IF_DEBUG("[WD(MMI)] value of pid_str =%s", pid_str);
+
+    info->sched = SchedulerCreate();
+    RETURN_IF_BAD(info->sched, FAIL, "SchedulerCreate failed");
+
+    SchedulerSwitchMode(info, BEGINE_MODE); /* BEGIN mode */
+
+    
     RETURN_IF_BAD(SUCCESS == pthread_create(&tid, NULL, (void *(*)(void *))SchedulerThread_TH, info),
                 FAIL, "pthread_create failed");
     RETURN_IF_BAD(SUCCESS == pthread_detach(tid), FAIL, "pthread_detach failed");
