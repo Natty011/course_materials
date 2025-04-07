@@ -186,21 +186,30 @@ static int SetupScheduler(wd_task_info_ty *info)
 static int SendSignal_TSK(wd_task_info_ty *info)
 {
     int kill_res = -1;
-    printf("[wd_app](SendSignal_TSK(info->argv[0]): %s\n", info->argv[0]);
+    pid_t child_pid = -1;
 
+    printf("[wd_app](SendSignal_TSK(info->argv[0]): %s\n", info->argv[0]);
     printf("[wd_app](SendSignal_TSK(info->argv[3]): %s\n", info->argv[3]);
 
     if (0 == info->partner_pid)   /*revive for the first time*/
     {
-        
-        printf("[wd_app](SendSignal_TSK) no child yet, reviving:info->argv[3]: %s, line =%d \n", info->argv[3], __LINE__);
-        printf("[wd_app](SendSignal_TSK(0 == info->child_pid):info->argv[3]: %s\n", info->argv[3]);
+        printf("[wd_app](SendSignal_TSK) First revive attempt, launching partner: %s\n", info->argv[0]);
 
         RETURN_IF_BAD(SUCCESS == ResetSignalMask(), FAIL, "ResetSignalMask failed");
 
-        execvp(info->argv[0], info->argv ); /*  revive client for first time */
-        perror("execvp failed");
-        exit(1);
+        child_pid = fork();
+        RETURN_IF_BAD(child_pid >= 0, FAIL, "fork failed");
+
+        if (0 == child_pid)
+        {
+            execvp(info->argv[0], info->argv ); /*  revive client(wd_test.out) for first time */
+            perror("execvp failed");
+            exit(1);
+        }
+        
+        info->partner_pid = child_pid;
+        return SHOULD_REPEAT;
+    
     }
 
 
@@ -209,23 +218,32 @@ static int SendSignal_TSK(wd_task_info_ty *info)
 
     if (-1 == kill_res)
     {
-        printf("[wd_app](SendSignal_TSK(-1 == kill_res)info->argv[0]: %s\n", info->argv[0]);
-        printf("[wd_app](SendSignal_TSK(-1 == kill_res)info->argv[3]: %s\n", info->argv[3]);
 
         if (ESRCH == errno)
         {
-            printf("[wd_app](SendSignal_TSK)(ESRCH == errno) about to execinfo->argv[3]: %s\n", info->argv[3]);
+            printf("[wd_app](SendSignal_TSK) Partner dead, reviving...\n");
             
             RETURN_IF_BAD(SUCCESS == ResetSignalMask(), FAIL, "ResetSignalMask failed");
 
-            execvp(info->argv[0], info->argv  ); /*revive the client app*/
+            if (0 == child_pid)
+            {
+                execvp(info->argv[0], info->argv ); /*  revive client(wd_test.out) for first time */
+                perror("execvp failed");
+                exit(1);
+            }
+        
+            info->partner_pid = child_pid;
+            return FINISHED;
+
+            execvp(info->argv[0], info->argv  ); /*  revive client(wd_test.out) cause it dead */
 
             perror("execvp failed");
             exit(1);
         }
         else
         {
-            ABORT_IF_BAD(FALSE,"abort executed -> check core file");
+            
+            ABORT_IF_BAD(FALSE, "partner killed failed unexpectedly: abort executed -> check core file");
         }
     }
 
