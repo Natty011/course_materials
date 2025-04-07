@@ -164,7 +164,7 @@ static int SendSignal_TSK(wd_task_info_ty *info)
 
         RETURN_IF_BAD(SUCCESS == ResetSignalMask(), FAIL, "ResetSignalMask failed");
         /*execvp(info->argv[3], info->argv + 3);*/
-        execvp(info->argv[0], info->argv);
+        execvp(info->argv[3], info->argv);
         /*execvp(info->argv[3], info->argv); */ /*  revive client for first time */
         perror("execvp failed");
         exit(1);
@@ -184,7 +184,7 @@ static int SendSignal_TSK(wd_task_info_ty *info)
             
             RETURN_IF_BAD(SUCCESS == ResetSignalMask(), FAIL, "ResetSignalMask failed");
             /*execvp(info->argv[3], info->argv + 3);*/
-            execvp(info->argv[0], info->argv);
+            execvp(info->argv[3], info->argv);
 
             /*execvp(info->argv[3], info->argv ); */ /*revive the client app*/
             perror("execvp failed");
