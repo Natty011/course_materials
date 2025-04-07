@@ -88,7 +88,7 @@ int MakeMeImmortal(size_t allowed_misses, size_t ping_frequency, int argc, char 
     int sem_stat = 0;
     sigset_t set;
 
-    assert(argc >= 3);
+    assert(argc >= 4);
 
     /* signal handlers */
     sa.sa_handler = HeartbeatHandler_HAND;
@@ -120,8 +120,8 @@ int MakeMeImmortal(size_t allowed_misses, size_t ping_frequency, int argc, char 
 
     if(!argv_copy || !pid_str)
     {
-        free(argv_copy);
         free(pid_str);
+        free(argv_copy);
 
         RETURN_IF_BAD(argv_copy, FAIL, "[wd] malloc for argv_copy failed");
         RETURN_IF_BAD(pid_str, FAIL, "[wd]malloc for pid_str failed");
@@ -173,7 +173,7 @@ int MakeMeImmortal(size_t allowed_misses, size_t ping_frequency, int argc, char 
         
         if (th_create_stat && errno != EAGAIN)
         {
-           /* free(info->argv[info->argc - 1]);*/ /* malloc of pid_str of wd */
+            free(info->argv[info->argc - 1]); /* malloc of pid_str of wd */
             free(info->argv);        
             free(info);
             RETURN_IF_BAD(SUCCESS == th_create_stat, FAIL, "pthread_create fail");
@@ -198,6 +198,8 @@ int MakeMeImmortal(size_t allowed_misses, size_t ping_frequency, int argc, char 
         /* EINTR: The call was interrupted by a signal handler */
         if (sem_stat && errno != EINTR)
         {
+            SchedulerDestroy(info->schd);
+            free(info->argv[info->argc - 1]); /* malloc of pid_str of wd */
             free(info->argv);
             free(info);
             ABORT_IF_BAD(SUCCESS == sem_stat, "sem_wait fail");
@@ -265,8 +267,9 @@ static void DestroyMode(wd_internal_info_ty *info)
     kill(info->partner_pid, SIGKILL);
 
     SchedulerStop(info->sched);
+    SchedulerDestroy(info->sched);
 
-    /*free(info->argv[info->argc - 1]);*/ /* malloc of pid_str of wd */
+    free(info->argv[info->argc - 1]); /* malloc of pid_str of wd */
     free(info->argv);                 /**/
     free(info);
 }
@@ -349,6 +352,13 @@ static int CheckWdAlive_TSK(wd_internal_info_ty *info)
                 return FINISHED;
             }
         }
+
+        else
+        {
+            ABORT_IF_BAD(FALSE,"abort executed -> check core file");
+        }
+
+        
     }    
     return SHOULD_REPEAT;
 }
