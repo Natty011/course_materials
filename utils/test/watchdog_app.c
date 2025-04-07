@@ -208,7 +208,7 @@ static int SendSignal_TSK(wd_task_info_ty *info)
         }
         
         info->partner_pid = child_pid;
-        return SHOULD_REPEAT;
+        return SHOULD_REPEAT;  /*while the parter isn't revive -> repeat*/
     
     }
 
@@ -225,9 +225,12 @@ static int SendSignal_TSK(wd_task_info_ty *info)
             
             RETURN_IF_BAD(SUCCESS == ResetSignalMask(), FAIL, "ResetSignalMask failed");
 
+            child_pid = fork();
+            RETURN_IF_BAD(child_pid >= 0, FAIL, "fork failed");
+
             if (0 == child_pid)
             {
-                execvp(info->argv[0], info->argv ); /*  revive client(wd_test.out) for first time */
+                execvp(info->argv[0], info->argv ); /*  revive client(wd_test.out) cause it dead */
                 perror("execvp failed");
                 exit(1);
             }
@@ -235,10 +238,6 @@ static int SendSignal_TSK(wd_task_info_ty *info)
             info->partner_pid = child_pid;
             return FINISHED;
 
-            execvp(info->argv[0], info->argv  ); /*  revive client(wd_test.out) cause it dead */
-
-            perror("execvp failed");
-            exit(1);
         }
         else
         {
