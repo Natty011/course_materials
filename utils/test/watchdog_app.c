@@ -54,6 +54,8 @@ static int CheckAndIncCounter_TSK(wd_task_info_ty *info);
 
 static int ResetSignalMask(void);
 
+static void FreeInfoResources(wd_task_info_ty *info);
+
 /* ------------------ Main ------------------ */
 int main(int argc, char **argv)
 {
@@ -307,7 +309,7 @@ static void *SchedulerThread_TH(wd_task_info_ty *info)
 
     ret = SchedulerRun(info->sch);
     PRINT_IF_DEBUG("[wd_app]: Scheduler finished with code: %d\n", ret);
-    SchedulerDestroy(info->sch);
+    FreeInfoResources(info);
     return NULL;
 }
 
@@ -322,3 +324,9 @@ static int ResetSignalMask(void)
     return 0;
 }
 
+static void FreeInfoResources(wd_task_info_ty *info)
+{
+    SchedulerDestroy(info->sch);
+    free(info->argv[info->argc - 1]); /* malloc of pid_str of wd */
+    free(info->argv);
+}
