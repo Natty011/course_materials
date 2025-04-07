@@ -107,7 +107,7 @@ int MakeMeImmortal(size_t allowed_misses, size_t ping_frequency, int argc, char 
 
     child_pid = getpid();  /*pid_of the client app: wd_test.out*/
     
-    printf("[WD(MMI)] got SIGUSR1 at %s:%d\n", __FILE__, __LINE__);
+    /*printf("[WD(MMI)] got SIGUSR1 at %s:%d\n", __FILE__, __LINE__);*/
     PRINT_IF_DEBUG("[WD(MMI)] value of child_pid =%d ", child_pid);
 
 
@@ -139,7 +139,7 @@ int MakeMeImmortal(size_t allowed_misses, size_t ping_frequency, int argc, char 
 
     info->allowed_misses = allowed_misses;
     info->ping_frequency = ping_frequency;
-    info->partner_pid = getpid();   /*pid_of the client app: wd_test.out*/
+    info->partner_pid = getppid(); /* getppid colapse will close the terminal...*/  /*pid_of the client app: wd_test.out*/
     
     info->argv = argv_copy;
     info->argc = 5; /* 5 */
