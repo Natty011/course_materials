@@ -213,7 +213,6 @@ static int SendSignal_TSK(wd_task_info_ty *info)
     
     }
 
-
     kill_res = kill(info->partner_pid, SIGUSR1);
     PRINT_IF_DEBUG("[wd_app](SendSignal_TSK) value of kill_res =%d ", kill_res);
 
