@@ -94,6 +94,8 @@ static int InitInfo(wd_task_info_ty *info, int argc, char **argv)
     info->ping_frequency = (size_t)atoi(argv[1]);
     info->allowed_misses = (size_t)atoi(argv[2]);
     /*EXIT_IF_BAD(argc >= 5, "Not enough arguments – expected argv[4] to be client PID");*/
+    PRINT_IF_DEBUG("[wd_app](InitInfo) value of info->child_pid =%d ", info->child_pid);
+    PRINT_IF_DEBUG("[wd_app](InitInfo) value of argc =%d ", argc);
 
     if(argc >= 5)
     {
@@ -152,7 +154,9 @@ static int SendSignal_TSK(wd_task_info_ty *info)
     {
         fprintf(stderr, "[wd_app](SendSignal_TSK) no child yet, reviving: %s, line =%d \n", info->argv[3], __LINE__);
         /*info->argv + 3 to info->argv*/
-        execvp(info->argv[3], info->argv + 3);  /*  revive client for first time */
+        execvp(info->argv[0], info->argv);
+
+        /*execvp(info->argv[3], info->argv + 3); */ /*  revive client for first time */
         perror("execvp failed");
         exit(1);
     }
@@ -167,8 +171,9 @@ static int SendSignal_TSK(wd_task_info_ty *info)
             fprintf(stderr, "[wd_app](SendSignal_TSK) about to exec: %s\n", info->argv[3]);
             
             /*info->argv + 3 to info->argv*/
+            execvp(info->argv[0], info->argv);
 
-            execvp(info->argv[3], info->argv +3 );  /*revive the client app*/
+            /*execvp(info->argv[3], info->argv + 3 );*/  /*revive the client app*/
             perror("execvp failed");
             exit(1);
         }
