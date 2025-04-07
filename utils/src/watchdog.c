@@ -18,7 +18,7 @@
 #include <string.h>     /* strcmp */
 #include <sys/types.h>
 #include <sys/wait.h>
-#include <semaphore.h>
+#include <semaphore.h> /*post, wait */
 
 #include "scheduler.h"
 #include "watchdog.h"
@@ -185,7 +185,8 @@ int MakeMeImmortal(size_t allowed_misses, size_t ping_frequency, int argc, char 
     RETURN_IF_BAD(SUCCESS == pthread_detach(tid), FAIL, "pthread_detach failed");
 
     /* Signal that watchdog is ready */
-    RETURN_IF_BAD(SUCCESS == sem_post(&g_sem), FAIL, "sem_post fail");
+    /*want the semaphore to be availble*/
+    RETURN_IF_BAD(SUCCESS == sem_post(&g_sem), FAIL, "sem_post fail"); 
 
     /* wait for indication that WD_app is working */
     do
