@@ -261,7 +261,7 @@ static void DestroyMode(wd_internal_info_ty *info)
 
     SchedulerStop(info->sched);
 
-    free(info->argv[info->argc - 1]); /* malloc of pid_str of wd */
+    /*free(info->argv[info->argc - 1]);*/ /* malloc of pid_str of wd */
     free(info->argv);                 /**/
     free(info);
 }
