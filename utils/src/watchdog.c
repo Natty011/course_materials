@@ -72,6 +72,8 @@ static int CheckAndIncCounter_TSK(wd_internal_info_ty *info);
 static int CheckDnrFlag_TSK(wd_internal_info_ty *info);
 /*static char **CopyArgvWithPid(char **argv, int argc, pid_t pid);*/
 
+static void FreeInfoResources(wd_internal_info_ty *info);
+
 /* ---------------------- Implementation ---------------------- */
 
 int MakeMeImmortal(size_t allowed_misses, size_t ping_frequency, int argc, char **argv)
@@ -166,16 +168,13 @@ int MakeMeImmortal(size_t allowed_misses, size_t ping_frequency, int argc, char 
     RETURN_IF_BAD(SUCCESS == sigaddset(&set, SIGUSR1), FAIL, "sigaddset failed");
     RETURN_IF_BAD(SUCCESS == sigprocmask(SIG_BLOCK, &set, NULL), FAIL, "sigprocmask failed");
 
-
     do
     {
         th_create_stat = pthread_create(&tid, NULL, (th_func_ptr)SchedulerThread_TH, info);
         
         if (th_create_stat && errno != EAGAIN)
         {
-            free(info->argv[info->argc - 1]); /* malloc of pid_str of wd */
-            free(info->argv);        
-            free(info);
+            SchedulerSwitchMode(info, DESTROY_MODE);
             RETURN_IF_BAD(SUCCESS == th_create_stat, FAIL, "pthread_create fail");
         }
 
@@ -188,9 +187,7 @@ int MakeMeImmortal(size_t allowed_misses, size_t ping_frequency, int argc, char 
     /* Signal that watchdog is ready */
     RETURN_IF_BAD(SUCCESS == sem_post(&g_sem), FAIL, "sem_post fail");
 
-
     /* wait for indication that WD_app is working */
-
     do
     {
         sem_stat = sem_wait(&g_sem);
@@ -198,10 +195,7 @@ int MakeMeImmortal(size_t allowed_misses, size_t ping_frequency, int argc, char 
         /* EINTR: The call was interrupted by a signal handler */
         if (sem_stat && errno != EINTR)
         {
-            SchedulerDestroy(info->schd);
-            free(info->argv[info->argc - 1]); /* malloc of pid_str of wd */
-            free(info->argv);
-            free(info);
+            SchedulerSwitchMode(info, DESTROY_MODE);
             ABORT_IF_BAD(SUCCESS == sem_stat, "sem_wait fail");
         }
     }
@@ -232,10 +226,10 @@ static void *SchedulerThread_TH(wd_internal_info_ty *info)
     RETURN_IF_BAD(SUCCESS == sigaddset(&set, SIGUSR1), NULL, "sigaddset failed");
     RETURN_IF_BAD(SUCCESS == sigprocmask(SIG_UNBLOCK, &set, NULL), NULL, "sigprocmask failed");
 
-    fprintf(stderr, "[wd][wd_thread] argv[3] = %s\n", info->argv[3]);
+    /*fprintf(stderr, "[wd][wd_thread] argv[3] = %s\n", info->argv[3]);*/
 
     SchedulerRun(info->sched);
-    SchedulerDestroy(info->sched);
+    SchedulerSwitchMode(info, DESTROY_MODE);
     return NULL;
 }
 
@@ -355,10 +349,11 @@ static int CheckWdAlive_TSK(wd_internal_info_ty *info)
 
         else
         {
+            SchedulerSwitchMode(info, DESTROY_MODE);
             ABORT_IF_BAD(FALSE,"abort executed -> check core file");
         }
 
-        
+
     }    
     return SHOULD_REPEAT;
 }
@@ -379,6 +374,7 @@ static int SendSignal_TSK(wd_internal_info_ty *info)
         }
         else
         {
+            SchedulerSwitchMode(info, DESTROY_MODE);
             ABORT_IF_BAD(FALSE,"abort executed -> check core file");
         }
     }
@@ -429,4 +425,12 @@ static void SigchldHandler_HAND(int sig)
 }
 
 
-
+/*
+static void FreeInfoResources(wd_internal_info_ty *info)
+{
+    SchedulerDestroy(info->sched);
+    free(info->argv[info->argc - 1]); 
+    free(info->argv);
+    free(info);
+}
+*/
