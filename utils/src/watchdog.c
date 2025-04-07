@@ -85,8 +85,10 @@ int MakeMeImmortal(size_t allowed_misses, size_t ping_frequency, int argc, char 
     int i = 0;
     char **argv_copy = NULL;
     char *pid_str = NULL;
+    int sem_stat = 0;
+    sigset_t set;
 
-    /*assert(argc >= 4);*/
+    assert(argc >= 4);
 
     /* signal handlers */
     sa.sa_handler = HeartbeatHandler_HAND;
@@ -125,28 +127,28 @@ int MakeMeImmortal(size_t allowed_misses, size_t ping_frequency, int argc, char 
         RETURN_IF_BAD(pid_str, FAIL, "malloc for pid_str failed");
     }
 
-    argv_copy[0] = argv[3];   /* ./wd_test.out */
-    argv_copy[1] = argv[1];   /* allowed_misses */
+    argv_copy[0] = argv[3];   /* ./watchdog_app.out  */
+    argv_copy[1] = argv[1];  /* allowed_misses */
     argv_copy[2] = argv[2];   /* ping_frequency */
-    argv_copy[3] = argv[0];   /* ./watchdog_app.out */
+    argv_copy[3] = argv[0];   /* ./wd_test.out */
 
     sprintf(pid_str, "%d", child_pid);
 
     argv_copy[4] = pid_str; /*pid_of the client app: wd_test.out*/
-    
+    argv_copy[5] = NULL; 
+
     info->allowed_misses = allowed_misses;
     info->ping_frequency = ping_frequency;
-    info->partner_pid = child_pid;   /*pid_of the client app: wd_test.out*/
+    info->partner_pid = getpid();   /*pid_of the client app: wd_test.out*/
     
     info->argv = argv_copy;
-    info->argc = argc + 1; /* 5 */
+    info->argc = 5; /* 5 */
 
     for (i = 0; i < info->argc; ++i)
     {
+        /*argv_copy[i] = argv[i];*/
         fprintf(stderr, "[MMI DEBUG] info->argv[%d] = %s\n", i, info->argv[i]);
-
     }
-
 
     PRINT_IF_DEBUG("[WD(MMI)] value of pid_str =%s", pid_str);
 
@@ -155,16 +157,21 @@ int MakeMeImmortal(size_t allowed_misses, size_t ping_frequency, int argc, char 
 
     SchedulerSwitchMode(info, BEGINE_MODE); /* BEGIN mode */
 
+    RETURN_IF_BAD(SUCCESS == sigemptyset(&set), FAIL, "sigemptyset failed");
+    RETURN_IF_BAD(SUCCESS == sigaddset(&set, SIGUSR1), FAIL, "sigaddset failed");
+    RETURN_IF_BAD(SUCCESS == sigprocmask(SIG_BLOCK, &set, NULL), FAIL, "sigprocmask failed");
+
+
     do
     {
-        th_create_stat = pthread_create(&tid, NULL, (void *(*)(void *))SchedulerThread_TH, info);
+        th_create_stat = pthread_create(&tid, NULL, (th_func_ptr)SchedulerThread_TH, info);
         
         if (th_create_stat && errno != EAGAIN)
         {
-            free(info->argv[info->argc - 1]); /* malloc of pid_str of wd */
+           /* free(info->argv[info->argc - 1]);*/ /* malloc of pid_str of wd */
             free(info->argv);        
             free(info);
-            RETURN_IF_BAD(0 == th_create_stat, -1, "pthread_create fail");
+            RETURN_IF_BAD(SUCCESS == th_create_stat, FAIL, "pthread_create fail");
         }
 
         ++retry_tid_creat;
@@ -175,6 +182,24 @@ int MakeMeImmortal(size_t allowed_misses, size_t ping_frequency, int argc, char 
 
     /* Signal that watchdog is ready */
     RETURN_IF_BAD(SUCCESS == sem_post(&g_sem), FAIL, "sem_post fail");
+
+
+    /* wait for indication that WD_app is working */
+
+    do
+    {
+        sem_stat = sem_wait(&g_sem);
+
+        /* EINTR: The call was interrupted by a signal handler */
+        if (sem_stat && errno != EINTR)
+        {
+            free(info->argv);
+            free(info);
+            ABORT_IF_BAD(SUCCESS == sem_stat, "sem_wait fail");
+        }
+    }
+    while (sem_stat);
+
 
     return SUCCESS;
 }
@@ -194,8 +219,13 @@ static void *SchedulerThread_TH(wd_internal_info_ty *info)
         dont know how much bytes need to copy... need to solve it....*/
 
     /*TO DO: COPY     free(info) to local struct and free info  */ 
+    sigset_t set;
     
-    fprintf(stderr, "[wd_app][wd_thread] argv[3] = %s\n", info->argv[3]);
+    RETURN_IF_BAD(SUCCESS == sigemptyset(&set), FAIL, "sigemptyset failed");
+    RETURN_IF_BAD(SUCCESS == sigaddset(&set, SIGUSR1), FAIL, "sigaddset failed");
+    RETURN_IF_BAD(SUCCESS == sigprocmask(SIG_UNBLOCK, &set, NULL), FAIL, "sigprocmask failed");
+
+    fprintf(stderr, "[wd][wd_thread] argv[3] = %s\n", info->argv[3]);
 
     SchedulerRun(info->sched);
     SchedulerDestroy(info->sched);
@@ -207,22 +237,22 @@ static void *SchedulerThread_TH(wd_internal_info_ty *info)
 static void BeginMode(wd_internal_info_ty *info)
 {
     SchedulerClear(info->sched);
-    SchedulerAdd(info->sched, (int (*)(void *))WaitForFirstSignal_TSK, info, info->ping_frequency);
+    SchedulerAdd(info->sched, (task_func_ptr)WaitForFirstSignal_TSK, info, info->ping_frequency);
 }
 
 static void ReviveMode(wd_internal_info_ty *info)
 {
     SchedulerClear(info->sched);
-    SchedulerAdd(info->sched, (int (*)(void *))RevivePartner_TSK, info, 1);
+    SchedulerAdd(info->sched, (task_func_ptr)RevivePartner_TSK, info, 1);
 }
 
 static void RoutineMode(wd_internal_info_ty *info)
 {
     SchedulerClear(info->sched);
-    SchedulerAdd(info->sched, (int (*)(void *))CheckWdAlive_TSK, info, info->ping_frequency);
-    SchedulerAdd(info->sched, (int (*)(void *))SendSignal_TSK, info, info->ping_frequency);
-    SchedulerAdd(info->sched, (int (*)(void *))CheckAndIncCounter_TSK, info, info->ping_frequency);
-    SchedulerAdd(info->sched, (int (*)(void *))CheckDnrFlag_TSK, info, 1);
+    SchedulerAdd(info->sched, (task_func_ptr)CheckWdAlive_TSK, info, info->ping_frequency);
+    SchedulerAdd(info->sched, (task_func_ptr)SendSignal_TSK, info, info->ping_frequency);
+    SchedulerAdd(info->sched, (task_func_ptr)CheckAndIncCounter_TSK, info, info->ping_frequency);
+    SchedulerAdd(info->sched, (task_func_ptr)CheckDnrFlag_TSK, info, 1);
 }
 
 static void DestroyMode(wd_internal_info_ty *info)
@@ -235,8 +265,6 @@ static void DestroyMode(wd_internal_info_ty *info)
     free(info->argv);                 /**/
     free(info);
 }
-
-
 
 static void SchedulerSwitchMode(wd_internal_info_ty *info, int mode)
 {
@@ -278,7 +306,7 @@ static int RevivePartner_TSK(wd_internal_info_ty *info)
     pid_t child_pid = fork();
     fprintf(stderr, "[WD](RevivePartner_TSK) child_pid after fork: %d\n", child_pid);
 
-    /*RETURN_IF_BAD(child_pid >= 0, FINISHED, "fork failed");*/
+    RETURN_IF_BAD(child_pid >= 0, FINISHED, "fork failed");
 
     if (0 == child_pid)
     {
@@ -384,3 +412,6 @@ static void SigchldHandler_HAND(int sig)
     (void)sig;
     while (waitpid(-1, NULL, WNOHANG) > 0) {}
 }
+
+
+
