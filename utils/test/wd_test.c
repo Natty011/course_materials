@@ -12,7 +12,7 @@ int main(int argc, char *argv[])
     int i = 0;
     printf("[wd_test] argc= %d \n", argc);
 
-    assert(argc >= 1);
+    assert(argc >= 4);
 
     fprintf(stderr, "[CLIENT] (pid: %d)\n", getpid());
 
@@ -20,16 +20,17 @@ int main(int argc, char *argv[])
     {
         printf("[wd_test] argv[%d] = %s\n", i, argv[i]);
     }
+    
 
     printf("[client] Calling MakeMeImmortal...\n");
     MakeMeImmortal((size_t)atoi(argv[1]), (size_t)atoi(argv[2]), argc, argv);
 
     printf("[client] Running main loop.\n");
 
-    for (i = 0; i < 5; ++i)
+    for (i = 0; i < 20; ++i)
     {
         
-        fprintf(stderr, "[CLIENT] Killed watchdog_app (pid: %d)\n", getppid());
+        fprintf(stderr, "[CLIENT] watchdog_app (pid: %d)\n", getpid());
 
         /*kill(getppid(), SIGKILL); *//* simulate crash of the WD_APP */
 
