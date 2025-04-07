@@ -50,6 +50,7 @@ static void CleanupDeadChildren_HAND(int sig);
 static int SendSignal_TSK(wd_task_info_ty *info);
 static int CheckMisses_TSK(wd_task_info_ty *info);
 static int CheckDnrFlag_TSK(wd_task_info_ty *info);
+static int CheckAndIncCounter_TSK(wd_task_info_ty *info);
 
 static int ResetSignalMask(void);
 
@@ -58,7 +59,7 @@ int main(int argc, char **argv)
 {
     wd_task_info_ty info = {0};
     int i = 0;
-    assert(argc >= 3);
+    assert(argc >= 4);
     PRINT_IF_DEBUG("[wd_app](main) value of getpid =%d ", getpid());
 
     EXIT_IF_BAD(SUCCESS == InitInfo(&info, argc, argv), "InitInfo failed");
@@ -173,6 +174,9 @@ static int SetupScheduler(wd_task_info_ty *info)
     uid = SchedulerAdd(info->sch, (task_func_ptr)CheckDnrFlag_TSK, info, 1);
     EXIT_IF_BAD(FALSE == UIDIsSame(uid, BADUID), "Add CheckDnrFlag_TSK failed");
 
+    uid = SchedulerAdd(info->sch, (task_func_ptr)CheckAndIncCounter_TSK, info, 1);
+    EXIT_IF_BAD(FALSE == UIDIsSame(uid, BADUID), "Add CheckAndIncCounter_TSK failed");
+
     return SUCCESS;
 }
 
@@ -228,7 +232,6 @@ static int SendSignal_TSK(wd_task_info_ty *info)
 
 static int CheckMisses_TSK(wd_task_info_ty *info)
 {
-    int count = 0;
 
     if ((size_t)g_missed_SOL > info->allowed_misses)
     {
@@ -236,12 +239,26 @@ static int CheckMisses_TSK(wd_task_info_ty *info)
         SchedulerAdd(info->sch, (task_func_ptr)SendSignal_TSK, info, 1);
         return FINISHED;
     }
-
-    count = __atomic_add_fetch(&g_missed_SOL, 1, __ATOMIC_SEQ_CST);
     
-    PRINT_IF_DEBUG("[wd_app] value of g_missed_SOL =%d ", count);
     return SHOULD_REPEAT;
 }
+
+static int CheckAndIncCounter_TSK(wd_task_info_ty *info)
+{
+    int count = 0;
+
+    PRINT_IF_DEBUG("[wd_app](CheckAndIncCounter_TSK) value of g_missed =%d ", g_missed_SOL);
+    PRINT_IF_DEBUG("[wd_app](CheckAndIncCounter_TSK) value of info->partner_pid =%d ", info->partner_pid);
+
+    count = __atomic_add_fetch(&g_missed_SOL, 1, __ATOMIC_SEQ_CST);
+
+    /*current = __sync_add_and_fetch(&g_missed_SOL, 1); what the difference?*/
+    PRINT_IF_DEBUG("[wd_app] value of g_missed_SOL =%d ", count);
+
+    return SHOULD_REPEAT;
+}
+
+
 
 static int CheckDnrFlag_TSK(wd_task_info_ty *info)
 {
@@ -249,6 +266,10 @@ static int CheckDnrFlag_TSK(wd_task_info_ty *info)
     if (g_should_stop)
     {
         SchedulerStop(info->sch);
+        SchedulerDestroy(info->sch);
+        free(info->argv[info->argc - 1]); /* malloc of pid_str of wd */
+        free(info->argv);        
+
         return FINISHED;
     }
 
