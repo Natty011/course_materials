@@ -88,7 +88,7 @@ int MakeMeImmortal(size_t allowed_misses, size_t ping_frequency, int argc, char 
     int sem_stat = 0;
     sigset_t set;
 
-    assert(argc >= 4);
+    assert(argc >= 3);
 
     /* signal handlers */
     sa.sa_handler = HeartbeatHandler_HAND;
@@ -123,8 +123,8 @@ int MakeMeImmortal(size_t allowed_misses, size_t ping_frequency, int argc, char 
         free(argv_copy);
         free(pid_str);
 
-        RETURN_IF_BAD(argv_copy, FAIL, "malloc for argv_copy failed");
-        RETURN_IF_BAD(pid_str, FAIL, "malloc for pid_str failed");
+        RETURN_IF_BAD(argv_copy, FAIL, "[wd] malloc for argv_copy failed");
+        RETURN_IF_BAD(pid_str, FAIL, "[wd]malloc for pid_str failed");
     }
 
     argv_copy[0] = argv[3];   /* ./watchdog_app.out  */
@@ -133,11 +133,11 @@ int MakeMeImmortal(size_t allowed_misses, size_t ping_frequency, int argc, char 
     argv_copy[3] = argv[0];   /* ./wd_test.out */
 
     /*argv_copy[0] = argv[0];*/   /* "./wd_test.out" */
-    /*argv_copy[1] = argv[1];*/   /* "3" */
+    /*argv_copy[1] = argv[1];*/  /* "20" */
     /*argv_copy[2] = argv[2];*/   /* "2" */
     /*argv_copy[3] = argv[3];*/   /* "./watchdog_app.out" */
 
-    sprintf(pid_str, "%d", child_pid);
+    sprintf(pid_str, "%d", getpid());
 
     argv_copy[4] = pid_str; /*pid_of the client app: wd_test.out*/
     argv_copy[5] = NULL; 
