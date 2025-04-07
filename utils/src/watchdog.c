@@ -64,9 +64,9 @@ static void SchedulerSwitchMode(wd_internal_info_ty *info, int mode);
 
 static int WaitForFirstSignal_TSK(wd_internal_info_ty *info);
 static int RevivePartner_TSK(wd_internal_info_ty *info);
-static int IsPartnerAlive_TSK(wd_internal_info_ty *info);
+static int CheckWdAlive_TSK(wd_internal_info_ty *info);
 static int SendSignal_TSK(wd_internal_info_ty *info);
-static int CheckMisses_TSK(wd_internal_info_ty *info);
+static int CheckAndIncCounter_TSK(wd_internal_info_ty *info);
 static int CheckDnrFlag_TSK(wd_internal_info_ty *info);
 /*static char **CopyArgvWithPid(char **argv, int argc, pid_t pid);*/
 
@@ -137,9 +137,8 @@ int MakeMeImmortal(size_t allowed_misses, size_t ping_frequency, int argc, char 
     info->argv = argv_copy;
     info->argc = argc + 1; /* 5 */
 
-    for (i = 0; i < argc; ++i)
+    for (i = 0; i < info->argc; ++i)
     {
-        argv_copy[i] = argv[i];
         fprintf(stderr, "[MMI DEBUG] info->argv[%d] = %s\n", i, info->argv[i]);
 
     }
@@ -201,9 +200,9 @@ static void ReviveMode(wd_internal_info_ty *info)
 static void RoutineMode(wd_internal_info_ty *info)
 {
     SchedulerClear(info->sched);
-    SchedulerAdd(info->sched, (int (*)(void *))IsPartnerAlive_TSK, info, info->ping_frequency);
+    SchedulerAdd(info->sched, (int (*)(void *))CheckWdAlive_TSK, info, info->ping_frequency);
     SchedulerAdd(info->sched, (int (*)(void *))SendSignal_TSK, info, info->ping_frequency);
-    SchedulerAdd(info->sched, (int (*)(void *))CheckMisses_TSK, info, info->ping_frequency);
+    SchedulerAdd(info->sched, (int (*)(void *))CheckAndIncCounter_TSK, info, info->ping_frequency);
     SchedulerAdd(info->sched, (int (*)(void *))CheckDnrFlag_TSK, info, 1);
 }
 
@@ -281,29 +280,28 @@ static int RevivePartner_TSK(wd_internal_info_ty *info)
     return FINISHED;
 }
 
-static int IsPartnerAlive_TSK(wd_internal_info_ty *info)
+static int CheckWdAlive_TSK(wd_internal_info_ty *info)
 {
-    
-    int kill_ret = kill(info->partner_pid, 0);
-    PRINT_IF_DEBUG("[wd(IsPartnerAlive_TSK)] value of info->partner_pid =%d ", info->partner_pid);
+    PRINT_IF_DEBUG("[wd(CheckWdAlive_TSK)] value of info->partner_pid =%d ", info->partner_pid);
 
-    PRINT_IF_DEBUG("[wd(IsPartnerAlive_TSK)] value of kill_ret =%d ", kill_ret);
+    if (g_missed > (int)info->allowed_misses)
+    {
+        /*TO DO: SEND SIKKILL BEFORE REVIVE*/
+        int ret = kill(info->partner_pid, SIGKILL);
 
-    if ( -1 == kill_ret )
-    { 
-        if(errno == ESRCH)
+        if (-1 == ret)
         {
-            SchedulerSwitchMode(info, REVIVE_MODE); /* revive */
-            return FINISHED;
+            if (ESRCH == errno)
+            {
+                SchedulerSwitchMode(info, REVIVE_MODE);
+                return FINISHED;
+            }
         }
-
-        else
-        {
-            ABORT_IF_BAD(FALSE,"abort executed -> check core file");
-        }
-    }   
+    }    
     return SHOULD_REPEAT;
 }
+
+
 
 static int SendSignal_TSK(wd_internal_info_ty *info)
 {
@@ -326,24 +324,12 @@ static int SendSignal_TSK(wd_internal_info_ty *info)
     return SHOULD_REPEAT;
 }
 
-static int CheckMisses_TSK(wd_internal_info_ty *info)
+static int CheckAndIncCounter_TSK(wd_internal_info_ty *info)
 {
     int current = 0;
+    PRINT_IF_DEBUG("[wd(CheckAndIncCounter_TSK)] value of g_missed =%d ", g_missed);
+    PRINT_IF_DEBUG("[wd(CheckAndIncCounter_TSK)] value of info->partner_pid =%d ", info->partner_pid);
 
-    if (g_missed > (int)info->allowed_misses)
-    {
-        /*TO DO: SEND SIKKILL BEFORE REVIVE*/
-        int ret = kill(info->partner_pid, SIGKILL);
-
-        if (-1 == ret)
-        {
-            if (ESRCH == errno)
-            {
-                SchedulerSwitchMode(info, REVIVE_MODE);
-                return FINISHED;
-            }
-        }
-    }    
     current = __sync_add_and_fetch(&g_missed, 1);
     PRINT_IF_DEBUG("[wd] value of g_missed =%d ", current);
 
