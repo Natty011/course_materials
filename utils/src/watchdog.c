@@ -72,7 +72,7 @@ static int CheckAndIncCounter_TSK(wd_internal_info_ty *info);
 static int CheckDnrFlag_TSK(wd_internal_info_ty *info);
 /*static char **CopyArgvWithPid(char **argv, int argc, pid_t pid);*/
 
-static void FreeInfoResources(wd_internal_info_ty *info);
+/*static void FreeInfoResources(wd_internal_info_ty *info);*/
 
 /* ---------------------- Implementation ---------------------- */
 
@@ -146,7 +146,7 @@ int MakeMeImmortal(size_t allowed_misses, size_t ping_frequency, int argc, char 
 
     info->allowed_misses = allowed_misses;
     info->ping_frequency = ping_frequency;
-    info->partner_pid = getppid(); /* getppid colapse will close the terminal...*/  /*pid_of the client app: wd_test.out*/
+    /*info->partner_pid = getppid();*/ /* getppid colapse will close the terminal...*/  /*pid_of the client app: wd_test.out*/
     
     info->argv = argv_copy;
     info->argc = 5; /* 5 */
