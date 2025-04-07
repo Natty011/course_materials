@@ -98,6 +98,7 @@ static int InitInfo(wd_task_info_ty *info, int argc, char **argv)
     if(argc >= 5)
     {
         info->child_pid = atoi(argv[4]); /*pid_of the client app: wd_test.out*/
+
     }
     info->argv = argv;
     info->argc = argc;
@@ -151,7 +152,7 @@ static int SendSignal_TSK(wd_task_info_ty *info)
     {
         fprintf(stderr, "[wd_app](SendSignal_TSK) no child yet, reviving: %s, line =%d \n", info->argv[3], __LINE__);
         /*info->argv + 3 to info->argv*/
-        execvp(info->argv[3], info->argv );  /*  revive client for first time */
+        execvp(info->argv[3], info->argv + 3);  /*  revive client for first time */
         perror("execvp failed");
         exit(1);
     }
@@ -167,7 +168,7 @@ static int SendSignal_TSK(wd_task_info_ty *info)
             
             /*info->argv + 3 to info->argv*/
 
-            execvp(info->argv[3], info->argv);  /*revive the client app*/
+            execvp(info->argv[3], info->argv +3 );  /*revive the client app*/
             perror("execvp failed");
             exit(1);
         }
