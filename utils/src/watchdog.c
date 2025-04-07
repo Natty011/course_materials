@@ -51,7 +51,7 @@ typedef enum mode
 
 static volatile sig_atomic_t g_should_stop = 0;
 static volatile sig_atomic_t g_missed = 0;
-extern sem_t g_sem = {0};
+sem_t g_sem = {0};
 
 /* ---------------------- Forward Declarations ---------------------- */
 
