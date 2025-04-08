@@ -5,7 +5,18 @@
 * Date : 08 / 04 / 2025
 * Last update: 08 / 04 / 2025
 *****************************************/
+#include <stdio.h>
+#include <sys/mman.h>   /* mmap, munmap */
+#include <sys/stat.h>   /* fstat */
+#include <fcntl.h>      /* open */
 
+#include "utils.h"
+
+enum
+{
+    NUM_LETTERS = 26,
+    WORDS_IN_ONE_DICT = 104334
+}
 /* struct thread_data_t */
     /* start_word_ptr*/
     /* end_word_ptr */
@@ -15,9 +26,10 @@
     /* NUM_LETTERS = 26*/
 
 /* typedef void *(*th_func_ptr)(void* ); */
+
 /*functions defenition*/
-    /* CountNumOfWordsInOnDIct(path) */
-    /* NumOfDictCopies(path, num_word) */
+    /* CountNumOfWordsInDictFile(char *dict_ptr, size_t dict_size) */
+    /* NumOfDictCopies(char *dict_ptr, size_t dict_size, num_word) */
     /* InitThreadMetaData(th_data, num_word, num_thread, start_ptr_dict) */
     /* CountCharInInterval_TH(thread_data_t *th_data[] )*/
 
@@ -33,8 +45,8 @@ int main(int argc, char **argv)
     /* main_hist[NUM_LETTERS] = {0}*/
 
     /* start_ptr_dict = mmap(path) */
-    /* num_word = CountNumOfWordsInOnDIct(path) */
-    /* num_thread = NumOfDictCopies(path, num_word) */
+    /* num_word = CountNumOfWordsInDictFile(char *dict_ptr, size_t dict_size) */
+    /* num_thread = NumOfDictCopies(char *dict_ptr, size_t dict_size, num_word) */
 
 
     /* local_hist[num_thread][NUM_LETTERS]*/
@@ -56,4 +68,10 @@ int main(int argc, char **argv)
         
 
     return 0;
+}
+/* Count the total words in the copy dictinory */
+size_t CountNumOfWordsInDictFile(char *dict_ptr, size_t dict_size)
+{
+
+
 }
