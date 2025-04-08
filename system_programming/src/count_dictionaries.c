@@ -2,8 +2,8 @@
 * Author : Natty
 * Reviewer :
 * File : count_dictionaries.c  
-* Date : 22 / 01 / 2025
-* Last update: 25 / 02 / 2025
+* Date : 08 / 04 / 2025
+* Last update: 08 / 04 / 2025
 *****************************************/
 
 /* struct thread_data_t */
@@ -11,33 +11,49 @@
     /* end_word_ptr */
     /*thread_histogram_ptr*/
 
+/* enum*/
+    /* NUM_LETTERS = 26*/
+
+/* typedef void *(*th_func_ptr)(void* ); */
+/*functions defenition*/
+    /* CountNumOfWordsInOnDIct(path) */
+    /* NumOfDictCopies(path, num_word) */
+    /* InitThreadMetaData(th_data, num_word, num_thread, start_ptr_dict) */
+    /* CountCharInInterval_TH(thread_data_t *th_data[] )*/
+
+
 int main(int argc, char **argv)
 {
 
     /* if argc < 2 */
         /* return */
 
-    /* main_hist[26] = {0} */
+    /* main_hist[NUM_LETTERS] = {0} */
     /* path = argv[1] */
+    /* main_hist[NUM_LETTERS] = {0}*/
+
     /* start_ptr_dict = mmap(path) */
     /* num_word = CountNumOfWordsInOnDIct(path) */
     /* num_thread = NumOfDictCopies(path, num_word) */
 
-    /* local_hist[num_thread][26]*/
+
+    /* local_hist[num_thread][NUM_LETTERS]*/
     /* thread_data_t th_data[num_thread] */
-    /* pthread_t pthread_creat[num_thread] */
+    /* pthread_t arr_thread[num_thread] */
 
-    /* InitThreadMetaData(th_data, num_word, num_thread, start_ptr_dict)*/
-
-
-
-
-
+    /* InitThreadMetaData(th_data, num_word, num_thread, start_ptr_dict) */
 
     
-    
+    /* for i from 0 to num_thread - 1*/
+        /* pthread_t pthread_create(arr_thread[i], (th_func_ptr)CountCharInInterval_TH, th_data[i] )*/
 
-    
+    /* for i from 0 to num_thread - 1*/
+        /* join_thread(arr_thread[i])*/
+
+    /* for i from 0 to num_thread - 1*/
+        /* for J from 0 to NUM_LETTERS*/
+            /*main_hist[j] += local_hist[i][j] */
+        
 
     return 0;
 }
