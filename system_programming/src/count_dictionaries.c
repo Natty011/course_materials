@@ -32,8 +32,8 @@ typedef struct aligned_hist
 
 typedef struct thread_meta_data
 {
-    char *start_word_ptr;
-    char *end_word_ptr;
+    char *start_chunk_ptr;
+    char *end_chunk_ptr;
     size_t *thread_histogram_ptr;
 
 }thread_meta_data_ty;
@@ -43,7 +43,7 @@ typedef void *(*th_func_ptr)(void* );
 static int AllocResources(size_t **main_hist, size_t **local_hists,
             thread_meta_data_ty **th_data, int num_threads);
 
-static int InitThreadMetaData(thread_meta_data_ty *th_data, int num_threads,
+static void InitThreadMetaData(thread_meta_data_ty *th_data, int num_threads,
     char *mmap_dict_ptr, size_t file_size);
 
 
@@ -141,15 +141,16 @@ static int AllocResources(size_t **main_hist, size_t **local_hists,
     return SUCCESS;
 }    
     
-static int InitThreadMetaData(thread_meta_data_ty *th_data, int num_threads,
+static void InitThreadMetaData(thread_meta_data_ty *th_data, int num_threads,
     char *mmap_dict_ptr, size_t file_size)
 {
     size_t chunk_size_block = file_size / num_threads;
     int idx = 0;
 
-
     for(idx = 0; idx < num_threads; ++idx)
     {
+        (th_data + idx)->start_chunk_ptr = mmap_dict_ptr + idx * chunk_size_block;
+        (th_data + idx)->end_chunk_ptr = mmap_dict_ptr + idx * chunk_size_block;
 
     }
 
