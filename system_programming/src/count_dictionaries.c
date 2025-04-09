@@ -18,6 +18,7 @@ enum
 {
     NUM_ASCII_CHARS  = 256,
     CACHE_LINE_SIZE = 64,
+    CACHE_PADDED_HIST_SIZE = NUM_ASCII_CHARS + CACHE_LINE_SIZE,
     NUM_THREADS = 4
                  
 };
@@ -43,8 +44,8 @@ typedef void *(*th_func_ptr)(void* );
 static int AllocResources(size_t **main_hist, size_t **local_hists,
             thread_meta_data_ty **th_data, int num_threads);
 
-static void InitThreadMetaData(thread_meta_data_ty *th_data, int num_threads,
-    char *mmap_dict_ptr, size_t file_size);
+static void InitThreadMetaData(thread_meta_data_ty *th_data, char *mmap_dict_ptr,
+    size_t *local_hists, int num_threads, size_t file_size);
 
 
 /*functions defenition*/
@@ -84,8 +85,8 @@ int main(int argc, char **argv)
                  &threads_data, num_threads);
     RETURN_IF_BAD (FAIL != alloc_ret, FAIL, "AllocResources failed" );
 
-    init_ret = InitThreadMetaData(threads_data, num_threads,
-                mmap_dict_ptr, st_dict.st_size);
+    InitThreadMetaData(threads_data, mmap_dict_ptr, 
+            local_histograms, num_threads, st_dict.st_size);
 
     /* local_hist[num_thread][NUM_LETTERS]*/
     /* thread_data_t th_data[num_thread] */
@@ -141,8 +142,8 @@ static int AllocResources(size_t **main_hist, size_t **local_hists,
     return SUCCESS;
 }    
     
-static void InitThreadMetaData(thread_meta_data_ty *th_data, int num_threads,
-    char *mmap_dict_ptr, size_t file_size)
+static void InitThreadMetaData(thread_meta_data_ty *th_data, char *mmap_dict_ptr,
+             size_t *local_hists, int num_threads, size_t file_size)
 {
     size_t chunk_size_block = file_size / num_threads;
     int idx = 0;
@@ -161,6 +162,9 @@ static void InitThreadMetaData(thread_meta_data_ty *th_data, int num_threads,
             (th_data + idx)->end_chunk_ptr = 
             (th_data + idx)->start_chunk_ptr + chunk_size_block;
         }
+
+        (th_data + idx)->thread_histogram_ptr = 
+            local_hists + idx * CACHE_PADDED_HIST_SIZE;   
         
     }
 
