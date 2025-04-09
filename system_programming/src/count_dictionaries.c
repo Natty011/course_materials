@@ -59,22 +59,22 @@ int main(int argc, char **argv)
 
     struct stat st_dict= {0};
 
-    RETURN_IF_BAD(argc >= 2, FAIL, "argv[1] missing\n")
+    RETURN_IF_BAD(argc >= 2, FAIL, "argv[1] missing")
 
     fd_dict = open(argv[1], O_RDONLY);
-    RETURN_IF_BAD(-1 != fd_dict, FAIL, "open failed\n")
+    RETURN_IF_BAD(-1 != fd_dict, FAIL, "open failed")
 
     ret_fstat = fstat(fd_dict, &st_dict);
-    RETURN_IF_BAD(-1 != ret_fstat, FAIL, "fstat failed\n")
+    RETURN_IF_BAD(-1 != ret_fstat, FAIL, "fstat failed")
 
     mmap_dict_ptr = mmap(NULL, st_dict.st_size, PROT_READ, MAP_PRIVATE, fd_dict, 0);
-    RETURN_IF_BAD(MAP_FAILED != mmap_dict_ptr, FAIL, "mmap failed\n");
+    RETURN_IF_BAD(MAP_FAILED != mmap_dict_ptr, FAIL, "mmap failed");
 
     local_histograms = (size_t*)calloc(num_threads, sizeof(aligned_hist_ty));
-    RETURN_IF_BAD(NULL != local_histograms, FAIL, "calloc failed\n");
+    RETURN_IF_BAD(NULL != local_histograms, FAIL, "calloc failed");
 
     main_histogram = (size_t*)calloc(1, NUM_ASCII_CHARS);
-    RETURN_IF_BAD(NULL != main_histogram, FAIL, "calloc failed\n");
+    RETURN_IF_BAD(NULL != main_histogram, FAIL, "calloc failed");
 
     /* local_hist[num_thread][NUM_LETTERS]*/
     /* thread_data_t th_data[num_thread] */
@@ -93,8 +93,8 @@ int main(int argc, char **argv)
         /* for J from 0 to NUM_LETTERS*/
             /*main_hist[j] += local_hist[i][j] */
         
-    RETURN_IF_BAD(-1 != munmap(mmap_dict_ptr, st_dict.st_size), FAIL, "munmap failed\n")
-    RETURN_IF_BAD(-1 != close(fd_dict), FAIL, "close failed\n")
+    RETURN_IF_BAD(-1 != munmap(mmap_dict_ptr, st_dict.st_size), FAIL, "munmap failed")
+    RETURN_IF_BAD(-1 != close(fd_dict), FAIL, "close failed")
 
     return 0;
 }
