@@ -223,8 +223,17 @@ static void InitThreadMetaData(thread_meta_data_ty *th_data, char *mmap_dict_ptr
 
 void *CountCharInChunckBlock_TH(thread_meta_data_ty *threads_data)
 {
+    size_t *local_hist = threads_data->thread_histogram_ptr;
+    char *start_ptr = threads_data->start_chunk_ptr;
+    char *end_ptr = threads_data->end_chunk_ptr;
+    
+    while(start_ptr < end_ptr)
+    {
+        ++(*(local_hist +  *(unsigned char*)start_ptr) );
+        ++start_ptr;
+    }
 
-
+    return NULL;
 }
 
 static void FreeResources(size_t *main_hist, size_t *local_hists,
