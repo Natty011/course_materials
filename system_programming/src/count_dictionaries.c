@@ -8,7 +8,8 @@
 #include <stdio.h>
 #include <sys/mman.h>   /* mmap, munmap */
 #include <sys/stat.h>   /* fstat */
-#include <fcntl.h>      /* open, close */
+#include <fcntl.h>      /* open */
+#include <unistd.h>     /* close */
 
 #include "utils.h"
 
@@ -47,11 +48,9 @@ typedef void *(*th_func_ptr)(void* );
 
 int main(int argc, char **argv)
 {
-
-    char *dict_ptr = NULL;
-    size_t file_size = 0;
+    char *mmap_dict_ptr = NULL;
     int fd_dict = -1;
-    int file_dict_stat = -1;
+    int ret_fstat = -1;
     int num_threads = NUM_THREADS;
     thread_meta_data_ty **threads_data = NULL;
     size_t *local_histogram = NULL;
@@ -62,15 +61,15 @@ int main(int argc, char **argv)
     fd_dict = open(argv[1], O_RDONLY);
     RETURN_IF_BAD(-1 != fd_dict, FAIL, "open failed\n")
 
-    file_dict_stat = fstat(file_dict_stat, &st_dict);
-    RETURN_IF_BAD(-1 != file_dict_stat, FAIL, "fstat failed\n")
+    ret_fstat = fstat(fd_dict, &st_dict);
+    RETURN_IF_BAD(-1 != ret_fstat, FAIL, "fstat failed\n")
 
     local_histogram = (size_t*)calloc(num_threads, sizeof(aligned_hist_ty));
 
     RETURN_IF_BAD(NULL != local_histogram, FAIL, "calloc failed\n");
 
-    dict_ptr = mmap(NULL, st_dict.st_size, PROT_READ, MAP_PRIVATE, fd_dict, 0);
-    RETURN_IF_BAD(MAP_FAILED != dict_ptr, FAIL, "mmap failed\n");
+    mmap_dict_ptr = mmap(NULL, st_dict.st_size, PROT_READ, MAP_PRIVATE, fd_dict, 0);
+    RETURN_IF_BAD(MAP_FAILED != mmap_dict_ptr, FAIL, "mmap failed\n");
 
     
     
@@ -95,7 +94,10 @@ int main(int argc, char **argv)
         /* for J from 0 to NUM_LETTERS*/
             /*main_hist[j] += local_hist[i][j] */
         
+    RETURN_IF_BAD(-1 != munmap(mmap_dict_ptr, st_dict.st_size), FAIL, "munmap failed\n")
+    RETURN_IF_BAD(-1 != close(fd_dict), FAIL, "close failed\n")
 
+        
     return 0;
 }
 /* Count the total words in the copy dictinory */
