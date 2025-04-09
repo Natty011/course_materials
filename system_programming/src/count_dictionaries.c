@@ -127,14 +127,14 @@ int main(int argc, char **argv)
             FreeResources(main_histogram, local_histograms, threads_data);
             EXIT_IF_BAD( FALSE, "pthread_create failed" );	
         }   
-        
 	}
 
     for( idx = 0; idx < num_threads ; ++idx )
     {
         for(ascii_char = 0; ascii_char < NUM_ASCII_CHARS; ++ascii_char)
         {
-            *(main_histogram + idx + ascii_char) = *(local_histograms + ascii_char);
+            *(main_histogram + idx + ascii_char) = 
+            *(local_histograms + (idx * CACHE_PADDED_HIST_SIZE) + ascii_char);
         }
     }
 
