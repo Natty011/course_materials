@@ -11,12 +11,27 @@
 #include <fcntl.h>      /* open */
 
 #include "utils.h"
+#include <cstdint>  /* uint8_8*/
 
 enum
 {
-    NUM_LETTERS = 26,
-    WORDS_IN_ONE_DICT = 104334
-}
+    NUM_ASCII_CHARS  = 256,
+    NUM_THREADS = 4,
+    CACHE_LINE_SIZE = 64,
+    APOSTROPHE = '\'',
+    CACHE_PADDED_HIST_SIZE = ((NUM_ASCII_CHARS + CACHE_LINE_SIZE - 1)
+                                     / CACHE_LINE_SIZE) * CACHE_LINE_SIZE
+
+};
+
+typedef struct thread_meta_data
+{
+    uint8_t *start_word_ptr;
+    uint8_t *end_word_ptr;
+    uint8_t *thread_histogram_ptr;
+
+}thread_meta_data_ty;
+
 /* struct thread_data_t */
     /* start_word_ptr*/
     /* end_word_ptr */
@@ -25,7 +40,7 @@ enum
 /* enum*/
     /* NUM_LETTERS = 26*/
 
-/* typedef void *(*th_func_ptr)(void* ); */
+typedef void *(*th_func_ptr)(void* ); 
 
 /*functions defenition*/
     /* CountNumOfWordsInDictFile(char *dict_ptr, size_t dict_size) */
@@ -36,6 +51,11 @@ enum
 
 int main(int argc, char **argv)
 {
+
+    char *dict_ptr = NULL;
+    size_t file_size = 0;
+    size_t num_threads = 0;
+    thread_meta_data_ty **threads_data = NULL;
 
     /* if argc < 2 */
         /* return */
@@ -75,3 +95,15 @@ size_t CountNumOfWordsInDictFile(char *dict_ptr, size_t dict_size)
 
 
 }
+
+void InitThreadMetaData(thread_meta_data_ty *th_data, size_t num_threads,
+    char *dict_ptr, size_t file_size)
+{
+
+
+}
+
+void *CountCharInInterval_TH(thread_meta_data_ty *data)
+{
+
+}    
