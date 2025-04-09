@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include <sys/mman.h>   /* mmap, munmap */
 #include <sys/stat.h>   /* fstat */
-#include <fcntl.h>      /* open */
+#include <fcntl.h>      /* open, close */
 
 #include "utils.h"
 
@@ -16,7 +16,6 @@ enum
 {
     NUM_ASCII_CHARS  = 256,
     CACHE_LINE_SIZE = 64,
-    CACHE_PADDED_HIST_SIZE = NUM_ASCII_CHARS + CACHE_LINE_SIZE,
     NUM_THREADS = 4
                  
 };
@@ -70,12 +69,11 @@ int main(int argc, char **argv)
 
     RETURN_IF_BAD(NULL != local_histogram, FAIL, "calloc failed\n");
 
+    dict_ptr = mmap(NULL, st_dict.st_size, PROT_READ, MAP_PRIVATE, fd_dict, 0);
+    RETURN_IF_BAD(MAP_FAILED != dict_ptr, FAIL, "mmap failed\n");
 
-    /* main_hist[NUM_LETTERS] = {0} */
-    /* path = argv[1] */
-    /* main_hist[NUM_LETTERS] = {0}*/
-
-    /* start_ptr_dict = mmap(path) */
+    
+    
     /* num_word = CountNumOfWordsInDictFile(char *dict_ptr, size_t dict_size) */
     /* num_thread = NumOfDictCopies(char *dict_ptr, size_t dict_size, num_word) */
 
