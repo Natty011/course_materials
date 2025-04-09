@@ -1,9 +1,10 @@
 /***************************************
 * Author : Natty
 * Reviewer :
-* File : count_dictionaries.c  
+* File : count_dictionaries.c
+* Version : 0.7  
 * Date : 08 / 04 / 2025
-* Last update: 08 / 04 / 2025
+* Last update: 09 / 04 / 2025
 *****************************************/
 #include <stdio.h>
 #include <sys/mman.h>   /* mmap, munmap */
@@ -53,7 +54,9 @@ int main(int argc, char **argv)
     int ret_fstat = -1;
     int num_threads = NUM_THREADS;
     thread_meta_data_ty **threads_data = NULL;
-    size_t *local_histogram = NULL;
+    size_t *main_histogram = NULL;
+    size_t *local_histograms = NULL;
+
     struct stat st_dict= {0};
 
     RETURN_IF_BAD(argc >= 2, FAIL, "argv[1] missing\n")
@@ -64,18 +67,14 @@ int main(int argc, char **argv)
     ret_fstat = fstat(fd_dict, &st_dict);
     RETURN_IF_BAD(-1 != ret_fstat, FAIL, "fstat failed\n")
 
-    local_histogram = (size_t*)calloc(num_threads, sizeof(aligned_hist_ty));
-
-    RETURN_IF_BAD(NULL != local_histogram, FAIL, "calloc failed\n");
-
     mmap_dict_ptr = mmap(NULL, st_dict.st_size, PROT_READ, MAP_PRIVATE, fd_dict, 0);
     RETURN_IF_BAD(MAP_FAILED != mmap_dict_ptr, FAIL, "mmap failed\n");
 
-    
-    
-    /* num_word = CountNumOfWordsInDictFile(char *dict_ptr, size_t dict_size) */
-    /* num_thread = NumOfDictCopies(char *dict_ptr, size_t dict_size, num_word) */
+    local_histograms = (size_t*)calloc(num_threads, sizeof(aligned_hist_ty));
+    RETURN_IF_BAD(NULL != local_histograms, FAIL, "calloc failed\n");
 
+    main_histogram = (size_t*)calloc(1, NUM_ASCII_CHARS);
+    RETURN_IF_BAD(NULL != main_histogram, FAIL, "calloc failed\n");
 
     /* local_hist[num_thread][NUM_LETTERS]*/
     /* thread_data_t th_data[num_thread] */
@@ -97,14 +96,7 @@ int main(int argc, char **argv)
     RETURN_IF_BAD(-1 != munmap(mmap_dict_ptr, st_dict.st_size), FAIL, "munmap failed\n")
     RETURN_IF_BAD(-1 != close(fd_dict), FAIL, "close failed\n")
 
-        
     return 0;
-}
-/* Count the total words in the copy dictinory */
-size_t CountNumOfWordsInDictFile(char *dict_ptr, size_t dict_size)
-{
-
-
 }
 
 void InitThreadMetaData(thread_meta_data_ty *th_data, size_t num_threads,
