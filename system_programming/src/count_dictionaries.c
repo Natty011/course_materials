@@ -40,8 +40,13 @@ typedef struct thread_meta_data
 
 typedef void *(*th_func_ptr)(void* ); 
 
-static int InitThreadMetaData(thread_meta_data_ty **th_data, int num_threads,
+static int AllocResources(size_t **main_hist, size_t **local_hists,
+            thread_meta_data_ty **th_data, int num_threads);
+
+static int InitThreadMetaData(thread_meta_data_ty *th_data, int num_threads,
     char *mmap_dict_ptr, size_t file_size);
+
+
 /*functions defenition*/
     /* CountNumOfWordsInDictFile(char *dict_ptr, size_t dict_size) */
     /* NumOfDictCopies(char *dict_ptr, size_t dict_size, num_word) */
@@ -55,30 +60,29 @@ int main(int argc, char **argv)
     int fd_dict = -1;
     int ret_fstat = -1;
     int init_ret = FAIL;
+    int alloc_ret = FAIL;
     int num_threads = NUM_THREADS;
 
-    thread_meta_data_ty **threads_data = NULL;
+    thread_meta_data_ty *threads_data = NULL;
     size_t *main_histogram = NULL;
     size_t *local_histograms = NULL;
 
     struct stat st_dict= {0};
 
-    RETURN_IF_BAD(argc >= 2, FAIL, "argv[1] missing")
+    RETURN_IF_BAD(argc >= 2, FAIL, "argv[1] missing");
 
     fd_dict = open(argv[1], O_RDONLY);
-    RETURN_IF_BAD(-1 != fd_dict, FAIL, "open failed")
+    RETURN_IF_BAD(-1 != fd_dict, FAIL, "open failed");
 
     ret_fstat = fstat(fd_dict, &st_dict);
-    RETURN_IF_BAD(-1 != ret_fstat, FAIL, "fstat failed")
+    RETURN_IF_BAD(-1 != ret_fstat, FAIL, "fstat failed");
 
     mmap_dict_ptr = mmap(NULL, st_dict.st_size, PROT_READ, MAP_PRIVATE, fd_dict, 0);
     RETURN_IF_BAD(MAP_FAILED != mmap_dict_ptr, FAIL, "mmap failed");
 
-    local_histograms = (size_t*)calloc(num_threads, sizeof(aligned_hist_ty));
-    RETURN_IF_BAD(NULL != local_histograms, FAIL, "calloc failed");
-
-    main_histogram = (size_t*)calloc(1, NUM_ASCII_CHARS);
-    RETURN_IF_BAD(NULL != main_histogram, FAIL, "calloc failed");
+    alloc_ret = AllocResources(&main_histogram, &local_histograms,
+                 &threads_data, num_threads);
+    RETURN_IF_BAD (FAIL != alloc_ret, FAIL, "AllocResources failed" );
 
     init_ret = InitThreadMetaData(threads_data, num_threads,
                 mmap_dict_ptr, st_dict.st_size);
@@ -106,11 +110,48 @@ int main(int argc, char **argv)
     return 0;
 }
 
-static int InitThreadMetaData(thread_meta_data_ty **th_data, int num_threads,
+static int AllocResources(size_t **main_hist, size_t **local_hists,
+    thread_meta_data_ty **th_data, int num_threads)
+{
+    *local_hists = (size_t*)calloc(num_threads, sizeof(aligned_hist_ty));
+
+    if(!(*local_hists))
+    {
+        RETURN_IF_BAD(FALSE, FAIL, "calloc local_hists failed");
+    }
+
+    *main_hist = (size_t*)calloc(1, NUM_ASCII_CHARS);
+
+    if(!(*main_hist))
+    {
+        free(*local_hists);
+        RETURN_IF_BAD(NULL != main_hist,FAIL , "calloc main_hist failed");
+    }
+
+    *th_data = (thread_meta_data_ty*)calloc(num_threads, sizeof(thread_meta_data_ty));
+
+    if(!(*th_data))
+    {
+        free(*local_hists);
+        free(*main_hist);
+
+        RETURN_IF_BAD(FALSE, FAIL, "calloc th_data failed");
+    }
+
+    return SUCCESS;
+}    
+    
+static int InitThreadMetaData(thread_meta_data_ty *th_data, int num_threads,
     char *mmap_dict_ptr, size_t file_size)
 {
-    th_data = (thread_meta_data_ty**)calloc(num_threads, sizeof(thread_meta_data_ty));
-    RETURN_IF_BAD(NULL != th_data, FAIL, "calloc failed");
+    size_t chunk_size_block = file_size / num_threads;
+    int idx = 0;
+
+
+    for(idx = 0; idx < num_threads; ++idx)
+    {
+
+    }
 
 }
 
