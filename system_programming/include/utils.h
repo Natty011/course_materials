@@ -1,6 +1,8 @@
 /***************************************
  * Author : Natty
  * Reviewer : 
+ * File : count_dictionaries.c  
+ * version : 0.8
  * Date : 26 / 03 / 2025
  * Last update: 09 / 04 / 2025
  *****************************************/
