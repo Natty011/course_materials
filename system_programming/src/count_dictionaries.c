@@ -11,34 +11,31 @@
 #include <fcntl.h>      /* open */
 
 #include "utils.h"
-#include <cstdint>  /* uint8_8*/
 
 enum
 {
     NUM_ASCII_CHARS  = 256,
-    NUM_THREADS = 4,
     CACHE_LINE_SIZE = 64,
-    APOSTROPHE = '\'',
-    CACHE_PADDED_HIST_SIZE = ((NUM_ASCII_CHARS + CACHE_LINE_SIZE - 1)
-                                     / CACHE_LINE_SIZE) * CACHE_LINE_SIZE
-
+    CACHE_PADDED_HIST_SIZE = NUM_ASCII_CHARS + CACHE_LINE_SIZE,
+    NUM_THREADS = 4
+                 
 };
+
+typedef struct aligned_hist
+{
+    size_t hist[NUM_ASCII_CHARS];
+    char padding[CACHE_LINE_SIZE];
+
+}aligned_hist_ty;
+
 
 typedef struct thread_meta_data
 {
-    uint8_t *start_word_ptr;
-    uint8_t *end_word_ptr;
-    uint8_t *thread_histogram_ptr;
+    char *start_word_ptr;
+    char *end_word_ptr;
+    size_t *thread_histogram_ptr;
 
 }thread_meta_data_ty;
-
-/* struct thread_data_t */
-    /* start_word_ptr*/
-    /* end_word_ptr */
-    /*thread_histogram_ptr*/
-
-/* enum*/
-    /* NUM_LETTERS = 26*/
 
 typedef void *(*th_func_ptr)(void* ); 
 
@@ -54,11 +51,25 @@ int main(int argc, char **argv)
 
     char *dict_ptr = NULL;
     size_t file_size = 0;
-    size_t num_threads = 0;
+    int fd_dict = -1;
+    int file_dict_stat = -1;
+    int num_threads = NUM_THREADS;
     thread_meta_data_ty **threads_data = NULL;
+    size_t *local_histogram = NULL;
+    struct stat st_dict= {0};
 
-    /* if argc < 2 */
-        /* return */
+    RETURN_IF_BAD(argc >= 2, FAIL, "argv[1] missing\n")
+
+    fd_dict = open(argv[1], O_RDONLY);
+    RETURN_IF_BAD(-1 != fd_dict, FAIL, "open failed\n")
+
+    file_dict_stat = fstat(file_dict_stat, &st_dict);
+    RETURN_IF_BAD(-1 != file_dict_stat, FAIL, "fstat failed\n")
+
+    local_histogram = (size_t*)calloc(num_threads, sizeof(aligned_hist_ty));
+
+    RETURN_IF_BAD(NULL != local_histogram, FAIL, "calloc failed\n");
+
 
     /* main_hist[NUM_LETTERS] = {0} */
     /* path = argv[1] */
