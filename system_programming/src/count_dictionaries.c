@@ -133,28 +133,16 @@ int main(int argc, char **argv)
     {
         for(ascii_char = 0; ascii_char < NUM_ASCII_CHARS; ++ascii_char)
         {
-            *(main_histogram + idx + ascii_char) = 
+            *(main_histogram + ascii_char) = 
             *(local_histograms + (idx * CACHE_PADDED_HIST_SIZE) + ascii_char);
         }
     }
 
-    
-    /* thread_data_t th_data[num_thread] */
-    /* pthread_t arr_thread[num_thread] */
+    for(ascii_char = 0; ascii_char < NUM_ASCII_CHARS; ++ascii_char)
+    {
+        printf("char: %c, ferquency: %lu\n", ascii_char, *(main_histogram + ascii_char));
+    }
 
-    /* InitThreadMetaData(th_data, num_word, num_thread, start_ptr_dict) */
-
-    
-    /* for i from 0 to num_thread - 1*/
-        /* pthread_t pthread_create(arr_thread[i], (th_func_ptr)CountCharInInterval_TH, th_data[i] )*/
-
-    /* for i from 0 to num_thread - 1*/
-        /* join_thread(arr_thread[i])*/
-
-    /* for i from 0 to num_thread - 1*/
-        /* for J from 0 to NUM_LETTERS*/
-            /*main_hist[j] += local_hist[i][j] */
-    
     FreeResources(main_histogram, local_histograms, threads_data);
             
     RETURN_IF_BAD(-1 != munmap(mmap_dict_ptr, st_dict.st_size), FAIL, "munmap failed")
