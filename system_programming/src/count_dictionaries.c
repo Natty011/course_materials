@@ -150,8 +150,18 @@ static void InitThreadMetaData(thread_meta_data_ty *th_data, int num_threads,
     for(idx = 0; idx < num_threads; ++idx)
     {
         (th_data + idx)->start_chunk_ptr = mmap_dict_ptr + idx * chunk_size_block;
-        (th_data + idx)->end_chunk_ptr = mmap_dict_ptr + idx * chunk_size_block;
 
+        if(idx == num_threads-1)
+        {
+            (th_data + idx)->end_chunk_ptr = mmap_dict_ptr + file_size;
+        }
+        
+        else
+        {
+            (th_data + idx)->end_chunk_ptr = 
+            (th_data + idx)->start_chunk_ptr + chunk_size_block;
+        }
+        
     }
 
 }
