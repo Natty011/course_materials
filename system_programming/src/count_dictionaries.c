@@ -11,6 +11,7 @@
 #include <sys/stat.h>   /* fstat */
 #include <fcntl.h>      /* open */
 #include <unistd.h>     /* close */
+#include <pthread.h>    /* pthread_create, join */
 
 #include "utils.h"
 
@@ -47,6 +48,10 @@ static int AllocResources(size_t **main_hist, size_t **local_hists,
 static void InitThreadMetaData(thread_meta_data_ty *th_data, char *mmap_dict_ptr,
     size_t *local_hists, int num_threads, size_t file_size);
 
+void *CountCharInChunckBlock_TH(thread_meta_data_ty *threads_data);
+
+static void FreeResources(size_t *main_hist, size_t *local_hists,
+                thread_meta_data_ty *th_data);
 
 /*functions defenition*/
     /* CountNumOfWordsInDictFile(char *dict_ptr, size_t dict_size) */
@@ -62,11 +67,18 @@ int main(int argc, char **argv)
     int ret_fstat = -1;
     int init_ret = FAIL;
     int alloc_ret = FAIL;
-    int num_threads = NUM_THREADS;
+
+    int idx = 0;
+    int ascii_char = 0;
+
+	unsigned int arg = 0, result = 0;
 
     thread_meta_data_ty *threads_data = NULL;
     size_t *main_histogram = NULL;
     size_t *local_histograms = NULL;
+    int num_threads = NUM_THREADS;
+
+    pthread_t arr_thread[NUM_THREADS] = {PTHREAD_COND_INITIALIZER}; 
 
     struct stat st_dict= {0};
 
@@ -88,7 +100,45 @@ int main(int argc, char **argv)
     InitThreadMetaData(threads_data, mmap_dict_ptr, 
             local_histograms, num_threads, st_dict.st_size);
 
-    /* local_hist[num_thread][NUM_LETTERS]*/
+    for( idx = 0; idx < num_threads ; ++idx )  
+    {
+        do
+        {
+            result = pthread_create(&arr_thread[idx], NULL,
+                 (th_func_ptr)CountCharInChunckBlock_TH,threads_data + idx);
+
+            if(SUCCESS != result)
+            {
+                FreeResources(main_histogram, local_histograms, threads_data);
+                EXIT_IF_BAD( FALSE, "pthread_create failed" );	
+
+            }     
+            
+        }while (result);
+    }
+    
+    for( idx = 0; idx < num_threads ; ++idx )
+	{
+
+		result = pthread_join(arr_thread[idx], NULL);
+
+        if(SUCCESS != result)
+        {
+            FreeResources(main_histogram, local_histograms, threads_data);
+            EXIT_IF_BAD( FALSE, "pthread_create failed" );	
+        }   
+        
+	}
+
+    for( idx = 0; idx < num_threads ; ++idx )
+    {
+        for(ascii_char = 0; ascii_char < NUM_ASCII_CHARS; ++ascii_char)
+        {
+            *(main_histogram + idx + ascii_char) = *(local_histograms + ascii_char);
+        }
+    }
+
+    
     /* thread_data_t th_data[num_thread] */
     /* pthread_t arr_thread[num_thread] */
 
@@ -104,7 +154,9 @@ int main(int argc, char **argv)
     /* for i from 0 to num_thread - 1*/
         /* for J from 0 to NUM_LETTERS*/
             /*main_hist[j] += local_hist[i][j] */
-        
+    
+    FreeResources(main_histogram, local_histograms, threads_data);
+            
     RETURN_IF_BAD(-1 != munmap(mmap_dict_ptr, st_dict.st_size), FAIL, "munmap failed")
     RETURN_IF_BAD(-1 != close(fd_dict), FAIL, "close failed")
 
@@ -165,12 +217,20 @@ static void InitThreadMetaData(thread_meta_data_ty *th_data, char *mmap_dict_ptr
 
         (th_data + idx)->thread_histogram_ptr = 
             local_hists + idx * CACHE_PADDED_HIST_SIZE;   
-        
     }
 
 }
 
-void *CountCharInInterval_TH(thread_meta_data_ty *data)
+void *CountCharInChunckBlock_TH(thread_meta_data_ty *threads_data)
 {
 
-}    
+
+}
+
+static void FreeResources(size_t *main_hist, size_t *local_hists,
+                    thread_meta_data_ty *th_data)
+{
+    free(local_hists);
+    free(main_hist); 
+    free(th_data);
+}
