@@ -40,6 +40,8 @@ typedef struct thread_meta_data
 
 typedef void *(*th_func_ptr)(void* ); 
 
+static int InitThreadMetaData(thread_meta_data_ty **th_data, int num_threads,
+    char *mmap_dict_ptr, size_t file_size);
 /*functions defenition*/
     /* CountNumOfWordsInDictFile(char *dict_ptr, size_t dict_size) */
     /* NumOfDictCopies(char *dict_ptr, size_t dict_size, num_word) */
@@ -49,10 +51,12 @@ typedef void *(*th_func_ptr)(void* );
 
 int main(int argc, char **argv)
 {
-    char *mmap_dict_ptr = NULL;
+    char *mmap_dict_ptr = MAP_FAILED;
     int fd_dict = -1;
     int ret_fstat = -1;
+    int init_ret = FAIL;
     int num_threads = NUM_THREADS;
+
     thread_meta_data_ty **threads_data = NULL;
     size_t *main_histogram = NULL;
     size_t *local_histograms = NULL;
@@ -75,6 +79,9 @@ int main(int argc, char **argv)
 
     main_histogram = (size_t*)calloc(1, NUM_ASCII_CHARS);
     RETURN_IF_BAD(NULL != main_histogram, FAIL, "calloc failed");
+
+    init_ret = InitThreadMetaData(threads_data, num_threads,
+                mmap_dict_ptr, st_dict.st_size);
 
     /* local_hist[num_thread][NUM_LETTERS]*/
     /* thread_data_t th_data[num_thread] */
@@ -99,10 +106,11 @@ int main(int argc, char **argv)
     return 0;
 }
 
-void InitThreadMetaData(thread_meta_data_ty *th_data, size_t num_threads,
-    char *dict_ptr, size_t file_size)
+static int InitThreadMetaData(thread_meta_data_ty **th_data, int num_threads,
+    char *mmap_dict_ptr, size_t file_size)
 {
-
+    th_data = (thread_meta_data_ty**)calloc(num_threads, sizeof(thread_meta_data_ty));
+    RETURN_IF_BAD(NULL != th_data, FAIL, "calloc failed");
 
 }
 
