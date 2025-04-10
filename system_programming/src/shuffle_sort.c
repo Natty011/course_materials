@@ -44,6 +44,12 @@ typedef void *(*th_func_ptr)(void* );
 
 int main(int argc, char **argv)
 {
+    /* phase start- define variables */
+
+    /* phase 0- Allocate Resources */
+    /* AllocResources(...)*/
+    
+
     /* phase 1 - read dict into file(copy) using mmap */
     /* mmap_dict_ptr = MmapDictFile(argv[1], &file_size)
         /* fd_dict = open(argv[1], O_RDONLY); */
@@ -78,9 +84,16 @@ int main(int argc, char **argv)
 
     /* phase 7 -  Sorting the full array by using threads */
     /* LaunchSortingThreads(arrs_10_of_ptrs, mmap_dict_ptr,
-       num_words*10,  num_threads, quicksort) */
+       num_words*10,  num_threads, threads_data , quicksort) */
 
     /* phase 8 - Merging the sorting results */
-    /* */
+    /* MergeSortedSections(arrs_10_of_ptrs, num_words * 10,
+     threads_data, num_thread ) */
+
+    /* phase 9 - Print and Measure result of time complexity */
+    /* PrintAndMeasuresResults(...) */
+
+        /* phase 10 - Free and clean all resources */
+        /* FreeResources(...) */
     return 0;
 }
