@@ -24,7 +24,9 @@ enum
 {
     WORDS_LINE_SIZE = 104334,
     NUM_THREADS = 4,
-    COPIES = 10
+    COPIES = 10,
+    NULL_TERM_CH = '\0',
+    NEW_LINE_CH = '\n'
                  
 };
 
