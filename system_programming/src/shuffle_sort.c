@@ -14,3 +14,43 @@
 #include <pthread.h>    /* pthread_create, join */
 
 #include "utils.h"
+
+enum
+{
+    NUM_ASCII_CHARS  = 256,
+    CACHE_LINE_SIZE = 64,
+    CACHE_PADDED_HIST_SIZE = NUM_ASCII_CHARS + CACHE_LINE_SIZE,
+    NUM_THREADS = 4
+                 
+};
+
+typedef struct aligned_hist
+{
+    size_t hist[NUM_ASCII_CHARS];
+    char padding[CACHE_LINE_SIZE];
+
+}aligned_hist_ty;
+
+
+typedef struct thread_meta_data
+{
+    char *start_chunk_ptr;
+    char *end_chunk_ptr;
+    size_t *thread_histogram_ptr;
+
+}thread_meta_data_ty;
+
+typedef void *(*th_func_ptr)(void* ); 
+
+int main(int argc, char **argv)
+{
+    /* read dict into file(copy) using mmap */
+    /* mmap_ptr = MmapDictFile(argv[1], &file_size)
+        /* fd_dict = open(argv[1], O_RDONLY); */
+        /* ret_fstat = fstat(fd_dict, &st_dict); */
+        /* mmap_dict_ptr = mmap(NULL, st_dict.st_size,
+                     PROT_READ, MAP_PRIVATE, fd_dict, 0);*/
+
+
+    return 0;
+}
