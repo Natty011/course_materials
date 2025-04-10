@@ -52,5 +52,10 @@ int main(int argc, char **argv)
                      PROT_READ, MAP_PRIVATE, fd_dict, 0);*/
 
 
+    /* counting the num_words and swappign '\n' to '\0' */
+    /* num_words = CountWordsAndReplaceNewLine(mmap_ptr, file_size) */
+    
+
+
     return 0;
 }
