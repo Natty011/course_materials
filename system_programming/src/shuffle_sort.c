@@ -9,14 +9,13 @@
 
 #define _POSIX_C_SOURCE 200809L /* popen */
 
-#include <stdio.h>      /* popen, pclose, FILE */
-#include <stdlib.h>     /* fscanf */
+#include <stdio.h>      /* popen, pclose, FILE, sprintf, fscanf */
 #include <sys/mman.h>   /* mmap, munmap */
 #include <sys/stat.h>   /* fstat */
 #include <fcntl.h>      /* open */
 #include <unistd.h>     /* close */
 #include <pthread.h>    /* pthread_create, join */
-#include <string.h>     /* snprintf */
+#include <string.h>     /* strcmp */
 #include <sys/wait.h>   /* WIFEXITED, WEXITSTATUS */
 
 #include "utils.h"
@@ -24,7 +23,8 @@
 enum
 {
     WORDS_LINE_SIZE = 104334,
-    NUM_THREADS = 4
+    NUM_THREADS = 4,
+    COPIES = 10
                  
 };
 
@@ -48,8 +48,10 @@ int CmpStrings(const void *p1, const void *p2)
 
 static size_t CountLinesWithWC(const char *filename);
 
-static int AllocResources(size_t **main_hist, size_t **local_hists,
-    thread_meta_data_ty **th_data, int num_threads);
+static int AllocResources(unsigned char ***arr_shuffled_word_ptrs,
+    unsigned char ***arr_dest_sorted_ptrs, thread_meta_data_ty **th_data,
+    pthread_t **arr_thread, int num_threads, size_t num_words);
+
 int main(int argc, char **argv)
 {
     /* phase start- define variables */
@@ -57,7 +59,7 @@ int main(int argc, char **argv)
     int ret_fstat = -1;
     int init_ret = FAIL;
     int alloc_ret = FAIL;
-    int num_threads = 0;
+    int num_threads = NUM_THREADS;
     int idx = 0;
     int cnt_merged_occure = 0;
     unsigned int result = 0;
@@ -79,7 +81,7 @@ int main(int argc, char **argv)
 
     /* phase 0 - read dict into file(copy) using mmap */
     num_words = CountLinesWithWC(argv[1]);
-    
+
     RETURN_IF_BAD(FAIL != num_words, FAIL, "CountLinesWithWC failed");
 
     fd_dict = open(argv[1], O_RDONLY);
@@ -88,14 +90,99 @@ int main(int argc, char **argv)
     ret_fstat = fstat(fd_dict, &st_dict);
     RETURN_IF_BAD(-1 != ret_fstat, FAIL, "fstat failed");
 
-    mmap_dict_ptr = mmap(NULL, st_dict.st_size, 
+    mmap_dict_ptr = (unsigned char*)mmap(NULL, st_dict.st_size, 
         PROT_READ | PROT_WRITE, MAP_PRIVATE, fd_dict, 0);
     RETURN_IF_BAD(MAP_FAILED != mmap_dict_ptr, FAIL, "mmap failed");
 
-       
+    alloc_ret = AllocResources(&shuffled_word_ptrs, &dest_sorted_ptrs,
+                 &threads_data, &arr_thread,  num_threads, num_words);
+                 
+    RETURN_IF_BAD (FAIL != alloc_ret, FAIL, "AllocResources failed" );   
     
+  
     
-    /* phase 1- Allocate Resources */
+
+    return 0;
+}
+
+static size_t CountLinesWithWC(const char *filename)
+{
+    char cmd[50] = {0}; /* /usr/share/dict/words */
+    FILE *fp = NULL;
+    int status = 0;
+    size_t num_lines = 0;
+
+    sprintf(cmd, "wc -l %s", filename);
+    fp = popen(cmd , "r");
+    RETURN_IF_BAD(NULL != fp, FAIL, "popen failed");
+
+    RETURN_IF_BAD(1 == fscanf(fp, "%lu", &num_lines), FAIL, "fscanf failed");
+
+    status = pclose(fp);
+    RETURN_IF_BAD(-1 != status, FAIL, "pclose failed");
+
+    if (WIFEXITED(status))
+    {
+        int exit_code = WEXITSTATUS(status);
+        RETURN_IF_BAD(0 == exit_code, FAIL, "wc command exited with failure");
+    }
+
+    else
+    {
+        RETURN_IF_BAD(0, FAIL, "wc command did not exit normally");
+    }
+
+    return num_lines;
+
+}
+
+static int AllocResources(unsigned char ***arr_shuffled_word_ptrs, unsigned char ***arr_dest_sorted_ptrs,
+    thread_meta_data_ty **th_data, pthread_t **arr_thread, int num_threads, size_t num_words)
+ 
+{
+    *arr_shuffled_word_ptrs = (unsigned char **)calloc(1, num_words * COPIES );
+
+    if(!(*arr_shuffled_word_ptrs))
+    {
+        RETURN_IF_BAD(FALSE, FAIL, "calloc word_ptrs failed");
+    }
+
+    *arr_dest_sorted_ptrs = (unsigned char **)calloc(1, num_words * COPIES);
+
+    if(!(*arr_dest_sorted_ptrs))
+    {
+        free(*arr_shuffled_word_ptrs);
+        RETURN_IF_BAD(FALSE, FAIL , "calloc arr_dest failed");
+    }
+
+
+    
+    *th_data = (thread_meta_data_ty*)calloc(num_threads, sizeof(thread_meta_data_ty));
+
+    if(!(*th_data))
+    {
+        free(*arr_shuffled_word_ptrs);
+        free(*arr_dest_sorted_ptrs);
+
+        RETURN_IF_BAD(FALSE, FAIL, "calloc th_data failed");
+    }
+
+    *arr_thread = (pthread_t*)calloc(num_threads, sizeof(pthread_t));
+
+    if(!(*arr_thread))
+    {
+        free(*arr_shuffled_word_ptrs);
+        free(*arr_dest_sorted_ptrs);
+        free(*th_data);
+
+        RETURN_IF_BAD(FALSE, FAIL, "calloc arr_thread failed");
+    }
+
+    return SUCCESS;
+}
+
+
+/* phase 1- Allocate Resources */
     /* AllocResources(...)*/
     
     /* phase 2 - counting the num_words and swappign '\n' to '\0' */
@@ -136,67 +223,3 @@ int main(int argc, char **argv)
 
         /* phase 10 - Free and clean all resources */
         /* FreeResources(...) */
-    return 0;
-}
-
-static size_t CountLinesWithWC(const char *filename)
-{
-    char cmd[50] = {0}; /* /usr/share/dict/words */
-    FILE *fp = NULL;
-    int status = 0;
-    size_t num_lines = 0;
-
-    sprintf(cmd, "wc -l %s", filename);
-    fp = popen(cmd , "r");
-    RETURN_IF_BAD(NULL != fp, FAIL, "popen failed");
-
-    RETURN_IF_BAD(1 == fscanf(fp, "%lu", &num_lines), FAIL, "fscanf failed");
-
-    status = pclose(fp);
-    RETURN_IF_BAD(-1 != status, FAIL, "pclose failed");
-
-    if (WIFEXITED(status))
-    {
-        int exit_code = WEXITSTATUS(status);
-        RETURN_IF_BAD(0 == exit_code, FAIL, "wc command exited with failure");
-    }
-
-    else
-    {
-        RETURN_IF_BAD(0, FAIL, "wc command did not exit normally");
-    }
-
-    return num_lines;
-
-}
-
-static int AllocResources(size_t **main_hist, size_t **local_hists,
-    thread_meta_data_ty **th_data, int num_threads)
-{
-    *local_hists = (size_t*)calloc(num_threads, sizeof(aligned_hist_ty));
-
-    if(!(*local_hists))
-    {
-        RETURN_IF_BAD(FALSE, FAIL, "calloc local_hists failed");
-    }
-
-    *main_hist = (size_t*)calloc(1, NUM_ASCII_CHARS);
-
-    if(!(*main_hist))
-    {
-        free(*local_hists);
-        RETURN_IF_BAD(NULL != main_hist,FAIL , "calloc main_hist failed");
-    }
-
-    *th_data = (thread_meta_data_ty*)calloc(num_threads, sizeof(thread_meta_data_ty));
-
-    if(!(*th_data))
-    {
-        free(*local_hists);
-        free(*main_hist);
-
-        RETURN_IF_BAD(FALSE, FAIL, "calloc th_data failed");
-    }
-
-    return SUCCESS;
-}  
