@@ -96,7 +96,7 @@ int main(int argc, char **argv)
 
     alloc_ret = AllocResources(&shuffled_word_ptrs, &dest_sorted_ptrs,
                  &threads_data, &arr_thread,  num_threads, num_words);
-                 
+
     RETURN_IF_BAD (FAIL != alloc_ret, FAIL, "AllocResources failed" );   
     
   
@@ -136,18 +136,21 @@ static size_t CountLinesWithWC(const char *filename)
 
 }
 
-static int AllocResources(unsigned char ***arr_shuffled_word_ptrs, unsigned char ***arr_dest_sorted_ptrs,
-    thread_meta_data_ty **th_data, pthread_t **arr_thread, int num_threads, size_t num_words)
+static int AllocResources(unsigned char ***arr_shuffled_word_ptrs,
+    unsigned char ***arr_dest_sorted_ptrs, thread_meta_data_ty **th_data,
+    pthread_t **arr_thread, int num_threads, size_t num_words)
  
 {
-    *arr_shuffled_word_ptrs = (unsigned char **)calloc(1, num_words * COPIES );
+    *arr_shuffled_word_ptrs = 
+        (unsigned char **)calloc(num_words * COPIES, sizeof(unsigned char *) );
 
     if(!(*arr_shuffled_word_ptrs))
     {
         RETURN_IF_BAD(FALSE, FAIL, "calloc word_ptrs failed");
     }
 
-    *arr_dest_sorted_ptrs = (unsigned char **)calloc(1, num_words * COPIES);
+    *arr_dest_sorted_ptrs =
+        (unsigned char **)calloc(num_words * COPIES, sizeof(unsigned char *));
 
     if(!(*arr_dest_sorted_ptrs))
     {
@@ -156,7 +159,6 @@ static int AllocResources(unsigned char ***arr_shuffled_word_ptrs, unsigned char
     }
 
 
-    
     *th_data = (thread_meta_data_ty*)calloc(num_threads, sizeof(thread_meta_data_ty));
 
     if(!(*th_data))
