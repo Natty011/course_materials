@@ -54,7 +54,8 @@ int main(int argc, char **argv)
 
     /* counting the num_words and swappign '\n' to '\0' */
     /* num_words = CountWordsAndReplaceNewLine(mmap_ptr, file_size) */
-    
+        /* num_words= popen("wc -l") / system() */
+        
 
 
     return 0;
