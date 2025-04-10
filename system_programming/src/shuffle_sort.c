@@ -79,6 +79,7 @@ int main(int argc, char **argv)
 
     /* phase 0 - read dict into file(copy) using mmap */
     num_words = CountLinesWithWC(argv[1]);
+    
     RETURN_IF_BAD(FAIL != num_words, FAIL, "CountLinesWithWC failed");
 
     fd_dict = open(argv[1], O_RDONLY);
