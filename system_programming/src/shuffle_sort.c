@@ -15,72 +15,72 @@
 
 #include "utils.h"
 
-
-typedef void *(*th_func_ptr)(void* ); 
-typedef int (*cmp_func_ptr)(const void* p1, const void* p2); 
-
 enum
 {
     WORDS_LINE_SIZE = 104334,
-    CACHE_LINE_SIZE = 64,
     NUM_THREADS = 4
                  
 };
 
-typedef struct aligned_hist
-{
-    size_t section_len_sort[WORDS_LINE_SIZE];
-    char padding[CACHE_LINE_SIZE];
+typedef void *(*th_func_ptr)(void* ); 
+typedef int (*cmp_func_ptr)(const void* p1, const void* p2); 
 
-}aligned_hist_ty;
 
 
 typedef struct thread_meta_data
 {
-    unsigned char *start_chunk_ptr;
-    unsigned char *end_chunk_ptr;
-    cmp_func_ptr StrCmp; 
-    size_t *thread_sort_ptr;
-
+    unsigned char **chunk_base;
+    size_t chunk_size;
+    cmp_func_ptr CmpStrings;
+ 
 }thread_meta_data_ty;
 
+int CmpStrings(const void *p1, const void *p2)
+{
+    return strcmp(*(const unsigned char **)p1, *(const unsigned char **)p2);
+}
 
+static int AllocResources(size_t **main_hist, size_t **local_hists,
+    thread_meta_data_ty **th_data, int num_threads);
 int main(int argc, char **argv)
 {
     /* phase start- define variables */
-    unsigned char *mmap_dict_ptr = MAP_FAILED;
     int fd_dict = -1;
     int ret_fstat = -1;
     int init_ret = FAIL;
     int alloc_ret = FAIL;
-
+    int num_threads = 0;
     int idx = 0;
-    int num_words = 0;
+    int cnt_merged_occure = 0;
+    unsigned int result = 0;
 
-	unsigned int arg = 0, result = 0;
+    size_t num_words = 0;
+    size_t total_words = 0;
+
+    unsigned char *mmap_dict_ptr = MAP_FAILED;
+
+    unsigned char **shuffled_word_ptrs = NULL;
+    unsigned char **dest_sorted_ptrs = NULL;
 
     thread_meta_data_ty *threads_data = NULL;
-    unsigned char **arr_sorted = NULL;
-    unsigned char **arr_of_ptrs = NULL;
-    unsigned char **arrs_10_of_ptrs = NULL;
+    pthread_t *arr_thread = NULL; 
 
-    int num_threads = NUM_THREADS;
-
-    pthread_t arr_thread[NUM_THREADS] = {PTHREAD_COND_INITIALIZER}; 
+    FILE *fp = NULL;
 
     struct stat st_dict= {0};
 
-    /* phase 0- Allocate Resources */
-    /* AllocResources(...)*/
-    
 
-    /* phase 1 - read dict into file(copy) using mmap */
+     /* phase 1 - read dict into file(copy) using mmap */
     /* mmap_dict_ptr = MmapDictFile(argv[1], &file_size)
         /* fd_dict = open(argv[1], O_RDWR); */
         /* ret_fstat = fstat(fd_dict, &st_dict); */
         /* mmap_dict_ptr = mmap(NULL, st_dict.st_size,
                      PROT_READ, MAP_PRIVATE, fd_dict, 0);*/
-
+    
+    
+    /* phase 1- Allocate Resources */
+    /* AllocResources(...)*/
+    
     /* phase 2 - counting the num_words and swappign '\n' to '\0' */
     /* num_words = CountWordsAndReplaceNewLine(mmap_dict_ptr, st_dict.st_size) */
         /* num_words= popen("wc -l") / system() */
@@ -123,3 +123,33 @@ int main(int argc, char **argv)
 }
 
 
+static int AllocResources(size_t **main_hist, size_t **local_hists,
+    thread_meta_data_ty **th_data, int num_threads)
+{
+    *local_hists = (size_t*)calloc(num_threads, sizeof(aligned_hist_ty));
+
+    if(!(*local_hists))
+    {
+        RETURN_IF_BAD(FALSE, FAIL, "calloc local_hists failed");
+    }
+
+    *main_hist = (size_t*)calloc(1, NUM_ASCII_CHARS);
+
+    if(!(*main_hist))
+    {
+        free(*local_hists);
+        RETURN_IF_BAD(NULL != main_hist,FAIL , "calloc main_hist failed");
+    }
+
+    *th_data = (thread_meta_data_ty*)calloc(num_threads, sizeof(thread_meta_data_ty));
+
+    if(!(*th_data))
+    {
+        free(*local_hists);
+        free(*main_hist);
+
+        RETURN_IF_BAD(FALSE, FAIL, "calloc th_data failed");
+    }
+
+    return SUCCESS;
+}  
