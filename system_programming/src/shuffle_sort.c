@@ -15,8 +15,13 @@
 
 #include "utils.h"
 
+
+typedef void *(*th_func_ptr)(void* ); 
+typedef int (*cmp_func_ptr)(const void* p1, const void* p2); 
+
 enum
 {
+    WORDS_LINE_SIZE = 104334,
     CACHE_LINE_SIZE = 64,
     NUM_THREADS = 4
                  
@@ -24,7 +29,7 @@ enum
 
 typedef struct aligned_hist
 {
-    size_t section_len_sort[LEN_TO_SORT];
+    size_t section_len_sort[WORDS_LINE_SIZE];
     char padding[CACHE_LINE_SIZE];
 
 }aligned_hist_ty;
@@ -32,17 +37,38 @@ typedef struct aligned_hist
 
 typedef struct thread_meta_data
 {
-    char *start_chunk_ptr;
-    char *end_chunk_ptr;
+    unsigned char *start_chunk_ptr;
+    unsigned char *end_chunk_ptr;
+    cmp_func_ptr StrCmp; 
     size_t *thread_sort_ptr;
 
 }thread_meta_data_ty;
 
-typedef void *(*th_func_ptr)(void* ); 
 
 int main(int argc, char **argv)
 {
     /* phase start- define variables */
+    unsigned char *mmap_dict_ptr = MAP_FAILED;
+    int fd_dict = -1;
+    int ret_fstat = -1;
+    int init_ret = FAIL;
+    int alloc_ret = FAIL;
+
+    int idx = 0;
+    int num_words = 0;
+
+	unsigned int arg = 0, result = 0;
+
+    thread_meta_data_ty *threads_data = NULL;
+    unsigned char **arr_sorted = NULL;
+    unsigned char **arr_of_ptrs = NULL;
+    unsigned char **arrs_10_of_ptrs = NULL;
+
+    int num_threads = NUM_THREADS;
+
+    pthread_t arr_thread[NUM_THREADS] = {PTHREAD_COND_INITIALIZER}; 
+
+    struct stat st_dict= {0};
 
     /* phase 0- Allocate Resources */
     /* AllocResources(...)*/
@@ -50,7 +76,7 @@ int main(int argc, char **argv)
 
     /* phase 1 - read dict into file(copy) using mmap */
     /* mmap_dict_ptr = MmapDictFile(argv[1], &file_size)
-        /* fd_dict = open(argv[1], O_RDONLY); */
+        /* fd_dict = open(argv[1], O_RDWR); */
         /* ret_fstat = fstat(fd_dict, &st_dict); */
         /* mmap_dict_ptr = mmap(NULL, st_dict.st_size,
                      PROT_READ, MAP_PRIVATE, fd_dict, 0);*/
@@ -85,7 +111,7 @@ int main(int argc, char **argv)
        num_words*10,  num_threads, threads_data , quicksort) */
 
     /* phase 8 - Merging the sorting results */
-    /* MergeSortedSections(arrs_10_of_ptrs, num_words * 10,
+    /* MergeSortedSections(arr_sorted, arrs_10_of_ptrs, num_words * 10,
      threads_data, num_thread ) */
 
     /* phase 9 - Print and Measure result of time complexity */
@@ -95,3 +121,5 @@ int main(int argc, char **argv)
         /* FreeResources(...) */
     return 0;
 }
+
+
