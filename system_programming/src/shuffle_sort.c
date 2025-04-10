@@ -44,19 +44,31 @@ typedef void *(*th_func_ptr)(void* );
 
 int main(int argc, char **argv)
 {
-    /* read dict into file(copy) using mmap */
+    /* phase 1 - read dict into file(copy) using mmap */
     /* mmap_ptr = MmapDictFile(argv[1], &file_size)
         /* fd_dict = open(argv[1], O_RDONLY); */
         /* ret_fstat = fstat(fd_dict, &st_dict); */
         /* mmap_dict_ptr = mmap(NULL, st_dict.st_size,
                      PROT_READ, MAP_PRIVATE, fd_dict, 0);*/
 
-
-    /* counting the num_words and swappign '\n' to '\0' */
+    /* phase 2 - counting the num_words and swappign '\n' to '\0' */
     /* num_words = CountWordsAndReplaceNewLine(mmap_ptr, file_size) */
         /* num_words= popen("wc -l") / system() */
         
+        /* foreach idx from 0 to num_word */
+            /* if '\n' == *(mmap_ptr + idx ) */
+                /* *(mmap_ptr + idx ) = '\0' */
 
+    /* phase 3 - Create arary of pointers to the words array 
+                and assign the pointers in the array according to 
+                the numbert of each word */
+    /* arr_of_ptrs = CreateArrPtrsAndAssignedPtrWords(mmap_ptr, num_words )*/
+
+    /* phase 4 - Duplicate the arr_of_ptrs 10 times */
+    /* arrs_10_of_ptrs = DuplicatePointersArr10Times(arr_of_ptrs, num_words, 10)*/
+    
+
+    
 
     return 0;
 }
