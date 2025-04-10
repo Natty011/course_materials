@@ -17,16 +17,14 @@
 
 enum
 {
-    NUM_ASCII_CHARS  = 256,
     CACHE_LINE_SIZE = 64,
-    CACHE_PADDED_HIST_SIZE = NUM_ASCII_CHARS + CACHE_LINE_SIZE,
     NUM_THREADS = 4
                  
 };
 
 typedef struct aligned_hist
 {
-    size_t hist[NUM_ASCII_CHARS];
+    size_t section_len_sort[LEN_TO_SORT];
     char padding[CACHE_LINE_SIZE];
 
 }aligned_hist_ty;
@@ -36,7 +34,7 @@ typedef struct thread_meta_data
 {
     char *start_chunk_ptr;
     char *end_chunk_ptr;
-    size_t *thread_histogram_ptr;
+    size_t *thread_sort_ptr;
 
 }thread_meta_data_ty;
 
