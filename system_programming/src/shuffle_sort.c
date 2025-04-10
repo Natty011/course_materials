@@ -6,12 +6,18 @@
 * Date : 09 / 04 / 2025
 * Last update: 09 / 04 / 2025
 *****************************************/
-#include <stdio.h>
+
+#define _POSIX_C_SOURCE 200809L /* popen */
+
+#include <stdio.h>      /* popen, pclose, FILE */
+#include <stdlib.h>     /* fscanf */
 #include <sys/mman.h>   /* mmap, munmap */
 #include <sys/stat.h>   /* fstat */
 #include <fcntl.h>      /* open */
 #include <unistd.h>     /* close */
 #include <pthread.h>    /* pthread_create, join */
+#include <string.h>     /* snprintf */
+#include <sys/wait.h>   /* WIFEXITED, WEXITSTATUS */
 
 #include "utils.h"
 
@@ -40,6 +46,8 @@ int CmpStrings(const void *p1, const void *p2)
     return strcmp(*(const unsigned char **)p1, *(const unsigned char **)p2);
 }
 
+static size_t CountLinesWithWC(const char *filename);
+
 static int AllocResources(size_t **main_hist, size_t **local_hists,
     thread_meta_data_ty **th_data, int num_threads);
 int main(int argc, char **argv)
@@ -65,17 +73,25 @@ int main(int argc, char **argv)
     thread_meta_data_ty *threads_data = NULL;
     pthread_t *arr_thread = NULL; 
 
-    FILE *fp = NULL;
 
     struct stat st_dict= {0};
+    RETURN_IF_BAD(argc >= 2, FAIL, "argv[1] missing");
 
+    /* phase 0 - read dict into file(copy) using mmap */
+    num_words = CountLinesWithWC(argv[1]);
+    RETURN_IF_BAD(FAIL != num_words, FAIL, "CountLinesWithWC failed");
 
-     /* phase 1 - read dict into file(copy) using mmap */
-    /* mmap_dict_ptr = MmapDictFile(argv[1], &file_size)
-        /* fd_dict = open(argv[1], O_RDWR); */
-        /* ret_fstat = fstat(fd_dict, &st_dict); */
-        /* mmap_dict_ptr = mmap(NULL, st_dict.st_size,
-                     PROT_READ, MAP_PRIVATE, fd_dict, 0);*/
+    fd_dict = open(argv[1], O_RDONLY);
+    RETURN_IF_BAD(-1 != fd_dict, FAIL, "open failed");
+
+    ret_fstat = fstat(fd_dict, &st_dict);
+    RETURN_IF_BAD(-1 != ret_fstat, FAIL, "fstat failed");
+
+    mmap_dict_ptr = mmap(NULL, st_dict.st_size, 
+        PROT_READ | PROT_WRITE, MAP_PRIVATE, fd_dict, 0);
+    RETURN_IF_BAD(MAP_FAILED != mmap_dict_ptr, FAIL, "mmap failed");
+
+       
     
     
     /* phase 1- Allocate Resources */
@@ -122,6 +138,36 @@ int main(int argc, char **argv)
     return 0;
 }
 
+static size_t CountLinesWithWC(const char *filename)
+{
+    char cmd[50] = {0}; /* /usr/share/dict/words */
+    FILE *fp = NULL;
+    int status = 0;
+    size_t num_lines = 0;
+
+    sprintf(cmd, "wc -l %s", filename);
+    fp = popen(cmd , "r");
+    RETURN_IF_BAD(NULL != fp, FAIL, "popen failed");
+
+    RETURN_IF_BAD(1 == fscanf(fp, "%lu", &num_lines), FAIL, "fscanf failed");
+
+    status = pclose(fp);
+    RETURN_IF_BAD(-1 != status, FAIL, "pclose failed");
+
+    if (WIFEXITED(status))
+    {
+        int exit_code = WEXITSTATUS(status);
+        RETURN_IF_BAD(0 == exit_code, FAIL, "wc command exited with failure");
+    }
+
+    else
+    {
+        RETURN_IF_BAD(0, FAIL, "wc command did not exit normally");
+    }
+
+    return num_lines;
+
+}
 
 static int AllocResources(size_t **main_hist, size_t **local_hists,
     thread_meta_data_ty **th_data, int num_threads)
