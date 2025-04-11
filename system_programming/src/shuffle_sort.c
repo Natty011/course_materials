@@ -125,9 +125,7 @@ int main(int argc, char **argv)
 
     ShuffleArray(words_ptrs, num_words*COPIES);
 
-
-
-
+    InitThreadChunks(words_ptrs, threads_data, num_threads, num_words*COPIES);
 
     FreeResources(words_ptrs, sorted_ptrs, threads_data, arr_thread);
     RETURN_IF_BAD(-1 != munmap(mmap_dict_ptr, st_dict.st_size), FAIL, "munmap failed")
