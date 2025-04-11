@@ -49,14 +49,14 @@ typedef struct thread_meta_data
 static size_t CountLinesWithWC(const char *filename);
 
 static int AllocResources(unsigned char ***arr_shuffled_word_ptrs,
-    unsigned char ***arr_dest_sorted_ptrs, thread_meta_data_ty **th_data,
-    pthread_t **arr_thread, int num_threads, size_t num_words);
+        unsigned char ***arr_dest_sorted_ptrs, thread_meta_data_ty **th_data,
+        pthread_t **arr_thread, int num_threads, size_t num_words);
 
 static int FillWordsPointers(unsigned  char* mmap_dict,
-    unsigned char **words_ptrs, size_t num_words);
+        unsigned char **words_ptrs, size_t num_words);
 
 static void FreeResources(unsigned char **word_ptrs, unsigned char **sorted_ptrs,
-    thread_meta_data_ty *th_data, pthread_t *arr_thread);
+            thread_meta_data_ty *th_data, pthread_t *arr_thread);
 
 static int RandomCmp(const void *a, const void *b);
 
@@ -64,6 +64,8 @@ void ShuffleArray(unsigned char **word_ptrs, size_t total_words);
 
 int CmpStrings(const void *p1, const void *p2);
 
+static void InitThreadChunks(unsigned char **word_ptrs, thread_meta_data_ty *th_data,
+            int num_threads, size_t total_words); 
 
 int main(int argc, char **argv)
 {
@@ -78,7 +80,6 @@ int main(int argc, char **argv)
     unsigned int result = 0;
 
     size_t num_words = 0;
-    size_t total_words = 0;
 
     unsigned char *mmap_dict_ptr = MAP_FAILED;
 
@@ -123,6 +124,9 @@ int main(int argc, char **argv)
     }
 
     ShuffleArray(words_ptrs, num_words*COPIES);
+
+
+
 
 
     FreeResources(words_ptrs, sorted_ptrs, threads_data, arr_thread);
@@ -216,7 +220,6 @@ static int FillWordsPointers(unsigned  char* mmap_dict,
 {
     unsigned char* runner = mmap_dict;
     unsigned char* word_start = mmap_dict;
-    char** ret_cpy = NULL;
     size_t word_idx = 0;
     size_t copy_idx = 0;
 
@@ -240,7 +243,7 @@ static int FillWordsPointers(unsigned  char* mmap_dict,
 
     for(copy_idx = 1; copy_idx < COPIES; ++copy_idx)
     {
-        ret_cpy = (char**)memcpy(words_ptrs + copy_idx*num_words, words_ptrs,
+        memcpy(words_ptrs + copy_idx*num_words, words_ptrs,
              num_words*sizeof(unsigned char*));
     }
 
@@ -276,3 +279,32 @@ int CmpStrings(const void *p1, const void *p2)
 {
     return strcmp(*(const unsigned char **)p1, *(const unsigned char **)p2);
 }
+
+  
+static void InitThreadChunks(unsigned char **word_ptrs, thread_meta_data_ty *th_data,
+                            int num_threads, size_t total_words)
+{
+    size_t chunk_size_block = total_words / num_threads;
+    int idx = 0;
+
+    for(idx = 0; idx < num_threads; ++idx)
+    {
+        (th_data + idx)->chunk_base = word_ptrs + idx * chunk_size_block;
+        (th_data + idx)->CmpStrings = CmpStrings;
+
+        if(idx == num_threads-1)
+        {
+            (th_data + idx)->chunk_base = word_ptrs + idx * chunk_size_block;
+            (th_data + idx)->chunk_size = chunk_size_block + 
+            (total_words > (idx * chunk_size_block)) * (total_words - chunk_size_block);
+        }
+
+        else
+        {
+            (th_data + idx)->chunk_size = chunk_size_block;
+        }
+
+    }
+
+}
+
