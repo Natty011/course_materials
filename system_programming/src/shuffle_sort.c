@@ -60,7 +60,7 @@ static void FreeResources(unsigned char **word_ptrs, unsigned char **sorted_ptrs
 
 static int RandomCmp(const void *a, const void *b);
 
-void ShuffleArray(char **ptr_array, size_t total_words); 
+void ShuffleArray(unsigned char **word_ptrs, size_t total_words); 
 
 int CmpStrings(const void *p1, const void *p2);
 
@@ -121,6 +121,8 @@ int main(int argc, char **argv)
         FreeResources(words_ptrs, sorted_ptrs, threads_data, arr_thread);
         RETURN_IF_BAD (FALSE, FAIL, "FillWordsPointers failed" );   
     }
+
+    ShuffleArray(words_ptrs, num_words*COPIES);
 
 
     FreeResources(words_ptrs, sorted_ptrs, threads_data, arr_thread);
@@ -254,15 +256,20 @@ static void FreeResources(unsigned char **word_ptrs, unsigned char **sorted_ptrs
     free(arr_thread);
 }
 
+/* Random comparator for qsort  */
 
 static int RandomCmp(const void *a, const void *b)
 {
-    return rand() % 2;
+    (void)a;
+    (void)b;
+    return rand() % 3 - 1; /* returns -1, 0, or 1 randomly */
 }
 
-void ShuffleArray(char **ptr_array, size_t total_words)
+/* Shuffle function using qsort and random comparator */
+
+void ShuffleArray(unsigned char **word_ptrs, size_t total_words)
 {
-    qsort(ptr_array, total_words, sizeof(unsigned char *), RandomCmp);
+    qsort(word_ptrs, total_words, sizeof(unsigned char *), RandomCmp);
 }
 
 int CmpStrings(const void *p1, const void *p2)
