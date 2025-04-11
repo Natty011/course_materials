@@ -10,6 +10,7 @@
 #define _POSIX_C_SOURCE 200809L /* popen */
 
 #include <stdio.h>      /* popen, pclose, FILE, sprintf, fscanf */
+#include <stdlib.h>     /* rand, srand, qsort */
 #include <sys/mman.h>   /* mmap, munmap */
 #include <sys/stat.h>   /* fstat */
 #include <fcntl.h>      /* open */
@@ -17,7 +18,7 @@
 #include <pthread.h>    /* pthread_create, join_try_np */
 #include <string.h>     /* strcmp, memcpy */
 #include <sys/wait.h>   /* WIFEXITED, WEXITSTATUS */
-
+#include <time.h>       /* time */
 #include "utils.h"
 
 enum
@@ -43,10 +44,7 @@ typedef struct thread_meta_data
  
 }thread_meta_data_ty;
 
-int CmpStrings(const void *p1, const void *p2)
-{
-    return strcmp(*(const unsigned char **)p1, *(const unsigned char **)p2);
-}
+
 
 static size_t CountLinesWithWC(const char *filename);
 
@@ -59,6 +57,14 @@ static int FillWordsPointers(unsigned  char* mmap_dict,
 
 static void FreeResources(unsigned char **word_ptrs, unsigned char **sorted_ptrs,
     thread_meta_data_ty *th_data, pthread_t *arr_thread);
+
+static int RandomCmp(const void *a, const void *b);
+
+void ShuffleArray(char **ptr_array, size_t total_words); 
+
+int CmpStrings(const void *p1, const void *p2);
+
+
 int main(int argc, char **argv)
 {
     /* phase start- define variables */
@@ -85,6 +91,8 @@ int main(int argc, char **argv)
 
     struct stat st_dict= {0};
     RETURN_IF_BAD(argc >= 2, FAIL, "argv[1] missing");
+
+    srand(time(NULL));
 
     /* phase 0 - read dict into file(copy) using mmap */
     num_words = CountLinesWithWC(argv[1]);
@@ -247,3 +255,17 @@ static void FreeResources(unsigned char **word_ptrs, unsigned char **sorted_ptrs
 }
 
 
+static int RandomCmp(const void *a, const void *b)
+{
+    return rand() % 2;
+}
+
+void ShuffleArray(char **ptr_array, size_t total_words)
+{
+    qsort(ptr_array, total_words, sizeof(unsigned char *), RandomCmp);
+}
+
+int CmpStrings(const void *p1, const void *p2)
+{
+    return strcmp(*(const unsigned char **)p1, *(const unsigned char **)p2);
+}
