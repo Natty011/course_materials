@@ -14,8 +14,8 @@
 #include <sys/stat.h>   /* fstat */
 #include <fcntl.h>      /* open */
 #include <unistd.h>     /* close */
-#include <pthread.h>    /* pthread_create, join */
-#include <string.h>     /* strcmp */
+#include <pthread.h>    /* pthread_create, join_try_np */
+#include <string.h>     /* strcmp, memcpy */
 #include <sys/wait.h>   /* WIFEXITED, WEXITSTATUS */
 
 #include "utils.h"
@@ -57,14 +57,15 @@ static int AllocResources(unsigned char ***arr_shuffled_word_ptrs,
 static int FillWordsPointers(unsigned  char* mmap_dict,
     unsigned char* words_ptrs, size_t num_words);
 
-
+static void FreeResources(unsigned char **word_ptrs, unsigned char **sorted_ptrs,
+    thread_meta_data_ty *th_data, pthread_t *arr_thread);
 int main(int argc, char **argv)
 {
     /* phase start- define variables */
     int fd_dict = -1;
     int ret_fstat = -1;
     int init_ret = FAIL;
-    int alloc_ret = FAIL;
+    int ret = FAIL;
     int num_threads = NUM_THREADS;
     int idx = 0;
     int cnt_merged_occure = 0;
@@ -75,8 +76,8 @@ int main(int argc, char **argv)
 
     unsigned char *mmap_dict_ptr = MAP_FAILED;
 
-    unsigned char **shuffled_word_ptrs = NULL;
-    unsigned char **dest_sorted_ptrs = NULL;
+    unsigned char **words_ptrs = NULL;
+    unsigned char **sorted_ptrs = NULL;
 
     thread_meta_data_ty *threads_data = NULL;
     pthread_t *arr_thread = NULL; 
@@ -100,13 +101,23 @@ int main(int argc, char **argv)
         PROT_READ | PROT_WRITE, MAP_PRIVATE, fd_dict, 0);
     RETURN_IF_BAD(MAP_FAILED != mmap_dict_ptr, FAIL, "mmap failed");
 
-    alloc_ret = AllocResources(&shuffled_word_ptrs, &dest_sorted_ptrs,
+    ret = AllocResources(&words_ptrs, &sorted_ptrs,
                  &threads_data, &arr_thread,  num_threads, num_words);
 
-    RETURN_IF_BAD (FAIL != alloc_ret, FAIL, "AllocResources failed" );   
+    RETURN_IF_BAD (FAIL != ret, FAIL, "AllocResources failed" );   
     
-  
+    ret = FillWordsPointers(mmap_dict_ptr, words_ptrs, num_words);
+
+    if(FAIL == ret)
+    {
+        FreeResources(words_ptrs, sorted_ptrs, threads_data, arr_thread);
+        RETURN_IF_BAD (FALSE, FAIL, "FillWordsPointers failed" );   
+    }
+
     
+    FreeResources(words_ptrs, sorted_ptrs, threads_data, arr_thread);
+    RETURN_IF_BAD(-1 != munmap(mmap_dict_ptr, st_dict.st_size), FAIL, "munmap failed")
+    RETURN_IF_BAD(-1 != close(fd_dict), FAIL, "close failed")
 
     return 0;
 }
@@ -228,8 +239,17 @@ static int FillWordsPointers(unsigned  char* mmap_dict,
     }
 
     return SUCCESS;
-
 }
+
+static void FreeResources(unsigned char **word_ptrs, unsigned char **sorted_ptrs,
+    thread_meta_data_ty *th_data, pthread_t *arr_thread)
+{
+    free(word_ptrs);
+    free(sorted_ptrs); 
+    free(th_data);
+    free(arr_thread);
+}
+
 /* phase 1- Allocate Resources */
     /* AllocResources(...)*/
     
