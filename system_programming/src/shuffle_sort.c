@@ -283,6 +283,8 @@ static void InitThreadChunks(unsigned char **word_ptrs, thread_meta_data_ty *th_
                             int num_threads, size_t total_words)
 {
     size_t chunk_size_block = total_words / num_threads;
+    size_t remainder = total_words % num_threads;
+
     int idx = 0;
 
     for(idx = 0; idx < num_threads; ++idx)
@@ -292,15 +294,17 @@ static void InitThreadChunks(unsigned char **word_ptrs, thread_meta_data_ty *th_
 
         if(idx == num_threads-1)
         {
-            (th_data + idx)->chunk_base = word_ptrs + idx * chunk_size_block;
-            (th_data + idx)->chunk_size = chunk_size_block + 
-            (total_words > (idx * chunk_size_block)) * (total_words - chunk_size_block);
+            (th_data + idx)->chunk_size = chunk_size_block + remainder;
         }
 
         else
         {
             (th_data + idx)->chunk_size = chunk_size_block;
         }
+
+        
+        printf("Thread %d: base = %p, size = %lu\n", idx,
+            (void *)(th_data + idx)->chunk_base, (th_data + idx)->chunk_size);
 
     }
 
