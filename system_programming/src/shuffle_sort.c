@@ -67,6 +67,8 @@ int CmpStrings(const void *p1, const void *p2);
 static void InitThreadChunks(unsigned char **word_ptrs, thread_meta_data_ty *th_data,
             int num_threads, size_t total_words); 
 
+void *SortChunk_TH(thread_meta_data_ty *thread_data);
+
 int main(int argc, char **argv)
 {
     /* phase start- define variables */
@@ -126,6 +128,23 @@ int main(int argc, char **argv)
     ShuffleArray(words_ptrs, num_words*COPIES);
 
     InitThreadChunks(words_ptrs, threads_data, num_threads, num_words*COPIES);
+
+    for( idx = 0; idx < num_threads ; ++idx )  
+    {
+        do
+        {
+            result = pthread_create(arr_thread + idx, NULL,
+                 (th_func_ptr)SortChunk_TH, threads_data + idx);
+
+            if(SUCCESS != result)
+            {
+                FreeResources(words_ptrs, sorted_ptrs, threads_data, arr_thread);
+                EXIT_IF_BAD( FALSE, "pthread_create failed" );	
+
+            }     
+            
+        }while (result);
+    }
 
     FreeResources(words_ptrs, sorted_ptrs, threads_data, arr_thread);
     RETURN_IF_BAD(-1 != munmap(mmap_dict_ptr, st_dict.st_size), FAIL, "munmap failed")
@@ -273,11 +292,11 @@ void ShuffleArray(unsigned char **word_ptrs, size_t total_words)
     qsort(word_ptrs, total_words, sizeof(unsigned char *), RandomCmp);
 }
 
+
 int CmpStrings(const void *p1, const void *p2)
 {
     return strcmp(*(const unsigned char **)p1, *(const unsigned char **)p2);
 }
-
   
 static void InitThreadChunks(unsigned char **word_ptrs, thread_meta_data_ty *th_data,
                             int num_threads, size_t total_words)
@@ -302,11 +321,18 @@ static void InitThreadChunks(unsigned char **word_ptrs, thread_meta_data_ty *th_
             (th_data + idx)->chunk_size = chunk_size_block;
         }
 
-        
+
         printf("Thread %d: base = %p, size = %lu\n", idx,
             (void *)(th_data + idx)->chunk_base, (th_data + idx)->chunk_size);
-
     }
+}
 
+
+void *SortChunk_TH(thread_meta_data_ty *thread_data)
+{
+    qsort(thread_data->chunk_base, thread_data->chunk_size,
+             sizeof(unsigned char *), thread_data->CmpStrings);
+
+    return NULL;
 }
 
