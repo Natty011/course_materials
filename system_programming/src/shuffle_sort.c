@@ -54,6 +54,10 @@ static int AllocResources(unsigned char ***arr_shuffled_word_ptrs,
     unsigned char ***arr_dest_sorted_ptrs, thread_meta_data_ty **th_data,
     pthread_t **arr_thread, int num_threads, size_t num_words);
 
+static int FillWordsPointers(unsigned  char* mmap_dict,
+    unsigned char* words_ptrs, size_t num_words);
+
+
 int main(int argc, char **argv)
 {
     /* phase start- define variables */
@@ -186,6 +190,46 @@ static int AllocResources(unsigned char ***arr_shuffled_word_ptrs,
 }
 
 
+static int FillWordsPointers(unsigned  char* mmap_dict,
+                            unsigned char* words_ptrs, size_t num_words)
+
+{
+    unsigned char* runner = mmap_dict;
+    unsigned char* word_start = mmap_dict;
+    char** ret_cpy = NULL;
+    size_t word_idx = 0;
+    size_t copy_idx = 0;
+
+
+    while((NULL_TERM_CH != *runner) && (word_idx < num_words) )
+    {
+        if(NEW_LINE_CH == *runner)
+        {
+            *runner = NULL_TERM_CH;
+            *(words_ptrs + word_idx) = word_start;
+            
+            ++word_idx;
+            word_start = runner + 1;
+        }
+
+        ++runner;
+
+    }
+
+    RETURN_IF_BAD(word_idx == num_words, FAIL, "word count in FillWords: failed")
+
+    for(copy_idx = 1; copy_idx < COPIES; ++copy_idx)
+    {
+        ret_cpy = (char**)memcpy(words_ptrs + copy_idx*num_words, words_ptrs,
+             num_words*sizeof(unsigned char*));
+
+        RETURN_IF_BAD(0 == strcmp(*ret_cpy, *words_ptrs), FAIL, "memcpy of words_ptrs failed");
+  
+    }
+
+    return SUCCESS;
+
+}
 /* phase 1- Allocate Resources */
     /* AllocResources(...)*/
     
