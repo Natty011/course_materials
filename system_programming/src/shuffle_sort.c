@@ -507,10 +507,10 @@ static int ValidateSortedOutput(unsigned char **sorted_ptrs, size_t total_words,
 {
     size_t i = 0;
     
-    for (i = 0; i < 20; ++i)
+    /*for (i = 0; i < 20; ++i)
     {
-        printf("sorted_ptrs[%lu] = %s\n", i, sorted_ptrs[i]);
-    }
+        printf("sorted_ptrs[%lu] = %p\n", i, (void*)(sorted_ptrs + i));
+    }*/
 
 
     for (i = 0; i < total_words; i += copies)
@@ -520,11 +520,11 @@ static int ValidateSortedOutput(unsigned char **sorted_ptrs, size_t total_words,
         for (j = 1; j < copies; ++j)
         {
             if (0 != strcmp((const char *)sorted_ptrs[i], (const char *)sorted_ptrs[i + j]))
-            {
-                fprintf(stderr, "Mismatch at group %lu: '%s' vs '%s'\n",
-                        i / copies, sorted_ptrs[i], sorted_ptrs[i + j]);
-                return FAIL;
-            }
+{
+    fprintf(stderr, "Mismatch at group %lu: '%s' vs '%s'\n",
+            i / copies, sorted_ptrs[i], sorted_ptrs[i + j]);
+    return FAIL;
+}
         }
 
         if (i + copies < total_words)
