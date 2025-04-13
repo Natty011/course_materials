@@ -8,7 +8,6 @@
 # gcXX = g++ release
 # gdeXX / gceXX = same with -Werror
 
-
 # gcc compilation aliases: c89, debug mode(gd), release mode(gc)
 
 alias gd='gcc -ansi -pedantic-errors -Wall -Wextra -g'
