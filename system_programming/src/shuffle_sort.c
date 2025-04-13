@@ -112,6 +112,7 @@ int main(int argc, char **argv)
     clock_t end_time = clock();
     double elapsed = 0.0;
 
+    RETURN_IF_BAD(SUCCESS == sem_init(&g_merge_semaphore, 0, 0), FAIL, "sem_init failed" );   
 
     RETURN_IF_BAD(argc >= 2, FAIL, "argv[1] missing");
 
@@ -423,7 +424,7 @@ int RunAndMergeThreads(unsigned char **dest_sorted_ptrs,
         }
     }
 
-    while(merged_count < num_threads)
+    while(merged_count < num_threads )
     {
         while(sem_wait(&g_merge_semaphore))
         {
@@ -472,8 +473,8 @@ int RunAndMergeThreads(unsigned char **dest_sorted_ptrs,
 
                     joined_flags[index] = 1;
                     ++merged_count;
-                    break;
-                }
+            
+                    continue;                }
 
                 else if(EBUSY == errno)
                 {
@@ -494,7 +495,16 @@ int RunAndMergeThreads(unsigned char **dest_sorted_ptrs,
             ++thread_runner;
             ++meta_runner;
         }
+
+        puts("111111111111111111111");
+        printf("merged_count = %d\n", merged_count);
+        /*assert(merged_count < num_threads);*/
+
     }
+
+    puts("22222222222222222222222222");
+
+    /*assert(merged_count == num_threads);*/
 
     return SUCCESS;
 }
