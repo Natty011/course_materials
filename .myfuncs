@@ -1,3 +1,5 @@
+# run: source ~/.bashrc in terminal aftar changes 
+
 # Compilation aliases for C and C++
 # Naming convention:
 # gd = gcc debug
