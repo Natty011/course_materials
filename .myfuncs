@@ -47,4 +47,7 @@ alias gce11='g++ -std=c++11 -Wall -Wextra -Werror -DNDEBUG -O3'
 # Valgrind alias
 alias vlg='valgrind --leak-check=yes --track-origins=yes'
 
+# Valgrind alias for c++ for inspections of free/delete
+#alias vlgpp='valgrind --leak-check=full --track-origins=yes --show-leak-kinds=all --error-exitcode=1'
+
 
