@@ -510,6 +510,97 @@ int RunAndMergeThreads(unsigned char **dest_sorted_ptrs,
 }
 
 
+
+int MergeSortedChunks(thread_meta_data_ty *th_data, unsigned char **dest_sorted_ptrs)
+{
+    unsigned char **a = th_data->chunk_base;
+    size_t a_len = th_data->chunk_size;
+
+    unsigned char **a_ptr = NULL;
+    unsigned char **b_ptr = NULL;
+    size_t a_remain = 0;
+    size_t b_remain = 0;
+    size_t i = 0;
+    unsigned char **merged = NULL;
+
+    puts("=== MergeSortedChunks() ===");
+    printf("a_len = %lu\n", a_len);
+    printf("g_current_result_len = %lu\n", g_current_result_len);
+
+    /* copy the first that finished */
+
+    if (0 == g_current_result_len)
+    {
+        memcpy(dest_sorted_ptrs, a, a_len * sizeof(unsigned char *));
+        g_start_of_result = dest_sorted_ptrs;
+        g_current_result_len = a_len;
+
+        puts("first merge copied directly");
+        return SUCCESS;
+    }
+
+    /* merge with the previous result*/
+    merged = (unsigned char **)malloc((a_len + g_current_result_len) * sizeof(unsigned char *));
+    if (NULL == merged)
+    {
+        perror("malloc failed in MergeSortedChunks");
+        return FAIL;
+    }
+
+    a_ptr = a;
+    b_ptr = g_start_of_result;
+    a_remain = a_len;
+    b_remain = g_current_result_len;
+    i = 0;
+
+    printf("Initial pointers:\n");
+    printf("a_ptr = %p\n", (void *)a_ptr);
+    printf("b_ptr = %p\n", (void *)b_ptr);
+    printf("dest_sorted_ptrs = %p\n", (void *)dest_sorted_ptrs);
+
+    /* sort and merge with the previous result*/
+    while (a_remain && b_remain)
+    {
+        if (th_data->CmpStrings(a_ptr, b_ptr) < 0)
+        {
+            merged[i++] = *a_ptr++;
+            --a_remain;
+        }
+        else
+        {
+            merged[i++] = *b_ptr++;
+            --b_remain;
+        }
+    }
+
+    /* copy remainnig A */
+    while (a_remain--)
+    {
+        merged[i++] = *a_ptr++;
+    }
+
+    /* copy remainnig B */
+    while (b_remain--)
+    {
+        merged[i++] = *b_ptr++;
+    }
+
+    printf("Merged i = %lu elements\n", i);
+    printf("Copying merged array back to dest_sorted_ptrs (size = %lu)\n", a_len + g_current_result_len);
+
+    /* copy to dest_sorted_ptrs */
+    memcpy(dest_sorted_ptrs, merged, (a_len + g_current_result_len) * sizeof(unsigned char *));
+    g_start_of_result = dest_sorted_ptrs;
+    g_current_result_len += a_len;
+
+    puts("merge completed\n");
+
+    free(merged);
+    return SUCCESS;
+}
+
+
+/*
 int MergeSortedChunks(thread_meta_data_ty *th_data, unsigned char **dest_sorted_ptrs)
 {
     unsigned char **a = th_data->chunk_base;
@@ -524,7 +615,6 @@ int MergeSortedChunks(thread_meta_data_ty *th_data, unsigned char **dest_sorted_
 
     puts("before merge");
 
-    /* copy the first that finished */
     if(0 == g_current_result_len)
     {
         memcpy(dest_sorted_ptrs, a, a_len * sizeof(unsigned char *));
@@ -535,7 +625,6 @@ int MergeSortedChunks(thread_meta_data_ty *th_data, unsigned char **dest_sorted_
         return SUCCESS;
     }
 
-    /* merge with the previous result*/
     merged = (unsigned char **)malloc((a_len + g_current_result_len) * sizeof(unsigned char *));
     if(NULL == merged)
     {
@@ -549,7 +638,6 @@ int MergeSortedChunks(thread_meta_data_ty *th_data, unsigned char **dest_sorted_
     b_remain = g_current_result_len;
     i = 0;
 
-    /* sort and merge with the previous result*/
     while(a_remain && b_remain)
     {
         if(th_data->CmpStrings(a_ptr, b_ptr) < 0)
@@ -564,19 +652,16 @@ int MergeSortedChunks(thread_meta_data_ty *th_data, unsigned char **dest_sorted_
         }
     }
 
-    /* copy remainnig A */
     while(a_remain--)
     {
         merged[i++] = *a_ptr++;
     }
 
-    /* copy remainnig B */
     while(b_remain--)
     {
         merged[i++] = *b_ptr++;
     }
 
-    /* copy to dest_sorted_ptrs */
     memcpy(dest_sorted_ptrs, merged, (a_len + g_current_result_len) * sizeof(unsigned char *));
     g_start_of_result = dest_sorted_ptrs;
     g_current_result_len += a_len;
@@ -586,7 +671,7 @@ int MergeSortedChunks(thread_meta_data_ty *th_data, unsigned char **dest_sorted_
     free(merged);
     return SUCCESS;
 }
-
+*/
 static int ValidateSortedOutput(unsigned char **sorted_ptrs, size_t total_words, size_t copies)
 {
     size_t i = 0;
