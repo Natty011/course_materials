@@ -1,9 +1,50 @@
-#
-# gcc compilation aliases: c89, c99, debug mode, release mode
+# Compilation aliases for C and C++
+# Naming convention:
+# gd = gcc debug
+# gc = gcc release
+# gdXX = g++ debug, where XX is the C++ standard version
+# gcXX = g++ release
+# gdeXX / gceXX = same with -Werror
+
+
+# gcc compilation aliases: c89, debug mode(gd), release mode(gc)
+
 alias gd='gcc -ansi -pedantic-errors -Wall -Wextra -g'
 alias gc='gcc -ansi -pedantic-errors -Wall -Wextra -DNDEBUG -O3'
-#alias gd9='gcc -std=c99 -pedantic-errors -Wall -Wextra -g'
-#alias gc9='gcc -std=c99 -pedantic-errors -Wall -Wextra -DNDEBUG -O3'
+
+# gcc compilation aliases: c89, debug mode(gd), release mode(gc)
+
+# gd99   = gcc debug, c99, no Werror
+# gc99   = gcc release, c99, no Werror
+
+alias gd99='gcc -std=c99 -pedantic-errors -Wall -Wextra -g'
+alias gc99='gcc -std=c99 -pedantic-errors -Wall -Wextra -DNDEBUG -O3'
+
+#
+# gcc compilation aliases: c++98, debug mode(gd), release mode(gc)
+# c++98, no Werror
+
+alias gd98='g++ -std=c++98 -Wall -Wextra -g'
+alias gc98='g++ -std=c++98 -Wall -Wextra -DNDEBUG -O3'
+
+# c++98, with Werror
+
+alias gde98='g++ -std=c++98 -Wall -Wextra -Werror -g'
+alias gce98='g++ -std=c++98 -Wall -Wextra -Werror -DNDEBUG -O3'
+
+# gcc compilation aliases: c++11, debug mode(gd), release mode(gc)
+# c++11, no Werror
+
+alias gd11='g++ -std=c++11 -Wall -Wextra -g'
+alias gc11='g++ -std=c++11 -Wall -Wextra -DNDEBUG -O3'
+
+# c++11, with Werror
+
+alias gde11='g++ -std=c++11 -Wall -Wextra -Werror -g'
+alias gce11='g++ -std=c++11 -Wall -Wextra -Werror -DNDEBUG -O3'
+
 #
 # Valgrind alias
 alias vlg='valgrind --leak-check=yes --track-origins=yes'
+
+
