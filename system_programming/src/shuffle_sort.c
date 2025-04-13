@@ -82,7 +82,12 @@ int RunAndMergeThreads(unsigned char **dest_sorted_ptrs,
 
 int MergeSortedChunks(thread_meta_data_ty *th_data);
 
+
 static int ValidateSortedOutput(unsigned char **sorted_ptrs, size_t total_words, size_t copies);
+
+void PrintFirstWordsPerDict(unsigned char **word_ptrs, size_t num_words, size_t num_copies);
+void PrintLastWordsPerDict(unsigned char **word_ptrs, size_t num_words, size_t num_copies);
+
 int main(int argc, char **argv)
 {
     /* phase start- define variables */
@@ -91,10 +96,7 @@ int main(int argc, char **argv)
     int ret = FAIL;
     int num_threads = NUM_THREADS;
     unsigned int result = 0;
-    int copy_idx = 0;
-    int i = 0;
-
-    size_t total_words  = 0;
+    
     unsigned char *mmap_dict_ptr = MAP_FAILED;
 
     unsigned char **words_ptrs = NULL;
@@ -116,8 +118,6 @@ int main(int argc, char **argv)
     g_num_words = CountLinesWithWC(argv[1]);
 
     RETURN_IF_BAD(FAIL != g_num_words, FAIL, "CountLinesWithWC failed");
-
-    total_words = COPIES*g_num_words;
 
     fd_dict = open(argv[1], O_RDONLY);
     RETURN_IF_BAD(-1 != fd_dict, FAIL, "open failed");
@@ -142,22 +142,19 @@ int main(int argc, char **argv)
         RETURN_IF_BAD (FALSE, FAIL, "FillWordsPointers failed" );   
     }
 
-    for(copy_idx = 1; copy_idx < COPIES; ++copy_idx)
-    {
-        memcpy(words_ptrs + copy_idx*g_num_words, words_ptrs,
-             g_num_words*sizeof(unsigned char*));
+   
+    puts("===========after FillWordsPointers================================");     
 
-        /*puts((char*)words_ptrs[copy_idx-0]);*/
-        
-        for(i  = 0 ; i < COPIES ; ++i )
-        {
-            puts((char*)words_ptrs[copy_idx*g_num_words + i]);     
+    PrintFirstWordsPerDict(words_ptrs, g_num_words, COPIES);
+    PrintLastWordsPerDict(words_ptrs, g_num_words, COPIES);
 
-        }
-
-   }
 
     ShuffleArray(words_ptrs, g_num_words*COPIES);
+
+    puts("===========after shuffle================================");
+
+    PrintFirstWordsPerDict(words_ptrs, g_num_words, COPIES);
+    PrintLastWordsPerDict(words_ptrs, g_num_words, COPIES);
 
     InitThreadChunks(words_ptrs, threads_data, num_threads, g_num_words*COPIES);
 
@@ -179,49 +176,18 @@ int main(int argc, char **argv)
     /*  sorted_ptrs */
 
 
-    puts("===========after RunAndMergeThreads================================");     
 
-    /*puts after shuffle */
-    for(copy_idx = 0; copy_idx < COPIES; ++copy_idx)
-    {
-        
-        for(i  = 0 ; i < COPIES ; ++i )
-        {
-            puts((char*)words_ptrs[copy_idx*g_num_words + i]);     
+    puts("===========after RunAndMergeThreads================================");
 
-        }
+    PrintFirstWordsPerDict(words_ptrs, g_num_words, COPIES);
+    PrintLastWordsPerDict(words_ptrs, g_num_words, COPIES);
 
-        puts("===========check 10 words from the start of each dictionary after RunAndMergeThread===");     
-
-
-   }
-
-   puts("===========end checking 10 from the end of each dictionary ==========");   
-
-   for(copy_idx = 0; copy_idx < COPIES; ++copy_idx)
-    {
-        printf("dictionaray number: %d\n", copy_idx);
-
-        for(i  = 0 ; i < -COPIES ; --i )
-        {
-            puts((char*)words_ptrs[total_words - copy_idx*g_num_words  + i ]);     
-
-        }
-        printf("=========end printing 10 words dictionaray number: %d ======\n", copy_idx);
-
-        puts("===========check 10 words after RunAndMergeThread===");     
-
-
-   }
-
-   puts("===========end check 10 words after RunAndMergeThread===");     
-
-    /*result = ValidateSortedOutput(sorted_ptrs , g_num_words * COPIES, COPIES);
+    result = ValidateSortedOutput(sorted_ptrs , g_num_words * COPIES, COPIES);
     if(FAIL == result)
     {
         FreeResources(words_ptrs, sorted_ptrs, threads_data, arr_thread);
         RETURN_IF_BAD (FALSE, FAIL, "Validation of sorted output failed" );   
-    }*/
+    }
 
    
 
@@ -339,11 +305,11 @@ static int FillWordsPointers(unsigned  char* mmap_dict,
     /* copy the first array to the next 9 arraies*/
     RETURN_IF_BAD(word_idx == g_num_words, FAIL, "word count in FillWords: failed");
 
-    /*for(copy_idx = 1; copy_idx < COPIES; ++copy_idx)
+    for(copy_idx = 1; copy_idx < COPIES; ++copy_idx)
     {
         memcpy(words_ptrs + copy_idx*g_num_words, words_ptrs,
              g_num_words*sizeof(unsigned char*));
-    }*/
+    }
 
     return SUCCESS;
 }
@@ -371,32 +337,8 @@ static int RandomCmp(const void *a, const void *b)
 
 void ShuffleArray(unsigned char **word_ptrs, size_t total_words)
 {
-    size_t copy_idx = 0;
-    size_t i = 0;
 
     qsort(word_ptrs, total_words, sizeof(unsigned char *), RandomCmp);
-
-    puts("===========after shuffle================================");     
-
-    /*puts after shuffle */
-    for(copy_idx = 0; copy_idx < COPIES; ++copy_idx)
-    {
-        
-        for(i  = 0 ; i < COPIES ; ++i )
-        {
-            puts((char*)word_ptrs[copy_idx*g_num_words + i]);     
-
-        }
-
-        puts("===========end iter ShuffleArray================================");     
-
-
-   }
-
-   puts("===========end ShuffleArray================================");     
-
-
-
 }
 
 
@@ -597,9 +539,7 @@ static int ValidateSortedOutput(unsigned char **sorted_ptrs, size_t total_words,
 {
     size_t i = 0;
     
-
-
-
+    
     for (i = 0; i < total_words; i += copies)
     {
         size_t j = 1;
@@ -629,3 +569,44 @@ static int ValidateSortedOutput(unsigned char **sorted_ptrs, size_t total_words,
     return SUCCESS;
 }
 
+
+void PrintFirstWordsPerDict(unsigned char **word_ptrs, size_t num_words, size_t num_copies)
+{
+    size_t copy_idx = 0;
+    size_t i = 0;
+
+    puts("=========== First 10 words of each dictionary ===========");
+
+    for (copy_idx = 0; copy_idx < num_copies; ++copy_idx)
+    {
+        printf(">>> Dictionary #%lu:\n", copy_idx);
+
+        for (i = 0; i < 10 && i < num_words; ++i)
+        {
+            puts((char *)word_ptrs[copy_idx * num_words + i]);
+        }
+
+        puts("---------------------------------------------------------");
+    }
+}
+
+
+void PrintLastWordsPerDict(unsigned char **word_ptrs, size_t num_words, size_t num_copies)
+{
+    size_t copy_idx = 0;
+    size_t i = 0;
+
+    puts("=========== Last 10 words of each dictionary ===========");
+
+    for (copy_idx = 0; copy_idx < num_copies; ++copy_idx)
+    {
+        printf(">>> Dictionary #%lu:\n", copy_idx);
+
+        for (i = num_words - 10; i < num_words; ++i)
+        {
+            puts((char *)word_ptrs[copy_idx * num_words + i]);
+        }
+
+        puts("--------------------------------------------------------");
+    }
+}
