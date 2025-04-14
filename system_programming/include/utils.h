@@ -16,8 +16,11 @@
 #include <assert.h>
 
 	#ifndef NDEBUG
-	#define PRINT_IF_DEBUG(fmt, val) \
-		fprintf(stderr, "" fmt " at line %d:\n",val,  __LINE__)
+	    #define PRINT_IF_DEBUG(fmt, val) \
+		    fprintf(stderr, "" fmt " at line %d:\n",val,  __LINE__)
+    #else
+        #define PRINT_IF_DEBUG(fmt, val) ((void)0)
+        
 #endif
 
 /* Returns 'ret_val' if 'cond' is false, prints msg to stderr */
@@ -31,7 +34,7 @@
 #define EXIT_IF_BAD(cond, msg)   \
     if (!(cond))                 \
     {                            \
-		fprintf(stderr, "[ABORT] at line %d: %s\n", __LINE__, msg); \
+		fprintf(stderr, "[EXIT] at line %d: %s\n", __LINE__, msg); \
         exit(FAIL);              \
     }
 
@@ -39,7 +42,7 @@
 #define ABORT_IF_BAD(cond, msg) \
     if (!(cond))                \
     {                           \
-        fprintf(stderr, "[EXIT] at line %d: %s\n", __LINE__, msg); \
+        fprintf(stderr, "[ABORT] at line %d: %s\n", __LINE__, msg); \
         abort();                \
     }
 
