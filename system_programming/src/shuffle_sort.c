@@ -489,7 +489,7 @@ int RunAndMergeThreads(unsigned char **dest_sorted_ptrs,
         PRINT_IF_DEBUG("merged_count = %d\n", merged_count);
 
     }
-
+    assert(merged_count == num_threads);
     return SUCCESS;
 }
 
@@ -504,7 +504,10 @@ int MergeSortedChunks(thread_meta_data_ty *th_data, unsigned char **dest_sorted_
     size_t b_remain = 0;
     size_t i = 0;
     unsigned char **merged = NULL;
-    size_t old_result_len = g_current_result_len;
+    
+    #ifndef NDEBUG
+        size_t old_result_len = g_current_result_len;
+    #endif
 
     puts("=== MergeSortedChunks() ===");
     PRINT_IF_DEBUG("a_len = %lu\n", a_len);
