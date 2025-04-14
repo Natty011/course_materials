@@ -2,9 +2,9 @@
  * Author : Natty
  * Reviewer : 
  * File : system_programming/include/utils.h  
- * version : 0.9
+ * version : 1.2
  * Date : 26 / 03 / 2025
- * Last update: 09 / 04 / 2025
+ * Last update: 14 / 04 / 2025
  *****************************************/
 
 #ifndef __UTILS__     /* __UTILS__  */
@@ -27,7 +27,7 @@
 #define RETURN_IF_BAD(cond, ret_val, msg) \
     if (!(cond))                          \
     {                                     \
-		fprintf(stderr, "[ERROR] at line %d: %s\n", __LINE__, msg); \
+		fprintf(stderr, "[ERROR] %s() at line %d: %s\n" ,__LINE__, msg); \
         return (ret_val);                 \
 	}
 /* Exits the program if 'cond' is false, prints msg */
