@@ -486,15 +486,9 @@ int RunAndMergeThreads(unsigned char **dest_sorted_ptrs,
             ++meta_runner;
         }
 
-        puts("111111111111111111111");
         PRINT_IF_DEBUG("merged_count = %d\n", merged_count);
-        /*assert(merged_count < num_threads);*/
 
     }
-
-    puts("22222222222222222222222222");
-
-    /*assert(merged_count == num_threads);*/
 
     return SUCCESS;
 }
