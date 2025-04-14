@@ -15,6 +15,12 @@
 #include <errno.h>	/*perror*/
 #include <assert.h>
 
+/*  example: #x is prints as a string like: 
+DEBUG_VAR(myvar); equal to ->
+printf("Value of myvar is %d\n", myvar);*/
+
+#define DEBUG_VAR(x) printf("Value of " #x " is %d\n", x);
+
 	#ifndef NDEBUG
 	    #define PRINT_IF_DEBUG(fmt, val) \
 		    fprintf(stderr, "" fmt " at line %d:\n",val,  __LINE__)
