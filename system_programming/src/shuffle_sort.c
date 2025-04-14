@@ -493,8 +493,6 @@ int RunAndMergeThreads(unsigned char **dest_sorted_ptrs,
     return SUCCESS;
 }
 
-
-
 int MergeSortedChunks(thread_meta_data_ty *th_data, unsigned char **dest_sorted_ptrs)
 {
     unsigned char **a = th_data->chunk_base;
