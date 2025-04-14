@@ -19,7 +19,7 @@
 #include <pthread.h>    /* pthread_create, join_try_np */
 #include <string.h>     /* strcmp, memcpy */
 #include <sys/wait.h>   /* WIFEXITED, WEXITSTATUS */
-#include <semaphore.h>  /* sem_wait, post */
+#include <semaphore.h>  /* sem_wait, post, init, destroy  */
 #include <time.h>       /* time */
 #include "utils.h"
 
@@ -168,8 +168,8 @@ int main(int argc, char **argv)
 
     puts("===========after RunAndMergeThreads================================");
 
-    PrintFirstWordsPerDict(words_ptrs, g_num_words, COPIES);
-    PrintLastWordsPerDict(words_ptrs, g_num_words, COPIES);
+    PrintFirstWordsPerDict(sorted_ptrs, g_num_words, COPIES);
+    PrintLastWordsPerDict(sorted_ptrs, g_num_words, COPIES);
 
     result = ValidateSortedOutput(sorted_ptrs , g_num_words * COPIES, COPIES);
     if(FAIL == result)
