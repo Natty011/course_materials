@@ -1,3 +1,4 @@
+# run: source ~/.myfuncs in terminal aftar changes 
 # run: source ~/.bashrc in terminal aftar changes 
 
 # Compilation aliases for C and C++
@@ -24,13 +25,13 @@ alias gc99='gcc -std=c99 -pedantic-errors -Wall -Wextra -DNDEBUG -O3'
 #
 # gcc compilation aliases: c++98, debug mode(gd), release mode(gc)
 # c++98, no Werror
-
-alias gd98='g++ -std=c++98 -Wall -Wextra -g'
-alias gc98='g++ -std=c++98 -Wall -Wextra -DNDEBUG -O3'
+#-pedantic-errors
+alias gd98='g++ -pedantic-errors -std=c++98 -Wall -Wextra -g -O0'
+alias gc98='g++ -pedantic-errors -std=c++98 -Wall -Wextra -DNDEBUG -O3'
 
 # c++98, with Werror
 
-alias gde98='g++ -std=c++98 -Wall -Wextra -Werror -g'
+alias gde98='g++ -std=c++98 -Wall -Wextra -Werror -g -O0'
 alias gce98='g++ -std=c++98 -Wall -Wextra -Werror -DNDEBUG -O3'
 
 # gcc compilation aliases: c++11, debug mode(gd), release mode(gc)
@@ -50,5 +51,72 @@ alias vlg='valgrind --leak-check=yes --track-origins=yes'
 
 # Valgrind alias for c++ for inspections of free/delete
 #alias vlgpp='valgrind --leak-check=full --track-origins=yes --show-leak-kinds=all --error-exitcode=1'
+
+
+#run_gc mytest.c
+#run_gc98 testprog.cpp
+#run_gd98 mydebug.cpp
+
+# יצירת קובץ C++ חדש עם תבנית ברירת מחדל
+function labp() 
+{ 
+    mkdir -p ~/test; 
+    cp ~/.labdefault.cpp ~/test/$1.cpp && code ~/test/$1.cpp 
+}
+
+# יצירת קובץ C חדש עם תבנית ברירת מחדל
+function labc() 
+{ 
+    mkdir -p ~/test; 
+    cp ~/.labdefaultc.c ~/test/$1.c && code ~/test/$1.c 
+}
+
+# קומפילציית קובץ C
+# קומפילציה והרצה לקובץ C עם alias gc (C89 release mode)
+function run_gc()
+{
+    local file="$1"
+    local base="${file%.c}"
+    gc "$file" -o "$base.out" && ./"$base.out"
+}
+
+# קומפילציה והרצה לקובץ C עם alias gd (C89 debug mode)
+function run_gc()
+{
+    local file="$1"
+    local base="${file%.c}"
+    gd "$file" -o "$base.out" && ./"$base.out"
+}
+
+
+# קומפילציה והרצה לקובץ C++ עם alias gc98 (C++98 release mode)
+function run_gc98()
+{
+    local file="$1"
+    local base="${file%.cpp}"
+    gc98 "$file" -o "$base.out" && ./"$base.out"
+}
+
+# קומפילציה והרצה לקובץ C++ עם alias gd98 (debug mode)
+function run_gd98()
+{
+    local file="$1"
+    local base="${file%.cpp}"
+    gd98 "$file" -o "$base.out" && ./"$base.out"
+}
+
+# כניסה לספריית ~/test
+function cdtest() 
+{
+    cd ~/test
+}
+
+# מחיקת קובץ הפלט a.out (אם נוצר)
+function rmout() 
+{
+    rm -f a.out *.out
+}
+
+
 
 
