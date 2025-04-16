@@ -111,12 +111,42 @@ function cdtest()
     cd ~/test
 }
 
-# מחיקת קובץ הפלט a.out (אם נוצר)
+# מחיקה לפי שם קובץ או את כל קבצי ההרצה
+# rmout myprog or myprog.out    ימחק את הקובץ myprog.out בלבד
+# rmout            ידפיס הודעת שימוש
+#rmout all          מוחק את כל קבצי .out כולל a.out
+
 function rmout() 
 {
-    rm -f a.out *.out
-}
+    if [ -z "$1" ]; then
+        echo "Usage:"
+        echo "  rmout <filename_without_extension>  # Delete specific .out file"
+        echo "  rmout <filename.out>                # Also works"
+        echo "  rmout all                           # Delete all .out files + a.out"
+        return 1
+    fi
 
+    if [ "$1" = "all" ]; then
+        rm -f a.out *.out
+        echo "All .out files deleted"
+        return
+    fi
+
+    local file="$1"
+
+    # אם המשתמש לא כתב .out - נוסיף אותה
+    case "$file" in
+        *.out) ;;                      # אל תעשה כלום אם כבר יש סיומת .out
+        *) file="$file.out" ;;        # אחרת הוסף אותה
+    esac
+
+    if [ -f "$file" ]; then
+        rm -f "$file"
+        echo "Deleted $file"
+    else
+        echo "File '$file' not found"
+    fi
+}
 
 
 
