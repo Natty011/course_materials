@@ -12,8 +12,11 @@ String::String(const char* str_ = "")
     m_str = temp;
 
 }
-
-
+// Dtor
+String::~String()
+{
+    delete[] m_str;
+}
 
 
 
