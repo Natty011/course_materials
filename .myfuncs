@@ -11,7 +11,7 @@
 
 # gcc compilation aliases: c89, debug mode(gd), release mode(gc)
 
-alias gd='gcc -ansi -pedantic-errors -Wall -Wextra -g'
+alias gd='gcc -ansi -pedantic-errors -Wall -Wextra -DDEBUG -g'
 alias gc='gcc -ansi -pedantic-errors -Wall -Wextra -DNDEBUG -O3'
 
 # gcc compilation aliases: c89, debug mode(gd), release mode(gc)
@@ -26,23 +26,23 @@ alias gc99='gcc -std=c99 -pedantic-errors -Wall -Wextra -DNDEBUG -O3'
 # gcc compilation aliases: c++98, debug mode(gd), release mode(gc)
 # c++98, no Werror
 #-pedantic-errors
-alias gd98='g++ -pedantic-errors -std=c++98 -Wall -Wextra -g -O0'
+alias gd98='g++ -pedantic-errors -std=c++98 -Wall -Wextra -DPLATFORM64 -DDEBUG -g -O0'
 alias gc98='g++ -pedantic-errors -std=c++98 -Wall -Wextra -DNDEBUG -O3'
 
 # c++98, with Werror
 
-alias gde98='g++ -std=c++98 -Wall -Wextra -Werror -g -O0'
+alias gde98='g++ -std=c++98 -Wall -Wextra -Werror -DDEBUG -g -O0'
 alias gce98='g++ -std=c++98 -Wall -Wextra -Werror -DNDEBUG -O3'
 
 # gcc compilation aliases: c++11, debug mode(gd), release mode(gc)
 # c++11, no Werror
 
-alias gd11='g++ -std=c++11 -Wall -Wextra -g'
+alias gd11='g++ -std=c++11 -Wall -Wextra -DDEBUG -g'
 alias gc11='g++ -std=c++11 -Wall -Wextra -DNDEBUG -O3'
 
 # c++11, with Werror
 
-alias gde11='g++ -std=c++11 -Wall -Wextra -Werror -g'
+alias gde11='g++ -std=c++11 -Wall -Wextra -Werror -DDEBUG -g'
 alias gce11='g++ -std=c++11 -Wall -Wextra -Werror -DNDEBUG -O3'
 
 #
@@ -81,7 +81,7 @@ function run_gc()
 }
 
 # קומפילציה והרצה לקובץ C עם alias gd (C89 debug mode)
-function run_gc()
+function run_gd()
 {
     local file="$1"
     local base="${file%.c}"
@@ -104,6 +104,25 @@ function run_gd98()
     local base="${file%.cpp}"
     gd98 "$file" -o "$base.out" && ./"$base.out"
 }
+
+
+# קומפילציה והרצה לקובץ C++ עם alias gc11 (C++11 release mode)
+function run_gc11()
+{
+    local file="$1"
+    local base="${file%.cpp}"
+    gc11 "$file" -o "$base.out" && ./"$base.out"
+}
+
+# קומפילציה והרצה לקובץ C++ עם alias gd11 (debug mode)
+function run_gd11()
+{
+    local file="$1"
+    local base="${file%.cpp}"
+    gd11 "$file" -o "$base.out" && ./"$base.out"
+}
+
+
 
 # כניסה לספריית ~/test
 function cdtest() 
