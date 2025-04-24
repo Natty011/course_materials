@@ -6,10 +6,10 @@
 class String
 {
     public:
-    explicit String(const char* s_ = ""); //  Ctor
-    String(const String& s_); //CCtor
+    explicit String(const char* str_ = ""); //  Ctor
+    String(const String& other_); //CCtor
     ~String(); //Dtor
-    
+    String& operator=(const String& other_); // Assignment operator
 
 }
 
