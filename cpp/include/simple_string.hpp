@@ -14,7 +14,10 @@ class String
 
     size_t Length() const; // return the length of the string
     const char* Cstr() const; // return the pointer to the string
+
+
 }
+
 
 
 
