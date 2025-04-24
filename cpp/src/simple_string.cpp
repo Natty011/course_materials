@@ -18,6 +18,13 @@ String::~String()
     delete[] m_str;
 }
 
+//CCtor
+String::String(const String& other_)
+{
+
+}
+
+
 
 
 
