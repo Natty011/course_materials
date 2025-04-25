@@ -32,6 +32,17 @@ String& String::operator=(const String& other_)
     return *this;
 }
 
+
+const String::Length() const
+{
+    return std::strlen(m_str);
+}
+
+const char* String::Cstr() const
+{
+    return m_str;
+}
+
 char* String::AllocateNewString(const char* input_)
 {
     assert(input_);
