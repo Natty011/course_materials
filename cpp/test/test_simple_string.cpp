@@ -19,21 +19,35 @@ int main()
     Foo(String("abc"));
     String tmp = Bla();
     std::cout << "tmp.Cstr(): " << tmp.Cstr() << "\n";
+    std::cout << "tmp.Length(): " << tmp.Length() << "\n\n";
 
     String str1("Ctor_s1");
     String str2(str1); //   CCtor
     String str3("Ctor_s3");
 
-    std::cout <<"str1: " << str1.Cstr() <<"\n";
-    std::cout <<"str2: " << str2.Cstr() <<"\n";
-    std::cout <<"str3: " << str3.Cstr() <<"\n";
+    std::cout <<"str1.Cstr(): " << str1.Cstr() <<"\n" 
+              <<"Address of str1.Cstr(): \n" 
+              << static_cast<const void*>(str1.Cstr()) <<"\n\n";
+
+    std::cout <<"After CCtor of str2(str1): " << str2.Cstr() <<"\n" 
+                <<"Address of str2.Cstr(): \n" 
+                << static_cast<const void*>(str2.Cstr()) <<"\n\n";
+
+    std::cout <<"str3.Cstr(): " << str3.Cstr() <<"\n"
+                <<"Address of str3.Cstr(): \n" 
+                << static_cast<const void*>(str3.Cstr()) <<"\n\n";
 
     str2 = str3;
-    std::cout << "After assignment (str2=str3): " << str2.Cstr() <<"\n";
+    std::cout << "After assignment (str2=str3): " << str2.Cstr() <<"\n"
+              <<"Address of str2.Cstr(): \n" 
+              << static_cast<const void*>(str2.Cstr()) <<"\n\n";
 
     str3 = str3;
-    std::cout << "self assignment (str3=str3): " << str3.Cstr() <<"\n";
+    std::cout << "self assignment (str3=str3): " << str3.Cstr() <<"\n"
+              <<"Address of str3.Cstr(): \n" 
+              << static_cast<const void*>(str3.Cstr()) <<"\n\n";
 
+    //str3.~String();
 
     return 0;
 }
