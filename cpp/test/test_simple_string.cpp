@@ -11,12 +11,12 @@ void Foo(String s_)
 
 String Bla()
 {
-    return "efg";
+    return String("efg");
 }
 
 int main()
 {
-    Foo("abc");
+    Foo(String("abc"));
     String tmp = Bla();
     std::cout << tmp.Cstr() << "\n";
 
