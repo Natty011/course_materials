@@ -26,23 +26,23 @@ alias gc99='gcc -std=c99 -pedantic-errors -Wall -Wextra -DNDEBUG -O3'
 # gcc compilation aliases: c++98, debug mode(gd), release mode(gc)
 # c++98, no Werror
 #-pedantic-errors
-alias gd98='g++ -pedantic-errors -std=c++98 -Wall -Wextra -DPLATFORM64 -DDEBUG -g -O0'
+alias gd98='g++ -pedantic-errors -std=c++98 -Wall -Wextra -DPLATFORM_64 -DDEBUG -g -O0'
 alias gc98='g++ -pedantic-errors -std=c++98 -Wall -Wextra -DNDEBUG -O3'
 
 # c++98, with Werror
 
-alias gde98='g++ -std=c++98 -Wall -Wextra -Werror -DDEBUG -g -O0'
+alias gde98='g++ -std=c++98 -Wall -Wextra -Werror -DPLATFORM_64 -DDEBUG -g -O0'
 alias gce98='g++ -std=c++98 -Wall -Wextra -Werror -DNDEBUG -O3'
 
 # gcc compilation aliases: c++11, debug mode(gd), release mode(gc)
 # c++11, no Werror
 
-alias gd11='g++ -std=c++11 -Wall -Wextra -DDEBUG -g'
+alias gd11='g++ -std=c++11 -Wall -Wextra -DPLATFORM_64 -DDEBUG -g'
 alias gc11='g++ -std=c++11 -Wall -Wextra -DNDEBUG -O3'
 
 # c++11, with Werror
 
-alias gde11='g++ -std=c++11 -Wall -Wextra -Werror -DDEBUG -g'
+alias gde11='g++ -std=c++11 -Wall -Wextra -Werror -DPLATFORM_64 -DDEBUG -g'
 alias gce11='g++ -std=c++11 -Wall -Wextra -Werror -DNDEBUG -O3'
 
 #
