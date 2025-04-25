@@ -12,7 +12,6 @@
 #define BAD_MEM_VALUE_32 0xDEADBEEF //invalid address in Vmemory
 #define BAD_MEM_VALUE_64 0xDEADBEEFDEADBEEF
 
-
 // BAD_MEM(T) is used to mark memory as "dead" after Dtor.
 // to help catch use-after-free bugs (e.g. segmentation fault on access).
 
