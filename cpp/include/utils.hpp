@@ -14,10 +14,7 @@
 
 
 // BAD_MEM(T) is used to mark memory as "dead" after Dtor.
-// assign a clearly invalid address (0xDEADBEEF)
 // to help catch use-after-free bugs (e.g. segmentation fault on access).
-// reinterpret_cast is used here because we cast an integer literal
-// (address) to a pointer
 
 #if defined(PLATFORM_32)
     #define BAD_MEM(T) reinterpret_cast<T *>(BAD_MEM_VALUE_32)
