@@ -20,7 +20,7 @@ public:
 
 private:
     char *m_str;
-    static char* AllocateNewString(const char* str_);
+    static char* AllocateNewString(const char* input_);
 };
 
 } // namespace ilrd
