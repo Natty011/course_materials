@@ -33,7 +33,7 @@ String& String::operator=(const String& other_)
 }
 
 
-const String::Length() const
+size_t String::Length() const
 {
     return std::strlen(m_str);
 }
