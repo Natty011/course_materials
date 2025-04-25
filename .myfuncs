@@ -58,18 +58,46 @@ alias vlg='valgrind --leak-check=yes --track-origins=yes'
 #run_gd98 mydebug.cpp
 
 # יצירת קובץ C++ חדש עם תבנית ברירת מחדל
+# labp here ./  create----> ./here.cpp in current directory
+# labp intro9 ~/projects/lab1 create----> ~/projects/lab1/intro9.cpp
 function labp() 
 { 
-    mkdir -p ~/test; 
-    cp ~/.labdefault.cpp ~/test/$1.cpp && code ~/test/$1.cpp 
+    mkdir -p "$2"
+    cp ~/.labdefault.cpp "$2/$1.cpp" && code "$2/$1.cpp" 
+    
+    #mkdir -p ~/test; 
+    #cp ~/.labdefault.cpp ~/test/$1.cpp && code ~/test/$1.cpp 
 }
 
 # יצירת קובץ C חדש עם תבנית ברירת מחדל
+# labc sort main_test   create----> ./main_test/sort.c
 function labc() 
 { 
-    mkdir -p ~/test; 
-    cp ~/.labdefaultc.c ~/test/$1.c && code ~/test/$1.c 
+    mkdir -p "$2"
+    cp ~/.labdefaultc.c "$2/$1.c" && code "$2/$1.c" 
+    
+    #mkdir -p ~/test; 
+    #cp ~/.labdefaultc.c ~/test/$1.c && code ~/test/$1.c 
 }
+
+
+# קובץ header C
+# labhpp here ./  create----> ./here.hpp in current directory
+# labhpp intro9 ~/projects/lab1 create----> ~/projects/lab1/intro9.hpp
+function labh() 
+{ 
+    mkdir -p "$2"
+    cp ~/.labdefaulth.h "$2/$1.h" && code "$2/$1.h"
+}
+
+# קובץ header C++
+function labhpp() 
+{ 
+	mkdir -p "$2"
+    cp ~/.labdefaulthpp.hpp "$2/$1.hpp" && code "$2/$1.hpp" 
+}
+
+
 
 # קומפילציית קובץ C
 # קומפילציה והרצה לקובץ C עם alias gc (C89 release mode)
