@@ -49,8 +49,13 @@ alias gce11='g++ -std=c++11 -Wall -Wextra -Werror -DNDEBUG -O3'
 # Valgrind alias
 alias vlg='valgrind --leak-check=yes --track-origins=yes'
 
+
+
 # Valgrind alias for c++ for inspections of free/delete
 #alias vlgpp='valgrind --leak-check=full --track-origins=yes --show-leak-kinds=all --error-exitcode=1'
+
+# gdb --tui alias
+alias gdbtui='gdb --tui'
 
 
 #run_gc mytest.c
@@ -58,45 +63,44 @@ alias vlg='valgrind --leak-check=yes --track-origins=yes'
 #run_gd98 mydebug.cpp
 
 # יצירת קובץ C++ חדש עם תבנית ברירת מחדל
-# labp here ./  create----> ./here.cpp in current directory
+# labp here   create----> ./here.cpp in current directory
 # labp intro9 ~/projects/lab1 create----> ~/projects/lab1/intro9.cpp
 function labp() 
 { 
-    mkdir -p "$2"
-    cp ~/.labdefault.cpp "$2/$1.cpp" && code "$2/$1.cpp" 
-    
-    #mkdir -p ~/test; 
-    #cp ~/.labdefault.cpp ~/test/$1.cpp && code ~/test/$1.cpp 
+    local dir="${2:-.}"   # אם $2 ריק – ברירת מחדל היא "."
+    mkdir -p "$dir"
+    cp ~/.labdefault.cpp "$dir/$1.cpp" && code "$dir/$1.cpp"
 }
 
 # יצירת קובץ C חדש עם תבנית ברירת מחדל
 # labc sort main_test   create----> ./main_test/sort.c
 function labc() 
 { 
-    mkdir -p "$2"
-    cp ~/.labdefaultc.c "$2/$1.c" && code "$2/$1.c" 
-    
-    #mkdir -p ~/test; 
-    #cp ~/.labdefaultc.c ~/test/$1.c && code ~/test/$1.c 
+    local dir="${2:-.}"
+    mkdir -p "$dir"
+    cp ~/.labdefaultc.c "$dir/$1.c" && code "$dir/$1.c" 
 }
 
-
 # קובץ header C
-# labhpp here ./  create----> ./here.hpp in current directory
-# labhpp intro9 ~/projects/lab1 create----> ~/projects/lab1/intro9.hpp
+
 function labh() 
 { 
-    mkdir -p "$2"
-    cp ~/.labdefaulth.h "$2/$1.h" && code "$2/$1.h"
+    local dir="${2:-.}"
+    mkdir -p "$dir"
+    cp ~/.labdefaulth.h "$dir/$1.h" && code "$dir/$1.h"
 }
 
 # קובץ header C++
+
+# labhpp here   create----> ./here.hpp in current directory
+# labhpp intro9 ~/projects/lab1 create----> ~/projects/lab1/intro9.hpp
+
 function labhpp() 
 { 
-	mkdir -p "$2"
-    cp ~/.labdefaulthpp.hpp "$2/$1.hpp" && code "$2/$1.hpp" 
+    local dir="${2:-.}"
+    mkdir -p "$dir"
+    cp ~/.labdefaulthpp.hpp "$dir/$1.hpp" && code "$dir/$1.hpp"
 }
-
 
 
 # קומפילציית קובץ C
