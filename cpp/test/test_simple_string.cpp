@@ -79,9 +79,15 @@ int main()
 
     std::cout << "s1 < s2: " << (s1 < s2) << std::endl;
     std::cout << "s1 > s2: " << (s1 > s2) << "\n" << std::endl;
-    
+
     std::cout << "s1 < s1: " << (s1 < s1) << std::endl;
-    std::cout << "s1 > s1: " << (s1 > s1) << std::endl;
+    std::cout << "s1 > s1: " << (s1 > s1) << "\n" << std::endl;
+
+    std::cout << "s22 > s2: " << (s22 > s2) << std::endl;
+    std::cout << "s22 < s2: " << (s22 < s2) << "\n" << std::endl;
+
+    std::cout << "s11 > s2: " << (s11 > s2) << std::endl;
+    std::cout << "s11 < s2: " << (s11 < s2) << "\n" << std::endl;
 
     return 0;
 }
