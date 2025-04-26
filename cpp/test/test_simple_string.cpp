@@ -63,22 +63,25 @@ int main()
     const char* s22 = "hi";
     const char* s33 = "hello";
 
-    String s1(s11);
-    String s2(s22);
+    String s1("hello");
+    String s2("hi");
     String s3("hello");
 
     std::cout << "s1: " << s1 << std::endl;
     std::cout << "s2: " << s2 << std::endl;
-    std::cout << "s3: " << s3 << std::endl;
+    std::cout << "s3: " << s3 << "\n" << std::endl;
 
     std::cout << "s1 == s3: " << (s1 == s3) << std::endl;
-    std::cout << "s1 == s2: " << (s1 == s2) << std::endl;
+    std::cout << "s1 == s2: " << (s1 == s2) << "\n"<< std::endl;
 
     std::cout << "s1 == s11: " << (s1 == s11) << std::endl;
-    std::cout << "s11 == s1: " << (s11 == s1) << std::endl;
+    std::cout << "s11 == s1: " << (s11 == s1) << "\n"<< std::endl;
 
     std::cout << "s1 < s2: " << (s1 < s2) << std::endl;
-    std::cout << "s1 > s2: " << (s1 > s2) << std::endl;
+    std::cout << "s1 > s2: " << (s1 > s2) << "\n" << std::endl;
+    
+    std::cout << "s1 < s1: " << (s1 < s1) << std::endl;
+    std::cout << "s1 > s1: " << (s1 > s1) << std::endl;
 
     return 0;
 }
