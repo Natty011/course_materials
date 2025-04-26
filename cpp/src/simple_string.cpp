@@ -110,8 +110,5 @@ bool operator>(const char* lhs_, const String& rhs_)
     return rhs_ < lhs_;
 }
 
-
-
-
 }// namespace ilrd
 
