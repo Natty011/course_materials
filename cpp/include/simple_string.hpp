@@ -43,4 +43,5 @@ bool operator>(const char* lhs_, const String& rhs_);
 
 } // namespace ilrd
 
+
 #endif // ILRD_HRD39_SIMPLE_STRING_HPP 
