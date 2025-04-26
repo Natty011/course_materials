@@ -1,4 +1,4 @@
-#include <iostream> // std::cin, std::cout 
+#include <iostream> // std::cin, std::cout , std::endl
 #include "simple_string.hpp" // ilrd::String
 
 
