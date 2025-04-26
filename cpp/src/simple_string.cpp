@@ -60,7 +60,7 @@ std::ostream& operator<<(std::ostream& os_,const String& str_)
 
 }
 
-bool operator==(const String& lhs_, const& String& rhs_)
+bool operator==(const String& lhs_, const String& rhs_)
 {
     return std::strcmp(lhs_.Cstr(), rhs_.Cstr()) == 0;
 }
