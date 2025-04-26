@@ -1,12 +1,12 @@
+#include <iostream> //std::ostream
 #include <cstring> // strlen, strcpy
 #include <cassert> // assert 
-
 #include "simple_string.hpp"
 #include "utils.hpp" // BAD_MEM
 
 namespace ilrd
 {
-
+//member functions
 // Ctor
 String::String(const char* str_): m_str(AllocateNewString(str_))
 {}
@@ -32,7 +32,6 @@ String& String::operator=(const String& other_)
     return *this;
 }
 
-
 size_t String::Length() const
 {
     return std::strlen(m_str);
@@ -54,4 +53,31 @@ char* String::AllocateNewString(const char* input_)
     return ret;
 }
 
+//Globals functions
+std::ostream& operator<<(std::ostream& os_,const String& str_)
+{
+    return os_<<str_.Cstr();
+
+}
+
+bool operator==(const String& lhs_, const& String& rhs_)
+{
+    
+}
+
+
+
 }// namespace ilrd
+
+
+/*
+
+std::ostream& operator<<(std:: ostream& os_,const String& str_);
+
+bool operator==(const String& lhs_, const& String& rhs_);
+bool operator==(const String& lhs_, const char* rhs_);
+bool operator==(const char* lhs_, const String& rhs_);
+
+bool operator<(const String& lhs_, const String& rhs_);
+bool operator>(const String& lhs_, const String& rhs_);
+*/
