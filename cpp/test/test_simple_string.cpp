@@ -71,10 +71,14 @@ int main()
     std::cout << "s2: " << s2 << std::endl;
     std::cout << "s3: " << s3 << std::endl;
 
-    std::cout << "s1 == s3: " <<
+    std::cout << "s1 == s3: " << (s1 == s3) << std::endl;
+    std::cout << "s1 == s2: " << (s1 == s2) << std::endl;
 
+    std::cout << "s1 == s11: " << (s1 == s11) << std::endl;
+    std::cout << "s11 == s1: " << (s11 == s1) << std::endl;
 
-
+    std::cout << "s1 < s2: " << (s1 < s2) << std::endl;
+    std::cout << "s1 > s2: " << (s1 > s2) << std::endl;
 
     return 0;
 }
