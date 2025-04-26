@@ -57,6 +57,25 @@ int main()
 
     //str3.~String();
 
+    //seif 11+12 in exersize 27
+
+    const char* s11 = "hello";
+    const char* s22 = "hi";
+    const char* s33 = "hello";
+
+    String s1(s11);
+    String s2(s22);
+    String s3("hello");
+
+    std::cout << "s1: " << s1 << std::endl;
+    std::cout << "s2: " << s2 << std::endl;
+    std::cout << "s3: " << s3 << std::endl;
+
+    std::cout << "s1 == s3: " <<
+
+
+
+
     return 0;
 }
 
