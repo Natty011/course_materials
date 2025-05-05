@@ -1,2 +1,19 @@
-# Ignore all files and folders except dummy.md file
+# קבצים שמקומפלים
+*.o
+*.out
+*.exe
+*.a
+*.so
+*.log
 
+# קבצי טקסט גדולים
+*.txt
+
+# קבצי גיבוי של עורך
+*~
+*.swp
+
+# קבצי הרצה שנוצרים ע"י make
+test
+main
+a.out
