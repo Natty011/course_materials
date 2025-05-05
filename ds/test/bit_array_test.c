@@ -110,9 +110,15 @@ static void TestBitArrResetAll(void)
 static void TestBitArrSetOn(void)
 {
  	bit_arr_t bit_array = 3;
+	 bit_arr_t bit_array1 = 0;
+
  	printf("bit_array = 3 \n");
  	puts("Expected result: 0x7 ");      
     printf(" BitArrSetOn = %#lx \n", BitArrSetOn(bit_array, 2));
+
+ 	printf("bit_array1 = 0 \n");
+ 	puts("Expected result: 0x1 ");      
+    printf(" BitArrSetOn = %#lx \n", BitArrSetOn(bit_array1,0));
     
 }  
 /********************  TestBitArrSetOff  *************************/    

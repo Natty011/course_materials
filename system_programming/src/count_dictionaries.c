@@ -53,12 +53,6 @@ void *CountCharInChunckBlock_TH(thread_meta_data_ty *threads_data);
 static void FreeResources(size_t *main_hist, size_t *local_hists,
                 thread_meta_data_ty *th_data);
 
-/*functions defenition*/
-    /* CountNumOfWordsInDictFile(char *dict_ptr, size_t dict_size) */
-    /* NumOfDictCopies(char *dict_ptr, size_t dict_size, num_word) */
-    /* InitThreadMetaData(th_data, num_word, num_thread, start_ptr_dict) */
-    /* CountCharInInterval_TH(thread_data_t *th_data[] )*/
-
 
 int main(int argc, char **argv)
 {

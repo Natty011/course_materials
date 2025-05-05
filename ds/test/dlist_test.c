@@ -8,7 +8,7 @@
 #include <stdio.h> 		/* printf, puts,  */
 #include <string.h> 	/* strcpy, strcmp */
 #include "dlist.h" 
-
+#include "aux_func.h" 
 static int match_func (void *check_data, void *user_param);
 static int op_func (void *data, void *user_param);
 /***************************function declaration**************************/

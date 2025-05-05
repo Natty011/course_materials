@@ -34,9 +34,8 @@ typedef struct position
 
 #endif                          /* __KNIGHTS_TOUR_H__      */
 
-/*
+
 #ifdef PRINTS
     void PrintBoard(uint8_t board[8][8],  position_t *ret_path);
 
 #endif
-*/

@@ -8,6 +8,7 @@
 #include <assert.h> 	/* assert */
 #include <stdlib.h> 	/* malloc, free */
 #include "dlist.h" 
+#include "aux_func.h" 
 
 #define 	NodeToIter(x)		((dlist_iter_t)x)
 #define		IterToNode(x)		((dlist_node_t*)x)	

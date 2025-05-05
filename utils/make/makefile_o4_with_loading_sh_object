@@ -1,0 +1,93 @@
+ROOT := ..
+CC = gcc
+
+SRC_PATH = $(ROOT)/src/
+TEST_PATH = $(ROOT)/test/
+HEAD_PATH = $(ROOT)/include/
+DS_SRC_PATH = $(ROOT)/../ds/src/
+DS_INC_PATH = $(ROOT)/../ds/include/
+
+BIN_DIR = $(ROOT)/bin
+DEBUG_DIR = $(BIN_DIR)/debug
+RELEASE_DIR = $(BIN_DIR)/release
+
+SRC_FILES = $(SRC_PATH)watchdog.c
+DS_SRC_FILES = \
+	$(DS_SRC_PATH)scheduler.c \
+	$(DS_SRC_PATH)task.c \
+	$(DS_SRC_PATH)uid.c \
+	$(DS_SRC_PATH)pqueue.c \
+	$(DS_SRC_PATH)sort_list.c \
+	$(DS_SRC_PATH)dlist.c
+
+TEST_SRCS = $(wildcard $(TEST_PATH)*_app.c)
+DEBUG_TARGETS = $(patsubst %.c,$(DEBUG_DIR)/%.out,$(notdir $(TEST_SRCS)))
+RELEASE_TARGETS = $(patsubst %.c,$(RELEASE_DIR)/%.out,$(notdir $(TEST_SRCS)))
+
+CFLAGS = -ansi -pedantic-errors -Wall -Wextra -fPIC
+DEBUG = -g
+RELEASE = -DNDEBUG -O3
+CPPFLAGS = -I$(HEAD_PATH) -I$(DS_INC_PATH) -I$(TEST_PATH)
+
+LIB_NAME = libwatchdog
+
+.PHONY: all debug release test clean
+
+all: release debug
+
+debug: $(DEBUG_DIR)/$(LIB_NAME)_debug.so \
+       $(DEBUG_DIR)/watchdog_app.out \
+       $(DEBUG_DIR)/wd_test.out
+
+release: prepare $(RELEASE_DIR)/$(LIB_NAME)_release.so $(RELEASE_TARGETS)
+
+prepare:
+	@mkdir -p $(DEBUG_DIR) $(RELEASE_DIR)
+
+test: debug
+
+# Rule for test app executables
+$(DEBUG_DIR)/%.out: $(DEBUG_DIR)/%.o $(DEBUG_DIR)/$(LIB_NAME)_debug.so
+	$(CC) $(CFLAGS) $(CPPFLAGS) $< -o $@ -L$(abspath $(DEBUG_DIR)) \
+	-l:$(notdir $(DEBUG_DIR)/$(LIB_NAME)_debug.so) -Wl,-rpath=$(abspath $(DEBUG_DIR)) -pthread
+
+$(RELEASE_DIR)/%.out: $(RELEASE_DIR)/%.o $(RELEASE_DIR)/$(LIB_NAME)_release.so
+	$(CC) $(CFLAGS) $(CPPFLAGS) $< -o $@ -L$(abspath $(RELEASE_DIR)) \
+	-l:$(notdir $(RELEASE_DIR)/$(LIB_NAME)_release.so) -Wl,-rpath=$(abspath $(RELEASE_DIR)) -pthread
+
+# Compilation rules
+$(DEBUG_DIR)/%.o: $(SRC_PATH)%.c | prepare
+	$(CC) $(CFLAGS) $(DEBUG) $(CPPFLAGS) -MMD -MP -MF $(patsubst %.o,%.d,$@) -c $< -o $@
+
+$(DEBUG_DIR)/%.o: $(DS_SRC_PATH)%.c | prepare
+	$(CC) $(CFLAGS) $(DEBUG) $(CPPFLAGS) -MMD -MP -MF $(patsubst %.o,%.d,$@) -c $< -o $@
+
+$(DEBUG_DIR)/%.o: $(TEST_PATH)%.c | prepare
+	$(CC) $(CFLAGS) $(DEBUG) $(CPPFLAGS) -MMD -MP -MF $(patsubst %.o,%.d,$@) -c $< -o $@
+
+$(RELEASE_DIR)/%.o: $(SRC_PATH)%.c | prepare
+	$(CC) $(CFLAGS) $(RELEASE) $(CPPFLAGS) -MMD -MP -MF $(patsubst %.o,%.d,$@) -c $< -o $@
+
+$(RELEASE_DIR)/%.o: $(DS_SRC_PATH)%.c | prepare
+	$(CC) $(CFLAGS) $(RELEASE) $(CPPFLAGS) -MMD -MP -MF $(patsubst %.o,%.d,$@) -c $< -o $@
+
+$(RELEASE_DIR)/%.o: $(TEST_PATH)%.c | prepare
+	$(CC) $(CFLAGS) $(RELEASE) $(CPPFLAGS) -MMD -MP -MF $(patsubst %.o,%.d,$@) -c $< -o $@
+
+# Shared library rules
+$(RELEASE_DIR)/$(LIB_NAME)_release.so: \
+	$(patsubst $(SRC_PATH)%.c,$(RELEASE_DIR)/%.o,$(SRC_FILES)) \
+	$(patsubst $(DS_SRC_PATH)%.c,$(RELEASE_DIR)/%.o,$(DS_SRC_FILES))
+	$(CC) $(CFLAGS) $(RELEASE) $(CPPFLAGS) -shared $^ -o $@
+
+$(DEBUG_DIR)/$(LIB_NAME)_debug.so: \
+	$(patsubst $(SRC_PATH)%.c,$(DEBUG_DIR)/%.o,$(SRC_FILES)) \
+	$(patsubst $(DS_SRC_PATH)%.c,$(DEBUG_DIR)/%.o,$(DS_SRC_FILES))
+	$(CC) $(CFLAGS) $(DEBUG) $(CPPFLAGS) -shared $^ -o $@
+
+# Include dep files
+-include $(wildcard $(DEBUG_DIR)/*.d) $(wildcard $(RELEASE_DIR)/*.d)
+
+clean:
+	rm -f $(DEBUG_DIR)/*.o $(DEBUG_DIR)/*.d $(DEBUG_DIR)/*.out $(DEBUG_DIR)/*.so \
+	      $(RELEASE_DIR)/*.o $(RELEASE_DIR)/*.d $(RELEASE_DIR)/*.out $(RELEASE_DIR)/*.so

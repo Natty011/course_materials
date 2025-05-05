@@ -1,0 +1,48 @@
+{
+    "files.associations": {
+        "random": "c",
+        "errno.h": "c",
+        "atomic": "c",
+        "stdlib.h": "c",
+        "stdio.h": "c",
+        "signal.h": "c",
+        "unistd.h": "c",
+        "pthread.h": "c",
+        "time.h": "c",
+        "array": "c",
+        "deque": "c",
+        "string": "c",
+        "unordered_map": "c",
+        "vector": "c",
+        "string_view": "c",
+        "initializer_list": "c",
+        "utils.h": "c",
+        "types.h": "c",
+        "ipc.h": "c",
+        "stdatomic.h": "c",
+        "functional": "c",
+        "slist.h": "c",
+        "assert.h": "c",
+        "semaphore.h": "c",
+        "tqueue.h": "c",
+        "system_error": "c",
+        "tuple": "c",
+        "type_traits": "c",
+        "utility": "c",
+        "stdint.h": "c",
+        "select.h": "c",
+        "fcntl.h": "c",
+        "stat.h": "c"
+    },
+    "editor.enableAutoCompletions": true,
+    "editor.suggest.showFunctions": true,
+    "editor.suggest.showVariables": true,
+    
+    "editor.tabCompletion": "on",
+    "editor.inlineCompletionsAccessibilityVerbose": true,
+    "C_pp.autocompleteAddParentheses": false,
+    "github.copilot.advanced": {
+
+    }
+
+}

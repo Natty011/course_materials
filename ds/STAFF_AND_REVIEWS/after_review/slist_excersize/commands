@@ -1,0 +1,7 @@
+gd slist_exercises.c slist_exercises_test.c -o slist_excercises_test
+
+gc slist_exercises.c slist_exercises_test.c -o slist_excercises_test
+
+./slist_excercises_test
+
+vlg ./slist_excercises_test

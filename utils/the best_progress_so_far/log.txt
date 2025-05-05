@@ -1,0 +1,134 @@
+[CLIENT] (pid: 247145)
+[wd](MMI) argv[0] = ./wd_test.out
+[wd](MMI) argv[1] = 3
+[wd](MMI) argv[2] = 2
+[wd](MMI) argv[3] = ./watchdog_app.out
+[WD(MMI)] value of child_pid =247145  at line 111:
+[MMI DEBUG] info->argv[0] = ./watchdog_app.out
+[MMI DEBUG] info->argv[1] = 3
+[MMI DEBUG] info->argv[2] = 2
+[MMI DEBUG] info->argv[3] = ./wd_test.out
+[MMI DEBUG] info->argv[4] = 247145
+[WD(MMI)] value of pid_str =247145 at line 153:
+[CLIENT] watchdog_app (pid: 247145)
+[wd][wd_thread] argv[3] = ./wd_test.out
+[CLIENT] watchdog_app (pid: 247145)
+[wd(WaitForFirstSignal_TSK)] value of (int)info->allowed_misses =3  at line 292:
+[wd(WaitForFirstSignal_TSK)] value of g_missed =0  at line 296:
+[CLIENT] watchdog_app (pid: 247145)
+[CLIENT] watchdog_app (pid: 247145)
+[CLIENT] watchdog_app (pid: 247145)
+[wd(CheckWdAlive_TSK)] value of info->partner_pid =239635  at line 332:
+[wd(SendSignal_TSK)] value of kill_res =0  at line 356:
+[wd(CheckAndIncCounter_TSK)] value of g_missed =0  at line 377:
+[wd(CheckAndIncCounter_TSK)] value of info->partner_pid =239635  at line 378:
+[wd] value of g_missed =1  at line 381:
+[CLIENT] watchdog_app (pid: 247145)
+[CLIENT] watchdog_app (pid: 247145)
+[wd(CheckWdAlive_TSK)] value of info->partner_pid =239635  at line 332:
+[wd(SendSignal_TSK)] value of kill_res =-1  at line 356:
+[CLIENT] watchdog_app (pid: 247145)
+[WD](RevivePartner_TSK) child_pid after fork: 247152
+[wd(RevivePartner_TSK)] value of info->partner_pid =247152  at line 323:
+[WD](RevivePartner_TSK) child_pid after fork: 0
+[WD](RevivePartner_TSK) about to exec: info->argv[0]: ./watchdog_app.out
+[wd_app](main) value of getpid =247152  at line 62:
+[wd_app](InitInfo) value of info->child_pid =0  at line 100:
+[wd_app](InitInfo) value of argc =5  at line 101:
+[wd_app](InitInfo) value of info->child_pid =247145  at line 113:
+[wd_app](main) argv[0] = ./watchdog_app.out
+[wd_app](main) argv[1] = 3
+[wd_app](main) argv[2] = 2
+[wd_app](main) argv[3] = ./wd_test.out
+[wd_app](main) argv[4] = 247145
+[wd_app][wd_thread] argv[3] = ./wd_test.out
+[CLIENT] watchdog_app (pid: 247145)
+[CLIENT] watchdog_app (pid: 247145)
+[wd(CheckWdAlive_TSK)] value of info->partner_pid =247152  at line 332:
+[wd(SendSignal_TSK)] value of kill_res =0  at line 356:
+[wd(CheckAndIncCounter_TSK)] value of g_missed =1  at line 377:
+[wd(CheckAndIncCounter_TSK)] value of info->partner_pid =247152  at line 378:
+[wd] value of g_missed =2  at line 381:
+[CLIENT] watchdog_app (pid: 247145)
+[wd_app](SendSignal_TSK) value of kill_res =0  at line 169:
+[wd(HeartbeatHandler_HAND)] value of g_missed =2  at line 403:
+[wd_app] value of g_missed_SOL =1  at line 205:
+[wd(CheckWdAlive_TSK)] value of info->partner_pid =247152  at line 332:
+[CLIENT] watchdog_app (pid: 247145)
+[wd(SendSignal_TSK)] value of kill_res =0  at line 356:
+[wd(CheckAndIncCounter_TSK)] value of g_missed =0  at line 377:
+[wd(CheckAndIncCounter_TSK)] value of info->partner_pid =247152  at line 378:
+[wd] value of g_missed =1  at line 381:
+[CLIENT] watchdog_app (pid: 247145)
+[wd(CheckWdAlive_TSK)] value of info->partner_pid =247152  at line 332:
+[CLIENT] watchdog_app (pid: 247145)
+[wd_app](SendSignal_TSK) value of kill_res =0  at line 169:
+[wd(HeartbeatHandler_HAND)] value of g_missed =1  at line 403:
+[wd(SendSignal_TSK)] value of kill_res =0  at line 356:
+[wd_app] value of g_missed_SOL =1  at line 205:
+[wd(CheckAndIncCounter_TSK)] value of g_missed =0  at line 377:
+[wd(CheckAndIncCounter_TSK)] value of info->partner_pid =247152  at line 378:
+[wd] value of g_missed =1  at line 381:
+[CLIENT] watchdog_app (pid: 247145)
+[wd(CheckWdAlive_TSK)] value of info->partner_pid =247152  at line 332:
+[CLIENT] watchdog_app (pid: 247145)
+[wd(SendSignal_TSK)] value of kill_res =0  at line 356:
+[wd(CheckAndIncCounter_TSK)] value of g_missed =1  at line 377:
+[wd(CheckAndIncCounter_TSK)] value of info->partner_pid =247152  at line 378:
+[wd] value of g_missed =2  at line 381:
+[CLIENT] watchdog_app (pid: 247145)
+[wd_app](SendSignal_TSK) value of kill_res =0  at line 169:
+[wd(HeartbeatHandler_HAND)] value of g_missed =2  at line 403:
+[wd(CheckWdAlive_TSK)] value of info->partner_pid =247152  at line 332:
+[wd_app] value of g_missed_SOL =1  at line 205:
+[CLIENT] watchdog_app (pid: 247145)
+[wd(SendSignal_TSK)] value of kill_res =0  at line 356:
+[wd(CheckAndIncCounter_TSK)] value of g_missed =0  at line 377:
+[wd(CheckAndIncCounter_TSK)] value of info->partner_pid =247152  at line 378:
+[wd] value of g_missed =1  at line 381:
+[CLIENT] watchdog_app (pid: 247145)
+[wd(CheckWdAlive_TSK)] value of info->partner_pid =247152  at line 332:
+[CLIENT] watchdog_app (pid: 247145)
+[wd_app](SendSignal_TSK) value of kill_res =0  at line 169:
+[wd(HeartbeatHandler_HAND)] value of g_missed =1  at line 403:
+[wd(SendSignal_TSK)] value of kill_res =0  at line 356:
+[wd_app] value of g_missed_SOL =1  at line 205:
+[wd(CheckAndIncCounter_TSK)] value of g_missed =0  at line 377:
+[wd(CheckAndIncCounter_TSK)] value of info->partner_pid =247152  at line 378:
+[wd] value of g_missed =1  at line 381:
+[wd_test] argc= 4 
+[wd_test] argv[0] = ./wd_test.out
+[wd_test] argv[1] = 3
+[wd_test] argv[2] = 2
+[wd_test] argv[3] = ./watchdog_app.out
+[client] Calling MakeMeImmortal...
+[WD LIB] inside MakeMeImmortal()
+[client] Running main loop.
+[client] Still alive! (1)
+[client] Still alive! (2)
+[client] Still alive! (3)
+[client] Still alive! (4)
+[client] Still alive! (5)
+[client] Still alive! (6)
+[client] Still alive! (7)
+[client] Still alive! (8)
+[client] Still alive! (9)
+[client] Still alive! (10)
+[client] Still alive! (11)
+WD: [HeartbeatHandler_HAND] got SIGUSR1 at ../src/watchdog.c:406
+[client] Still alive! (12)
+[client] Still alive! (13)
+[client] Still alive! (14)
+WD: [HeartbeatHandler_HAND] got SIGUSR1 at ../src/watchdog.c:406
+[client] Still alive! (15)
+[client] Still alive! (16)
+[client] Still alive! (17)
+WD: [HeartbeatHandler_HAND] got SIGUSR1 at ../src/watchdog.c:406
+[client] Still alive! (18)
+[client] Still alive! (19)
+[client] Still alive! (20)
+WD: [HeartbeatHandler_HAND] got SIGUSR1 at ../src/watchdog.c:406
+[client] Simulating crash with exit(1)...
+[wd_app](SendSignal_TSK) value of kill_res =-1  at line 169:
+[wd_app](SendSignal_TSK) about to exec: ./wd_test.out
+wd_test.out: ../test/wd_test.c:15: main: Assertion `argc >= 4' failed.

@@ -1,6 +1,6 @@
 #include <iostream> // std::cin, std::cout , std::endl
 #include "simple_string.hpp" // ilrd::String
-
+#include "simple_string_advanced.hpp" //ilrd
 
 #define RESET   "\033[0m"
 #define GREEN   "\033[32m"

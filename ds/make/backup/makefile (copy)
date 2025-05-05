@@ -1,0 +1,46 @@
+CC = gcc
+OBJS = $(patsubst $(SRC_PATH)%.c,%.o,$(wildcard $(SRC_PATH)*.c))
+TEST_OBJS = $(patsubst $(TEST_PATH)%.c,%.o,$(wildcard $(TEST_PATH)*_test.c))
+TARGETS = $(patsubst $(TEST_PATH)%_test.c,%.out,$(wildcard $(TEST_PATH)*_test.c))
+
+CFLAGS = -ansi -pedantic-errors -Wall -Wextra
+DEBUG = -g
+RELEASE = -DNDEBUG -O3
+CPPFLAGS = -I $(HEAD_PATH)
+
+SRC_PATH = $(CURDIR)/src/
+TEST_PATH = $(CURDIR)/test/
+HEAD_PATH = $(CURDIR)/include/
+LIB_PATH = $(CURDIR)  # נתיב מוחלט לספריות הדינמיות
+
+.PHONY : clean test debug release all
+
+all : release debug
+
+release : CFLAGS += $(RELEASE)
+release : libds_release.so
+
+debug : CFLAGS += $(DEBUG)
+debug : libds_debug.so
+
+test : $(TARGETS)
+
+%.out : %_test.o | libds_debug.so
+	$(CC) -o $@ $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) $< -L $(LIB_PATH) -lds_debug -Wl,-rpath,$(LIB_PATH)
+
+libds_%.so : $(OBJS)
+	$(CC) $(CFLAGS) $(CPPFLAGS) -shared -fPIC $^ -o $(LIB_PATH)/$@
+
+-include $(OBJS:.o=.d) $(TEST_OBJS:_test.o=_test.d)
+
+%.d : $(SRC_PATH)%.c
+	$(CC) $(CFLAGS) $(CPPFLAGS) -MM $< -MF $@
+	echo "\t$(CC) $(CFLAGS) $(CPPFLAGS) -c -fPIC $< -o $(basename $@).o" >> $@
+
+%_test.d : $(TEST_PATH)%_test.c
+	$(CC) $(CFLAGS) $(CPPFLAGS) -MM $< -MF $@
+	echo "\t$(CC) $(CFLAGS) $(CPPFLAGS) -c $< -o $(basename $@).o" >> $@
+
+clean : 
+	$(RM) *.o *.d *.out *.so
+

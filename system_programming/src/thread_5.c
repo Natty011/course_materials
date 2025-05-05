@@ -6,11 +6,10 @@
  *****************************************/
 
 #include <stdio.h>	 	 /* printf, fgets  */
-#include <pthread.h>    /* pthread_create */
 #include "utils.h"		 /* ExitIfBad, msg */
 #include <omp.h>		/* omp parallel for */
 
-unsigned int g_number = 333314;
+unsigned int g_number = 30; /*333314 */
 
 size_t SumOfDivisors(void)
 {

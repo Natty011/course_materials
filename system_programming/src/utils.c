@@ -22,7 +22,7 @@ void ExitIfBad(int is_good, const char *msg)
 	{
 		perror(msg);
 		puts(msg);
-		exit(0);
+		exit(1);
 	}
 }
 

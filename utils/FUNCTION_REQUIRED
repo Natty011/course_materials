@@ -1,0 +1,21 @@
+watchdog.c function:
+
+WaitForFisrtSignal_TSK
+WDProccesCreation
+IsWdAlive_TSK
+CheckAndIncCounter
+SendSignal_TSK
+CheckDnrFlag_TSK
+TH_Routine
+DNR
+MMI
+
+watchdog_app.c function:
+wd_app_SendSignal_TSK
+wd_app_IncCounter
+wd_app_SigHandlerSIGUSR1_HAND
+wd_app_main
+wd_app_sigmask
+wd_app static MakeCleintArgv
+wd_app static InitWdInfoStruct
+static StringToUlong

@@ -41,8 +41,8 @@ ilrd_uid_t UIDCreate(void)
 	ilrd_uid_t uid;
 	struct ifaddrs *ifaddr, *ifa;
 		
-	static size_t count = 0;
-	
+	volatile static size_t count = 0;
+	/*__atomic_add_fetch() need to operate on count don't forget */
 	uid.counter = count;
 	++count;
 	

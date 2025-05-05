@@ -261,7 +261,7 @@ static void TestBstTwoeNode(void)
 	bst_iter_t itr7;
 	
 	bst_t *bst1 = BstCreate(SortingFunc);	
-	puts(RED);
+	/*puts(RED);*/
 
 	if( !BstIsEmpty(bst1) )  
 	{
@@ -308,7 +308,7 @@ static void TestBstTwoeNode(void)
 			flag =  TRUE;
 		}
 	}
-	/*Aux_Pre_Print_Tree(bst1, 0);*/
+	Aux_Pre_Print_Tree(bst1, 0);
 	itr3 = BstFind(bst1, arr + 3); /* 85 */
 	itr2 = BstFind(bst1, arr); /* 100 (root) */
 

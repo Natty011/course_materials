@@ -169,18 +169,21 @@ static void TestKnightsTour(void)
 
 }
 
-/*
+
+
 void PrintBoard(uint8_t board[BOARD_SIZE][BOARD_SIZE],  position_t *ret_path)
 	{
 		int i = 0, j = 0;
-		size_t sum = 0; total sum 2016
+		size_t sum = 0; /*total sum 2016*/
 
-		for (i = 0; i < BOARD_SIZE ; i++)
+		for (i = 0; i < BOARD_SIZE * BOARD_SIZE ; i++)
 		{
          
 			board[ret_path[i].x][ret_path[i].y] = i;
+			/*
 			printf(" ret_path[i].x, ret_path[i].y = { %u,%u } \n"
 				,ret_path[i].x, ret_path[i].y );
+				*/
 
         }
         
@@ -202,4 +205,4 @@ void PrintBoard(uint8_t board[BOARD_SIZE][BOARD_SIZE],  position_t *ret_path)
 		printf("sum = %lu \n", sum);
 	}
 
-	*/
+	

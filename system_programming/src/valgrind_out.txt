@@ -1,0 +1,35 @@
+==62681== Memcheck, a memory error detector
+==62681== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==62681== Using Valgrind-3.18.1 and LibVEX; rerun with -h for copyright info
+==62681== Command: ./shuffle_sort.out /usr/share/dict/words
+==62681== 
+==62681== 
+==62681== Process terminating with default action of signal 2 (SIGINT)
+==62681==    at 0x10A37D: RunAndMergeThreads (shuffle_sort.c:385)
+==62681==    by 0x1098BB: main (shuffle_sort.c:146)
+==62681== 
+==62681== HEAP SUMMARY:
+==62681==     in use at exit: 18,785,432 bytes in 10 blocks
+==62681==   total heap usage: 17 allocs, 7 frees, 33,396,800 bytes allocated
+==62681== 
+==62681== 1,088 bytes in 4 blocks are possibly lost in loss record 3 of 7
+==62681==    at 0x484DA83: calloc (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==62681==    by 0x40147D9: calloc (rtld-malloc.h:44)
+==62681==    by 0x40147D9: allocate_dtv (dl-tls.c:375)
+==62681==    by 0x40147D9: _dl_allocate_tls (dl-tls.c:634)
+==62681==    by 0x49047B4: allocate_stack (allocatestack.c:430)
+==62681==    by 0x49047B4: pthread_create@@GLIBC_2.34 (pthread_create.c:647)
+==62681==    by 0x10A3D5: RunAndMergeThreads (shuffle_sort.c:387)
+==62681==    by 0x1098BB: main (shuffle_sort.c:146)
+==62681== 
+==62681== LEAK SUMMARY:
+==62681==    definitely lost: 0 bytes in 0 blocks
+==62681==    indirectly lost: 0 bytes in 0 blocks
+==62681==      possibly lost: 1,088 bytes in 4 blocks
+==62681==    still reachable: 18,784,344 bytes in 6 blocks
+==62681==         suppressed: 0 bytes in 0 blocks
+==62681== Reachable blocks (those to which a pointer was found) are not shown.
+==62681== To see them, rerun with: --leak-check=full --show-leak-kinds=all
+==62681== 
+==62681== For lists of detected and suppressed errors, rerun with: -s
+==62681== ERROR SUMMARY: 1 errors from 1 contexts (suppressed: 0 from 0)

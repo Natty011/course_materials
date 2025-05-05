@@ -14,7 +14,7 @@
 
 /* the position of each thread in his jobs priority*/
 unsigned int g_arr_ret_threads[ARR_SIZE] = { 0 }; 
-unsigned int g_number = 333314;
+unsigned int g_number = 333314; /*333314*/
 
 /* hold the thread_id*/
 pthread_t g_arr_thread_id[ARR_SIZE]  = { 0 }; 

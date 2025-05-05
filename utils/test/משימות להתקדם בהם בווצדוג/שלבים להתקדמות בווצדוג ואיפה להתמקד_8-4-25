@@ -1,0 +1,127 @@
+מה אתה אומר על התוצאות :-) ?
+
+natty@natty:~/Desktop/git/utils/bin/debug$ ./bidirectional_revive_test.sh
+>> Starting bidirectional revive test
+[INFO] Launching: ./wd_test.out 20 3 ./watchdog_app.out
+[INFO] Client PID: 264663
+[INFO] Watchdog PID: 264663
+[STEP 1] Killing wd_test.out (PID: 264663)...
+[SUCCESS] Client revived by watchdog: 264665
+[STEP 2] Killing watchdog_app.out (PID: 264663)...
+./bidirectional_revive_test.sh: line 43: kill: (264663) - No such process
+[SUCCESS] Watchdog revived by client: 264665
+[CLEANUP] Killing all remaining processes...
+>> Test completed. Check bidirectional_revive_test.log for detailed output.
+natty@natty:~/Desktop/git/utils/bin/debug$ ./revive_test.sh
+>> Starting test: ./wd_test.out 20 3 ./watchdog_app.out
+[TEST] wd_test.out started with PID: 264698
+[TEST] Found watchdog_app.out with PID: 264702
+[TEST] Killing watchdog_app.out...
+[SUCCESS] watchdog_app.out revived successfully with new PID: 264710
+>> Test completed. Check revive_test.log for full logs.
+natty@natty:~/Desktop/git/utils/bin/debug$ ./revive_client_test.sh
+>> Starting test: ./wd_test.out 20 3 ./watchdog_app.out
+[TEST] wd_test.out started with PID: 264717
+[TEST] Killing wd_test.out (PID: 264721)...
+[SUCCESS] wd_test.out revived successfully with new PID: 264710
+>> Test completed. Check revive_client_test.log for full logs.
+natty@natty:~/Desktop/git/utils/bin/debug$ 
+
+הרצה שניה:
+natty@natty:~/Desktop/git/utils/bin/debug$ ./revive_client_test.sh
+>> Starting test: ./wd_test.out 20 3 ./watchdog_app.out
+[TEST] wd_test.out started with PID: 265514
+[TEST] Killing wd_test.out (PID: 265517)...
+[SUCCESS] wd_test.out revived successfully with new PID: 265514
+>> Test completed. Check revive_client_test.log for full logs.
+natty@natty:~/Desktop/git/utils/bin/debug$ ./revive_test.sh
+>> Starting test: ./wd_test.out 20 3 ./watchdog_app.out
+[TEST] wd_test.out started with PID: 265531
+[TEST] Found watchdog_app.out with PID: 265534
+[TEST] Killing watchdog_app.out...
+[SUCCESS] watchdog_app.out revived successfully with new PID: 265541
+>> Test completed. Check revive_test.log for full logs.
+natty@natty:~/Desktop/git/utils/bin/debug$ ./bidirectional_revive_test.sh
+>> Starting bidirectional revive test
+[INFO] Launching: ./wd_test.out 20 3 ./watchdog_app.out
+[INFO] Client PID: 265541
+[INFO] Watchdog PID: 265541
+[STEP 1] Killing wd_test.out (PID: 265541)...
+[SUCCESS] Client revived by watchdog: 265548
+[STEP 2] Killing watchdog_app.out (PID: 265541)...
+./bidirectional_revive_test.sh: line 43: kill: (265541) - No such process
+[SUCCESS] Watchdog revived by client: 265548
+[CLEANUP] Killing all remaining processes...
+>> Test completed. Check bidirectional_revive_test.log for detailed output.
+natty@natty:~/Desktop/git/utils/bin/debug$ 
+
+חבל שהקבצי לוג לא יוצאים כמו שצריך... תוכל לתקן את הסקריפטים שיוציאו קבצי לוג שאינם ריקם כמו שהיה בהתחלה?
+
+מצרף לך גם את הקובץ לוג של הרצה מהטרמינל
+natty@natty:~/Desktop/git/utils/bin/debug$ ./wd_test.out 20 2 ./watchdog_app.out > log.txt 2>&1
+
+
+לא הצלחתי לעצור את התוכנית עם  ctrl+c
+רק עם 
+
+natty@natty:~$ killall -9 wd_test.out
+natty@natty:~$ killall -9 watchdog_app.out
+natty@natty:~$ killall -9 wd_test.out
+natty@natty:~$ killall -9 watchdog_app.out
+natty@natty:~$ killall -9 wd_test.out
+wd_test.out: no process found
+natty@natty:~$ killall -9 watchdog_app.out
+watchdog_app.out: no process found
+natty@natty:~$ killall -9 wd_test.out
+wd_test.out: no process found
+natty@natty:~$ killall -9 watchdog_app.out
+watchdog_app.out: no process found
+natty@natty:~$ killall -9 wd_test.out
+wd_test.out: no process found
+natty@natty:~$ killall -9 watchdog_app.out
+watchdog_app.out: no process found
+natty@natty:~$ killall -9 wd_test.out
+wd_test.out: no process found
+natty@natty:~$ killall -9 watchdog_app.out
+watchdog_app.out: no process found
+natty@natty:~$ killall -9 watchdog_app.out
+watchdog_app.out: no process found
+natty@natty:~$ killall -9 wd_test.out
+wd_test.out: no process found
+natty@natty:~$ 
+
+
+וגם זה לקח כמה פעמיים עד שהצלחתי לעצור...
+הרצתי את הפקודות כמה פעמים עד שלא נשארו פרוססים...
+
+מצורפים גם קבצי המקור האחרונים שאותם קמפלתי והרצתי...
+מה דעתך?
+
+אז לסיכום כמה דברים:
+1. מה דעתך עם התוצאות האחרונות?
+2. תוכל לשפר את קבצי הסקריפט שיוצאו קבצי לוג עם תוכן ולא ריקים...?
+3. אם נראה לך שזה תקין אפשר לעבור לבדוק את הפונקציה DNR
+4. חובה שנבדוק ב valgrind שאין דליפות זיכרון...? בייחוד אם עושים DNR?
+תוכל לכתוב סקריפט כזה שבודק DNR?
+וגם בודק ששני התהליכים מסתיימים אחרי DNR באופן gracfully מה שנקרא?
+כלומר שאין זליגת זיגרון, לא של wd_test.out
+ולא של watchdog_app.out?
+
+5. אפשר אח"כ לשפר את הקוד, להוריד כפילות, להוריד הערות, להוסיף עוד טסטים ומקרי כזה ...
+
+6. אבל להגיש לריוויו אם השלבים הקודים תקינים והכל תקין בדוק ומתאים להגשה לריוויו...
+
+7. אם יש לך הצעות נוספות לשיפורים, תיקונים, וכו... אני אשמח.. או אפילו מקרי קצה שלא חשבתי עליהם וזה יכול להקריס את התוכנה עוד שבועייים...
+
+8. אפשר גם ליצור דיפיין קבוע של 
+"./watchdog_app.out"
+ככה שהמשתמש יריץ רק את 
+./wd_test.out
+
+בתוך המופע של התוכנית שלו. יגדיר איזה ארגומנטים הוא רוצה עבור allow misses, freq_ping, arcg, argv
+
+ויקרא לפונקציה MMI עם הארגומנטים האלה...
+
+מה דעתך... זה גם מה שצריך להיות ממה שהבנתי מסטודנטית 
+
+אז איפה נתחיל?

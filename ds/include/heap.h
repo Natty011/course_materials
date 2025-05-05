@@ -9,6 +9,7 @@
 #include <stddef.h>     /* size_t	       */
 #include "aux_func.h"
 
+
 typedef struct heap heap_t;
 
 /******************************************************************************

@@ -114,10 +114,10 @@ static state_t Error(calc_t *calc_state, double* result);
 
 static state_t current_state = WAIT_FOR_NUM;
 static int num_of_brackets = 0;
-int arr_events[ASCI_LEN] = { 0 };
+int arr_events[ASCI_LEN] = { 0 }; /* change the LUT to static int*/
 
-handler_t num_arr_handlers[ NUM_OF_EVENTS ] = { NULL };
-handler_t op_arr_handlers[ NUM_OF_EVENTS ] = { NULL };
+handler_t num_arr_handlers[ NUM_OF_EVENTS ] = { NULL };/* change the num_arr_handlers to static*/
+handler_t op_arr_handlers[ NUM_OF_EVENTS ] = { NULL };/* change the op_arr_handlers to static*/
 static status_t current_status = SUCCESS; 
 static event_t num_event = INVALID_INPUT;
 static event_t op_event = INVALID_INPUT;

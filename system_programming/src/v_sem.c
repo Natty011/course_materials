@@ -55,7 +55,7 @@ void RunSemaphore(int semid, char *sem_file_path)
     /* TO DO: change op to op[1] because it is array of semaphores
     1. change &op to op in semop(...)
     2. change op.sem_num to op[0].sem_num */
-    struct sembuf op; 
+    struct sembuf op = {0}; 
     char command[MAX_COMMAND_SIZE] = {0};
     char undo_flag[MAX_COMMAND_SIZE] = {0};
     int number = 0;

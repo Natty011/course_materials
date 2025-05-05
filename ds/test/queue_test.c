@@ -1,6 +1,6 @@
 /***************************************
 * Author : Natty
-* Reviewer : Chen
+* Reviewer : Michael
 * Date : 15 / 12 / 2024
 * Last update: 15 / 12 / 2024
 *****************************************/
@@ -9,8 +9,6 @@
 #include <string.h> 	/* strcpy, strcmp */
 #include "queue.h"
 #include "slist.h" 
-
-
 
 /***************************function declaration**************************/
 static void TestString(void);

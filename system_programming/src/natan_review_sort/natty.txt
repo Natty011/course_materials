@@ -1,0 +1,7 @@
+1.	Use *(arr + mid) instead of arr[mid].
+2.	No need for asserts in aux functions, they are static and you know what you 
+	send to them.
+3.	In Merge you can add conditions and put everything into one while loop.
+4.	In QuickSort you don't need to save element_size in a new variable, just use
+	the argument (you can shorten the name, if you want).
+5.	SwapQuick returns success/ fail, but you do not use the return value.

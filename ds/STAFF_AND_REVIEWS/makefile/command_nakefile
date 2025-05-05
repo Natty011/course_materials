@@ -1,0 +1,11 @@
+touch makefile
+
+make
+make all
+make foo.o
+make main.o
+make -f fooer.out
+make debug
+make release
+
+./fooer.out 

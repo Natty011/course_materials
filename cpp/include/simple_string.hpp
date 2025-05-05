@@ -25,22 +25,6 @@ private:
     static char* AllocateNewString(const char* input_);
 };
 
-std::ostream& operator<<(std::ostream& os_,const String& str_);
-
-bool operator==(const String& lhs_, const String& rhs_);
-bool operator==(const String& lhs_, const char* rhs_);
-bool operator==(const char* lhs_, const String& rhs_);
-
-bool operator<(const String& lhs_, const String& rhs_);
-bool operator>(const String& lhs_, const String& rhs_);
-
-//seif 12
-bool operator<(const String& lhs_, const char* rhs_);
-bool operator<(const char* lhs_, const String& rhs_);
-
-bool operator>(const String& lhs_, const char* rhs_);
-bool operator>(const char* lhs_, const String& rhs_);
-
 } // namespace ilrd
 
 

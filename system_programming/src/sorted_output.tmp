@@ -1,0 +1,29 @@
+Thread 0: base = 0x70ab34800010, size = 260835
+Thread 1: base = 0x70ab349fd728, size = 260835
+Thread 2: base = 0x70ab34bfae40, size = 260835
+Thread 3: base = 0x70ab34df8558, size = 260835
+Merging thread 0 into [0x70ab347f5c70 - 0x70ab347f5c70]
+Merging thread 1 into [0x70ab345f8558 - 0x70ab347f5c70]
+Merging thread 2 into [0x70ab343fae40 - 0x70ab347f5c70]
+Merging thread 3 into [0x70ab341fd728 - 0x70ab347f5c70]
+g_start_of_result[0] = A
+g_start_of_result[1] = A
+g_start_of_result[2] = A
+g_start_of_result[3] = A's
+g_start_of_result[4] = A's
+g_start_of_result[5] = AA
+g_start_of_result[6] = AA
+g_start_of_result[7] = AA's
+g_start_of_result[8] = AAA
+g_start_of_result[9] = AB
+g_start_of_result[10] = AB
+g_start_of_result[11] = AB's
+g_start_of_result[12] = AB's
+g_start_of_result[13] = ABC
+g_start_of_result[14] = ABC
+g_start_of_result[15] = ABC
+g_start_of_result[16] = ABC's
+g_start_of_result[17] = ABC's
+g_start_of_result[18] = ABC's
+g_start_of_result[19] = ABCs
+Time taken for sorting and merging with 4 threads: 0.243613 seconds

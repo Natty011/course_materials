@@ -112,10 +112,10 @@ int ArrIsSorted(int* arr, size_t len)
 	
 	for(i = 0; i < len - 1; i++)
 	{
-		/*	
+			
 		printf("arr[i] = %d , i = %lu \n", arr[i], i);
-		printf("arr[i + 1] = %d , i + 1 = %lu \n", arr[i + 1], i + 1);	
-		*/
+		/*printf("arr[i + 1] = %d , i + 1 = %lu \n", arr[i + 1], i + 1);*/	
+		
 		if(arr[i] > arr[i + 1] )
 		{
 			flag = TRUE; /* not sorted */
@@ -123,7 +123,8 @@ int ArrIsSorted(int* arr, size_t len)
 		}	
 		
 	}
-	
+	printf("arr[i] = %d , i = %lu \n", arr[i], i);
+
 	return flag;
 	
 }
@@ -164,7 +165,7 @@ int main ()
 		mode = DEBUG;
 		background =  BACK_YELLOW;
 	#endif
-
+/*
 	puts(BLUE"====================================================="RESET);
 	printf("%sTEST: %s "RESET" \n", background,  mode);
 	
@@ -175,7 +176,7 @@ int main ()
 	  
     puts(BACK_BLUE"'TestSort2()'"RESET);
     TestSort2();
-    
+   */ 
 	puts(BLUE"====================================================="RESET);
 
 	puts(BACK_BLUE"'TestSort3()'"RESET);

@@ -1,0 +1,717 @@
+/***************************************
+* Author : Natty
+* Reviewer : 
+* Date : 10 / 02 / 2025
+* Last update: 15 / 02 / 2025
+*****************************************/
+#ifdef PRINTS
+	#include <stdio.h> 	
+#endif
+
+#include <assert.h> 	/* assert */
+#include <stdlib.h> 	/* malloc, free */
+
+#include <math.h>
+#include <stdio.h> 
+
+#include "avl.h" 
+
+#define MAX( a , b )		( ( (a) > (b) ) ? (a) : (b) )
+#define UNUSED( var )       ( (void)var )
+
+
+/***************************** Success / Fail Enum ****************************/
+
+typedef enum
+{
+	SUCCESS = 0,
+	OPERATION_FAIL = 1
+	
+} result_t;
+
+/******************************************************************************/
+/******************************* True / False Enum ****************************/
+
+typedef enum
+{
+	FALSE = 0,
+	TRUE = 1
+} bool_t;
+
+/******************************************************************************/
+/*************************** Left child / Right child Enum ********************/
+
+typedef enum
+{
+	LEFT = 0  ,
+	RIGHT = 1 ,
+	NUMBER_OF_CHILDRENS
+	
+} child_pose_t;
+/******************************************************************************/
+
+typedef enum
+{
+	
+	NO_CHILDS = 0,
+	ONE_CHILD = 1,
+	TWO_CHILDS = 2
+	
+} num_of_childs_t;
+
+/******************************************************************************/
+/***************************** Management struct ******************************/
+struct avl
+{
+	avl_node_t *root;
+	cmp_func_t cmp_func;	
+};
+
+
+struct avl_node 
+{
+	void* data;
+	int height;
+	struct avl_node *child[NUMBER_OF_CHILDRENS];
+};
+
+/******************************************************************************/
+/************************ ststic functions declartions ************************/
+
+
+static avl_node_t*
+RecAVLInsert(avl_node_t* root ,avl_node_t *new_node , cmp_func_t func);
+
+static void RecAVLDestroy(avl_node_t* node);
+
+static void SetHeight( avl_node_t* node ); 
+static int BalancedFactor( avl_node_t *node );
+
+static avl_node_t *RightRotate( avl_node_t *node );
+static avl_node_t *LeftRotate( avl_node_t *node );
+static avl_node_t*
+HandleRebalance(avl_node_t *root ,int balance_factor ,int child_balance_factor);
+
+static avl_node_t* 
+RecAVLRemove(avl_node_t* root , void *data , cmp_func_t func , void** data_ptr);
+
+static size_t FindNumChilds(avl_node_t* node);
+
+
+static void AuxAVLSize(avl_node_t *node, size_t *size);
+static avl_node_t* AuxAVLFind(avl_t *tree, avl_node_t *node,
+								  	const void *data_to_find );
+
+static void AuxAVLForEachPreOrder(avl_node_t *node, op_func_t op_func,
+								 				void *user_param, int *res_op);
+static void AuxAVLForEachPostOrder(avl_node_t *node, op_func_t op_func,
+											    void *user_param, int *res_op);
+static void AuxAVLForEachInOrder(avl_node_t *node, op_func_t op_func,
+								 				void *user_param, int *res_op);
+	
+/*******************End Of Static Functions definition************************/
+
+/********************  AVLCreate  ****************************/
+avl_t* AVLCreate(cmp_func_t sort_func)
+{
+	avl_t* avl_p = ( avl_t* )malloc( sizeof(avl_t) );
+
+	if(NULL == avl_p)
+	{
+		return NULL;
+	}
+	
+	avl_p->cmp_func = sort_func;
+	avl_p->root = NULL;
+	
+	return avl_p;
+}
+
+/********************  AVLIsEmpty  ****************************/
+
+int AVLIsEmpty(const avl_t* tree)
+{
+	assert( tree );
+	
+	return NULL == tree->root;  
+}
+
+/********************  AVLHeight  ****************************/
+
+int AVLHeight(const avl_t* tree)
+{
+	assert( tree );
+	
+	return AVLIsEmpty( tree ) ? -1 : tree->root->height ; 
+}
+
+/********************  AVLDestroy  ****************************/
+
+static void RecAVLDestroy(avl_node_t* node)
+{
+	if ( NULL == node )
+	{
+		return;
+	}
+
+	RecAVLDestroy(node->child[LEFT] );
+	RecAVLDestroy(node->child[RIGHT] );
+	
+	node->child[LEFT] = node->child[RIGHT] = NULL;
+	
+	free( node );
+	node = NULL;
+}
+
+void AVLDestroy(avl_t* tree)
+{	
+	if ( NULL != tree )
+	{
+		RecAVLDestroy( tree->root);
+		tree->root = NULL;
+		free(tree);
+		tree = NULL;
+	}
+
+}
+
+/********************  AVLSize  ****************************/
+
+size_t AVLSize(const avl_t* tree)
+{
+	size_t size = 0;
+	assert( tree );
+	
+	AuxAVLSize( tree->root, &size);
+	return size;
+}
+
+/********************  AVLInsert  ****************************/
+
+int AVLInsert( avl_t* tree, void* data )
+{
+	avl_node_t *new_node = NULL;
+
+	assert(tree);
+	
+	new_node = (avl_node_t*)malloc(sizeof(avl_node_t) );
+	
+	if(NULL == new_node)
+	{
+		return OPERATION_FAIL;
+	}
+	new_node->data = data;
+	new_node->height = 0;
+	new_node->child[LEFT] = new_node->child[RIGHT] = NULL; 
+
+	tree->root = RecAVLInsert( tree->root , new_node , tree->cmp_func );
+	SetHeight( tree->root );
+	
+	return SUCCESS; 
+				 
+}
+static avl_node_t*
+RecAVLInsert(avl_node_t* root , avl_node_t *new_node , cmp_func_t func)
+{	
+	int res = 0 , balance_factor = 0 , child_balance_factor = 0;
+	child_pose_t pose_to_move = 0;
+
+	if ( NULL == root )
+	{
+		return new_node;
+	}
+	
+	res = func( root->data , new_node->data );
+	pose_to_move = res < 0; /* ... */
+	
+	root->child[pose_to_move] = 
+	RecAVLInsert( root->child[pose_to_move] , new_node , func );
+
+	SetHeight( root );
+	
+	balance_factor = BalancedFactor( root );
+	
+	if ( balance_factor > -2 && balance_factor < 2 )
+	{
+		return root;
+	}
+	
+	child_balance_factor = BalancedFactor(root->child[(-2 == balance_factor)]);
+	
+	return HandleRebalance( root , balance_factor , child_balance_factor );	
+}
+						
+/********************  AvlGetDataFind  ****************************/
+static void *AvlGetDataFind(avl_node_t *node)
+{
+	if(NULL == node )
+	{
+		return NULL;
+	}
+	
+	return node->data;
+}
+
+/********************  AVLFind  ****************************/
+void *AVLFind(avl_t *tree, const void *data)
+{
+	avl_node_t *curr_node = NULL;
+	assert(tree);
+	
+	curr_node = tree->root; /* get the root */
+	
+	return AvlGetDataFind(AuxAVLFind(tree, curr_node, data));						 
+}
+/********************  AVLForEachInOrder  ****************************/
+int AVLForEach(avl_t *tree, op_func_t op_func, 
+                              void *user_param, int traversal_order)
+{
+	int op_state = SUCCESS;
+	assert(tree);
+	assert( op_func);
+	
+	switch( traversal_order )
+	{
+		case IN_ORDER:
+			AuxAVLForEachInOrder(tree->root ,op_func , user_param, &op_state);
+			break;
+		case PRE_ORDER:
+			AuxAVLForEachPreOrder(tree->root ,op_func , user_param, &op_state);
+			break;
+		case POST_ORDER:
+			AuxAVLForEachPostOrder(tree->root ,op_func , user_param, &op_state);
+			break;	
+	}
+	
+	return op_state;
+}
+
+/********************  AVLRemove  ****************************/
+
+void AVLRemove(avl_t *tree, void *data)
+{
+	assert(tree);
+	
+	tree->root = RecAVLRemove( tree->root , data , tree->cmp_func , NULL );
+	
+	SetHeight( tree->root );
+}
+
+
+/********************  AuxAVLRemove  ****************************/
+
+static avl_node_t* 
+RecAVLRemove(avl_node_t* root , void *data , cmp_func_t func , void** data_ptr)
+{	
+	int res = 0 ,pose_to_move = 0 ,balance_factor = 0 ,child_balance_factor = 0;
+	avl_node_t* node_to_return = NULL;
+	
+	if(NULL == root ) 
+	{
+		return NULL;
+	}
+	
+	
+	if ( NULL == data_ptr )
+	{
+		res = func( root->data , data );
+		
+		
+		if ( res != 0 )
+		{
+			pose_to_move = res < 0; /* ... */
+			
+			root->child[pose_to_move] = 
+			RecAVLRemove( root->child[pose_to_move] , data , func , NULL );
+		}
+		else if ( FindNumChilds( root ) < 2 )
+		{
+			node_to_return = root->child[root->child[RIGHT] != NULL];
+			
+			root->child[LEFT] = root->child[RIGHT] = NULL;
+			root->data = NULL;
+			free( root );
+			
+			return node_to_return;	
+		}
+		else
+		{
+			root->child[RIGHT] = 
+			RecAVLRemove( root->child[RIGHT] , data , func , &root->data );
+		}
+	}
+	else
+	{
+		if ( NULL != root->child[LEFT] )
+		{
+			root->child[LEFT] = 
+			RecAVLRemove( root->child[LEFT] , data , func , data_ptr );
+		}
+		else
+		{
+			*data_ptr = root->data;
+			node_to_return = root->child[RIGHT];
+
+			root->child[LEFT] = root->child[RIGHT] = NULL;
+			root->data = NULL;
+			free( root );
+
+			return node_to_return;
+		}
+	}
+	
+	SetHeight( root );
+	
+	balance_factor = BalancedFactor( root );
+	
+	if ( balance_factor > -2 && balance_factor < 2 )
+	{
+		return root;
+	}
+	
+	child_balance_factor = BalancedFactor(root->child[(-2 == balance_factor)]);
+	
+	return HandleRebalance( root , balance_factor , child_balance_factor );
+}	
+
+/*********************  AvlNodeMax  ****************************/
+/*	
+	Find the Max of node's sub tree 
+*/
+/*static avl_node_t* AvlNodeMax(avl_node_t **parent, avl_node_t* curr_node)
+{
+	assert(curr_node);
+	assert(parent);
+	assert(*parent);	
+
+	if( NULL != curr_node->child[RIGHT] )
+	{
+		*parent = curr_node;
+		curr_node = curr_node->child[RIGHT];
+		AvlNodeMax( parent, curr_node);
+		
+		SetHeight( *parent, RIGHT );	
+	}
+	
+	return curr_node;
+}*/
+
+/************************ ststic functions definitions ************************/
+/********************  FindNumChilds  ****************************/
+static size_t FindNumChilds(avl_node_t* node)
+{
+	assert(node);
+	return ( NULL != node->child[LEFT] ) + ( NULL != node->child[RIGHT] );
+
+}
+
+/* Find the height of an AVL node recursively */
+/********************  SetHeight  ****************************/
+
+static void SetHeight( avl_node_t* node ) 
+{
+	int height_left = 0;
+	int height_right = 0;
+	assert(node);
+	
+	height_left = node->child[LEFT] ? node->child[LEFT]->height : -1;
+	height_right = node->child[RIGHT] ? node->child[RIGHT]->height : -1;
+	
+	node->height = MAX( height_left , height_right ) + 1;
+}
+
+/********************  AuxAVLSize  ****************************/
+static void AuxAVLSize(avl_node_t *node, size_t *size)
+{
+	if(NULL != node )
+	{
+		AuxAVLSize(node->child[LEFT],  size);
+		AuxAVLSize(node->child[RIGHT], size);
+		
+		++(*size);
+	}
+}	
+
+/********************  HandleRebalance  ****************************/	
+
+static avl_node_t*
+HandleRebalance(avl_node_t *root ,int balance_factor ,int child_balance_factor)
+{	
+	avl_node_t *new_root = NULL;
+	
+	/* RR */									
+	if( -2 == balance_factor && child_balance_factor <= 0 )
+	{			
+		new_root =  LeftRotate( root ); 
+	}
+	/* RL */										
+	else if( -2 == balance_factor &&  1 == child_balance_factor )
+	{
+		root->child[RIGHT] = RightRotate( root->child[RIGHT] );
+		new_root = LeftRotate( root );
+	}
+	/* LL */										
+	else if( 2 == balance_factor && child_balance_factor >= 0 )
+	{			
+		new_root =  RightRotate( root ); 
+	}
+	/* LR */										
+	else if( 2 == balance_factor &&  child_balance_factor == -1  )
+	{
+		root->child[LEFT] = LeftRotate( root->child[LEFT] );				
+		new_root = RightRotate( root );		
+	}
+	
+	SetHeight( root );
+	SetHeight( new_root );
+	return new_root;					
+}
+
+/********************  RightRotate  ****************************/	
+static avl_node_t *RightRotate( avl_node_t *node )
+{
+	avl_node_t *new_root = NULL, *tmp = NULL;
+	assert( node );
+	
+	new_root = node->child[LEFT];
+	tmp = new_root->child[RIGHT]; /* save for connect to old root later */
+	
+	new_root->child[RIGHT] = node;
+	node->child[LEFT] = tmp;
+	
+	SetHeight( node );
+	SetHeight( new_root );
+	
+	return new_root;
+}
+/********************  RightRotate  ****************************/	
+static avl_node_t *LeftRotate( avl_node_t *node )
+{
+	avl_node_t *new_root = NULL, *tmp = NULL;
+	assert( node );
+	
+	new_root = node->child[RIGHT];
+	tmp = new_root->child[LEFT]; /* save for connect to old root later */
+	
+	new_root->child[LEFT] = node;
+	node->child[RIGHT] = tmp;
+	
+	SetHeight( node );
+	SetHeight( new_root );
+	
+	return new_root;
+}
+
+/********************  BalancedFactor  ****************************/	
+static int BalancedFactor( avl_node_t *node )
+{
+	int height_left = 0;
+	int height_right = 0;
+	assert(node);
+	
+	height_left = node->child[LEFT] ? node->child[LEFT]->height : -1;
+	height_right = node->child[RIGHT] ? node->child[RIGHT]->height : -1;
+	
+	return height_left - height_right; 
+}
+
+/********************  AuxAVLFind  ****************************/
+static avl_node_t* AuxAVLFind(avl_t *tree, avl_node_t *node,
+								  	const void *data_to_find )
+{
+	int what_child = LEFT, res = 0;
+	
+	assert(tree);
+	assert(node);
+	
+	if( NULL == node )
+	{
+		return NULL;	
+	}
+	
+	res = tree->cmp_func( node->data, data_to_find );
+	what_child = res > 0 ? LEFT : RIGHT;
+	
+	if( 0 == res )
+	{
+		return node;
+	}
+
+	return AuxAVLFind(tree, node->child[what_child], data_to_find);
+}
+/********************  AuxAVLForEachPreOrder  ****************************/
+
+static void AuxAVLForEachPreOrder(avl_node_t *node, op_func_t op_func,
+								 void *user_param, int *res_op)
+{
+	assert( op_func);
+
+	if( NULL != node )
+	{
+		if(SUCCESS == *res_op && OPERATION_FAIL == op_func(node->data, user_param) )
+		{
+			*res_op =  OPERATION_FAIL;	
+		}
+
+		else if ( SUCCESS == *res_op )
+		{
+			AuxAVLForEachPreOrder( node->child[LEFT], op_func, user_param, res_op);
+			AuxAVLForEachPreOrder( node->child[RIGHT], op_func, user_param, res_op);
+		}
+	}
+}								 
+
+/********************  AuxAVLForEachPostOrder  ****************************/
+static void AuxAVLForEachPostOrder(avl_node_t *node, op_func_t op_func,
+								 void *user_param, int *res_op)
+{
+	assert( op_func);
+
+	if( NULL != node )
+	{
+		if ( SUCCESS == *res_op )
+		{
+			AuxAVLForEachPostOrder( node->child[LEFT], op_func, user_param, res_op);
+			AuxAVLForEachPostOrder( node->child[RIGHT], op_func, user_param, res_op);
+			
+			if(SUCCESS == *res_op &&  OPERATION_FAIL == op_func(node->data, user_param) )
+			{
+				*res_op =  OPERATION_FAIL;
+			}
+		}
+	}
+}		
+                          
+/********************  AuxAVLForEachInOrder  ****************************/
+static void AuxAVLForEachInOrder(avl_node_t *node, op_func_t op_func,
+								 void *user_param, int *res_op)
+{
+	assert( op_func);
+
+	if( NULL != node )
+	{
+		if ( SUCCESS == *res_op )
+		{
+			AuxAVLForEachInOrder( node->child[LEFT], op_func, user_param, res_op);
+			
+			if(SUCCESS == *res_op && OPERATION_FAIL == op_func(node->data, user_param) )
+			{
+				*res_op =  OPERATION_FAIL;	
+			}
+	
+			AuxAVLForEachInOrder( node->child[RIGHT], op_func, user_param, res_op);
+		}
+	}
+}	
+
+static void PrintSpace( size_t num )
+{
+	size_t i = 0;
+	for ( i = 0 ; i < num ; ++i )
+	{
+		printf("%3s" , " ");
+	}
+}
+typedef struct 
+{
+
+	int data;
+	int height;
+	int left_child_data;
+	int right_child_data;
+
+	
+} node_det_t;
+
+static void SetTreeArray(avl_node_t* node , node_det_t* arr , size_t index )
+{
+	node_det_t* det = NULL;
+	
+	det = arr + index; 
+	
+	det->data = *(int*)node->data;
+	det->height = node->height; 
+	
+	if ( NULL != node->child[LEFT] )
+	{
+		det->left_child_data = *(int*)node->child[LEFT]->data;
+		SetTreeArray( node->child[LEFT] , arr , index*2 );
+	}
+	else
+	{
+		det->left_child_data = -1;	
+	}
+	
+	if ( NULL != node->child[RIGHT] )
+	{
+		det->right_child_data = *(int*)node->child[RIGHT]->data;
+		SetTreeArray( node->child[RIGHT], arr , index*2 + 1 );
+	}
+	else
+	{
+		det->right_child_data = -1;	
+		return;	
+	}
+	
+}
+static size_t SumOfPow( size_t n )
+{
+	size_t i = 0;
+	size_t sum = 0;
+	
+	for( i = 0; i < n ; ++i )
+	{
+		sum += pow( 2 , i);
+	}	
+	return sum;
+}
+
+void PrintTree( avl_t* avl )
+{
+	node_det_t arr[40] = {0};
+	int i = 0 , j = 0;
+	size_t big = 0 , small = 0;
+	node_det_t* itr = arr + 1;
+	int size = 0;
+	assert( avl );
+	size = AVLHeight( avl ) + 1;
+	
+	SetTreeArray( avl->root , arr , 1 );
+	
+	for ( i = 0 ; i < size ; ++i)
+	{
+		big = SumOfPow( size - i);
+		small = SumOfPow( size - 1 - i);
+		PrintSpace( small );
+		for ( j = 0 ; j < pow( 2 , i) ; ++j )
+		{
+			if( itr->data != 0)
+			{		
+				printf("%3d" , itr->data );
+			}
+			else
+			{
+				printf("   ");
+			}
+			PrintSpace(big);
+			++itr;
+		}
+		putchar('\n');
+	}
+	
+	/*putchar('\n');
+	printf( "node  : height  : left  : right\n" );
+	for ( i = 1 ; i < 40 ; ++i )
+	{
+		printf( " %3d  :   %3d   :  %3d  :  %3d  \n" , arr[i].data ,
+	 arr[i].height , arr[i].left_child_data , arr[i].right_child_data);
+	}
+	
+	putchar('\n');*/
+	
+}
+
+
+
+
+

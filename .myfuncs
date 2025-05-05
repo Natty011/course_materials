@@ -52,7 +52,7 @@ alias vlg='valgrind --leak-check=yes --track-origins=yes'
 
 
 # Valgrind alias for c++ for inspections of free/delete
-#alias vlgpp='valgrind --leak-check=full --track-origins=yes --show-leak-kinds=all --error-exitcode=1'
+alias vlgpp='valgrind --leak-check=full --track-origins=yes --show-leak-kinds=all --error-exitcode=1'
 
 # gdb --tui alias
 alias gdbtui='gdb --tui'

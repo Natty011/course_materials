@@ -1,11 +1,12 @@
 /***************************************
  * Author : Natty
+ * Exercise: real time intro #3
  * Reviewer : ?
  * Date : 25 / 03 / 2025
  * Last update: 26 / 03 / 2025
  *****************************************/
 
-#define _POSIX_C_SOURCE 199309L
+#define _POSIX_C_SOURCE 199309L /*nanosleep*/
 
 #include <stdio.h>      /* printf, getchar */     
 #include <stdint.h>     /* uint8_t, uint16_t, uint32_t*/
