@@ -16,6 +16,6 @@
 *.swp
 
 # קבצי הרצה שנוצרים ע"י make
-test
+#test
 main
 a.out
