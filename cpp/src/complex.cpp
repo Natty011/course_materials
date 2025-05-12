@@ -80,17 +80,32 @@ Complex& Complex::operator-=(const Complex& other_)
 // operator*=
 Complex& Complex::operator*=(const Complex& other_)
 {
-	*this = *this * other_;
+	double real= m_real*other_.m_real - m_imag*other_.m_imag;
+	double imag= m_real*other_.m_imag + m_imag*other_.m_real;
+
+	m_real = real;
+	m_imag = imag;
+
 	return *this;
 }
 
 // operator/=
 Complex& Complex::operator/=(const Complex& other_)
 {
+	
+	
 	const double epsilon = 1e-10;
-	assert(other_.Abs() > epsilon);
+	double denominator = (other_.GetReal() * other_.GetReal()) + 
+						 (other_.GetImag() * other_.GetImag());
 
-	*this = *this / other_;
+	assert(epsilon < denominator);
+
+	double real = (m_real*other_.GetReal()) + (m_imag*other_.GetImag());
+	double imag = (m_imag*other_.GetReal()) - (m_real*other_.GetImag());
+
+	m_real= real / denominator;
+	m_imag= imag / denominator;
+
 	return *this;
 }
 
