@@ -1,0 +1,9 @@
+[wokwi]
+version = 1
+name = "soda_dispenser"
+firmware = ".pio/build/uno/firmware.hex"
+dependencies = []
+
+[[devices]]
+type = "wokwi-arduino-uno"
+id = "uno"

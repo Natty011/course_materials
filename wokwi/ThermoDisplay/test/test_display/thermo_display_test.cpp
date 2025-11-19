@@ -1,0 +1,26 @@
+#include <Arduino.h>     // setup(), loop(), delay, println
+#include "thermo_display.h" // OledDisplay, InitDisplay
+
+OledDisplay g_display;
+
+void setup()
+{
+    //Communication between the Arduino board
+    // and the SSD1306 OLED Display
+    Serial.begin(9600); 
+    if(!g_display.InitDisplay())
+    {
+        Serial.println("Display init failed!");
+        while(true); // Dont proceed, loop forever
+    }
+
+}
+
+void loop()
+{
+    double temp = 24.6;
+    double hum  = 58.2;
+
+    g_display.ShowSensorData(temp, hum);
+    delay(5000);
+}

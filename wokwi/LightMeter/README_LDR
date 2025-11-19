@@ -1,0 +1,174 @@
+בוקר מצוין 🌞
+איזה כיף לפתוח את היום עם פרויקט חדש – **LightMeter** 💡
+נבנה README מסודר ומקצועי, בדיוק כמו ב־ThermoDisplay, כך שתוכל לשמור אותו בתיקיית הפרויקט (`README.md`) של PlatformIO.
+
+להלן הגרסה המלאה:
+
+---
+
+# **LightMeter – Digital Light Intensity Meter (Arduino UNO + OLED SSD1306)**
+
+## 📖 Overview
+
+The **LightMeter** project measures ambient light intensity using an **LDR (Light Dependent Resistor)** connected to an **analog input (ADC)** of the Arduino UNO.
+The measured value is converted into a readable percentage and displayed in real-time on an **OLED SSD1306 display** via the I²C bus.
+
+This project is designed as a continuation of the **ThermoDisplay** project, introducing the concept of **analog-to-digital conversion (ADC)** and **voltage dividers**, while maintaining a clear and modular C++ architecture.
+
+---
+
+## 🎯 Project Goals
+
+* Learn how to read **analog signals** using the Arduino’s built-in ADC.
+* Understand the principles of **voltage dividers** and **LDR behavior**.
+* Convert raw ADC readings into meaningful physical quantities (voltage, light percentage).
+* Display real-time light level on an **SSD1306 OLED screen** in multiple formats:
+
+  * Raw ADC value (0–1023)
+  * Normalized percentage (0–100%)
+  * Optional: graphical **bar graph** or **progress indicator**
+* Practice **non-blocking loops** using `millis()` (no `delay()`).
+
+---
+
+## ⚙️ Hardware Components
+
+| Component                  | Quantity | Description                          |
+| -------------------------- | -------- | ------------------------------------ |
+| Arduino UNO                | 1        | Main microcontroller                 |
+| OLED SSD1306 (I²C, 128×64) | 1        | Display for visual output            |
+| LDR (Photoresistor)        | 1        | Light sensor                         |
+| Resistor 10kΩ              | 1        | Used in voltage divider with the LDR |
+| Breadboard                 | 1        | For circuit assembly                 |
+| Jumper wires               | —        | For connections                      |
+
+---
+
+## 🔌 Circuit Description
+
+### Voltage Divider Principle:
+
+The **LDR** and the **10kΩ resistor** form a voltage divider connected to **A0** input:
+
+```
+(5V) ─── LDR ───┬─── A0 (Analog Input)
+                 │
+               10kΩ
+                 │
+                GND
+```
+
+* When light intensity **increases**, the LDR resistance **decreases**, resulting in **higher voltage** at A0.
+* When it’s **darker**, resistance **increases**, and A0 voltage **drops**.
+
+---
+
+## 🧩 Software Structure
+
+### Directory Tree
+
+```
+LightMeter/
+│
+├── include/
+│   ├── light_sensor.h       # Light sensor class (ADC, normalization)
+│   ├── display_manager.h    # OLED display logic
+│
+├── src/
+│   ├── main.cpp             # Entry point, loop with millis()
+│   ├── light_sensor.cpp
+│   ├── display_manager.cpp
+│
+├── test/
+│   ├── test_light_sensor.cpp  # Basic functional test (no Unity)
+│
+├── diagram.json             # Wokwi wiring diagram
+├── platformio.ini           # PlatformIO configuration
+└── README.md                # This file
+```
+
+---
+
+## 🧠 C++ Design Concepts
+
+* **Encapsulation:** separate logic into distinct classes (`LightSensor`, `DisplayManager`).
+* **Const correctness:** use `const` and `constexpr` for fixed hardware pins and reference values.
+* **Modular design:** clear separation between sensor logic, display logic, and main control loop.
+* **Timing control:** use `millis()` for stable, non-blocking updates.
+* **Mathematical mapping:** use `map()` or linear scaling for normalization.
+
+---
+
+## 🧮 Core Equations
+
+1. **Analog to Voltage:**
+   [
+   V_{in} = \frac{\text{ADC Value}}{1023} \times 5.0
+   ]
+
+2. **Light Percentage (simple linear model):**
+   [
+   \text{Light %} = \frac{\text{ADC Value}}{1023} \times 100
+   ]
+
+---
+
+## 🖥️ Example Display Output
+
+```
+LightMeter
+----------
+Raw: 645
+Brightness: 63%
+█████████░░░░░░
+```
+
+---
+
+## 🧰 PlatformIO Configuration (`platformio.ini`)
+
+```ini
+[env:uno]
+platform = atmelavr
+board = uno
+framework = arduino
+
+lib_deps =
+    adafruit/Adafruit SSD1306 @ ^2.5.9
+    adafruit/Adafruit GFX Library @ ^1.11.11
+    adafruit/Adafruit BusIO @ ^1.16.1
+```
+
+---
+
+## 🧪 Testing (Manual)
+
+* Place a flashlight or cover the LDR to test light variation.
+* Observe the OLED display updating the value smoothly.
+* Check that the reading changes in real-time without delay.
+
+---
+
+## 🚀 Future Enhancements
+
+* Add a **button** to toggle display modes (Raw / % / Graph).
+* Implement **auto-calibration** (min/max light detection).
+* Store recent values in an array and plot a mini light-history graph.
+* Add sound feedback (buzzer) for sudden light changes.
+
+---
+
+## 📚 Learning Outcomes
+
+By completing this project, you will:
+
+* Master analog input handling and signal scaling.
+* Gain practical understanding of voltage dividers and LDR behavior.
+* Improve display data formatting and update logic.
+* Strengthen your embedded C++ design discipline.
+
+---
+
+רוצה שאוסיף לגרסה הזו גם גרסה בעברית (כמו שעשינו ב־ThermoDisplay – חלק בעברית וחלק טכני באנגלית)?
+או להשאיר אותה בגרסה טכנית אנגלית בלבד?
+

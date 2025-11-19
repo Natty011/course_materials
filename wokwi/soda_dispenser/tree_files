@@ -1,0 +1,17 @@
+soda_dispenser/
+├── include/
+│   ├── dispenser.h         ← ממשק אבסטרקטי
+│   └── state.h          ← דפוס האסטרטגיה (הניתן להחלפה)
+├── src/
+│   ├── dispenser.cpp       ← מימוש ברירת מחדל
+│   └── state.cpp        ← אסטרטגיות שונות למכונה
+├── lib/
+│   └── user_interface/     ← ספרייה נפרדת לאינטרקציה עם המשתמש
+│       ├── ui.h
+│       └── ui.cpp
+├── test/
+│   └── test_dispenser.cpp  ← בדיקות בסיסיות ל־Dispenser
+├── platformio.ini
+├── diagram.json            ← דיאגרמת Wokwi (כפתור, לד/סרוו)
+└── README.md
+

@@ -1,0 +1,15 @@
+🚀 איך להתחיל בפרויקט שלך:
+
+לחץ בצד שמאל על 🐞 PlatformIO → Create New Project
+
+תן שם: my-blink-project
+
+Board: Arduino Uno
+
+Framework: Arduino
+
+תדביק את הקוד לעיל ל־src/main.cpp
+
+לחץ 🔨 Build (או Ctrl+Alt+B)
+
+אם אתה מדמה ב־Wokwi – תוכל לעבוד ישירות מהקובץ בלבד

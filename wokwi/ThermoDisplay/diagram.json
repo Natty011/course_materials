@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "author": "Natty Levi",
+  "editor": "wokwi",
+  "parts": [
+    { "type": "wokwi-arduino-uno", "id": "uno", "top": 29.4, "left": 57, "attrs": {} },
+    { "type": "wokwi-breadboard-half", "id": "bb1", "top": 246.6, "left": 60.4, "attrs": {} },
+    {
+      "type": "board-ssd1306",
+      "id": "oled",
+      "top": 319.94,
+      "left": 240.23,
+      "attrs": { "i2cAddress": "0x3C" }
+    },
+    { "type": "wokwi-dht22", "id": "dht", "top": 38.7, "left": 378.6, "attrs": {} }
+  ],
+  "connections": [
+    [ "uno:5V", "bb1:+", "red", [ "v0" ] ],
+    [ "uno:GND", "bb1:-", "black", [ "v0" ] ],
+    [ "dht:VCC", "bb1:+", "red", [ "h0" ] ],
+    [ "dht:GND", "bb1:-", "black", [ "h0" ] ],
+    [ "dht:DATA", "uno:2", "green", [ "h0", "v-40" ] ],
+    [ "oled:VCC", "bb1:+", "red", [ "h0" ] ],
+    [ "oled:GND", "bb1:-", "black", [ "h0" ] ],
+    [ "oled:SDA", "uno:A4", "blue", [ "v-40" ] ],
+    [ "oled:SCL", "uno:A5", "magenta", [ "v-40" ] ],
+    [ "oled:VIN", "oled:3V3", "red", [ "v0" ] ],
+    [ "uno:5V", "bb1:tp.12", "red", [ "v0" ] ],
+    [ "uno:GND.2", "bb1:tn.13", "black", [ "v0" ] ],
+    [ "oled:VCC", "bb1:tp.18", "red", [ "v0" ] ],
+    [ "oled:GND", "bb1:tp.17", "black", [ "v0" ] ],
+    [ "dht:GND", "bb1:tn.25", "black", [ "v0", "h57.6", "v124.8" ] ],
+    [ "dht:VCC", "bb1:tp.23", "red", [ "v57.6", "h-48" ] ],
+    [ "dht:SDA", "uno:2", "green", [ "v28.8", "h-57.5", "v-163.2", "h-48" ] ],
+    [ "oled:GND", "bb1:21t.d", "", [ "$bb" ] ],
+    [ "oled:VCC", "bb1:22t.d", "", [ "$bb" ] ],
+    [ "oled:SCL", "bb1:23t.d", "", [ "$bb" ] ],
+    [ "oled:SDA", "bb1:24t.d", "", [ "$bb" ] ]
+  ],
+  "dependencies": {}
+}

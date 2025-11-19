@@ -1,0 +1,47 @@
+{
+    "version": 1,
+    "author": "natty",
+    "editor": "wokwi",
+    "parts": [
+      { "type": "wokwi-arduino-uno", "id": "uno", "top": 19.8, "left": -19.8, "attrs": {} },
+      {
+        "type": "wokwi-pushbutton",
+        "id": "btnSelect",
+        "top": -86.5,
+        "left": 137.9,
+        "rotate": 90,
+        "attrs": { "color": "green" }
+      },
+      {
+        "type": "wokwi-pushbutton",
+        "id": "btnConfirm",
+        "top": -61,
+        "left": 259.2,
+        "attrs": { "color": "blue" }
+      },
+      { "type": "wokwi-servo", "id": "servo", "top": 36.4, "left": 316.8, "attrs": {} },
+      { "type": "wokwi-led", "id": "led", "top": -51.6, "left": 109.4, "attrs": { "color": "red" } },
+      { "type": "board-ssd1306", "id": "oled", "top": 262.34, "left": 163.43, "attrs": {} },
+      { "type": "wokwi-hc-sr04", "id": "sensor", "top": -27.3, "left": -186.5, "attrs": {} }
+    ],
+    "connections": [
+      [ "btnSelect:1.l", "uno:2", "green", [ "h34", "v100", "h0" ] ],
+      [ "btnSelect:2.r", "uno:GND.1", "black", [ "v100" ] ],
+      [ "btnConfirm:1.l", "uno:3", "green", [ "h-50", "v0" ] ],
+      [ "btnConfirm:2.r", "uno:GND.1", "black", [ "v100", "h0" ] ],
+      [ "servo:PWM", "uno:9", "orange", [ "h-170", "v50" ] ],
+      [ "servo:GND", "uno:GND.1", "black", [ "v0", "h-70" ] ],
+      [ "servo:V+", "uno:5V", "red", [ "h-100" ] ],
+      [ "led:A", "uno:5", "green", [ "h5" ] ],
+      [ "led:C", "uno:GND.1", "black", [ "v0" ] ],
+      [ "oled:SDA", "uno:A4", "green", [ "v0" ] ],
+      [ "oled:SCL", "uno:A5", "green", [ "v-10", "h5" ] ],
+      [ "oled:VCC", "uno:5V", "red", [ "v-20", "h5" ] ],
+      [ "oled:GND", "uno:GND.3", "black", [ "v-15", "h5" ] ],
+      [ "sensor:VCC", "uno:5V", "red", [ "v160", "h10" ] ],
+      [ "sensor:GND", "uno:GND.1", "black", [ "v15", "h20" ] ],
+      [ "sensor:TRIG", "uno:6", "orange", [ "v10", "h10" ] ],
+      [ "sensor:ECHO", "uno:7", "yellow", [ "h0" ] ]
+    ],
+    "dependencies": {}
+  }
