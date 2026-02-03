@@ -1,4 +1,5 @@
 #include "display.h"
+#include<Arduino.h>
 
 Display::Display(uint8_t cs, uint8_t dc)
     : m_tft(cs, dc) {}
@@ -6,8 +7,26 @@ Display::Display(uint8_t cs, uint8_t dc)
 void Display::begin()
 {
     m_tft.begin();
+    m_tft.setRotation(1);
     m_tft.fillScreen(ILI9341_BLACK);
     drawStaticFrame();    
+
+}
+
+void Display::splash(const char* title)
+{
+    m_tft.fillScreen(ILI9341_BLACK);
+    m_tft.setTextColor(ILI9341_CYAN);
+    m_tft.setTextSize(2);
+    m_tft.setCursor(20, 20);
+    //delay(3000);
+    m_tft.println(title);
+    m_tft.setTextSize(2);
+    m_tft.setTextColor(20, 40);
+    m_tft.setTextColor(ILI9341_YELLOW);
+    m_tft.println("Initializing...");
+    delay(3000);
+
 }
 
 void Display::drawStaticFrame()
@@ -15,17 +34,21 @@ void Display::drawStaticFrame()
     m_tft.fillScreen(ILI9341_BLACK);
     m_tft.setTextSize(2);
     m_tft.setTextColor(ILI9341_ORANGE);
-    m_tft.setCursor(10, 10);
+    m_tft.setCursor(0, 0);
     m_tft.print("LightMeter");
+    //delay(3000);
 
     m_tft.setTextColor(ILI9341_LIGHTGREY);
-    m_tft.setCursor(10, 50); m_tft.print("Lux:");
-    m_tft.setCursor(10, 80); m_tft.print("Light %:");
-    m_tft.setCursor(10,110); m_tft.print("Analog:");
-    m_tft.setCursor(10,140); m_tft.print("Digital:");
+    m_tft.setCursor(0, 50); m_tft.print("Lux:");
+    m_tft.setCursor(0, 80); m_tft.print("Light:");
+    m_tft.setCursor(0,110); m_tft.print("Analog:");
+    m_tft.setCursor(0,140); m_tft.print("Digital:");
+    //(3000);
 
     //Frame to percent's bar
-    m_tft.drawRect(60, 180, 120, 20, ILI9341_DARKGREY);
+    //m_tft.drawRect(120, 78, 180, 18, ILI9341_DARKGREY);
+    delay(3000);
+
 }
 
 void Display::printValue(int16_t x, int16_t y, const String& text,
@@ -40,15 +63,31 @@ void Display::printValue(int16_t x, int16_t y, const String& text,
 
 void Display::drawBar(int16_t x, int16_t y, int16_t w, int16_t h, float p)
 {
-    if(p<0)
+    if(p<0.0f)
     {
-        p = 0;
+        p = 0.0f;
     }
-    if(100 > p)
+    if(100.0f < p)
     {
-        p = 100;
+        p = 100.0f;
     }
-    int filled = (int)(w * (p / 100.0f));
+    const int filled = static_cast<int>(w * p / 100.0f);
     m_tft.fillRect(x, y, w, h, ILI9341_BLACK); // Clean
-    m_tft.fillRect()
+    m_tft.fillRect(x, y, filled,h, ILI9341_GREEN); // Fill the relative bar
+    m_tft.drawRect(x, y, w, h, ILI9341_DARKGREY); //Frame
 }
+
+void Display::show(float lux, float percent, int analog_value, bool digital_state)
+{
+
+    printValue(100, 50, String(lux, 1));
+    printValue(190, 50, "lx", ILI9341_DARKGREY);// Small units if wants
+
+    drawBar(100, 78, 150, 18, percent);
+    printValue(260, 78, String(percent, 1)+"%");
+
+    printValue(100, 110, String(analog_value));
+    printValue(100, 140, digital_state ? "HIGH" : "LOW",
+                digital_state ? ILI9341_GREEN : ILI9341_RED);
+}
+

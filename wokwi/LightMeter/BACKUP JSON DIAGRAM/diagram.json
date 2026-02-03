@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "author": "Natty Levi",
+  "editor": "wokwi",
+  "parts": [
+    {
+      "type": "wokwi-arduino-uno",
+      "id": "uno",
+      "top": -31.8,
+      "left": 20.6,
+      "rotate": 90,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-photoresistor-sensor",
+      "id": "ldr",
+      "top": 18.9,
+      "left": -139.9,
+      "rotate": 90,
+      "attrs": { "lux": "100" }
+    },
+    { "type": "wokwi-ili9341", "id": "lcd", "top": 43.3, "left": 558, "rotate": 90, "attrs": {} }
+  ],
+  "connections": [
+    [ "uno:TX", "$serialMonitor:RX", "", [] ],
+    [ "uno:RX", "$serialMonitor:TX", "", [] ],
+    [ "ldr:AO", "uno:A0", "white", [ "v19.2", "h96.7", "v-19.2" ] ],
+    [ "ldr:GND", "uno:GND.3", "black", [ "v-9.6", "h67.6", "v-9.6" ] ],
+    [ "lcd:GND", "uno:GND.1", "black", [ "h-67.2", "v-115.2" ] ],
+    [ "lcd:VCC", "uno:5V", "red", [ "h-355.2", "v-67.2", "h-9.6", "v9.6" ] ],
+    [ "ldr:VCC", "uno:5V", "red", [ "v0" ] ],
+    [ "uno:2", "ldr:DO", "green", [ "h19.2", "v42.5", "h-326.4" ] ],
+    [ "uno:12", "lcd:MISO", "blue", [ "h182.4", "v163.7" ] ],
+    [ "uno:10", "lcd:CS", "yellow", [ "h220.8", "v87.1" ] ],
+    [ "uno:13", "lcd:SCK", "orange", [ "h124.8", "v144.4", "h115.2", "v9.6" ] ],
+    [ "uno:11", "lcd:MOSI", "gray", [ "h105.6", "v115.8", "h144", "v9.6" ] ],
+    [ "uno:9", "lcd:D/C", "purple", [ "h67.2", "v87.2", "h163.2", "v9.6" ] ]
+  ],
+  "serialMonitor": { "display": "plotter" },
+  "dependencies": {}
+}

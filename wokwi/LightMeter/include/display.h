@@ -20,6 +20,8 @@ private:
                     int16_t boxW = 110, int16_t boxH = 16);
     //Progress bar of light percent
     void drawBar(int16_t x, int16_t y, int16_t w, int16_t h, float percent);
+private:
+
 }; //class Display
 
 #endif // DISPLAY_H

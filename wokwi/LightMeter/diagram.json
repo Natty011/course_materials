@@ -2,11 +2,7 @@
   "version": 1,
   "author": "Natty Levi",
   "editor": "wokwi",
-  "serialMonitor": {
-    "display": "plotter"
-  },
   "parts": [
-    { "type": "wokwi-breadboard-half", "id": "bb", "top": 260, "left": 60, "attrs": {} },
     {
       "type": "wokwi-arduino-uno",
       "id": "uno",
@@ -23,29 +19,23 @@
       "rotate": 90,
       "attrs": { "lux": "100" }
     },
-    { "type": "wokwi-ili9341", "id": "lcd", "top": -85.6, "left": 326.1, "attrs": {} }
+    { "type": "wokwi-ili9341", "id": "lcd", "top": 43.3, "left": 558, "rotate": 90, "attrs": {} }
   ],
   "connections": [
-    [ "uno:TX", "$serialMonitor:RX", "" ],
-    [ "uno:RX", "$serialMonitor:TX", "" ],
-    [ "uno:5V", "bb:tp.12", "red", [ "h-28.7", "v147.8", "h182.4" ] ],
-    [ "ldr:VCC", "bb:tp.1", "red", [ "v0" ] ],
-    [ "lcd:VCC", "bb:tp.14", "red", [ "v19.2", "h-144" ] ],
-    [ "uno:GND.1", "bb:tn.17", "black", [ "h28.8", "v0.3" ] ],
-    [ "ldr:GND", "bb:tn.1", "black", [ "v0" ] ],
-    [ "lcd:GND", "bb:tn.15", "black", [ "v38.4", "h-134.4" ] ],
-    [ "ldr:DO", "bb:1t.a", "green", [ "v0" ] ],
-    [ "uno:2", "bb:20t.a", "green", [ "h19.2", "v4.1" ] ],
-    [ "bb:1t.a", "bb:20t.a", "limegreen", [ "v0" ] ],
+    [ "uno:TX", "$serialMonitor:RX", "", [] ],
+    [ "uno:RX", "$serialMonitor:TX", "", [] ],
     [ "ldr:AO", "uno:A0", "white", [ "v19.2", "h96.7", "v-19.2" ] ],
-    [ "lcd:CS", "uno:10", "yellow", [ "v28.8", "h-96", "v-144", "h-48" ] ],
-    [ "lcd:D/C", "uno:9", "cyan", [ "v48", "h-105.6", "v-153.6" ] ],
-    [ "uno:11", "lcd:MOSI", "orange", [ "h67.2", "v135", "h19.2" ] ],
-    [ "lcd:SCK", "bb:30t.a", "#8f4814", [ "v0" ] ],
-    [ "uno:13", "bb:22t.a", "#8f4814", [ "h38.4", "v0.4" ] ],
-    [ "bb:30t.a", "bb:22t.a", "#8f4814", [ "v0" ] ],
-    [ "lcd:MISO", "bb:11t.c", "blue", [ "v0" ] ],
-    [ "uno:12", "bb:11t.c", "blue", [ "h0" ] ]
+    [ "ldr:GND", "uno:GND.3", "black", [ "v-9.6", "h67.6", "v-9.6" ] ],
+    [ "lcd:GND", "uno:GND.1", "black", [ "h-67.2", "v-115.2" ] ],
+    [ "lcd:VCC", "uno:5V", "red", [ "h-355.2", "v-67.2", "h-9.6", "v9.6" ] ],
+    [ "ldr:VCC", "uno:5V", "red", [ "v0" ] ],
+    [ "uno:2", "ldr:DO", "green", [ "h19.2", "v42.5", "h-326.4" ] ],
+    [ "uno:12", "lcd:MISO", "blue", [ "h182.4", "v163.7" ] ],
+    [ "uno:10", "lcd:CS", "yellow", [ "h220.8", "v87.1" ] ],
+    [ "uno:13", "lcd:SCK", "orange", [ "h124.8", "v144.4", "h115.2", "v9.6" ] ],
+    [ "uno:11", "lcd:MOSI", "gray", [ "h105.6", "v115.8", "h144", "v9.6" ] ],
+    [ "uno:9", "lcd:D/C", "purple", [ "h67.2", "v87.2", "h163.2", "v9.6" ] ]
   ],
+  "serialMonitor": { "display": "plotter" },
   "dependencies": {}
 }

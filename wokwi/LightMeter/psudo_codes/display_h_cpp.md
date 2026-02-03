@@ -1,214 +1,137 @@
-#ifndef THERMO_DISPLAY_H
-#define THERMO_DISPLAY_H
+#pragma once
+#include <Adafruit_GFX.h>
+#include <Adafruit_ILI9341.h>
 
-#include <Arduino.h> //println, length, print
-#include <Wire.h> //begin (for OLED I2C)
-#include <Adafruit_GFX.h> // setTextSize, setTextColor, setCersor
-#include <Adafruit_SSD1306.h> //clearDisplay, display, 
-
-class OledDisplay {
+class Display {
 public:
-    OledDisplay();
-
-    // אתחול המסך
-    bool InitDisplay();
-
-    // הצגת טמפ’ ולחות
-    void ShowSensorData(float temp, float hum);
+  Display(uint8_t cs, uint8_t dc, uint8_t rst);
+  void begin();
+  void splash(const char* title = "LightMeter");
+  void show(float lux, float percent, int analogVal, bool digitalState);
 
 private:
-    Adafruit_SSD1306 m_display;
-    bool m_inited;
+  Adafruit_ILI9341 _tft;
+  // ציור שכבת טקסט קבועה
+  void drawStaticFrame();
+  // הדפסה שמנקה רק את האזור הישן (ללא ריצוד)
+  void printValue(int16_t x, int16_t y, const String& text,
+                  uint16_t fg = ILI9341_WHITE, uint16_t bg = ILI9341_BLACK,
+                  int16_t boxW = 110, int16_t boxH = 16);
+  // בר התקדמות לאחוז אור
+  void drawBar(int16_t x, int16_t y, int16_t w, int16_t h, float percent);
 };
 
-#endif
 
 ///////////////////////////////////////////////////////////////////////////////
-#include "thermo_display.h"
+#include "display.h"
 
-#define SCREEN_WIDTH 128
-#define SCREEN_HEIGHT 64
-#define OLED_ADDR 0x3C
+Display::Display(uint8_t cs, uint8_t dc, uint8_t rst)
+: _tft(cs, dc, rst) {}
 
-OledDisplay::OledDisplay()
-    : m_display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1), m_inited(false)
-{
+void Display::begin() {
+  _tft.begin();
+  _tft.setRotation(1);            // לרוחב
+  _tft.fillScreen(ILI9341_BLACK);
+  drawStaticFrame();
 }
 
-bool OledDisplay::InitDisplay()
-{
-    Wire.begin();
-
-    if (!m_display.begin(SSD1306_SWITCHCAPVCC, OLED_ADDR)) {
-        m_inited = false;
-        return false;
-    }
-
-    m_display.clearDisplay();
-    m_display.setTextSize(1);
-    m_display.setTextColor(SSD1306_WHITE);
-    m_display.setCursor(0, 0);
-    m_display.println(F("ThermoDisplay Init..."));
-    m_display.display();
-    delay(1000);
-
-    m_display.clearDisplay();
-    m_display.display();
-    m_inited = true;
-
-    return true;
+void Display::splash(const char* title) {
+  _tft.fillScreen(ILI9341_BLACK);
+  _tft.setTextColor(ILI9341_CYAN);
+  _tft.setTextSize(3);
+  _tft.setCursor(20, 40);
+  _tft.print(title);
+  _tft.setTextSize(2);
+  _tft.setCursor(20, 80);
+  _tft.setTextColor(ILI9341_YELLOW);
+  _tft.print("Initializing...");
 }
 
-void OledDisplay::ShowSensorData(float temp, float hum)
-{
-    if (!m_inited) return;
+void Display::drawStaticFrame() {
+  _tft.fillScreen(ILI9341_BLACK);
+  _tft.setTextSize(2);
+  _tft.setTextColor(ILI9341_ORANGE);
+  _tft.setCursor(10, 10);  _tft.print("LightMeter");
 
-    m_display.clearDisplay();
-    m_display.setTextSize(1);
-    m_display.setTextColor(SSD1306_WHITE);
+  _tft.setTextColor(ILI9341_LIGHTGREY);
+  _tft.setCursor(10, 50);  _tft.print("Lux:");
+  _tft.setCursor(10, 80);  _tft.print("Light %:");
+  _tft.setCursor(10,110);  _tft.print("Analog:");
+  _tft.setCursor(10,140);  _tft.print("Digital:");
 
-    m_display.setCursor(0, 0);
-    m_display.print("Temp: ");
-    m_display.print(temp, 1);
-    m_display.println(" C");
-
-    m_display.setCursor(0, 16);
-    m_display.print("Hum:  ");
-    m_display.print(hum, 1);
-    m_display.println(" %");
-
-    m_display.display();
+  // מסגרת לבר האחוזים
+  _tft.drawRect(120, 78, 180, 18, ILI9341_DARKGREY);
 }
 
+void Display::printValue(int16_t x, int16_t y, const String& text,
+                         uint16_t fg, uint16_t bg, int16_t w, int16_t h) {
+  _tft.fillRect(x, y, w, h, bg);       // נקה אזור קודם
+  _tft.setTextColor(fg);
+  _tft.setTextSize(2);
+  _tft.setCursor(x, y);
+  _tft.print(text);
+}
 
+void Display::drawBar(int16_t x, int16_t y, int16_t w, int16_t h, float p) {
+  if (p < 0) p = 0; if (p > 100) p = 100;
+  int filled = (int)(w * (p / 100.0f));
+  _tft.fillRect(x, y, w, h, ILI9341_BLACK);       // נקה
+  _tft.fillRect(x, y, filled, h, ILI9341_GREEN);  // מלא
+  _tft.drawRect(x, y, w, h, ILI9341_DARKGREY);    // מסגרת
+}
 
+void Display::show(float lux, float percent, int analogVal, bool digitalState) {
+  // ערכים
+  printValue(120, 50, String(lux, 1));            // Lux
+  printValue(310, 50, "lx", ILI9341_DARKGREY);    // יחידות קטנות בצד אם רוצים
 
-// מטרת הקובץ: ניהול מסך OLED SSD1306 בתקשורת I2C.
-// אחראי רק על הצגה ויזואלית, ללא לוגיקה של מדידה.
+  drawBar(120, 78, 180, 18, percent);
+  printValue(310, 78, String(percent, 1) + "%");
 
-// display.h
-מחלקה: OledDisplay
-    משתנים פרטיים:
-        m_inited : bool
-    פונקציות ציבוריות:
-        InitDisplay()
-            - מאתחלת את המסך
-            - מציגה הודעת פתיחה “ThermoDisplay Init...”
-        Clear()
-            - מנקה את המסך
-        ShowText(line1, line2)
-            - מציגה שתי שורות טקסט (או רק אחת אם השנייה ריקה)
-        ShowValue(label, value)
-            - מציגה תווית ומספר מעוצב (לדוגמה “Temp: 25.3°C”)
-
-// display.cpp
-ב־InitDisplay():
-    1. מפעיל את Wire (I²C)
-    2. מפעיל את SSD1306.begin()
-    3. מגדיר גודל גופן וצבע
-    4. מציג הודעת פתיחה
-
-ב־ShowText():
-    1. ClearDisplay()
-    2. SetCursor(0,0)
-    3. print(line1)
-    4. אם יש line2 → SetCursor(0,16), print(line2)
-    5. display()
-
-ב־ShowValue():
-    1. ClearDisplay()
-    2. SetCursor(0,0)
-    3. print(label)
-    4. SetCursor(0,16)
-    5. print(value בפורמט קבוע)
-    6. display()
-
-
+  printValue(120,110, String(analogVal));
+  printValue(120,140, digitalState ? "HIGH" : "LOW",
+             digitalState ? ILI9341_GREEN : ILI9341_RED);
+}
 ///////////////////////////////////////////////////////////////////////////////
-// מטרת המחלקה:
-// ניהול מסך OLED SSD1306 בתקשורת I2C, כולל הדפסות טקסט וערכים מדודים.
+#include <Arduino.h>
+#include "display.h"
 
-מחלקה OledDisplay {
+// פינים למסך (לפי מה שהשתמשת בו אתמול)
+#define TFT_CS  10
+#define TFT_DC   9
+#define TFT_RST  8
 
-public:
-    // אתחול המסך והכנתו לעבודה
-    InitDisplay()
+Display g_display(TFT_CS, TFT_DC, TFT_RST);
 
-    // ניקוי התצוגה
-    Clear()
+void setup() {
+  Serial.begin(115200);
+  Serial.println("Display test start");
 
-    // הדפסת שתי שורות טקסט (אופציונלית שורה שנייה)
-    ShowText(line1, line2="")
+  g_display.begin();
+  g_display.splash("Display Test");
+  delay(1500);
 
-    // הצגת ערך מדידה (לדוגמה: Temp: 25.4°C)
-    ShowValue(label, value, unit="")
-
-private:
-    // מציין אם המסך מאותחל בהצלחה
-    m_inited : bool
+  // ציור ראשוני של המסגרת
+  g_display.show(0, 0, 0, false);
 }
 
-///////////////////////////////////////////////////////////////////////////////
-InitDisplay():
-    הפעל תקשורת I2C ע"י Wire.begin()
-    אתחל את המסך עם SSD1306.begin(SSD1306_SWITCHCAPVCC, 0x3C)
-    אם אתחול נכשל → הגדר m_inited=false והחזר
-    הגדר טקסט קטן (setTextSize(1)), צבע לבן (setTextColor(WHITE))
-    נקה את המסך והצג הודעת פתיחה "ThermoDisplay Init..."
-    m_inited = true
+void loop() {
+  // בדיקה דינמית של המסך: ערכים משתנים כמו בגרף
+  static float lux = 0;
+  static bool  state = false;
 
-Clear():
-    אם !m_inited → החזר
-    clearDisplay()
-    display()
+  lux += 5;
+  if (lux > 1000) {
+    lux = 0;
+    state = !state;
+  }
 
-ShowText(line1, line2=""):
-    אם !m_inited → החזר
-    clearDisplay()
-    setCursor(0,0)
-    print(line1)
-    אם line2 לא ריק → setCursor(0,16) + print(line2)
-    display()
+  float percent = (lux / 1000.0f) * 100.0f;
+  int analogVal = map(lux, 0, 1000, 0, 1023);
 
-ShowValue(label, value, unit=""):
-    אם !m_inited → החזר
-    clearDisplay()
-    setCursor(0,0)
-    print(label + ":")
-    setCursor(0,16)
-    print(value בפורמט של 1-2 ספרות אחרי נקודה)
-    אם unit לא ריק → print(" " + unit)
-    display()
-//////////////////////////////////////////////////////////////////////
+  g_display.show(lux, percent, analogVal, state);
 
-מחלקה: OledDisplay
-מצב פנימי:
-    m_inited : bool  ← האם האתחול הצליח
-
-InitDisplay():
-    - מפעיל I2C (Wire.begin)
-    - מפעיל SSD1306.begin עם כתובת 0x3C
-    - מגדיר גודל טקסט 1, צבע לבן, קורסור (0,0)
-    - מציג "ThermoDisplay / Init..." כדי לאשר שהמסך עובד
-    - מגדיר m_inited=true, אחרת false
-
-Clear():
-    - אם לא מאותחל → return
-    - clearDisplay + display()
-
-ShowText(line1, line2=""):
-    - אם לא מאותחל → return
-    - clearDisplay
-    - setCursor(0,0); print(line1)
-    - אם line2 לא ריק: setCursor(0,16); print(line2)
-    - display()
-
-ShowValue(label, value, unit=""):
-    - אם לא מאותחל → return
-    - clearDisplay
-    - setCursor(0,0); print(label + ":")
-    - setCursor(0,16); print(value בפורמט 1-2 ספרות אחרי נקודה)
-    - אם unit לא ריק: print(" " + unit)
-    - display()
+  delay(150);
+}
 
 

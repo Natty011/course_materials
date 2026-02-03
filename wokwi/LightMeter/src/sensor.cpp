@@ -48,7 +48,7 @@ float Sensor::ComputeLux(int analog_value)
 float Sensor::GetLightLevelPercent() const
 {
     // Direct calculation from the last analog value (0-1023)
-    float percent = (m_last_analog / 1023.0f) * 100.0f;
+    float percent = ((1024 - m_last_analog )/ 1023.0f) * 100.0f;
 
     // Insure valide range
     if(percent < 0.0f) percent = 0.0f;
