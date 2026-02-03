@@ -31,7 +31,7 @@ void loop() {
   g_ui.show(lux, p, a, d);
 
   // אופציונלי: דיבוג לסריאל
-  // g_light_sensor.PrintDebug();
+   g_light_sensor.PrintDebug();
 
   delay(150);
 }

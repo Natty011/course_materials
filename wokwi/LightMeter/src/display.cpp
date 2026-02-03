@@ -1,5 +1,5 @@
 #include "display.h"
-#include<Arduino.h>
+//#include<Arduino.h>
 
 Display::Display(uint8_t cs, uint8_t dc)
     : m_tft(cs, dc) {}
@@ -19,13 +19,11 @@ void Display::splash(const char* title)
     m_tft.setTextColor(ILI9341_CYAN);
     m_tft.setTextSize(2);
     m_tft.setCursor(20, 20);
-    //delay(3000);
     m_tft.println(title);
     m_tft.setTextSize(2);
     m_tft.setTextColor(20, 40);
     m_tft.setTextColor(ILI9341_YELLOW);
     m_tft.println("Initializing...");
-    delay(3000);
 
 }
 
@@ -36,14 +34,12 @@ void Display::drawStaticFrame()
     m_tft.setTextColor(ILI9341_ORANGE);
     m_tft.setCursor(0, 0);
     m_tft.print("LightMeter");
-    //delay(3000);
 
     m_tft.setTextColor(ILI9341_LIGHTGREY);
     m_tft.setCursor(0, 50); m_tft.print("Lux:");
     m_tft.setCursor(0, 80); m_tft.print("Light:");
     m_tft.setCursor(0,110); m_tft.print("Analog:");
     m_tft.setCursor(0,140); m_tft.print("Digital:");
-    //(3000);
 
     //Frame to percent's bar
     //m_tft.drawRect(120, 78, 180, 18, ILI9341_DARKGREY);
@@ -80,14 +76,33 @@ void Display::drawBar(int16_t x, int16_t y, int16_t w, int16_t h, float p)
 void Display::show(float lux, float percent, int analog_value, bool digital_state)
 {
 
-    printValue(100, 50, String(lux, 1));
-    printValue(190, 50, "lx", ILI9341_DARKGREY);// Small units if wants
+    if(lux != m_last_lux)
+    {
+        printValue(100, 50, String(lux, 1));
+        printValue(195, 50, "lx", ILI9341_BLUE);// Small units if wants
+        m_last_lux = lux;
+    }
 
-    drawBar(100, 78, 150, 18, percent);
-    printValue(260, 78, String(percent, 1)+"%");
+    if(percent != m_last_percent)
+    {
+        drawBar(100, 78, 150, 18, percent);
+        printValue(260, 78, String(percent, 1)+"%");
+        m_last_percent = percent;
+    }
 
-    printValue(100, 110, String(analog_value));
-    printValue(100, 140, digital_state ? "HIGH" : "LOW",
-                digital_state ? ILI9341_GREEN : ILI9341_RED);
+    if(analog_value != m_last_analog)
+    {
+        printValue(100, 110, String(analog_value));
+        m_last_analog = analog_value;
+    }
+
+    if(digital_state != m_last_digital)
+    {
+        printValue(100, 140,
+            digital_state ? "HIGH" : "LOW",
+            digital_state ? ILI9341_GREEN : ILI9341_RED);
+        m_last_digital = digital_state;
+    }
+
 }
 

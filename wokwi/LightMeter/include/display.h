@@ -21,6 +21,10 @@ private:
     //Progress bar of light percent
     void drawBar(int16_t x, int16_t y, int16_t w, int16_t h, float percent);
 private:
+    float m_last_lux = -1.0f;
+    float m_last_percent = -1.0f;
+    int m_last_analog = -1;
+    bool m_last_digital = false;
 
 }; //class Display
 
